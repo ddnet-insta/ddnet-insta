@@ -294,6 +294,30 @@ public:
 	void InstagibUnstackChatMessage(char *pUnstacked, const char *pMessage, int Size);
 	bool AllowPublicChat(const CPlayer *pPlayer);
 	bool OnInstaChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer);
+	/*
+		Function: GetTimelimit
+
+		special instagib wrapper to set fake timelimits
+		using the game timer also as countdown during warmup or countdown
+		since 0.6 only has warmup and no countdown we have to fake countdown
+		with broadcasts.
+		Since broadcast might not be shown we also show a countdown in the game timer
+		using this GetTimelimit method we come up with a time limit
+		that is only returned during countdown
+	*/
+	int GetTimelimit();
+		/*
+		Function: GetWarmup
+
+		special instagib wrapper to set fake timelimits
+		using the game timer also as countdown during warmup or countdown
+		since 0.6 only has warmup and no countdown we have to fake countdown
+		with broadcasts.
+		Since broadcast might not be shown we also show a countdown in the game timer
+		using this GetWarmup method we come up with a time limit
+		that is only returned during countdown
+	*/
+	int GetWarmup();
 
 	//
 	void CheckPureTuning();

@@ -33,7 +33,7 @@ class IGameController
 
 	CGameTeams m_Teams;
 
-protected:
+public: // gctf changed from prot to pub
 	CGameContext *GameServer() const { return m_pGameServer; }
 	CConfig *Config() { return m_pConfig; }
 	IServer *Server() const { return m_pServer; }

@@ -773,10 +773,10 @@ void IGameController::Snap(int SnappingClient)
 	if(GameServer()->m_World.m_Paused)
 		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_PAUSED;
 	pGameInfoObj->m_RoundStartTick = m_RoundStartTick;
-	pGameInfoObj->m_WarmupTimer = m_Warmup;
+	pGameInfoObj->m_WarmupTimer = GameServer()->GetWarmup();
 
 	pGameInfoObj->m_ScoreLimit = g_Config.m_SvScorelimit;
-	pGameInfoObj->m_TimeLimit = g_Config.m_SvTimelimit;
+	pGameInfoObj->m_TimeLimit = GameServer()->GetTimelimit();
 
 	pGameInfoObj->m_RoundNum = 0;
 	pGameInfoObj->m_RoundCurrent = m_RoundCount + 1;
@@ -1258,11 +1258,11 @@ int IGameController::GetStartTeam()
 
 void IGameController::CheckGameInfo()
 {
-	bool GameInfoChanged = (m_GameInfo.m_ScoreLimit != g_Config.m_SvScorelimit) || (m_GameInfo.m_TimeLimit != g_Config.m_SvTimelimit);
+	bool GameInfoChanged = (m_GameInfo.m_ScoreLimit != g_Config.m_SvScorelimit) || (m_GameInfo.m_TimeLimit != GameServer()->GetTimelimit());
 	m_GameInfo.m_MatchCurrent = 0;
 	m_GameInfo.m_MatchNum = 0;
 	m_GameInfo.m_ScoreLimit = g_Config.m_SvScorelimit;
-	m_GameInfo.m_TimeLimit = g_Config.m_SvTimelimit;
+	m_GameInfo.m_TimeLimit = GameServer()->GetTimelimit();
 	if(GameInfoChanged)
 		UpdateGameInfo(-1);
 }
@@ -1302,7 +1302,7 @@ void IGameController::UpdateGameInfo(int ClientID)
 			Msg.m_MatchCurrent = 1;
 			Msg.m_MatchNum = 0;
 			Msg.m_ScoreLimit = Config()->m_SvScorelimit;
-			Msg.m_TimeLimit = Config()->m_SvTimelimit;
+			Msg.m_TimeLimit = GameServer()->GetTimelimit();
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
 		}
 	}

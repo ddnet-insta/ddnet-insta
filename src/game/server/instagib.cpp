@@ -12,6 +12,27 @@
 
 #include "instagib.h"
 
+int CGameContext::GetTimelimit()
+{
+	if(m_pController->GameState() == IGameController::IGS_WARMUP_GAME || m_pController->GameState() == IGameController::IGS_WARMUP_USER)
+	{
+		dbg_msg("timer", "returning fake time limit");
+		return 1;
+	}
+	return g_Config.m_SvTimelimit;
+}
+
+int CGameContext::GetWarmup()
+{
+	if(m_pController->GameState() == IGameController::IGS_WARMUP_GAME || m_pController->GameState() == IGameController::IGS_WARMUP_USER)
+	{
+		dbg_msg("warmup", "returning fake time limit");
+		return -1;
+	}
+	return -1;
+	// return m_pController->m_Warmup;
+}
+
 // gctf
 void CGameContext::ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
