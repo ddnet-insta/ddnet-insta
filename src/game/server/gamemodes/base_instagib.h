@@ -9,6 +9,19 @@ public:
 	CGameControllerInstagib(class CGameContext *pGameServer);
 	~CGameControllerInstagib();
 
+	typedef void (*FCommandCallback)(IResult *pResult, void *pUserData);
+
+	class CBangCommand {
+		const char *m_pName;
+		const char *m_pHelp;
+		const char *m_pParams;
+		FCommandCallback m_pfnCallback;
+		void *m_pUserData;
+		CBangCommand(const char *pName, const char *pHelp, const char *pParams, FCommandCallback pfnFunc, void *pUser) :
+			m_pName(pName), m_pHelp(pHelp), m_pParams(pParams) {
+		}
+	};
+
 	// convience accessors to copy code from gamecontext to the instagib controller
 	class IServer *Server() const { return GameServer()->Server(); }
 	class CConfig *Config() { return GameServer()->Config(); }
