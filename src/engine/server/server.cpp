@@ -2385,7 +2385,7 @@ void CServer::UpdateRegisterServerInfo()
 		"\"size\":%d"
 		"},"
 		"\"version\":\"%s\","
-		"\"client_score_kind\":\"time\","
+		"\"client_score_kind\":\"points\","
 		"\"clients\":[",
 		MaxClients,
 		MaxPlayers,
