@@ -8,9 +8,10 @@
 #include <game/server/player.h>
 
 #include "flag.h"
-CFlag::CFlag(CGameWorld *pGameWorld, int Team) :
+CFlag::CFlag(CGameWorld *pGameWorld, int Team, int DDRaceTeam) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_FLAG)
 {
+	m_DDRaceTeam = DDRaceTeam;
 	m_Team = Team;
 	m_pCarrier = NULL;
 	m_GrabTick = 0;
@@ -114,6 +115,9 @@ void CFlag::Snap(int SnappingClient)
 	// which is not needed on vanilla servers
 	if(m_pCarrier)
 		m_Pos = m_pCarrier->GetPos();
+
+	if(GameServer()->GetDDRaceTeam(SnappingClient) != m_DDRaceTeam)
+		return;
 
 	if(Server()->IsSixup(SnappingClient))
 	{

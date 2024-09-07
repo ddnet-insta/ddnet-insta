@@ -76,7 +76,7 @@ bool CGameControllerBaseCTF::OnEntity(int Index, int x, int y, int Layer, int Fl
 	if(Team == -1 || m_apFlags[Team])
 		return false;
 
-	CFlag *F = new CFlag(&GameServer()->m_World, Team);
+	CFlag *F = new CFlag(&GameServer()->m_World, Team, 0);
 	F->m_StandPos = Pos;
 	F->m_Pos = Pos;
 	m_apFlags[Team] = F;
