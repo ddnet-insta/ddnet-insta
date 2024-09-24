@@ -4,6 +4,8 @@
 #include <game/server/score.h>
 #include <game/version.h>
 
+#include <game/server/instagib/gamecontext.h>
+
 #include "base_pvp.h"
 
 void CGameControllerPvp::BangCommandVote(int ClientId, const char *pCommand, const char *pDesc)

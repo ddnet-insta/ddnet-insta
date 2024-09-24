@@ -37,7 +37,7 @@ class CGameTeams
 	// the message from playing for a long time in an unfinishable team.
 	int m_aTeamUnfinishableKillTick[NUM_DDRACE_TEAMS];
 
-	class CGameContext *m_pGameContext;
+	class CInstaGameContext *m_pGameContext;
 
 	/**
 	* Kill the whole team.

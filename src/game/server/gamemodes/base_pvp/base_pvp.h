@@ -9,7 +9,7 @@
 class CGameControllerPvp : public CGameControllerDDRace
 {
 public:
-	CGameControllerPvp(class CGameContext *pGameServer);
+	CGameControllerPvp(class CInstaGameContext *pGameServer);
 	~CGameControllerPvp() override;
 
 	// convience accessors to copy code from gamecontext to the instagib controller

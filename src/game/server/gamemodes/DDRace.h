@@ -7,7 +7,7 @@
 class CGameControllerDDRace : public IGameController
 {
 public:
-	CGameControllerDDRace(class CGameContext *pGameServer);
+	CGameControllerDDRace(class CInstaGameContext *pGameServer);
 	~CGameControllerDDRace();
 
 	CScore *Score();

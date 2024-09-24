@@ -15,7 +15,7 @@
 #define GAME_TYPE_NAME "DDraceNetwork"
 #define TEST_TYPE_NAME "TestDDraceNetwork"
 
-CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
+CGameControllerDDRace::CGameControllerDDRace(class CInstaGameContext *pGameServer) :
 	IGameController(pGameServer)
 {
 	// game

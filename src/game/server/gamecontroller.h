@@ -14,6 +14,9 @@
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 
+
+#include <game/server/instagib/gamecontext.h>
+
 struct CScoreLoadBestTimeResult;
 
 /*
@@ -30,14 +33,14 @@ class IGameController
 
 	std::vector<vec2> m_avSpawnPoints[3];
 
-	class CGameContext *m_pGameServer;
+	class CInstaGameContext *m_pGameServer;
 	class CConfig *m_pConfig;
 	class IServer *m_pServer;
 
 	CGameTeams m_Teams;
 
 protected:
-	CGameContext *GameServer() const { return m_pGameServer; }
+	class CInstaGameContext *GameServer() const { return m_pGameServer; }
 	CConfig *Config() { return m_pConfig; }
 	IServer *Server() const { return m_pServer; }
 
@@ -79,7 +82,7 @@ protected:
 public:
 	const char *m_pGameType;
 
-	IGameController(class CGameContext *pGameServer);
+	IGameController(class CInstaGameContext *pGameServer);
 	virtual ~IGameController();
 
 	// event

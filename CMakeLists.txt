@@ -2804,6 +2804,8 @@ if(SERVER)
     gameworld.h
     instagib/chat_commands.cpp
     instagib/extra_columns.h
+    instagib/gamecontext.cpp
+    instagib/gamecontext.h
     instagib/gamecontroller.cpp
     instagib/gamecontroller.h
     instagib/gamelogic.cpp

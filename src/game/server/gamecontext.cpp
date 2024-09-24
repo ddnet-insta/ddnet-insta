@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "gamecontext.h"
 
+#include <game/server/instagib/gamecontext.h>
+
 #include <vector>
 
 #include "teeinfo.h"
@@ -188,6 +190,18 @@ void CGameContext::Clear()
 	CVoteOptionServer *pVoteOptionLast = m_pVoteOptionLast;
 	int NumVoteOptions = m_NumVoteOptions;
 	CTuningParams Tuning = m_Tuning;
+
+	dbg_msg("gamecontext", "clearing ....");
+	dbg_msg("gamecontext", "clearing ....");
+	dbg_msg("gamecontext", "clearing ....");
+	dbg_msg("gamecontext", "clearing ....");
+	dbg_msg("gamecontext", "clearing ....");
+	dbg_msg("gamecontext", "clearing ....");
+	dbg_msg("gamecontext", "clearing ....");
+	dbg_msg("gamecontext", "clearing ....");
+	dbg_msg("gamecontext", "clearing ....");
+	dbg_msg("gamecontext", "clearing ....");
+	dbg_msg("gamecontext", "clearing ....");
 
 	m_Resetting = true;
 	this->~CGameContext();
@@ -4112,8 +4126,6 @@ void CGameContext::OnInit(const void *pPersistentData)
 	CreateAllEntities(true);
 
 	m_pAntibot->RoundStart(this);
-
-	OnInitInstagib(); // ddnet-insta
 }
 
 void CGameContext::CreateAllEntities(bool Initial)
@@ -4526,7 +4538,7 @@ const char *CGameContext::GameType() const { return m_pController && m_pControll
 const char *CGameContext::Version() const { return GAME_VERSION; }
 const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
 
-IGameServer *CreateGameServer() { return new CGameContext; }
+IGameServer *CreateGameServer() { return new CInstaGameContext; }
 
 void CGameContext::OnSetAuthed(int ClientId, int Level)
 {

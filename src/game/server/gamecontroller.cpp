@@ -20,7 +20,7 @@
 #include "entities/pickup.h"
 #include "entities/projectile.h"
 
-IGameController::IGameController(class CGameContext *pGameServer) :
+IGameController::IGameController(class CInstaGameContext *pGameServer) :
 	m_Teams(pGameServer), m_pLoadBestTimeResult(nullptr)
 {
 	m_pGameServer = pGameServer;

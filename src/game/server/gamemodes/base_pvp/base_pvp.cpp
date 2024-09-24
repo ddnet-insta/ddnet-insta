@@ -11,9 +11,12 @@
 #include <game/server/score.h>
 #include <game/version.h>
 
+
+#include <game/server/instagib/gamecontext.h>
+
 #include "base_pvp.h"
 
-CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
+CGameControllerPvp::CGameControllerPvp(class CInstaGameContext *pGameServer) :
 	CGameControllerDDRace(pGameServer)
 {
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;

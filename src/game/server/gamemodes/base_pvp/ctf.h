@@ -9,7 +9,7 @@ class CGameControllerBaseCTF : public CGameControllerPvp
 	bool DoWincheckRound() override;
 
 public:
-	CGameControllerBaseCTF(class CGameContext *pGameServer);
+	CGameControllerBaseCTF(class CInstaGameContext *pGameServer);
 	~CGameControllerBaseCTF() override;
 
 	void Tick() override;
