@@ -167,7 +167,6 @@ void CGameControllerBaseFng::OnCharacterSpawn(class CCharacter *pChr)
 int CGameControllerBaseFng::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
 	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
-	DoWincheckRound();
 	return 0;
 }
 
@@ -288,8 +287,6 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 				}
 			}
 		}
-
-		DoWincheckRound();
 	}
 
 	if(LastToucherId == -1)
@@ -422,7 +419,6 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 
 		pKiller->IncrementScore();
 		AddTeamscore(pKiller->GetTeam(), 1);
-		DoWincheckRound();
 	}
 
 	if(IsStatTrack())

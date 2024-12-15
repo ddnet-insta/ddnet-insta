@@ -89,7 +89,6 @@ public:
 	CGameControllerDM(class CGameContext *pGameServer);
 	~CGameControllerDM() override;
 
-	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	void Tick() override;
 };

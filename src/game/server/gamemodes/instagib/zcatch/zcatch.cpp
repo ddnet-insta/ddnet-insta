@@ -193,9 +193,6 @@ void CGameControllerZcatch::Tick()
 			SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
 		}
 	}
-
-	if(Server()->Tick() % 100 == 0)
-		DoWincheckRound();
 }
 
 void CGameControllerZcatch::OnCharacterSpawn(class CCharacter *pChr)
@@ -354,8 +351,6 @@ int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPl
 	}
 
 	pVictim->GetPlayer()->m_vVictimIds.clear();
-	DoWincheckRound();
-
 	return 0;
 }
 

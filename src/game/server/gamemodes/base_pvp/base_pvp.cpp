@@ -882,9 +882,15 @@ void CGameControllerPvp::Tick()
 
 		OnPlayerTick(pPlayer);
 	}
-	//call anticamper
+	// call anticamper
 	if(g_Config.m_SvAnticamper && !GameServer()->m_World.m_Paused)
 		Anticamper();
+
+	// win check
+	if((m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_GAME_PAUSED) && !GameServer()->m_World.m_ResetRequested)
+	{
+		DoWincheckRound();
+	}
 }
 
 void CGameControllerPvp::OnPlayerTick(class CPlayer *pPlayer)
