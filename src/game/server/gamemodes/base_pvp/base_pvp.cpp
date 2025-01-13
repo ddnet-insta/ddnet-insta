@@ -833,8 +833,6 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 {
 	CGameControllerDDRace::OnCharacterDeath(pVictim, pKiller, Weapon);
 
-	const bool SuicideOrWorld = Weapon == WEAPON_SELF || Weapon == WEAPON_WORLD;
-
 	// do scoreing
 	if(!pKiller || Weapon == WEAPON_GAME)
 		return 0;
@@ -847,6 +845,9 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 		return 0;
 	if(GameServer()->GetDDRaceTeam(pVictim->GetPlayer()->GetCid()))
 		return 0;
+
+	const bool SelfKill = pKiller == pVictim->GetPlayer();
+	const bool SuicideOrWorld = Weapon == WEAPON_SELF || Weapon == WEAPON_WORLD || SelfKill;
 
 	// zCatch score can never be decremented
 	// and only be incremented by wins
@@ -875,7 +876,7 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 	// }
 
 	// selfkill is no kill
-	if(pKiller != pVictim->GetPlayer())
+	if(!SelfKill)
 		pKiller->AddKill();
 	// but selfkill is a death
 	pVictim->GetPlayer()->AddDeath();
