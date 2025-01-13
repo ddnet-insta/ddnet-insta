@@ -648,6 +648,12 @@ bool CGameControllerZcatch::DoWincheckRound()
 			{
 				char aBuf[512];
 				int Points = PointsForWin(pPlayer);
+				// if stat track is on points are given in the base controller
+				// if it is off we still want to give points
+				// because you can only win if you made enough kills
+				// if by then everyone left you should still be rewarded
+				if(!IsStatTrack())
+					pPlayer->m_Stats.m_Points += Points;
 				str_format(aBuf, sizeof(aBuf), "'%s' won the round and gained %d points.", Server()->ClientName(pPlayer->GetCid()), Points);
 				SendChat(-1, TEAM_ALL, aBuf);
 				GotWinner = true;
