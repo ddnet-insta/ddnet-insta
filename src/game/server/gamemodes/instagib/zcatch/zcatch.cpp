@@ -648,7 +648,6 @@ bool CGameControllerZcatch::DoWincheckRound()
 			{
 				char aBuf[512];
 				int Points = PointsForWin(pPlayer);
-				pPlayer->m_Stats.m_Points += Points;
 				str_format(aBuf, sizeof(aBuf), "'%s' won the round and gained %d points.", Server()->ClientName(pPlayer->GetCid()), Points);
 				SendChat(-1, TEAM_ALL, aBuf);
 				GotWinner = true;
