@@ -1288,7 +1288,7 @@ void CGameControllerPvp::EndSpree(class CPlayer *pPlayer, class CPlayer *pKiller
 			}
 
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "'%s' %d-kills killing spree was ended by %s",
+			str_format(aBuf, sizeof(aBuf), "'%s' %d-kills killing spree was ended by '%s'",
 				Server()->ClientName(pPlayer->GetCid()), pPlayer->Spree(), Server()->ClientName(pKiller->GetCid()));
 			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 		}
