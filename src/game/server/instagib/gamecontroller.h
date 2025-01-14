@@ -454,14 +454,26 @@ public:
 
 	/*
 		Function: InitPlayer
-			called once for every new CPlayer object that is being constructed
+			Called once for every new CPlayer object that is being constructed
 			is only called when a new player connects
-			not on round end
+			not on round end.
+			See also `RoundInitPlayer()`
 
 		Arguments:
 			pPlayer - newly joined player
 	*/
 	virtual void InitPlayer(class CPlayer *pPlayer){};
+
+	/*
+		Function: RoundInitPlayer
+			Called for all players when a new round starts
+			And also for all players that join
+			See also `InitPlayer()`
+
+		Arguments:
+			pPlayer - player that was connected on round start
+	*/
+	virtual void RoundInitPlayer(class CPlayer *pPlayer){};
 	virtual CClientMask FreezeDamageIndicatorMask(CCharacter *pChr);
 	virtual void OnDDRaceTimeLoad(class CPlayer *pPlayer, float Time);
 

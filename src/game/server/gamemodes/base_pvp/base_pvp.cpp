@@ -93,6 +93,14 @@ void CGameControllerPvp::OnRoundStart()
 		// in case there is some network overload or hiccups
 		m_TicksUntilShutdown = Server()->TickSpeed() * 3;
 	}
+
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		RoundInitPlayer(pPlayer);
+	}
 }
 
 CGameControllerPvp::~CGameControllerPvp()
@@ -115,12 +123,17 @@ CGameControllerPvp::~CGameControllerPvp()
 	}
 }
 
-// this is only called once on connect
-// NOT ON ROUND END
-void CGameControllerPvp::InitPlayer(class CPlayer *pPlayer)
+// called on round init and on join
+void CGameControllerPvp::RoundInitPlayer(CPlayer *pPlayer)
 {
 	pPlayer->m_IsDead = false;
 	pPlayer->m_KillerId = -1;
+}
+
+// this is only called once on connect
+// NOT ON ROUND END
+void CGameControllerPvp::InitPlayer(CPlayer *pPlayer)
+{
 	pPlayer->m_Spree = 0;
 	pPlayer->m_UntrackedSpree = 0;
 	pPlayer->ResetStats();
@@ -130,6 +143,8 @@ void CGameControllerPvp::InitPlayer(class CPlayer *pPlayer)
 	pPlayer->m_DeadSpecMode = false;
 	pPlayer->m_GameStateBroadcast = false;
 	pPlayer->m_Score = 0; // ddnet-insta
+
+	RoundInitPlayer(pPlayer);
 }
 
 int CGameControllerPvp::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
