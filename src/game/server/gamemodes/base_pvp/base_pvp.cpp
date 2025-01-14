@@ -119,10 +119,18 @@ void CGameControllerPvp::OnRoundEnd()
 	{
 		if(!pPlayer)
 			continue;
-		if(m_pStatsTable[0] == '\0')
-			continue;
 
-		SaveStatsOnRoundEnd(pPlayer);
+		if(g_Config.m_SvKillingspreeResetOnRoundEnd)
+		{
+			// TODO: it is a bit weird that it says:
+			//         x's spree was ended by x
+			//       it should instead say something like:
+			//         x's spree was ended by game/round
+			EndSpree(pPlayer, pPlayer);
+		}
+
+		if(m_pStatsTable[0] != '\0')
+			SaveStatsOnRoundEnd(pPlayer);
 	}
 }
 
