@@ -87,6 +87,7 @@ public:
 	void OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
 	void OnShowRank(int Rank, int RankedScore, const char *pRankType, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
 	void OnRoundStart() override;
+	void OnRoundEnd() override;
 	bool IsGrenadeGameType() const override;
 	bool IsDDRaceGameType() const override { return false; }
 	void OnFlagCapture(class CFlag *pFlag, float Time, int TimeTicks) override;

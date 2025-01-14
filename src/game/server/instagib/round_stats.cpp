@@ -14,29 +14,6 @@
 #include "../gamecontroller.h"
 #include "../player.h"
 
-void IGameController::OnEndRoundInsta()
-{
-	dbg_msg("ddnet-insta", "match end");
-
-	if(g_Config.m_SvTournamentChatSmart)
-	{
-		g_Config.m_SvTournamentChat = 0;
-		GameServer()->SendChat(-1, TEAM_ALL, g_Config.m_SvTournamentChatSmart == 1 ? "Spectators can use public chat again" : "All can use public chat again");
-	}
-
-	PublishRoundEndStats();
-
-	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
-	{
-		if(!pPlayer)
-			continue;
-		if(m_pStatsTable[0] == '\0')
-			continue;
-
-		SaveStatsOnRoundEnd(pPlayer);
-	}
-}
-
 float IGameController::CalcKillDeathRatio(int Kills, int Deaths) const
 {
 	if(!Kills)

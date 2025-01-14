@@ -105,6 +105,14 @@ public:
 	virtual void OnRoundStart(){};
 
 	/*
+		Function: OnRoundEnd
+			Will be called at the beginning of the end of every round.
+			If you need to run code after the waiting time in the death screen
+			consider using `OnRoundStart()`
+	*/
+	virtual void OnRoundEnd(){};
+
+	/*
 		Function: OnLaserHit
 			Will be called before Character::TakeDamage() and CGameController::OnCharacterTakeDamage()
 
@@ -612,7 +620,6 @@ public:
 
 	float CalcKillDeathRatio(int Kills, int Deaths) const;
 
-	void OnEndRoundInsta();
 	void GetRoundEndStatsStrCsv(char *pBuf, size_t Size);
 	void GetRoundEndStatsStrCsvTeamPlay(char *pBuf, size_t Size);
 	void GetRoundEndStatsStrCsvNoTeamPlay(char *pBuf, size_t Size);

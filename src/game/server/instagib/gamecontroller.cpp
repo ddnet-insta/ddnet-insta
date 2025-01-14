@@ -492,7 +492,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			m_SuddenDeath = 0;
 			GameServer()->m_World.m_Paused = true;
 
-			OnEndRoundInsta();
+			OnRoundEnd(); // ddnet-insta specific
 		}
 	}
 }
