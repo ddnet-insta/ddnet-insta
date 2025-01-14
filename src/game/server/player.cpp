@@ -152,7 +152,7 @@ void CPlayer::Reset()
 
 	m_CameraInfo.Reset();
 
-	GameServer()->m_pController->ResetPlayer(this); // ddnet-insta
+	GameServer()->m_pController->InitPlayer(this); // ddnet-insta
 }
 
 static int PlayerFlags_SixToSeven(int Flags)

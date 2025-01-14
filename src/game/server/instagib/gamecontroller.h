@@ -451,9 +451,19 @@ public:
 	virtual void SnapDDNetPlayer(int SnappingClient, CPlayer *pPlayer, CNetObj_DDNetPlayer *pDDNetPlayer){};
 	virtual int SnapRoundStartTick(int SnappingClient);
 	virtual int SnapTimeLimit(int SnappingClient);
+
+	/*
+		Function: InitPlayer
+			called once for every new CPlayer object that is being constructed
+			is only called when a new player connects
+			not on round end
+
+		Arguments:
+			pPlayer - newly joined player
+	*/
+	virtual void InitPlayer(class CPlayer *pPlayer){};
 	virtual CClientMask FreezeDamageIndicatorMask(CCharacter *pChr);
 	virtual void OnDDRaceTimeLoad(class CPlayer *pPlayer, float Time);
-	virtual void ResetPlayer(class CPlayer *pPlayer){};
 
 	// See also ddnet's SetArmorProgress() and ddnet-insta's SetArmorProgressEmpty()
 	// used to keep armor progress bar in ddnet gametype

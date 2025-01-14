@@ -44,7 +44,7 @@ public:
 	void OnUpdateSpectatorVotesConfig() override;
 	bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) override;
 	void OnDDRaceTimeLoad(class CPlayer *pPlayer, float Time) override{};
-	void ResetPlayer(class CPlayer *pPlayer) override;
+	void InitPlayer(class CPlayer *pPlayer) override;
 	bool LoadNewPlayerNameData(int ClientId) override;
 	void OnLoadedNameStats(const CSqlStatsPlayer *pStats, class CPlayer *pPlayer) override;
 

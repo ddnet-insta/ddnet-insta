@@ -115,7 +115,9 @@ CGameControllerPvp::~CGameControllerPvp()
 	}
 }
 
-void CGameControllerPvp::ResetPlayer(class CPlayer *pPlayer)
+// this is only called once on connect
+// NOT ON ROUND END
+void CGameControllerPvp::InitPlayer(class CPlayer *pPlayer)
 {
 	pPlayer->m_IsDead = false;
 	pPlayer->m_KillerId = -1;
