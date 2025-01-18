@@ -3,11 +3,13 @@
 #ifndef GAME_SERVER_GAMECONTEXT_H
 #define GAME_SERVER_GAMECONTEXT_H
 
-#include <engine/console.h>
 #include <engine/http.h> // ddnet-insta m_pHttp
-#include <engine/server.h>
+#include <game/server/instagib/enums.h> // ddnet-insta
 #include <string> // ddnet-insta map pool
 #include <vector> // ddnet-insta map pool
+
+#include <engine/console.h>
+#include <engine/server.h>
 
 #include <game/collision.h>
 #include <game/generated/protocol.h>

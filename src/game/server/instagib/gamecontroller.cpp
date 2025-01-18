@@ -80,11 +80,6 @@ bool IGameController::IsPlaying(const CPlayer *pPlayer)
 	return pPlayer->GetTeam() == TEAM_RED || pPlayer->GetTeam() == TEAM_BLUE;
 }
 
-EDisplayScore IGameController::GetDisplayScore(const CPlayer *pPlayer)
-{
-	return pPlayer->m_DisplayScore;
-}
-
 void IGameController::ToggleGamePause()
 {
 	SetPlayersReadyState(false);

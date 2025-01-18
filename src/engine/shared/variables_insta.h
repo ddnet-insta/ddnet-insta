@@ -72,7 +72,7 @@ MACRO_CONFIG_INT(SvMeltHammerScaleY, sv_melt_hammer_scale_y, 50, 1, 1000, CFGFLA
 MACRO_CONFIG_INT(SvFngHammer, sv_fng_hammer, 1, 0, 1, CFGFLAG_SERVER, "(fng only) use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer")
 MACRO_CONFIG_INT(SvFngSpikeSound, sv_fng_spike_sound, 1, 0, 1, CFGFLAG_SERVER, "(fng only) play flag capture sound when sacrificing an enemy into the spikes")
 MACRO_CONFIG_INT(SvPunishFreezeDisconnect, sv_punish_freeze_disconnect, 1, 0, 60, CFGFLAG_SERVER, "(fng) 0=off otherwise bantime in minutes when leaving server while being frozen")
-MACRO_CONFIG_INT(SvDisplayScore, sv_display_score, 0, 0, (int)EDisplayScore::NUM_SCORES, CFGFLAG_SERVER, "0=round_points 1=points 2=spree 3=current_spree 4=wins 5=kills 6=round_kills")
+MACRO_CONFIG_STR(SvDisplayScore, sv_display_score, 512, "round_points", CFGFLAG_SERVER, "values: points, round_points, spree, current_spree, wins, kills, round_kills")
 MACRO_CONFIG_INT(SvLaserTextPoints, sv_laser_text_points, 1, 0, 1, CFGFLAG_SERVER, "display laser text in the world on scoring (only fng for now)")
 
 /*

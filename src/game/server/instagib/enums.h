@@ -16,6 +16,8 @@ enum class EDisplayScore
 	NUM_SCORES,
 };
 
+#define DISPLAY_SCORE_VALUES "points, round_points, spree, current_spree, wins, kills, round_kills"
+
 // writes based on the input pInputText the output pDisplayScore
 // returns true on match
 // returns false on no match

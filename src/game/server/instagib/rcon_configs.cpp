@@ -157,26 +157,29 @@ void CGameContext::ConchainSpectatorVotes(IConsole::IResult *pResult, void *pUse
 
 void CGameContext::ConchainDisplayScore(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
-	pfnCallback(pResult, pCallbackUserData);
-
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	char aBuf[512];
 	if(pResult->NumArguments() == 0)
 	{
-		str_format(aBuf, sizeof(aBuf), "Current default display score is %s", display_score_to_str((EDisplayScore)g_Config.m_SvDisplayScore));
+		pfnCallback(pResult, pCallbackUserData);
+		return;
+	}
+
+	if(!str_to_display_score(pResult->GetString(0), &pSelf->m_DisplayScore))
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "'%s' is not a valid display score pick one of those: " DISPLAY_SCORE_VALUES, pResult->GetString(0));
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", aBuf);
 		return;
 	}
 
-	str_format(aBuf, sizeof(aBuf), "Changed the default display score to %s", display_score_to_str((EDisplayScore)g_Config.m_SvDisplayScore));
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", aBuf);
+	pfnCallback(pResult, pCallbackUserData);
 
 	for(CPlayer *pPlayer : pSelf->m_apPlayers)
 	{
 		if(!pPlayer)
 			continue;
 
-		pPlayer->m_DisplayScore = (EDisplayScore)g_Config.m_SvDisplayScore;
+		pPlayer->m_DisplayScore = pSelf->m_DisplayScore;
 	}
 }

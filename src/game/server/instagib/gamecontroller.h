@@ -268,19 +268,6 @@ public:
 	virtual int PointsForWin(const CPlayer *pPlayer) { return 1; }
 
 	/*
-		Function: GetDisplayScore
-			Gets the type of score that should be displayed in the scoreboard
-			to the given player.
-			The default implementations looks at the the players m_DisplayScore
-			which is by default determined by sv_display_score
-			and can be overwritten by the player using the /score chat command
-
-		Arguments:
-			pPlayer - the player that the score will be displayed to
-	*/
-	virtual EDisplayScore GetDisplayScore(const CPlayer *pPlayer);
-
-	/*
 		Function: IsPlaying
 			Should return true if the player is playing. But the player does not have to
 			be alive. And might be currently in team spectators (for example LMS/zCatch).

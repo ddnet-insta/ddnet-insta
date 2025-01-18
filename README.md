@@ -279,7 +279,6 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_fng_hammer` (fng only) use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer
 + `sv_fng_spike_sound` (fng only) play flag capture sound when sacrificing an enemy into the spikes
 + `sv_punish_freeze_disconnect` (fng) 0=off otherwise bantime in minutes when leaving server while being frozen
-+ `sv_save_server` display all time score in scoreboard based on the player name
 + `sv_laser_text_points` display laser text in the world on scoring (only fng for now)
 + `sv_chat_ratelimit_long_messages` Needs sv_spamprotection 0 (0=off, 1=only messages longer than 12 chars are limited)
 + `sv_chat_ratelimit_spectators` Needs sv_spamprotection 0 (0=off, 1=specs have slow chat)
@@ -302,6 +301,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_round_stats_format_file` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
 + `sv_spawn_weapons` possible values: grenade, laser
 + `sv_zcatch_colors` Color scheme for zCatch options: teetime, savander
++ `sv_display_score` values: points, round_points, spree, current_spree, wins, kills, round_kills
 + `sv_tournament_welcome_chat` Chat message shown in chat on join when sv_tournament is 1
 + `sv_round_stats_discord_webhook` If set will post score stats there on round end
 + `sv_round_stats_http_endpoint` If set will post score stats there on round end
@@ -346,6 +346,7 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `/statsall` Shows the all time stats of player name (your stats by default)
 + `/stats_all` Shows the all time stats of player name (your stats by default)
 + `/multis` Shows the all time fng multi kill stats
++ `/score` change which type of score is displayed in scoreboard
 + `/points` Shows the all time points rank of player name (your stats by default)
 + `/rank_points` Shows the all time points rank of player name (your stats by default)
 + `/rank_kills` Shows the all time kills rank of player name (your stats by default)

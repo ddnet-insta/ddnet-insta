@@ -175,7 +175,7 @@ void CGameControllerPvp::InitPlayer(CPlayer *pPlayer)
 	pPlayer->m_DeadSpecMode = false;
 	pPlayer->m_GameStateBroadcast = false;
 	pPlayer->m_Score = 0; // ddnet-insta
-	pPlayer->m_DisplayScore = (EDisplayScore)g_Config.m_SvDisplayScore;
+	pPlayer->m_DisplayScore = GameServer()->m_DisplayScore;
 
 	RoundInitPlayer(pPlayer);
 }

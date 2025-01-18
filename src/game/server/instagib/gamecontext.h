@@ -11,12 +11,17 @@
 #include <engine/http.h>
 #include <engine/server.h>
 
+#include <game/server/instagib/enums.h>
+
 class CGameContext : public IGameServer
 {
 #endif // IN_CLASS_IGAMECONTEXT
 
 public:
 	const char *ServerInfoPlayerScoreKind() override { return "points"; }
+
+	// set by the config sv_display_score
+	EDisplayScore m_DisplayScore = EDisplayScore::ROUND_POINTS;
 
 	// bang commands
 	void BangCommandVote(int ClientId, const char *pCommand, const char *pDesc);

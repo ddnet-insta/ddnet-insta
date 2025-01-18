@@ -40,8 +40,7 @@ CONSOLE_COMMAND("multis", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConM
 // and "round_points" is only for the current round
 //
 // the default value can be set by the config sv_display_score
-CONSOLE_COMMAND("score", "?s[points|round_points", CFGFLAG_CHAT | CFGFLAG_SERVER, ConScore, this, "change which time of score is displayed in scoreboard")
-// CONSOLE_COMMAND("score", "?s[points|round_points|kills|round_kills|spree|current_spree]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConScore, this, "change which time of score is displayed in scoreboard")
+CONSOLE_COMMAND("score", "?s['points'|'round_points'|'spree'|'current_spree'|'wins'|'kills'|'round_kills']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConScore, this, "change which type of score is displayed in scoreboard")
 
 // "points" shadows a ddnet command
 CONSOLE_COMMAND("points", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaRankPoints, this, "Shows the all time points rank of player name (your stats by default)")
