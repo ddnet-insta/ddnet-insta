@@ -4,7 +4,7 @@
 
 bool str_to_display_score(const char *pInputText, EDisplayScore *pDisplayScore)
 {
-	if(!pInputText && pInputText[0] == '\0')
+	if(!pInputText || pInputText[0] == '\0')
 		return false;
 
 	if(!str_comp_nocase(pInputText, "points"))
