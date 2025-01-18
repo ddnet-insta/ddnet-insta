@@ -34,6 +34,15 @@ CONSOLE_COMMAND("statsall", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, Co
 CONSOLE_COMMAND("stats_all", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConStatsAllTime, this, "Shows the all time stats of player name (your stats by default)")
 CONSOLE_COMMAND("multis", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConMultis, this, "Shows the all time fng multi kill stats")
 
+// which points to display in scoreboard
+// all time stats are implicit and round stats are specific
+// so "points" is all time stats of players points
+// and "round_points" is only for the current round
+//
+// the default value can be set by the config sv_display_score
+CONSOLE_COMMAND("score", "?s[points|round_points", CFGFLAG_CHAT | CFGFLAG_SERVER, ConScore, this, "change which time of score is displayed in scoreboard")
+// CONSOLE_COMMAND("score", "?s[points|round_points|kills|round_kills|spree|current_spree]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConScore, this, "change which time of score is displayed in scoreboard")
+
 // "points" shadows a ddnet command
 CONSOLE_COMMAND("points", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaRankPoints, this, "Shows the all time points rank of player name (your stats by default)")
 CONSOLE_COMMAND("rank_points", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaRankPoints, this, "Shows the all time points rank of player name (your stats by default)")

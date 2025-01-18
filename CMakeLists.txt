@@ -2813,6 +2813,8 @@ if(SERVER)
     gameworld.h
     instagib/chat_commands.cpp
     instagib/chat_commands.h
+    instagib/enums.cpp
+    instagib/enums.h
     instagib/extra_columns.h
     instagib/gamecontext.h
     instagib/gamecontext/bangcommands.cpp

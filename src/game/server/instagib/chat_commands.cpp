@@ -3,6 +3,7 @@
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontroller.h>
+#include <game/server/instagib/enums.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
@@ -256,6 +257,25 @@ void CGameContext::ConMultis(IConsole::IResult *pResult, void *pUserData)
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
 	pSelf->m_pController->m_pSqlStats->ShowStats(pResult->m_ClientId, pName, pSelf->m_pController->StatsTable(), EInstaSqlRequestType::CHAT_CMD_MULTIS);
+}
+
+void CGameContext::ConScore(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	if(!pSelf->m_pController)
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	if(str_to_display_score(pResult->GetString(0), &pPlayer->m_DisplayScore))
+		pSelf->SendChatTarget(pResult->m_ClientId, "Updated display score.");
+	else
+		pSelf->SendChatTarget(pResult->m_ClientId, "Invalid score name pick one of those: points, round_points");
 }
 
 void CGameContext::ConRankKills(IConsole::IResult *pResult, void *pUserData)

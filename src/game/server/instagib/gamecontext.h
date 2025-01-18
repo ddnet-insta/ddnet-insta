@@ -82,6 +82,7 @@ public:
 	static void ConStatsRound(IConsole::IResult *pResult, void *pUserData);
 	static void ConStatsAllTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConMultis(IConsole::IResult *pResult, void *pUserData);
+	static void ConScore(IConsole::IResult *pResult, void *pUserData);
 	static void ConRankKills(IConsole::IResult *pResult, void *pUserData);
 	static void ConInstaRankPoints(IConsole::IResult *pResult, void *pUserData);
 	static void ConTopKills(IConsole::IResult *pResult, void *pUserData);

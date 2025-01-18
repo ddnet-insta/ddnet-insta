@@ -13,6 +13,7 @@
 #include <memory>
 #include <optional>
 
+#include <game/server/instagib/enums.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
 

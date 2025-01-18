@@ -5,6 +5,7 @@
 #ifndef IN_CLASS_PLAYER
 
 #include <base/vmath.h>
+#include <game/server/instagib/enums.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
 #include <optional>
@@ -25,6 +26,12 @@ public:
 	int m_SentWarmupAlerts = 0;
 	void WarmupAlert();
 	const char *GetTeamStr() const;
+
+	// The type of score that will be snapped to this player
+	// and displayed in the scoreboard
+	// it is determined by the sv_display_score config and /score chat command
+	// and used by the GetDisplayScore gamecontroller method
+	EDisplayScore m_DisplayScore = EDisplayScore::POINTS;
 
 	/*******************************************************************
 	 * zCatch                                                          *

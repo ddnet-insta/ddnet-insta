@@ -13,6 +13,7 @@
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 
+#include <game/server/instagib/enums.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
 
@@ -265,6 +266,19 @@ public:
 			pPlayer - the player that won
 	*/
 	virtual int PointsForWin(const CPlayer *pPlayer) { return 1; }
+
+	/*
+		Function: GetDisplayScore
+			Gets the type of score that should be displayed in the scoreboard
+			to the given player.
+			The default implementations looks at the the players m_DisplayScore
+			which is by default determined by sv_display_score
+			and can be overwritten by the player using the /score chat command
+
+		Arguments:
+			pPlayer - the player that the score will be displayed to
+	*/
+	virtual EDisplayScore GetDisplayScore(const CPlayer *pPlayer);
 
 	/*
 		Function: IsPlaying

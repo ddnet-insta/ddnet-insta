@@ -7,6 +7,7 @@
 #include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
 #include <game/server/entities/flag.h>
 #include <game/server/gamecontroller.h>
+#include <game/server/instagib/enums.h>
 #include <game/server/instagib/laser_text.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/version.h>
@@ -174,6 +175,7 @@ void CGameControllerPvp::InitPlayer(CPlayer *pPlayer)
 	pPlayer->m_DeadSpecMode = false;
 	pPlayer->m_GameStateBroadcast = false;
 	pPlayer->m_Score = 0; // ddnet-insta
+	pPlayer->m_DisplayScore = (EDisplayScore)g_Config.m_SvDisplayScore;
 
 	RoundInitPlayer(pPlayer);
 }
@@ -258,10 +260,14 @@ void CGameControllerPvp::SnapDDNetPlayer(int SnappingClient, CPlayer *pPlayer, C
 
 int CGameControllerPvp::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer, int DDRaceScore)
 {
+	CPlayer *pSnapReceiver = GameServer()->m_apPlayers[SnappingClient];
+	if(!pSnapReceiver)
+		return DDRaceScore;
+
 	int Score = pPlayer->m_Score.value_or(0);
 	// display round score if the game ended
 	// otherwise you can not see who actually won
-	if(g_Config.m_SvSaveServer && GameState() != IGS_END_ROUND)
+	if(pSnapReceiver->m_DisplayScore == EDisplayScore::POINTS && GameState() != IGS_END_ROUND)
 	{
 		Score += pPlayer->m_SavedStats.m_Points;
 
