@@ -272,10 +272,22 @@ void CGameContext::ConScore(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
+#define __SCORE_TYPES "points, round_points, spree, current_spree, wins, kills, round_kills"
+
+	if(pResult->NumArguments() == 0)
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "Your current display score type is %s.", display_score_to_str(pPlayer->m_DisplayScore));
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+		pSelf->SendChatTarget(pResult->m_ClientId, "You can change it to any of these: " __SCORE_TYPES);
+		return;
+	}
+
 	if(str_to_display_score(pResult->GetString(0), &pPlayer->m_DisplayScore))
 		pSelf->SendChatTarget(pResult->m_ClientId, "Updated display score.");
 	else
-		pSelf->SendChatTarget(pResult->m_ClientId, "Invalid score name pick one of those: points, round_points");
+		pSelf->SendChatTarget(pResult->m_ClientId, "Invalid score name pick one of those: " __SCORE_TYPES);
+#undef __SCORE_TYPES
 }
 
 void CGameContext::ConRankKills(IConsole::IResult *pResult, void *pUserData)

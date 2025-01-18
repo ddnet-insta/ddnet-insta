@@ -122,8 +122,13 @@ public:
 	// if you need the correct up to date stats of a players name you have to do a new db request
 	CSqlStatsPlayer m_SavedStats;
 
+	// currently active unterminated killing spree
 	int Spree() const { return m_Spree; }
+
+	// kills made in current round
 	int Kills() const { return m_Stats.m_Kills; }
+
+	// deaths from the current round
 	int Deaths() const { return m_Stats.m_Deaths; }
 
 	void AddKill() { AddKills(1); }

@@ -4,14 +4,14 @@
 enum class EDisplayScore
 {
 	ROUND_POINTS,
-
 	// all time points from database
 	POINTS,
-
-	// // all time best spree
-	// SPREE,
-
-	// CURRENT_SPREE,
+	// all time best spree
+	SPREE,
+	CURRENT_SPREE,
+	WINS,
+	KILLS,
+	ROUND_KILLS,
 
 	NUM_SCORES,
 };
