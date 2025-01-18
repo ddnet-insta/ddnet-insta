@@ -30,9 +30,9 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 			Character.SetWeaponAmmo(WEAPON_GRENADE, minimum(Character.GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + 1, g_Config.m_SvGrenadeAmmoRegenNum));
 		}
 
-		// no pain eyes when hitting our self with laser
-		if(Weapon == WEAPON_LASER)
-			Dmg = 0;
+		// no pain eyes when hitting our self
+		// https://github.com/ddnet-insta/ddnet-insta/issues/232
+		Dmg = 0;
 
 		// no self damage
 		//
@@ -46,7 +46,12 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 		return false;
 	}
 	if(Dmg < g_Config.m_SvDamageNeededForKill && Weapon == WEAPON_GRENADE)
+	{
+		// no pain eyes if the bullet does not kill
+		// https://github.com/ddnet-insta/ddnet-insta/issues/232#issuecomment-2599690405
+		Dmg = 0;
 		return false;
+	}
 	Dmg = 20;
 
 	dbg_assert(Character.IsAlive(), "tried to apply damage to dead character");
