@@ -284,7 +284,17 @@ int CGameControllerPvp::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer, in
 
 	// alawys force display round score if the game ended
 	// otherwise you can not see who actually won
-	if(GameState() == IGS_END_ROUND)
+	//
+	// in zCatch you do win by score
+	// and you also do make any points during round
+	// so we just keep display whatever we displayed during the round
+	// https://github.com/ddnet-insta/ddnet-insta/issues/233
+	// TODO: once there are other non points winning gametypes
+	//       we should introduce something like IsLmsGameType()
+	//       and use that here
+	//       but that really depends on how these gametypes
+	//       do scoring and give points
+	if(GameState() == IGS_END_ROUND && !IsZcatchGameType())
 		return Score;
 
 	switch(pSnapReceiver->m_DisplayScore)
