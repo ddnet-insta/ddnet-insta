@@ -23,6 +23,7 @@ public:
 
 	void OnCharacterConstruct(class CCharacter *pChr);
 	void OnPlayerTick(class CPlayer *pPlayer);
+	void OnCharacterTick(class CCharacter *pChr);
 
 	void SendChatSpectators(const char *pMessage, int Flags);
 	void OnInit() override;
@@ -53,6 +54,7 @@ public:
 
 	bool AllowPublicChat(const CPlayer *pPlayer);
 	bool ParseChatCmd(char Prefix, int ClientId, const char *pCmdWithArgs);
+	bool IsChatBlocked(const CNetMsg_Cl_Say *pMsg, int Length, int Team, CPlayer *pPlayer) const;
 	bool OnBangCommand(int ClientId, const char *pCmd, int NumArgs, const char **ppArgs);
 	void AddSpree(CPlayer *pPlayer);
 	void EndSpree(CPlayer *pPlayer, CPlayer *pKiller);

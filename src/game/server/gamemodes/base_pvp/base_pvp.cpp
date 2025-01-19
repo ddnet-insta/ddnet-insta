@@ -1063,6 +1063,11 @@ void CGameControllerPvp::Tick()
 			continue;
 
 		OnPlayerTick(pPlayer);
+
+		if(!pPlayer->GetCharacter())
+			continue;
+
+		OnCharacterTick(pPlayer->GetCharacter());
 	}
 	// call anticamper
 	if(g_Config.m_SvAnticamper && !GameServer()->m_World.m_Paused)
@@ -1104,6 +1109,12 @@ void CGameControllerPvp::OnPlayerTick(class CPlayer *pPlayer)
 			}
 		}
 	}
+}
+
+void CGameControllerPvp::OnCharacterTick(CCharacter *pChr)
+{
+	if(pChr->GetPlayer()->m_PlayerFlags & PLAYERFLAG_CHATTING)
+		pChr->GetPlayer()->m_TicksSpentChatting++;
 }
 
 bool CGameControllerPvp::OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim)

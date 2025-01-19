@@ -233,9 +233,52 @@ bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumAr
 	return true;
 }
 
+bool CGameControllerPvp::IsChatBlocked(const CNetMsg_Cl_Say *pMsg, int Length, int Team, CPlayer *pPlayer) const
+{
+	int ClientId = pPlayer->GetCid();
+
+	if(!g_Config.m_SvRequireChatFlagToChat)
+		return false;
+
+	// always allow sending chat commands
+	// yes this enables /me spam but nobody knows
+	if(pMsg->m_pMessage[0] == '/')
+		return false;
+
+	// spectators can not send the playerflag chatting
+	// legit chat binds also do not send the playerflag chatting
+	// so after 20 seconds we allow everyone to use the chat
+	// to cover those cases.
+	// It should still filter out the reconnecting spam bots.
+	int SecondsConnected = (Server()->Tick() - pPlayer->m_JoinTick) / Server()->TickSpeed();
+	int SecondsUntilAllowed = maximum(0, 20 - SecondsConnected);
+	if(SecondsUntilAllowed == 0)
+		return false;
+
+	// writing "hi" in less than 2 ticks is sus
+	int ChatTicksNeeded = 2;
+
+	// writing "hello world" in less than 20 ticks is sus
+	if(Length > 10)
+		ChatTicksNeeded = 20;
+
+	if(pPlayer->m_TicksSpentChatting < ChatTicksNeeded)
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "You are not allowed to use the chat yet. Please wait %d seconds.", SecondsUntilAllowed);
+		SendChatTarget(ClientId, aBuf);
+		return true;
+	}
+
+	return false;
+}
+
 bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer)
 {
 	int ClientId = pPlayer->GetCid();
+
+	if(IsChatBlocked(pMsg, Length, Team, pPlayer))
+		return true;
 
 	if(pMsg->m_Team || !AllowPublicChat(pPlayer))
 		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? TEAM_SPECTATORS : pPlayer->GetTeam()); // ddnet-insta

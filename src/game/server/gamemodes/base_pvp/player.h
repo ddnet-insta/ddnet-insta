@@ -176,6 +176,10 @@ public:
 	void DecrementScore() { AddScore(-1); }
 	void AddScore(int Score);
 
+	// how many ticks this player sent the
+	// PLAYERFLAG_CHATTING that displays the chat bubble to others
+	int m_TicksSpentChatting = 0;
+
 #ifndef IN_CLASS_PLAYER
-}
+};
 #endif
