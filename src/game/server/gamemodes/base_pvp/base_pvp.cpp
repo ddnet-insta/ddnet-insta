@@ -212,6 +212,22 @@ int CGameControllerPvp::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
 	if(g_Config.m_SvOldLaser)
 		Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE);
 
+	// if the grenade spam protection is on
+	// and we have "cl_antiping 1"
+	// the grenade starts glitching when we hold
+	// fire without having any bullets left
+	// https://github.com/ddnet-insta/ddnet-insta/issues/234
+	if(g_Config.m_SvGrenadeAmmoRegen && IsGrenadeGameType())
+	{
+		Flags &= ~(GAMEINFOFLAG_UNLIMITED_AMMO);
+
+		// unsetting unlimited ammo alone does not work
+		// sadly ddnet prediction is a bit generic
+		// so predict ddrace overwrites a missing unlimited ammo
+		// https://github.com/ddnet/ddnet/issues/8923
+		Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE);
+	}
+
 	return Flags;
 }
 
