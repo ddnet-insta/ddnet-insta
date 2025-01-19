@@ -245,6 +245,12 @@ bool CGameControllerPvp::IsChatBlocked(const CNetMsg_Cl_Say *pMsg, int Length, i
 	if(pMsg->m_pMessage[0] == '/')
 		return false;
 
+	// spammers do not get pinged
+	// but if real players get greeted they
+	// should be able to respond instantly
+	if(pPlayer->m_GotPingedInChat)
+		return false;
+
 	// spectators can not send the playerflag chatting
 	// legit chat binds also do not send the playerflag chatting
 	// so after 20 seconds we allow everyone to use the chat
@@ -286,24 +292,28 @@ bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, i
 		Team = TEAM_ALL;
 
 	// ddnet-insta warn on ping if cant respond
-	if(Team == TEAM_ALL && pPlayer->GetTeam() != TEAM_SPECTATORS && pMsg->m_pMessage[0] != '/')
+	if(pMsg->m_pMessage[0] != '/')
 	{
-		for(const CPlayer *pSpecPlayer : GameServer()->m_apPlayers)
+		for(CPlayer *pPingedPlayer : GameServer()->m_apPlayers)
 		{
-			if(!pSpecPlayer)
+			if(!pPingedPlayer)
 				continue;
-			if(pSpecPlayer->GetTeam() != TEAM_SPECTATORS)
-				continue;
-			if(AllowPublicChat(pSpecPlayer))
-				continue;
-			if(!str_find_nocase(pMsg->m_pMessage, Server()->ClientName(pSpecPlayer->GetCid())))
+			if(!str_find_nocase(pMsg->m_pMessage, Server()->ClientName(pPingedPlayer->GetCid())))
 				continue;
 
-			char aChatText[256];
-			str_format(aChatText, sizeof(aChatText), "Warning: '%s' got pinged in chat but can not respond", Server()->ClientName(pSpecPlayer->GetCid()));
-			GameServer()->SendChat(-1, TEAM_ALL, aChatText);
-			GameServer()->SendChat(-1, TEAM_ALL, "turn off tournament chat or make sure there are enough in game slots");
-			break;
+			if(
+				Team == TEAM_ALL &&
+				pPingedPlayer->GetTeam() == TEAM_SPECTATORS &&
+				pPlayer->GetTeam() != TEAM_SPECTATORS &&
+				!AllowPublicChat(pPingedPlayer))
+			{
+				char aChatText[256];
+				str_format(aChatText, sizeof(aChatText), "Warning: '%s' got pinged in chat but can not respond", Server()->ClientName(pPingedPlayer->GetCid()));
+				GameServer()->SendChat(-1, TEAM_ALL, aChatText);
+				GameServer()->SendChat(-1, TEAM_ALL, "turn off tournament chat or make sure there are enough in game slots");
+			}
+
+			pPingedPlayer->m_GotPingedInChat = true;
 		}
 	}
 

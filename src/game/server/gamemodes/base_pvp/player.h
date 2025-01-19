@@ -180,6 +180,14 @@ public:
 	// PLAYERFLAG_CHATTING that displays the chat bubble to others
 	int m_TicksSpentChatting = 0;
 
+	// tracks if this player already got pinged in chat
+	// at least once by others
+	// this is used to unlock the chat for these players
+	// if there is a initial chat delay
+	// because automated spam bots are usually not greeted
+	// and greeted players want to respond instantly
+	bool m_GotPingedInChat = false;
+
 #ifndef IN_CLASS_PLAYER
 };
 #endif
