@@ -28,7 +28,9 @@ class CCharacter : public CEntity
 #define IN_CLASS_CHARACTER
 #include <game/server/gamemodes/base_pvp/character.h>
 
-	friend class CSaveTee; // need to use core
+	// need to use core
+	friend class CSaveTee;
+	friend class CSaveHotReloadTee;
 
 public:
 	CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput);
