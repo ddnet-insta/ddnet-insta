@@ -2276,6 +2276,8 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 
 void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 {
+	if(m_pController->OnCallVoteNetMessage(pMsg, ClientId)) // ddnet-insta
+		return;
 	if(RateLimitPlayerVote(ClientId) || m_VoteCloseTime)
 		return;
 	if(m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)

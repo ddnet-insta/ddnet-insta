@@ -177,9 +177,30 @@ public:
 	virtual bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) { return false; };
 
 	/*
+		Function: OnCallVoteNetMessage
+			hooks into CGameContext::OnCallVoteNetMessage()
+			before any spam protection check
+
+			This is being called when a player creates a new vote
+
+			See also `OnVoteNetMessage()`
+
+		Returns:
+			return true to not run the rest of CGameContext::OnCallVoteNetMessage()
+	*/
+	virtual bool OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
+	{
+		return false;
+	}
+
+	/*
 		Function: OnVoteNetMessage
 			hooks into CGameContext::OnVoteNetMessage()
 			before any spam protection check
+
+			This is being called when a player votes yes or no.
+
+			See also `OnCallVoteNetMessage()`
 
 		Returns:
 			return true to not run the rest of CGameContext::OnVoteNetMessage()
