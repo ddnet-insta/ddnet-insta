@@ -325,6 +325,11 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 	const auto *pData = dynamic_cast<const CSqlPlayerStatsRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CInstaSqlResult *>(pGameData->m_pResult.get());
 
+	// do not print "is unranked" in chat for new players
+	// https://github.com/ddnet-insta/ddnet-insta/issues/245
+	if(pData->m_RequestType == EInstaSqlRequestType::PLAYER_DATA)
+		pResult->m_MessageKind = pData->m_RequestType;
+
 	char aBuf[4096];
 	str_format(
 		aBuf,
