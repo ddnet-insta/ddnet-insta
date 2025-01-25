@@ -430,9 +430,6 @@ bool CGameControllerBaseFng::OnLaserHit(int Bounces, int From, int Weapon, CChar
 	// do not track wallshots on frozen tees
 	if(pVictim->m_FreezeTime)
 		return true;
-	CPlayer *pPlayer = GameServer()->m_apPlayers[From];
-	if(pVictim->GetPlayer() != pPlayer)
-		GameServer()->CreateDeath(pVictim->m_Pos, pVictim->GetPlayer()->GetCid(), pVictim->TeamMask());
 	return CGameControllerInstagib::OnLaserHit(Bounces, From, Weapon, pVictim);
 }
 
@@ -506,6 +503,8 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 	Msg.m_Weapon = Weapon;
 	Msg.m_ModeSpecial = 0;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+
+	GameServer()->CreateDeath(Character.m_Pos, Character.GetPlayer()->GetCid(), Character.TeamMask());
 
 	Character.Freeze(10);
 	return false;
