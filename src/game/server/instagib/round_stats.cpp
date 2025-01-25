@@ -253,9 +253,9 @@ void IGameController::GetRoundEndStatsStrHttp(char *pBuf, size_t Size)
 {
 	if(g_Config.m_SvRoundStatsFormatHttp == 0)
 		GetRoundEndStatsStrCsv(pBuf, Size);
-	if(g_Config.m_SvRoundStatsFormatHttp == 1)
+	else if(g_Config.m_SvRoundStatsFormatHttp == 1)
 		GetRoundEndStatsStrPsv(pBuf, Size);
-	if(g_Config.m_SvRoundStatsFormatHttp == 2)
+	else if(g_Config.m_SvRoundStatsFormatHttp == 2)
 		GetRoundEndStatsStrAsciiTable(pBuf, Size);
 	else if(g_Config.m_SvRoundStatsFormatHttp == 4)
 		GetRoundEndStatsStrJson(pBuf, Size);
@@ -267,9 +267,9 @@ void IGameController::GetRoundEndStatsStrDiscord(char *pBuf, size_t Size)
 {
 	if(g_Config.m_SvRoundStatsFormatDiscord == 0)
 		GetRoundEndStatsStrCsv(pBuf, Size);
-	if(g_Config.m_SvRoundStatsFormatDiscord == 1)
+	else if(g_Config.m_SvRoundStatsFormatDiscord == 1)
 		GetRoundEndStatsStrPsv(pBuf, Size);
-	if(g_Config.m_SvRoundStatsFormatFile == 2)
+	else if(g_Config.m_SvRoundStatsFormatDiscord == 2)
 		GetRoundEndStatsStrAsciiTable(pBuf, Size);
 	else if(g_Config.m_SvRoundStatsFormatDiscord == 4)
 		GetRoundEndStatsStrJson(pBuf, Size);
@@ -281,9 +281,9 @@ void IGameController::GetRoundEndStatsStrFile(char *pBuf, size_t Size)
 {
 	if(g_Config.m_SvRoundStatsFormatFile == 0)
 		GetRoundEndStatsStrCsv(pBuf, Size);
-	if(g_Config.m_SvRoundStatsFormatFile == 1)
+	else if(g_Config.m_SvRoundStatsFormatFile == 1)
 		GetRoundEndStatsStrPsv(pBuf, Size);
-	if(g_Config.m_SvRoundStatsFormatFile == 2)
+	else if(g_Config.m_SvRoundStatsFormatFile == 2)
 		GetRoundEndStatsStrAsciiTable(pBuf, Size);
 	else if(g_Config.m_SvRoundStatsFormatFile == 4)
 		GetRoundEndStatsStrJson(pBuf, Size);
@@ -320,28 +320,40 @@ void IGameController::PublishRoundEndStatsStrDiscord(const char *pStr)
 		"{\"allowed_mentions\": {\"parse\": []}, \"content\": \"%s\"}",
 		EscapeJson(aStatsStr, sizeof(aStatsStr), pStr));
 	const int PayloadSize = str_length(aPayload);
-	// TODO: use HttpPostJson()
-	std::shared_ptr<CHttpRequest> pDiscord = HttpPost(g_Config.m_SvRoundStatsDiscordWebhook, (const unsigned char *)aPayload, PayloadSize);
-	pDiscord->LogProgress(HTTPLOG::FAILURE);
-	pDiscord->IpResolve(IPRESOLVE::V4);
-	pDiscord->Timeout(CTimeout{4000, 15000, 500, 5});
-	pDiscord->HeaderString("Content-Type", "application/json");
-	GameServer()->m_pHttp->Run(pDiscord);
+	const char *pUrls = g_Config.m_SvRoundStatsDiscordWebhooks;
+	char aUrl[1024];
+
+	while((pUrls = str_next_token(pUrls, ",", aUrl, sizeof(aUrl))))
+	{
+		// TODO: use HttpPostJson()
+		std::shared_ptr<CHttpRequest> pDiscord = HttpPost(aUrl, (const unsigned char *)aPayload, PayloadSize);
+		pDiscord->LogProgress(HTTPLOG::FAILURE);
+		pDiscord->IpResolve(IPRESOLVE::V4);
+		pDiscord->Timeout(CTimeout{4000, 15000, 500, 5});
+		pDiscord->HeaderString("Content-Type", "application/json");
+		GameServer()->m_pHttp->Run(pDiscord);
+	}
 }
 
 void IGameController::PublishRoundEndStatsStrHttp(const char *pStr)
 {
 	const int PayloadSize = str_length(pStr);
-	std::shared_ptr<CHttpRequest> pHttp = HttpPost(g_Config.m_SvRoundStatsHttpEndpoint, (const unsigned char *)pStr, PayloadSize);
-	pHttp->LogProgress(HTTPLOG::FAILURE);
-	pHttp->IpResolve(IPRESOLVE::V4);
-	pHttp->Timeout(CTimeout{4000, 15000, 500, 5});
-	if(g_Config.m_SvRoundStatsFormatHttp == 4)
-		pHttp->HeaderString("Content-Type", "application/json");
-	else
-		pHttp->HeaderString("Content-Type", "text/plain");
-	// TODO: text/csv
-	GameServer()->m_pHttp->Run(pHttp);
+	const char *pUrls = g_Config.m_SvRoundStatsHttpEndpoints;
+	char aUrl[1024];
+
+	while((pUrls = str_next_token(pUrls, ",", aUrl, sizeof(aUrl))))
+	{
+		std::shared_ptr<CHttpRequest> pHttp = HttpPost(aUrl, (const unsigned char *)pStr, PayloadSize);
+		pHttp->LogProgress(HTTPLOG::FAILURE);
+		pHttp->IpResolve(IPRESOLVE::V4);
+		pHttp->Timeout(CTimeout{4000, 15000, 500, 5});
+		if(g_Config.m_SvRoundStatsFormatHttp == 4)
+			pHttp->HeaderString("Content-Type", "application/json");
+		else
+			pHttp->HeaderString("Content-Type", "text/plain");
+		// TODO: text/csv
+		GameServer()->m_pHttp->Run(pHttp);
+	}
 }
 
 void IGameController::PublishRoundEndStats()
@@ -352,13 +364,13 @@ void IGameController::PublishRoundEndStats()
 	// but a 32v32 will still overflow
 	char aStats[16384];
 	aStats[0] = '\0';
-	if(g_Config.m_SvRoundStatsDiscordWebhook[0] != '\0')
+	if(g_Config.m_SvRoundStatsDiscordWebhooks[0] != '\0')
 	{
 		GetRoundEndStatsStrDiscord(aStats, sizeof(aStats));
 		PublishRoundEndStatsStrDiscord(aStats);
 		dbg_msg("ddnet-insta", "publishing round stats to discord:\n%s", aStats);
 	}
-	if(g_Config.m_SvRoundStatsHttpEndpoint[0] != '\0')
+	if(g_Config.m_SvRoundStatsHttpEndpoints[0] != '\0')
 	{
 		GetRoundEndStatsStrHttp(aStats, sizeof(aStats));
 		PublishRoundEndStatsStrHttp(aStats);
