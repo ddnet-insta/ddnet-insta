@@ -22,6 +22,7 @@ void CGameContext::RegisterInstagibCommands()
 	Console()->Chain("sv_spectator_votes", ConchainSpectatorVotes, this);
 	Console()->Chain("sv_spectator_votes_sixup", ConchainSpectatorVotes, this);
 	Console()->Chain("sv_display_score", ConchainDisplayScore, this);
+	Console()->Chain("sv_only_wallshot_kills", ConchainOnlyWallshotKills, this);
 
 	// generated undocumented chat commands
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;
@@ -182,4 +183,18 @@ void CGameContext::ConchainDisplayScore(IConsole::IResult *pResult, void *pUserD
 
 		pPlayer->m_DisplayScore = pSelf->m_DisplayScore;
 	}
+}
+
+void CGameContext::ConchainOnlyWallshotKills(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+
+	if(pResult->NumArguments() == 0)
+		return;
+
+	if(g_Config.m_SvOnlyWallshotKills)
+		pSelf->SendChat(-1, TEAM_ALL, "WARNING: only wallshots can kill");
+	else
+		pSelf->SendChat(-1, TEAM_ALL, "WARNING: wallshot is not needed anymore to kill");
 }
