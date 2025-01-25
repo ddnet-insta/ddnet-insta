@@ -37,15 +37,9 @@ void CServer::ConRedirect(IConsole::IResult *pResult, void *pUser)
 	int VictimId = pResult->GetVictim();
 	int Port = pResult->GetInteger(1);
 
-	if(VictimId == -1)
+	if(VictimId == pResult->m_ClientId)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(i == pResult->m_ClientId)
-				continue;
-
-			pThis->RedirectClient(i, Port);
-		}
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "You can not redirect your self");
 		return;
 	}
 
@@ -57,8 +51,6 @@ void CServer::ConRedirect(IConsole::IResult *pResult, void *pUser)
 	}
 	if(!pThis->ClientIngame(VictimId))
 	{
-		str_format(aBuf, sizeof(aBuf), "No player with ClientId %d connected", VictimId);
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", aBuf);
 		return;
 	}
 	pThis->RedirectClient(VictimId, Port);

@@ -20,6 +20,6 @@ CONSOLE_COMMAND("add_map_to_pool", "s[map name]", CFGFLAG_SERVER, ConAddMapToPoo
 CONSOLE_COMMAND("clear_map_pool", "", CFGFLAG_SERVER, ConClearMapPool, this, "Clears pool used by random_map_from_pool command")
 CONSOLE_COMMAND("random_map_from_pool", "", CFGFLAG_SERVER, ConRandomMapFromPool, this, "Changes to random map from pool (see add_map_to_pool)")
 
-CONSOLE_COMMAND("redirect", "v[victim] i[port]", CFGFLAG_SERVER, CServer::ConRedirect, Server(), "Redirect client to given port use victim -1 to redirect all")
+CONSOLE_COMMAND("redirect", "v[victim] i[port]", CFGFLAG_SERVER, CServer::ConRedirect, Server(), "Redirect client to given port use victim \"all\" to redirect all but your self")
 
 #undef CONSOLE_COMMAND
