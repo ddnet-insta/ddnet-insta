@@ -1189,6 +1189,7 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientId].m_Snapshots.PurgeAll();
 	pThis->m_aClients[ClientId].m_Sixup = false;
 	pThis->m_aClients[ClientId].m_RedirectDropTime = 0;
+	pThis->m_aClients[ClientId].m_HasPersistentData = false;
 
 	pThis->GameServer()->TeehistorianRecordPlayerDrop(ClientId, pReason);
 	pThis->Antibot()->OnEngineClientDrop(ClientId, pReason);
@@ -2850,7 +2851,7 @@ int CServer::Run()
 				{
 					// new map loaded
 
-					// ask the game to for the data it wants to persist past a map change
+					// ask the game for the data it wants to persist past a map change
 					for(int i = 0; i < MAX_CLIENTS; i++)
 					{
 						if(m_aClients[i].m_State == CClient::STATE_INGAME)

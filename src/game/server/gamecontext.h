@@ -163,6 +163,7 @@ class CGameContext : public IGameServer
 	{
 		bool m_IsSpectator;
 		bool m_IsAfk;
+		int m_LastWhisperTo;
 	};
 
 public:
@@ -456,6 +457,7 @@ private:
 	static void ConPractice(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeCmdList(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwap(IConsole::IResult *pResult, void *pUserData);
+	static void ConCancelSwap(IConsole::IResult *pResult, void *pUserData);
 	static void ConSave(IConsole::IResult *pResult, void *pUserData);
 	static void ConLoad(IConsole::IResult *pResult, void *pUserData);
 	static void ConMap(IConsole::IResult *pResult, void *pUserData);

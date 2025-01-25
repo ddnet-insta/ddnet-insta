@@ -800,11 +800,13 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_ENTITIES_DDRACE |
 		GAMEINFOFLAG_ENTITIES_RACE |
 		GAMEINFOFLAG_RACE;
-	pGameInfoEx->m_Flags = SnapGameInfoExFlags(SnappingClient, pGameInfoEx->m_Flags); // ddnet-insta
-	pGameInfoEx->m_Flags2 = SnapGameInfoExFlags2(SnappingClient, pGameInfoEx->m_Flags2); // ddnet-insta
+	pGameInfoEx->m_Flags2 = GAMEINFOFLAG2_HUD_DDRACE | GAMEINFOFLAG2_DDRACE_TEAM;
 	if(g_Config.m_SvNoWeakHook)
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
 	pGameInfoEx->m_Version = GAMEINFO_CURVERSION;
+
+	pGameInfoEx->m_Flags = SnapGameInfoExFlags(SnappingClient, pGameInfoEx->m_Flags); // ddnet-insta
+	pGameInfoEx->m_Flags2 = SnapGameInfoExFlags2(SnappingClient, pGameInfoEx->m_Flags2); // ddnet-insta
 
 	if(Server()->IsSixup(SnappingClient))
 	{
