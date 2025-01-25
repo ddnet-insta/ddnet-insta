@@ -110,8 +110,9 @@ void CGameControllerPvp::OnRoundEnd()
 
 	if(g_Config.m_SvTournamentChatSmart)
 	{
+		if(g_Config.m_SvTournamentChat)
+			GameServer()->SendChat(-1, TEAM_ALL, g_Config.m_SvTournamentChatSmart == 1 ? "Spectators can use public chat again" : "All can use public chat again");
 		g_Config.m_SvTournamentChat = 0;
-		GameServer()->SendChat(-1, TEAM_ALL, g_Config.m_SvTournamentChatSmart == 1 ? "Spectators can use public chat again" : "All can use public chat again");
 	}
 
 	PublishRoundEndStats();
