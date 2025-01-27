@@ -162,9 +162,8 @@ void CGameControllerBaseFng::OnPlayerDisconnect(class CPlayer *pPlayer, const ch
 		if(!pChr->m_FreezeTime)
 			break;
 
-		NETADDR Addr;
-		Server()->GetClientAddr(pPlayer->GetCid(), &Addr);
-		m_vFrozenQuitters.emplace_back(Addr);
+		const NETADDR *pAddr = Server()->ClientAddr(pPlayer->GetCid());
+		m_vFrozenQuitters.emplace_back(*pAddr);
 
 		// frozen quit punishment expires after 5 minutes
 		// to avoid memory leaks
@@ -179,15 +178,14 @@ void CGameControllerBaseFng::OnPlayerConnect(CPlayer *pPlayer)
 {
 	CGameControllerInstagib::OnPlayerConnect(pPlayer);
 
-	NETADDR Addr;
-	Server()->GetClientAddr(pPlayer->GetCid(), &Addr);
+	const NETADDR *pAddr = Server()->ClientAddr(pPlayer->GetCid());
 
 	bool Match = false;
 	int Index = -1;
 	for(const auto &Quitter : m_vFrozenQuitters)
 	{
 		Index++;
-		if(!net_addr_comp_noport(&Quitter, &Addr))
+		if(!net_addr_comp_noport(&Quitter, pAddr))
 		{
 			Match = true;
 			break;
