@@ -46,11 +46,6 @@
 
 */
 
-enum
-{
-	NUM_TUNEZONES = 256
-};
-
 class CCharacter;
 class IConfigManager;
 class CConfig;
