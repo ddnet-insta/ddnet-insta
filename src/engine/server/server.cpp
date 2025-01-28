@@ -726,30 +726,27 @@ int CServer::DistinctClientCount() const
 	const NETADDR *apAddresses[MAX_CLIENTS];
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
-		{
-			apAddresses[i] = ClientAddr(i);
-		}
+		// connecting clients with spoofed ips can clog slots without being ingame
+		apAddresses[i] = ClientIngame(i) ? ClientAddr(i) : nullptr;
 	}
 
 	int ClientCount = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		// connecting clients with spoofed ips can clog slots without being ingame
-		if(ClientIngame(i))
+		if(apAddresses[i] == nullptr)
 		{
-			ClientCount++;
-			for(int j = 0; j < i; j++)
+			continue;
+		}
+		ClientCount++;
+		for(int j = 0; j < i; j++)
+		{
+			if(apAddresses[j] != nullptr && !net_addr_comp_noport(apAddresses[i], apAddresses[j]))
 			{
-				if(!net_addr_comp_noport(apAddresses[i], apAddresses[j]))
-				{
-					ClientCount--;
-					break;
-				}
+				ClientCount--;
+				break;
 			}
 		}
 	}
-
 	return ClientCount;
 }
 
@@ -2734,8 +2731,10 @@ int CServer::LoadMap(const char *pMapName)
 
 	if(Config()->m_SvMapsBaseUrl[0])
 	{
-		str_format(aBuf, sizeof(aBuf), "%s%s_%s.map", Config()->m_SvMapsBaseUrl, pMapName, aSha256);
-		EscapeUrl(m_aMapDownloadUrl, aBuf);
+		char aEscaped[256];
+		str_format(aBuf, sizeof(aBuf), "%s_%s.map", pMapName, aSha256);
+		EscapeUrl(aEscaped, aBuf);
+		str_format(m_aMapDownloadUrl, sizeof(m_aMapDownloadUrl), "%s%s", Config()->m_SvMapsBaseUrl, aEscaped);
 	}
 	else
 	{
