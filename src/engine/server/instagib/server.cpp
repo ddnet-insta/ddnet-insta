@@ -24,7 +24,7 @@ const char *CServer::GetRandomMapFromPool()
 	const char *pMap = m_vMapPool[RandIdx].c_str();
 
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "Chose random map '%s' out of %d maps", pMap, m_vMapPool.size());
+	str_format(aBuf, sizeof(aBuf), "Chose random map '%s' out of %zu maps", pMap, m_vMapPool.size());
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", aBuf);
 	return pMap;
 }
