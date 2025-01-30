@@ -2572,10 +2572,8 @@ void CGameContext::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 
 void CGameContext::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId)
 {
-	// ddnet-insta
+	// ddnet-insta (also moved the world m_Paused check to the pvp controller)
 	if(m_pController->OnSetTeamNetMessage(pMsg, ClientId))
-		return;
-	if(m_World.m_Paused)
 		return;
 
 	CPlayer *pPlayer = m_apPlayers[ClientId];

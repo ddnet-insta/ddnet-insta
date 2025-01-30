@@ -735,11 +735,21 @@ bool CGameControllerPvp::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int Clien
 }
 
 // called before spam protection on client team join request
+// return true to consume the event and not run the base controller code
 bool CGameControllerPvp::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId)
 {
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
 	if(!pPlayer)
 		return false;
+
+	if(GameServer()->m_World.m_Paused)
+	{
+		if(!g_Config.m_SvAllowTeamChangeDuringPause)
+		{
+			GameServer()->SendChatTarget(pPlayer->GetCid(), "Changing teams while the game is paused is currently disabled.");
+			return true;
+		}
+	}
 
 	int Team = pMsg->m_Team;
 
