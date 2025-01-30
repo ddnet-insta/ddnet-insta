@@ -1,6 +1,7 @@
 #include <base/system.h>
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
+#include <game/server/instagib/protocol.h>
 
 #include "../entities/character.h"
 #include "../gamecontext.h"
@@ -226,7 +227,15 @@ void CGameContext::SendBroadcastSix(const char *pText, bool Important)
 		// is merged. If it is merged for long enough the entire ghost char hack can be removed
 		// and we just drop broadcast support for old clients in that weird state
 		if(!pPlayer->m_HasGhostCharInGame && pPlayer->GetTeam() != TEAM_SPECTATORS)
-			SendChatTarget(pPlayer->GetCid(), pText);
+		{
+			if(Server()->GetClientVersion(pPlayer->GetCid()) < VERSION_DDNET_NO_SCOREBOARD_DURING_PAUSE)
+			{
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "%s (update your client to hide this message)", pText);
+				SendChatTarget(pPlayer->GetCid(), aBuf);
+			}
+		}
+
 		SendBroadcast(pText, pPlayer->GetCid(), Important);
 	}
 }

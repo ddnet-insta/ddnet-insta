@@ -1,0 +1,10 @@
+#ifndef GAME_SERVER_INSTAGIB_PROTOCOL_H
+#define GAME_SERVER_INSTAGIB_PROTOCOL_H
+
+enum
+{
+	// https://github.com/ddnet/ddnet/pull/8892/commits/74bb32779921c5efa38187d7b1760932c02763d5
+	VERSION_DDNET_NO_SCOREBOARD_DURING_PAUSE = 18051,
+};
+
+#endif
