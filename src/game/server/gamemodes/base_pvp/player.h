@@ -21,6 +21,9 @@ class CPlayer
 
 public:
 	void InstagibTick();
+	void RainbowTick();
+
+	int m_RainbowColor = 0;
 
 	void ProcessStatsResult(CInstaSqlResult &Result);
 
