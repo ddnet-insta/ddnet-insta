@@ -630,7 +630,7 @@ bool CSqlStats::ShowFastcapRankWorker(IDbConnection *pSqlServer, const ISqlData 
 		int Rank = pSqlServer->GetInt(1);
 		float Time = pSqlServer->GetFloat(2);
 		// CEIL and FLOOR are not supported in SQLite
-		int BetterThanPercent = std::floor(100.0f - 100.0f * pSqlServer->GetFloat(3));
+		int BetterThanPercent = std::floor(100.0f - (100.0f * pSqlServer->GetFloat(3)));
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 
 		if(str_comp_nocase(pData->m_aRequestingPlayer, pData->m_aName) == 0)
@@ -1045,7 +1045,6 @@ bool CSqlStats::CreateFastcapTableThread(IDbConnection *pSqlServer, const ISqlDa
 		dbg_assert(false, "CreateFastcapTableThread failed to write");
 		return true;
 	}
-	const CSqlCreateTableRequest *pData = dynamic_cast<const CSqlCreateTableRequest *>(pGameData);
 
 	char aBuf[4096];
 	str_format(aBuf, sizeof(aBuf),
@@ -1065,8 +1064,7 @@ bool CSqlStats::CreateFastcapTableThread(IDbConnection *pSqlServer, const ISqlDa
 		MAX_NAME_LENGTH_SQL,
 		pSqlServer->BinaryCollate(),
 		pSqlServer->BinaryCollate(),
-		pSqlServer->BinaryCollate(),
-		pData->m_aColumns);
+		pSqlServer->BinaryCollate());
 
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{

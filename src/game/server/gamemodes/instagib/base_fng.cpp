@@ -76,7 +76,7 @@ void CGameControllerBaseFng::OnShowStatsAll(const CSqlStatsPlayer *pStats, class
 		aBuf,
 		sizeof(aBuf),
 		"~~~ all time stats for '%s'",
-		pRequestedName, pStats->m_Kills, Server()->ClientName(pRequestingPlayer->GetCid()));
+		pRequestedName);
 	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "~ Points: %d, Wins: %d, Deaths: %d", pStats->m_Points, pStats->m_Wins, pStats->m_Deaths);
@@ -122,7 +122,7 @@ void CGameControllerBaseFng::OnShowMultis(const CSqlStatsPlayer *pStats, class C
 		aBuf,
 		sizeof(aBuf),
 		"~~~ all time multi stats for '%s'",
-		pRequestedName, pStats->m_Kills, Server()->ClientName(pRequestingPlayer->GetCid()));
+		pRequestedName);
 	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "~ Highest multi: %d", pStats->m_BestMulti);
@@ -194,7 +194,7 @@ void CGameControllerBaseFng::OnPlayerConnect(CPlayer *pPlayer)
 
 	if(Match)
 	{
-		dbg_msg("fng", "a frozen player rejoined removing slot %d (%d left)", Index, m_vFrozenQuitters.size() - 1);
+		dbg_msg("fng", "a frozen player rejoined removing slot %d (%zu left)", Index, m_vFrozenQuitters.size() - 1);
 		m_vFrozenQuitters.erase(m_vFrozenQuitters.begin() + Index);
 
 		pPlayer->m_FreezeOnSpawn = 20;

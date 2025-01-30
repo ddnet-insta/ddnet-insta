@@ -395,7 +395,7 @@ void CGameControllerPvp::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPl
 		aBuf,
 		sizeof(aBuf),
 		"~~~ all time stats for '%s'",
-		pRequestedName, pStats->m_Kills, Server()->ClientName(pRequestingPlayer->GetCid()));
+		pRequestedName);
 	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "~ Points: %d", pStats->m_Points);

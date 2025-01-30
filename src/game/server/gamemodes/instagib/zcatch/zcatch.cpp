@@ -68,7 +68,7 @@ void CGameControllerZcatch::OnShowRoundStats(const CSqlStatsPlayer *pStats, clas
 	str_format(aBuf, sizeof(aBuf), "~ Kills that give points on win: %d", pRequestingPlayer->m_KillsThatCount);
 	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "~ Kills that can be released: %d", pRequestingPlayer->m_vVictimIds.size());
+	str_format(aBuf, sizeof(aBuf), "~ Kills that can be released: %zu", pRequestingPlayer->m_vVictimIds.size());
 	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
 }
 
@@ -314,7 +314,7 @@ bool CGameControllerZcatch::OnSelfkill(int ClientId)
 	str_format(aBuf, sizeof(aBuf), "You were released by '%s'", Server()->ClientName(pPlayer->GetCid()));
 	ReleasePlayer(pVictim, aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "You released '%s' (%d players left)", Server()->ClientName(pVictim->GetCid()), pPlayer->m_vVictimIds.size());
+	str_format(aBuf, sizeof(aBuf), "You released '%s' (%zu players left)", Server()->ClientName(pVictim->GetCid()), pPlayer->m_vVictimIds.size());
 	SendChatTarget(ClientId, aBuf);
 
 	// the kill count should never go negative
@@ -336,7 +336,7 @@ bool CGameControllerZcatch::OnSelfkill(int ClientId)
 			str_format(aBuf, sizeof(aBuf), "You were released by '%s'", Server()->ClientName(pPlayer->GetCid()));
 			ReleasePlayer(pVictim, aBuf);
 		}
-		str_format(aBuf, sizeof(aBuf), "You released %d remaining spectators because your kill count reached 0.", pPlayer->m_vVictimIds.size());
+		str_format(aBuf, sizeof(aBuf), "You released %zu remaining spectators because your kill count reached 0.", pPlayer->m_vVictimIds.size());
 		SendChatTarget(ClientId, aBuf);
 		pPlayer->m_vVictimIds.clear();
 	}
