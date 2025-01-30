@@ -278,7 +278,7 @@ CConfigManager::CConfigManager()
 {
 	m_pConsole = nullptr;
 	m_pStorage = nullptr;
-	m_ConfigFile = 0;
+	m_ConfigFile = nullptr;
 	m_Failed = false;
 }
 
@@ -421,7 +421,7 @@ bool CConfigManager::Save()
 		log_error("config", "ERROR: closing %s failed", aConfigFileTmp);
 	}
 
-	m_ConfigFile = 0;
+	m_ConfigFile = nullptr;
 
 	if(m_Failed)
 	{

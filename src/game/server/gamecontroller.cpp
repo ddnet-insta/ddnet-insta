@@ -482,7 +482,7 @@ void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pRe
 {
 	pPlayer->OnDisconnect();
 	int ClientId = pPlayer->GetCid();
-	if(Server()->ClientIngame(ClientId))
+	if(Server()->ClientIngame(ClientId) || Server()->ClientRedirected(ClientId))
 	{
 		char aBuf[512];
 		if(pReason && *pReason)
@@ -758,7 +758,7 @@ void IGameController::Snap(int SnappingClient)
 	pGameInfoObj->m_RoundCurrent = m_RoundCount + 1;
 
 	CCharacter *pChr;
-	CPlayer *pPlayer = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->m_apPlayers[SnappingClient] : 0;
+	CPlayer *pPlayer = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->m_apPlayers[SnappingClient] : nullptr;
 	CPlayer *pPlayer2;
 
 	if(pPlayer && (pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER || pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && pPlayer->GetClientVersion() >= VERSION_DDNET_GAMETICK)
