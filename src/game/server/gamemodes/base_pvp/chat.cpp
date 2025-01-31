@@ -11,6 +11,74 @@
 
 #include "base_pvp.h"
 
+void CGameControllerPvp::DoWarmup(int Seconds)
+{
+	CGameControllerDDRace::DoWarmup(Seconds);
+
+	if(Seconds)
+	{
+		if(g_Config.m_SvTournamentChatSmart && !DetectedCasualRound())
+		{
+			g_Config.m_SvTournamentChat = g_Config.m_SvTournamentChatSmart;
+			GameServer()->SendChat(-1, TEAM_ALL, g_Config.m_SvTournamentChatSmart == 1 ? "Spectators can no longer use public chat" : "All can no longer use public chat");
+		}
+	}
+}
+
+bool CGameControllerPvp::DetectedCasualRound()
+{
+	int NumAfks = 0;
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(pPlayer->m_IsCompetitiveAfk)
+			NumAfks++;
+	}
+
+	int ActivePlayers = NumActivePlayers();
+	bool FreeSlots = ActivePlayers < Server()->MaxClients() - g_Config.m_SvSpectatorSlots;
+
+	// yes if someone leaves during a dm1 1on1
+	// spectators can start chatting instantly
+	// and that makes sense
+	//
+	// if a ctf game drops down to one player this is always
+	// a casual round again
+	if(ActivePlayers < 2)
+		return true;
+
+	// two people did not move in the last 6 seconds
+	// and at least one team is missing players
+	if(FreeSlots && NumAfks > 1)
+		return true;
+
+	// could also check:
+	// - chat usage (trigger words)
+	// - team switches
+	// - vote calls
+	// see https://github.com/ddnet-insta/ddnet-insta/issues/256
+
+	return false;
+}
+
+void CGameControllerPvp::SmartChatTick()
+{
+	// do not compute this stuff every tick
+	// waste of clock cycles
+	if(Server()->Tick() % 10)
+		return;
+
+	if(DetectedCasualRound())
+	{
+		if(g_Config.m_SvTournamentChat)
+		{
+			SendChat(-1, TEAM_ALL, "Spectators can use public chat again. Because this is no longer a competitve round.");
+			g_Config.m_SvTournamentChat = 0;
+		}
+	}
+}
+
 bool CGameControllerPvp::AllowPublicChat(const CPlayer *pPlayer)
 {
 	if(!g_Config.m_SvTournamentChat)

@@ -81,6 +81,12 @@ void CPlayer::AddDeaths(int Amount)
 
 void CPlayer::InstagibTick()
 {
+	// 6 seconds of doing nothing should never happen during
+	// a competitive game
+	// even tactical waiting (also known as "camping")
+	// should not take that long without once moving the mouse
+	m_IsCompetitiveAfk = m_LastPlaytime < time_get() - time_freq() * 6;
+
 	if(m_StatsQueryResult != nullptr && m_StatsQueryResult->m_Completed)
 	{
 		ProcessStatsResult(*m_StatsQueryResult);

@@ -591,15 +591,6 @@ void IGameController::DoWarmup(int Seconds)
 	// and then it is unitialized
 	m_Warmup = 0;
 	SetGameState(IGS_WARMUP_USER, Seconds);
-
-	if(Seconds)
-	{
-		if(g_Config.m_SvTournamentChatSmart)
-		{
-			g_Config.m_SvTournamentChat = g_Config.m_SvTournamentChatSmart;
-			GameServer()->SendChat(-1, TEAM_ALL, g_Config.m_SvTournamentChatSmart == 1 ? "Spectators can no longer use public chat" : "All can no longer use public chat");
-		}
-	}
 }
 
 bool IGameController::IsForceBalanced()

@@ -1071,9 +1071,11 @@ void CGameControllerPvp::Tick()
 
 		OnCharacterTick(pPlayer->GetCharacter());
 	}
-	// call anticamper
+
 	if(g_Config.m_SvAnticamper && !GameServer()->m_World.m_Paused)
 		Anticamper();
+	if(g_Config.m_SvTournamentChatSmart)
+		SmartChatTick();
 
 	// win check
 	if((m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_GAME_PAUSED) && !GameServer()->m_World.m_ResetRequested)
