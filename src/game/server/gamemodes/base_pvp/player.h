@@ -188,6 +188,22 @@ public:
 	// and greeted players want to respond instantly
 	bool m_GotPingedInChat = false;
 
+	// if there is a anti chat spam filter active such as
+	// sv_require_chat_flag_to_chat
+	// then this boolean tracks players that got verified
+	// to be able to use the chat
+	//
+	// players can also chat if the `m_GotPingedInChat` is set
+	// or `m_TicksSpentChatting` is high enough
+	//
+	// and this boolean is for all remaining edge cases where players
+	// got whitelisted because of some action they did
+	// for now this is used to make sure
+	// players who joined after the server was empty
+	// or players who were there before a map reload
+	// get whitelisted
+	bool m_VerifiedForChat = false;
+
 #ifndef IN_CLASS_PLAYER
 };
 #endif

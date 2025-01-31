@@ -1409,6 +1409,11 @@ void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 		GameServer()->ShowCurrentInstagibConfigsMotd(ClientId);
 	}
 
+	if((Server()->Tick() - GameServer()->m_NonEmptySince) / Server()->TickSpeed() < 20)
+	{
+		pPlayer->m_VerifiedForChat = true;
+	}
+
 	CheckReadyStates(); // ddnet-insta
 
 	// update game info

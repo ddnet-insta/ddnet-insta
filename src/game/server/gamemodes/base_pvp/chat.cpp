@@ -1,3 +1,4 @@
+#include <base/math.h>
 #include <base/system.h>
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
@@ -251,6 +252,12 @@ bool CGameControllerPvp::IsChatBlocked(const CNetMsg_Cl_Say *pMsg, int Length, i
 	// but if real players get greeted they
 	// should be able to respond instantly
 	if(pPlayer->m_GotPingedInChat)
+		return false;
+
+	// all kinds of verifications such as
+	// joining a few seconds after the server was empty
+	// or being on the server before a map change
+	if(pPlayer->m_VerifiedForChat)
 		return false;
 
 	// spectators can not send the playerflag chatting
