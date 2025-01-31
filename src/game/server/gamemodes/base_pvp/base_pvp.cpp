@@ -39,6 +39,13 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	m_pSqlStats = new CSqlStats(GameServer(), ((CServer *)Server())->DbPool());
 	m_pExtraColumns = nullptr;
 	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+
+	// https://github.com/ddnet-insta/ddnet-insta/issues/253
+	// always umute spectators on map change or "reload" command
+	//
+	// this contructor is not called on "restart" commands
+	if(g_Config.m_SvTournamentChatSmart)
+		g_Config.m_SvTournamentChat = 0;
 }
 
 void CGameControllerPvp::OnInit()
