@@ -32,7 +32,7 @@ bool CGameControllerPvp::DetectedCasualRound()
 	{
 		if(!pPlayer)
 			continue;
-		if(pPlayer->m_IsCompetitiveAfk)
+		if(pPlayer->m_IsCompetitiveAfk && pPlayer->GetTeam() != TEAM_SPECTATORS)
 			NumAfks++;
 	}
 
