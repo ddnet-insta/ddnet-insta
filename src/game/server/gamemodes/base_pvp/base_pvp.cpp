@@ -1088,6 +1088,13 @@ void CGameControllerPvp::OnPlayerTick(class CPlayer *pPlayer)
 {
 	pPlayer->InstagibTick();
 
+	// this is needed for the smart tournament chat
+	// otherwise players get marked as afk during pause
+	// and then the game is considered not competitive anymore
+	// which is wrong
+	if(GameServer()->m_World.m_Paused)
+		pPlayer->UpdatePlaytime();
+
 	if(pPlayer->m_GameStateBroadcast)
 	{
 		char aBuf[512];
