@@ -184,6 +184,7 @@ void CGameControllerPvp::InitPlayer(CPlayer *pPlayer)
 	pPlayer->m_GameStateBroadcast = false;
 	pPlayer->m_Score = 0; // ddnet-insta
 	pPlayer->m_DisplayScore = GameServer()->m_DisplayScore;
+	pPlayer->m_JoinTime = time_get();
 
 	RoundInitPlayer(pPlayer);
 }

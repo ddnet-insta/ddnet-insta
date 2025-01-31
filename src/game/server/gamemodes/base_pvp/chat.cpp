@@ -333,7 +333,7 @@ bool CGameControllerPvp::IsChatBlocked(const CNetMsg_Cl_Say *pMsg, int Length, i
 	// so after 20 seconds we allow everyone to use the chat
 	// to cover those cases.
 	// It should still filter out the reconnecting spam bots.
-	int SecondsConnected = (Server()->Tick() - pPlayer->m_JoinTick) / Server()->TickSpeed();
+	int SecondsConnected = (time_get() - pPlayer->m_JoinTime) / time_freq();
 	int SecondsUntilAllowed = maximum(0, 20 - SecondsConnected);
 	if(SecondsUntilAllowed == 0)
 		return false;

@@ -5,6 +5,7 @@
 #ifndef IN_CLASS_PLAYER
 
 #include <base/vmath.h>
+#include <cstdint>
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
@@ -209,6 +210,11 @@ public:
 	// this is used to quickly detect if someone
 	// goes afk during a high pace non casual game
 	bool m_IsCompetitiveAfk = false;
+
+	// similar to ddnets m_JoinTick
+	// but uses time instead of tick
+	// so it also works when the world is paused
+	int64_t m_JoinTime = 0;
 
 #ifndef IN_CLASS_PLAYER
 };
