@@ -127,7 +127,7 @@ public:
 	virtual void OnReset();
 
 	// game
-	virtual void DoWarmup(int Seconds); // made virtual by ddnet-insta
+	virtual void DoWarmup(int Seconds);
 
 	void StartRound();
 	// void EndRound(); // ddnet-insta
