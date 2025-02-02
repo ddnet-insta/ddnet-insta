@@ -19,8 +19,8 @@ void CGameControllerPvp::DoWarmup(int Seconds)
 	{
 		if(g_Config.m_SvTournamentChatSmart && !DetectedCasualRound())
 		{
-			g_Config.m_SvTournamentChat = g_Config.m_SvTournamentChatSmart;
-			GameServer()->SendChat(-1, TEAM_ALL, g_Config.m_SvTournamentChatSmart == 1 ? "Spectators can no longer use public chat" : "All can no longer use public chat");
+			g_Config.m_SvTournamentChat = 1;
+			GameServer()->SendChat(-1, TEAM_ALL, "Spectators can no longer use public chat");
 		}
 	}
 }

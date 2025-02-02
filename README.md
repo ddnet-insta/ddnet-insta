@@ -293,9 +293,10 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_show_settings_motd` Show insta game settings in motd on join
 + `sv_unstack_chat` Revert ddnet clients duplicated chat message stacking
 + `sv_casual_rounds` 1=start rounds automatically, 0=require restart vote to properly start game
++ `sv_allow_team_change_during_pause` allow players to join the game or spectators during pause
 + `sv_tournament` Print messages saying tournament is running. No other effects.
 + `sv_tournament_chat` 0=off, 1=Spectators can not public chat, 2=Nobody can public chat
-+ `sv_tournament_chat_smart` Turns sv_tournament_chat on on restart and off on round end (1=specs,2=all)
++ `sv_tournament_chat_smart` Turns sv_tournament_chat on on restart and off on round end
 + `sv_tournament_join_msgs` Hide join/leave of spectators in chat !0.6 only for now! (0=off,1=hidden,2=shown for specs)
 + `sv_round_stats_format_discord` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
 + `sv_round_stats_format_http` 0=csv 1=psv 2=ascii table 3=markdown table 4=json

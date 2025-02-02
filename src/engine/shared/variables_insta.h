@@ -110,7 +110,7 @@ MACRO_CONFIG_INT(SvAllowTeamChangeDuringPause, sv_allow_team_change_during_pause
 MACRO_CONFIG_INT(SvTournament, sv_tournament, 0, 0, 1, CFGFLAG_SERVER, "Print messages saying tournament is running. No other effects.")
 MACRO_CONFIG_STR(SvTournamentWelcomeChat, sv_tournament_welcome_chat, 900, "", CFGFLAG_SERVER, "Chat message shown in chat on join when sv_tournament is 1")
 MACRO_CONFIG_INT(SvTournamentChat, sv_tournament_chat, 0, 0, 2, CFGFLAG_SERVER, "0=off, 1=Spectators can not public chat, 2=Nobody can public chat")
-MACRO_CONFIG_INT(SvTournamentChatSmart, sv_tournament_chat_smart, 0, 0, 2, CFGFLAG_SERVER, "Turns sv_tournament_chat on on restart and off on round end (1=specs,2=all)")
+MACRO_CONFIG_INT(SvTournamentChatSmart, sv_tournament_chat_smart, 0, 0, 1, CFGFLAG_SERVER, "Turns sv_tournament_chat on on restart and off on round end")
 MACRO_CONFIG_INT(SvTournamentJoinMsgs, sv_tournament_join_msgs, 0, 0, 2, CFGFLAG_SERVER, "Hide join/leave of spectators in chat !0.6 only for now! (0=off,1=hidden,2=shown for specs)")
 MACRO_CONFIG_STR(SvRoundStatsDiscordWebhooks, sv_round_stats_discord_webhooks, 512, "", CFGFLAG_SERVER, "If set will post score stats there on round end. Can be a comma separated list.")
 MACRO_CONFIG_STR(SvRoundStatsHttpEndpoints, sv_round_stats_http_endpoints, 512, "", CFGFLAG_SERVER, "If set will post score stats there on round end. Can be a comma separated list.")
