@@ -688,6 +688,7 @@ void CGameControllerZcatch::ReleaseAllPlayers()
 			pPlayer->m_IsDead = false;
 			pPlayer->SetTeamNoKill(TEAM_RED);
 		}
+		pPlayer->m_KillerId = -1;
 	}
 }
 
