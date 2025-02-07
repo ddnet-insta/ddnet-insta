@@ -820,7 +820,7 @@ void IGameController::Snap(int SnappingClient)
 		pRaceData->m_RaceFlags = protocol7::RACEFLAG_KEEP_WANTED_WEAPON;
 
 		// ddnet-insta
-		if(IsTeamplay())
+		if(IsTeamPlay())
 		{
 			protocol7::CNetObj_GameDataTeam *pGameDataTeam = static_cast<protocol7::CNetObj_GameDataTeam *>(Server()->SnapNewItem(-protocol7::NETOBJTYPE_GAMEDATATEAM, 0, sizeof(protocol7::CNetObj_GameDataTeam)));
 			if(!pGameDataTeam)

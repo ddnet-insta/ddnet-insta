@@ -818,7 +818,7 @@ int CGameControllerPvp::GetAutoTeam(int NotThisId)
 
 	// determine new team
 	int Team = TEAM_RED;
-	if(IsTeamplay())
+	if(IsTeamPlay())
 	{
 #ifdef CONF_DEBUG
 		if(!Config()->m_DbgStress) // this will force the auto balancer to work overtime aswell
@@ -952,7 +952,7 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 		}
 		else
 		{
-			if(IsTeamplay() && pVictim->GetPlayer()->GetTeam() == pKiller->GetTeam())
+			if(IsTeamPlay() && pVictim->GetPlayer()->GetTeam() == pKiller->GetTeam())
 				pKiller->DecrementScore(); // teamkill
 			else
 				pKiller->IncrementScore(); // normal kill

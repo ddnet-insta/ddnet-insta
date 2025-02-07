@@ -123,7 +123,7 @@ void CCharacter::TakeHammerHit(CCharacter *pFrom)
 	{
 		// matches ddnet clients prediction code by default
 		// https://github.com/ddnet/ddnet/blob/f9df4a85be4ca94ca91057cd447707bcce16fd94/src/game/client/prediction/entities/character.cpp#L334-L346
-		if(GameServer()->m_pController->IsTeamplay() && pFrom->GetPlayer() && m_pPlayer->GetTeam() == pFrom->GetPlayer()->GetTeam() && m_FreezeTime)
+		if(GameServer()->m_pController->IsTeamPlay() && pFrom->GetPlayer() && m_pPlayer->GetTeam() == pFrom->GetPlayer()->GetTeam() && m_FreezeTime)
 		{
 			Push.x *= g_Config.m_SvMeltHammerScaleX * 0.01f;
 			Push.y *= g_Config.m_SvMeltHammerScaleY * 0.01f;
@@ -144,7 +144,7 @@ void CCharacter::TakeHammerHit(CCharacter *pFrom)
 	if(!pPlayer)
 		return;
 
-	if(GameServer()->m_pController->IsTeamplay() && pPlayer->GetTeam() == m_pPlayer->GetTeam())
+	if(GameServer()->m_pController->IsTeamPlay() && pPlayer->GetTeam() == m_pPlayer->GetTeam())
 	{
 		// interaction from team mates protects from spikes
 		m_pPlayer->UpdateLastToucher(-1);

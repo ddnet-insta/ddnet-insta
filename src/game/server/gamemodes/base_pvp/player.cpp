@@ -256,7 +256,7 @@ void CPlayer::UpdateLastToucher(int ClientId)
 	if(
 		pPlayer &&
 		GameServer()->m_pController &&
-		GameServer()->m_pController->IsTeamplay() &&
+		GameServer()->m_pController->IsTeamPlay() &&
 		pPlayer->GetTeam() == GetTeam())
 	{
 		m_LastToucherId = -1;
