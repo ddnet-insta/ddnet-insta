@@ -127,16 +127,22 @@ void CPlayer::RainbowTick()
 		Msg.m_aUseCustomColors[p] = m_TeeInfos.m_aUseCustomColors[p];
 	}
 
-	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	for(CPlayer *pRainbowReceiverPlayer : GameServer()->m_apPlayers)
 	{
-		if(!pPlayer)
+		if(!pRainbowReceiverPlayer)
 			continue;
-		if(!Server()->IsSixup(pPlayer->GetCid()))
-			continue;
-		if(NetworkClipped(GameServer(), pPlayer->GetCid(), GetCharacter()->GetPos()))
+		if(!Server()->IsSixup(pRainbowReceiverPlayer->GetCid()))
 			continue;
 
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, pPlayer->GetCid());
+		const bool IsTopscorer = !GameServer()->m_pController->IsTeamPlay() && GameServer()->m_pController->HasWinningScore(this);
+
+		// never clip when in scoreboard or the top scorer
+		// to see the rainbow in scoreboard and hud in the bottom right
+		if(!(pRainbowReceiverPlayer->m_PlayerFlags & PLAYERFLAG_SCOREBOARD) && !IsTopscorer)
+			if(NetworkClipped(GameServer(), pRainbowReceiverPlayer->GetCid(), GetCharacter()->GetPos()))
+				continue;
+
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, pRainbowReceiverPlayer->GetCid());
 	}
 }
 

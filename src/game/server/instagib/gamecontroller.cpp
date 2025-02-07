@@ -531,3 +531,32 @@ void IGameController::SetArmorProgressEmpty(CCharacter *pCharacer)
 {
 	pCharacer->SetArmor(0);
 }
+
+bool IGameController::HasWinningScore(const CPlayer *pPlayer) const
+{
+	if(IsTeamplay())
+	{
+		if(pPlayer->GetTeam() < TEAM_RED || pPlayer->GetTeam() > TEAM_BLUE)
+			return false;
+		return m_aTeamscore[pPlayer->GetTeam()] > m_aTeamscore[!pPlayer->GetTeam()];
+	}
+	else
+	{
+		int OwnScore = pPlayer->m_Score.value_or(0);
+		if(!OwnScore)
+			return false;
+
+		int Topscore = 0;
+		for(auto &pOtherPlayer : GameServer()->m_apPlayers)
+		{
+			if(!pOtherPlayer)
+				continue;
+			int Score = pOtherPlayer->m_Score.value_or(0);
+			if(Score > Topscore)
+				Topscore = Score;
+		}
+		return OwnScore >= Topscore;
+	}
+
+	return false;
+}
