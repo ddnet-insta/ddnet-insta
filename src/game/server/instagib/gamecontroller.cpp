@@ -134,11 +134,6 @@ void IGameController::CheckReadyStates(int WithoutId)
 	{
 		switch(m_GameState)
 		{
-		case IGS_WARMUP_USER:
-			// all players are ready -> end warmup
-			if(GetPlayersReadyState(WithoutId))
-				SetGameState(IGS_WARMUP_USER, 0);
-			break;
 		case IGS_GAME_PAUSED:
 			// all players are ready -> unpause the game
 			if(GetPlayersReadyState(WithoutId))
@@ -148,6 +143,7 @@ void IGameController::CheckReadyStates(int WithoutId)
 			}
 			break;
 		case IGS_GAME_RUNNING:
+		case IGS_WARMUP_USER:
 		case IGS_WARMUP_GAME:
 		case IGS_START_COUNTDOWN_UNPAUSE:
 		case IGS_START_COUNTDOWN_ROUND_START:
