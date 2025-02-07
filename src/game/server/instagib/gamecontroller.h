@@ -697,7 +697,6 @@ public:
 	int GameFlags() const { return m_GameFlags; }
 	void CheckGameInfo();
 	bool IsFriendlyFire(int ClientId1, int ClientId2);
-	bool IsTeamplay() const { return m_GameFlags & GAMEFLAG_TEAMS; }
 
 	// get client id by in game name
 	int GetCidByName(const char *pName);

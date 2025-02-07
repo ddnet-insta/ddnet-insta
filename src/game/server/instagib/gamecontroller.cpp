@@ -190,7 +190,7 @@ bool IGameController::DoWincheckRound()
 	if(IsWarmup())
 		return false;
 
-	if(IsTeamplay())
+	if(IsTeamPlay())
 	{
 		// check score win condition
 		if((m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit)) ||
@@ -256,7 +256,7 @@ bool IGameController::IsFriendlyFire(int ClientId1, int ClientId2)
 	if(ClientId1 == ClientId2)
 		return false;
 
-	if(IsTeamplay())
+	if(IsTeamPlay())
 	{
 		if(!GameServer()->m_apPlayers[ClientId1] || !GameServer()->m_apPlayers[ClientId2])
 			return false;

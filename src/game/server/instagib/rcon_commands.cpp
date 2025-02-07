@@ -79,7 +79,7 @@ void CGameContext::ConForceReady(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConShuffleTeams(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!pSelf->m_pController->IsTeamplay())
+	if(!pSelf->m_pController->IsTeamPlay())
 		return;
 
 	int Rnd = 0;
@@ -124,7 +124,7 @@ void CGameContext::ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserDat
 
 void CGameContext::SwapTeams()
 {
-	if(!m_pController->IsTeamplay())
+	if(!m_pController->IsTeamPlay())
 		return;
 
 	SendGameMsg(protocol7::GAMEMSG_TEAM_SWAP, -1);

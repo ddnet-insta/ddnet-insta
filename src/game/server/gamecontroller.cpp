@@ -203,7 +203,7 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 		return false;
 
 	CSpawnEval Eval;
-	if(IsTeamplay()) // ddnet-insta
+	if(IsTeamPlay()) // ddnet-insta
 	{
 		Eval.m_FriendlyTeam = Team;
 
@@ -511,7 +511,7 @@ void IGameController::ResetGame()
 const char *IGameController::GetTeamName(int Team)
 {
 	// ddnet-insta
-	if(IsTeamplay())
+	if(IsTeamPlay())
 	{
 		if(Team == TEAM_RED)
 			return "red team";
@@ -916,7 +916,7 @@ int IGameController::ClampTeam(int Team) const
 {
 	if(Team < TEAM_RED)
 		return TEAM_SPECTATORS;
-	if(IsTeamplay())
+	if(IsTeamPlay())
 		return Team & 1;
 	return TEAM_RED;
 }
