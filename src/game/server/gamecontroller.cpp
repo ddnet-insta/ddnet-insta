@@ -482,7 +482,7 @@ void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pRe
 {
 	pPlayer->OnDisconnect();
 	int ClientId = pPlayer->GetCid();
-	if(Server()->ClientIngame(ClientId) || Server()->ClientRedirected(ClientId))
+	if(Server()->ClientIngame(ClientId))
 	{
 		char aBuf[512];
 		if(pReason && *pReason)
@@ -591,11 +591,6 @@ void IGameController::DoWarmup(int Seconds)
 	// and then it is unitialized
 	m_Warmup = 0;
 	SetGameState(IGS_WARMUP_USER, Seconds);
-}
-
-bool IGameController::IsForceBalanced()
-{
-	return false;
 }
 
 bool IGameController::CanBeMovedOnBalance(int ClientId)

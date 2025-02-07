@@ -137,8 +137,6 @@ public:
 	bool IsFriendlyFire(int ClientId1, int ClientId2);
 	bool IsTeamplay() const { return m_GameFlags & GAMEFLAG_TEAMS; }
 
-	bool IsForceBalanced();
-
 	/*
 
 	*/
