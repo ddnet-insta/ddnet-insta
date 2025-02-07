@@ -61,7 +61,7 @@ void CGameContext::ConRainbow(IConsole::IResult *pResult, void *pUserData)
 	if(!pChr)
 		return;
 
-	pChr->m_Rainbow = !pChr->m_Rainbow;
+	pChr->Rainbow(!pChr->HasRainbow());
 }
 
 void CGameContext::ConForceReady(IConsole::IResult *pResult, void *pUserData)
