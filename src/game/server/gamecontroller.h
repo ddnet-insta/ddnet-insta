@@ -133,10 +133,6 @@ public:
 	// void EndRound(); // ddnet-insta
 	void ChangeMap(const char *pToMap);
 
-	void CheckGameInfo();
-	bool IsFriendlyFire(int ClientId1, int ClientId2);
-	bool IsTeamplay() const { return m_GameFlags & GAMEFLAG_TEAMS; }
-
 	/*
 
 	*/
