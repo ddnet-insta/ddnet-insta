@@ -24,7 +24,12 @@ public:
 		useful for votes
 	*/
 	void ResetInstaSettings();
-	bool m_IsGodmode;
+
+	// player can not be damaged with weapons
+	bool m_IsGodmode = false;
+
+	// players skin changes colors
+	bool m_Rainbow = false;
 
 	int Health() { return m_Health; };
 	int Armor() { return m_Armor; };

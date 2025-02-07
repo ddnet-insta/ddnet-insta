@@ -534,7 +534,7 @@ void IGameController::SetArmorProgressEmpty(CCharacter *pCharacer)
 
 bool IGameController::HasWinningScore(const CPlayer *pPlayer) const
 {
-	if(IsTeamplay())
+	if(IsTeamPlay())
 	{
 		if(pPlayer->GetTeam() < TEAM_RED || pPlayer->GetTeam() > TEAM_BLUE)
 			return false;

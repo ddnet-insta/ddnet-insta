@@ -316,6 +316,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `unhammer` Removes a hammer from you
 + `ungun` Removes a gun from you
 + `godmode` Removes damage
++ `rainbow` Toggle rainbow skin on or off
 + `force_ready` Sets a player to ready (when the game is paused)
 + `shuffle_teams` Shuffle the current teams
 + `swap_teams` Swap the current teams

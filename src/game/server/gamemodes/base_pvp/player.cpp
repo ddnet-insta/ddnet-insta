@@ -106,6 +106,8 @@ void CPlayer::RainbowTick()
 {
 	if(!GetCharacter())
 		return;
+	if(!GetCharacter()->m_Rainbow)
+		return;
 
 	m_TeeInfos.m_UseCustomColor = true;
 	m_RainbowColor = (m_RainbowColor + 1) % 256;
