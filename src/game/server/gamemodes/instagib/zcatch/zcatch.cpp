@@ -597,37 +597,48 @@ void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 
 	CGameControllerInstagib::OnPlayerConnect(pPlayer);
 
-	CPlayer *pBestPlayer = PlayerWithMostKillsThatCount();
-	if(pBestPlayer && IsCatchGameRunning() && IsGameRunning()) // TODO: this should not happen in tournament or when the slots are full (when we join as spec)
+	// if a player joins as spectator that means
+	// either the in game slots are full
+	// or the server is in tournament mode
+	// either way the player will be become a permanent alive spectator
+	//
+	// those players do not affect the in game things
+	// so they can not be caught by the leading player
+	// and they can also not change the game state
+	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
 	{
-		// avoid team change message by pre setting it
-		pPlayer->SetTeamRaw(TEAM_SPECTATORS);
-		KillPlayer(pPlayer, GameServer()->m_apPlayers[pBestPlayer->GetCid()], false);
+		CPlayer *pBestPlayer = PlayerWithMostKillsThatCount();
+		if(pBestPlayer && IsCatchGameRunning() && IsGameRunning())
+		{
+			// avoid team change message by pre setting it
+			pPlayer->SetTeamRaw(TEAM_SPECTATORS);
+			KillPlayer(pPlayer, GameServer()->m_apPlayers[pBestPlayer->GetCid()], false);
 
-		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "'%s' is now spectating you (selfkill to release them)", Server()->ClientName(pPlayer->GetCid()));
-		SendChatTarget(pBestPlayer->GetCid(), aBuf);
-	}
-	// complicated way of saying not tournament mode
-	else if(CGameControllerInstagib::GetAutoTeam(pPlayer->GetCid()) != TEAM_SPECTATORS && pPlayer->GetTeam() == TEAM_SPECTATORS)
-	{
-		// auto join running games if nobody made a kill yet
-		// DoTeamChange will kill us and delay the spawning
-		// so you are stuck in the scoreboard for a second when joining a active round
-		// but lets call that a feature for now so you have to to get ready
-		DoTeamChange(pPlayer, TEAM_RED, false);
-	}
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "'%s' is now spectating you (selfkill to release them)", Server()->ClientName(pPlayer->GetCid()));
+			SendChatTarget(pBestPlayer->GetCid(), aBuf);
+		}
+		// complicated way of saying not tournament mode
+		else if(CGameControllerInstagib::GetAutoTeam(pPlayer->GetCid()) != TEAM_SPECTATORS && pPlayer->GetTeam() == TEAM_SPECTATORS)
+		{
+			// auto join running games if nobody made a kill yet
+			// DoTeamChange will kill us and delay the spawning
+			// so you are stuck in the scoreboard for a second when joining a active round
+			// but lets call that a feature for now so you have to to get ready
+			DoTeamChange(pPlayer, TEAM_RED, false);
+		}
 
-	m_aBodyColors[pPlayer->GetCid()] = GetBodyColor(0);
-	SetCatchColors(pPlayer);
-	SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
+		m_aBodyColors[pPlayer->GetCid()] = GetBodyColor(0);
+		SetCatchColors(pPlayer);
+		SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
 
-	if(!CheckChangeGameState())
-	{
-		if(CatchGameState() == ECatchGameState::WAITING_FOR_PLAYERS)
-			SendChatTarget(pPlayer->GetCid(), "Waiting for more players to start the round.");
-		else if(CatchGameState() == ECatchGameState::RELEASE_GAME)
-			SendChatTarget(pPlayer->GetCid(), "This is a release game.");
+		if(!CheckChangeGameState())
+		{
+			if(CatchGameState() == ECatchGameState::WAITING_FOR_PLAYERS)
+				SendChatTarget(pPlayer->GetCid(), "Waiting for more players to start the round.");
+			else if(CatchGameState() == ECatchGameState::RELEASE_GAME)
+				SendChatTarget(pPlayer->GetCid(), "This is a release game.");
+		}
 	}
 }
 
