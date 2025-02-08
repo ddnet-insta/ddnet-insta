@@ -107,12 +107,13 @@ public:
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize) override;
+	int GetAutoTeam(int NotThisId) override;
+	int FreeInGameSlots() override;
 	void DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg) override;
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 	bool DoWincheckRound() override;
 	void OnRoundStart() override;
 	bool OnSelfkill(int ClientId) override;
-	int GetAutoTeam(int NotThisId) override;
 	bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) override;
 	int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup) override;
 	bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) override;

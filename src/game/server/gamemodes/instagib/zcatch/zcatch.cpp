@@ -9,6 +9,7 @@
 #include <game/server/entities/flag.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
+#include <game/server/gamemodes/instagib/base_instagib.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
@@ -492,6 +493,45 @@ bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisId, char *pErrorRea
 	return CGameControllerInstagib::CanJoinTeam(Team, NotThisId, pErrorReason, ErrorReasonSize);
 }
 
+int CGameControllerZcatch::GetAutoTeam(int NotThisId)
+{
+	if(IsCatchGameRunning() && PlayerWithMostKillsThatCount())
+	{
+		return TEAM_SPECTATORS;
+	}
+
+	return CGameControllerInstagib::GetAutoTeam(NotThisId);
+}
+
+int CGameControllerZcatch::FreeInGameSlots()
+{
+	int Players = 0;
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		// alive spectators are considered permanent spectators
+		// they do not count as in game players
+		// and do not occupy in game slots
+		if(!pPlayer->m_IsDead && pPlayer->GetTeam() == TEAM_SPECTATORS)
+			continue;
+
+		Players++;
+	}
+
+	int Slots = Server()->MaxClients() - g_Config.m_SvSpectatorSlots;
+	return maximum(0, Slots - Players);
+}
+
+void CGameControllerZcatch::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
+{
+	UpdateCatchTicks(pPlayer);
+
+	CGameControllerInstagib::DoTeamChange(pPlayer, Team, DoChatMsg);
+
+	CheckChangeGameState();
+}
+
 void CGameControllerZcatch::UpdateCatchTicks(class CPlayer *pPlayer)
 {
 	char aBuf[512];
@@ -513,15 +553,6 @@ void CGameControllerZcatch::UpdateCatchTicks(class CPlayer *pPlayer)
 
 	if(g_Config.m_SvDebugStats > 1)
 		SendChat(-1, TEAM_ALL, aBuf);
-}
-
-void CGameControllerZcatch::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
-{
-	UpdateCatchTicks(pPlayer);
-
-	CGameControllerInstagib::DoTeamChange(pPlayer, Team, DoChatMsg);
-
-	CheckChangeGameState();
 }
 
 bool CGameControllerZcatch::CheckChangeGameState()
@@ -549,16 +580,6 @@ bool CGameControllerZcatch::CheckChangeGameState()
 		}
 	}
 	return false;
-}
-
-int CGameControllerZcatch::GetAutoTeam(int NotThisId)
-{
-	if(IsCatchGameRunning() && PlayerWithMostKillsThatCount())
-	{
-		return TEAM_SPECTATORS;
-	}
-
-	return CGameControllerInstagib::GetAutoTeam(NotThisId);
 }
 
 void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)

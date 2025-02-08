@@ -70,6 +70,15 @@ CClientMask IGameController::FreezeDamageIndicatorMask(class CCharacter *pChr)
 	return pChr->TeamMask() & GameServer()->ClientsMaskExcludeClientVersionAndHigher(VERSION_DDNET_NEW_HUD);
 }
 
+int IGameController::FreeInGameSlots()
+{
+	// TODO: add SvPlayerSlots in upstream
+
+	int Players = m_aTeamSize[TEAM_RED] + m_aTeamSize[TEAM_BLUE];
+	int Slots = Server()->MaxClients() - g_Config.m_SvSpectatorSlots;
+	return maximum(0, Slots - Players);
+}
+
 int IGameController::GetPlayerTeam(CPlayer *pPlayer, bool Sixup)
 {
 	return pPlayer->GetTeam();
