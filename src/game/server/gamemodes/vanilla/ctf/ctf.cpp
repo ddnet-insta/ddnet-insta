@@ -60,9 +60,18 @@ bool CGameControllerCTF::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 	// if(Weapon == WEAPON_GRENADE)
 	// 	Dmg = 6;
 
-	// m_pPlayer only inflicts half damage on self
 	if(From == Character.GetPlayer()->GetCid())
+	{
+		// m_pPlayer only inflicts half damage on self
 		Dmg = maximum(1, Dmg / 2);
+
+		// do not cause self damage with jetpack
+		if(Weapon == WEAPON_GUN && Character.Core()->m_Jetpack)
+		{
+			Dmg = 0;
+			return false;
+		}
+	}
 
 	Character.m_DamageTaken++;
 
