@@ -160,7 +160,7 @@ bool CGameControllerBaseCTF::OnEntity(int Index, int x, int y, int Layer, int Fl
 {
 	CGameControllerPvp::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
 
-	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
+	const vec2 Pos((x * 32.0f) + 16.0f, (y * 32.0f) + 16.0f);
 	int Team = -1;
 	if(Index == ENTITY_FLAGSTAND_RED)
 		Team = TEAM_RED;

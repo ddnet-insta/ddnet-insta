@@ -109,7 +109,7 @@ bool CGameControllerVanilla::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 
 bool CGameControllerVanilla::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
-	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
+	const vec2 Pos((x * 32.0f) + 16.0f, (y * 32.0f) + 16.0f);
 
 	int Type = -1;
 	int SubType = 0;
