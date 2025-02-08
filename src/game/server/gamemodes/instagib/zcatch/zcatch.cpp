@@ -495,7 +495,7 @@ bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisId, char *pErrorRea
 
 int CGameControllerZcatch::GetAutoTeam(int NotThisId)
 {
-	if(IsCatchGameRunning() && PlayerWithMostKillsThatCount())
+	if(IsCatchGameRunning() && IsGameRunning() && PlayerWithMostKillsThatCount())
 	{
 		return TEAM_SPECTATORS;
 	}
