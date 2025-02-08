@@ -48,9 +48,20 @@ public:
 
 	// Will be -1 when the player is alive
 	int m_KillerId = -1;
+
+	// never call this method use DoTeamChange() instead
+	// otherwise the m_aTeamSize goes out of sync
+	// and the in game slots break
 	void SetTeamSpoofed(int Team, bool DoChatMsg = false);
+
+	// never call this method use DoTeamChange() instead
+	// otherwise the m_aTeamSize goes out of sync
+	// and the in game slots break
 	void SetTeamNoKill(int Team, bool DoChatMsg = false);
-	void SetTeamRaw(int Team) { m_Team = Team; }
+
+	// try to avoid using that method because it is hacky
+	void SetTeamRaw(int Team);
+
 	// dead players can not respawn
 	// will be used like m_RespawnDisabled in 0.7
 	bool m_IsDead;

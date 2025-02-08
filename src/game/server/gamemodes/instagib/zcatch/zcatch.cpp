@@ -281,7 +281,7 @@ void CGameControllerZcatch::ReleasePlayer(class CPlayer *pPlayer, const char *pM
 
 	if(pPlayer->m_WantsToJoinSpectators)
 	{
-		pPlayer->SetTeam(TEAM_SPECTATORS);
+		DoTeamChange(pPlayer, TEAM_SPECTATORS, true);
 		pPlayer->m_WantsToJoinSpectators = false;
 	}
 	else
@@ -577,7 +577,7 @@ void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 	CGameControllerInstagib::OnPlayerConnect(pPlayer);
 
 	CPlayer *pBestPlayer = PlayerWithMostKillsThatCount();
-	if(pBestPlayer && IsCatchGameRunning() && IsGameRunning())
+	if(pBestPlayer && IsCatchGameRunning() && IsGameRunning()) // TODO: this should not happen in tournament or when the slots are full (when we join as spec)
 	{
 		// avoid team change message by pre setting it
 		pPlayer->SetTeamRaw(TEAM_SPECTATORS);
@@ -591,10 +591,10 @@ void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 	else if(CGameControllerInstagib::GetAutoTeam(pPlayer->GetCid()) != TEAM_SPECTATORS && pPlayer->GetTeam() == TEAM_SPECTATORS)
 	{
 		// auto join running games if nobody made a kill yet
-		// SetTeam will kill us and delay the spawning
+		// DoTeamChange will kill us and delay the spawning
 		// so you are stuck in the scoreboard for a second when joining a active round
 		// but lets call that a feature for now so you have to to get ready
-		pPlayer->SetTeam(TEAM_RED);
+		DoTeamChange(pPlayer, TEAM_RED, false);
 	}
 
 	m_aBodyColors[pPlayer->GetCid()] = GetBodyColor(0);
