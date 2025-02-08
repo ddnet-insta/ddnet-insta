@@ -24,7 +24,7 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 
 	UpdateSpawnWeapons(true, true);
 
-	m_AllowSkinChange = true;
+	m_AllowSkinColorChange = true;
 
 	GameServer()->Tuning()->Set("gun_curvature", 1.25f);
 	GameServer()->Tuning()->Set("gun_speed", 2200);

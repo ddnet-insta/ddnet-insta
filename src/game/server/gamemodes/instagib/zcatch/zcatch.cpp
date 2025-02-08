@@ -20,7 +20,7 @@ CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)
 {
 	m_GameFlags = 0;
-	m_AllowSkinChange = false;
+	m_AllowSkinColorChange = false;
 	m_pGameType = "zCatch";
 	m_WinType = WIN_BY_SURVIVAL;
 	m_DefaultWeapon = GetDefaultWeaponBasedOnSpawnWeapons();

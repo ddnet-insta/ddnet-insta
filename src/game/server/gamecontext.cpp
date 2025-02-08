@@ -1976,10 +1976,6 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 				pPlayer->m_LastChangeInfo + Server()->TickSpeed() * g_Config.m_SvInfoChangeDelay > Server()->Tick())
 				return nullptr;
 
-			// ddnet-insta
-			if(!m_pController->IsSkinChangeAllowed())
-				return 0;
-
 			pPlayer->m_LastChangeInfo = Server()->Tick();
 
 			CTeeInfo Info(pMsg->m_apSkinPartNames, pMsg->m_aUseCustomColors, pMsg->m_aSkinPartColors);
@@ -1991,8 +1987,12 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 			for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 			{
 				Msg.m_apSkinPartNames[p] = pMsg->m_apSkinPartNames[p];
-				Msg.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
-				Msg.m_aUseCustomColors[p] = pMsg->m_aUseCustomColors[p];
+				// ddnet-insta
+				if(m_pController->IsSkinColorChangeAllowed())
+				{
+					Msg.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
+					Msg.m_aUseCustomColors[p] = pMsg->m_aUseCustomColors[p];
+				}
 			}
 
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
@@ -2743,15 +2743,16 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 	Server()->SetClientCountry(ClientId, pMsg->m_Country);
 
 	// ddnet-insta
-	if(m_pController->IsSkinChangeAllowed())
+	if(m_pController->IsSkinColorChangeAllowed())
 	{
-		str_copy(pPlayer->m_TeeInfos.m_aSkinName, pMsg->m_pSkin, sizeof(pPlayer->m_TeeInfos.m_aSkinName));
 		pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
 		pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
 		pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
-		if(!Server()->IsSixup(ClientId))
-			pPlayer->m_TeeInfos.ToSixup();
 	}
+
+	str_copy(pPlayer->m_TeeInfos.m_aSkinName, pMsg->m_pSkin, sizeof(pPlayer->m_TeeInfos.m_aSkinName));
+	if(!Server()->IsSixup(ClientId))
+		pPlayer->m_TeeInfos.ToSixup();
 
 	if(SixupNeedsUpdate)
 	{

@@ -643,7 +643,7 @@ public:
 	bool HasEnoughPlayers() const { return (IsTeamPlay() && m_aTeamSize[TEAM_RED] > 0 && m_aTeamSize[TEAM_BLUE] > 0) || (!IsTeamPlay() && m_aTeamSize[TEAM_RED] > 1); }
 	void SetGameState(EGameState GameState, int Timer = 0);
 
-	bool m_AllowSkinChange = true;
+	bool m_AllowSkinColorChange = true;
 
 	// protected:
 public:
@@ -718,7 +718,7 @@ public:
 	// depends on the base pvp controller to tick
 	int m_TicksUntilShutdown = 0;
 
-	bool IsSkinChangeAllowed() const { return m_AllowSkinChange; }
+	bool IsSkinColorChangeAllowed() const { return m_AllowSkinColorChange; }
 	int GameFlags() const { return m_GameFlags; }
 	void CheckGameInfo();
 	bool IsFriendlyFire(int ClientId1, int ClientId2);
