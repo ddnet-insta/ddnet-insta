@@ -674,6 +674,7 @@ public:
 	virtual void OnUpdateZcatchColorConfig(){};
 	virtual void OnUpdateSpectatorVotesConfig(){};
 	virtual bool DropFlag(class CCharacter *pChr) { return false; };
+	virtual bool HasWinningScore(const CPlayer *pPlayer) const;
 
 	/*
 		Variable: m_GamePauseStartTime

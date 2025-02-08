@@ -16,6 +16,7 @@
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
+#include <game/server/teeinfo.h>
 
 class CCharacter;
 class CGameContext;

@@ -42,12 +42,26 @@ void CGameContext::ConGodmode(IConsole::IResult *pResult, void *pUserData)
 	if(!pChr)
 		return;
 
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "'%s' got godmode!",
-		pSelf->Server()->ClientName(Victim));
-	pSelf->SendChat(-1, TEAM_ALL, aBuf);
+	bool Give = pChr->m_IsGodmode = !pChr->m_IsGodmode;
 
-	pChr->m_IsGodmode = true;
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "'%s' %s godmode!",
+		pSelf->Server()->ClientName(Victim),
+		Give ? "got" : "lost");
+	pSelf->SendChat(-1, TEAM_ALL, aBuf);
+}
+
+void CGameContext::ConRainbow(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->GetVictim();
+
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+
+	if(!pChr)
+		return;
+
+	pChr->Rainbow(!pChr->HasRainbow());
 }
 
 void CGameContext::ConForceReady(IConsole::IResult *pResult, void *pUserData)

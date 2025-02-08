@@ -9,6 +9,7 @@
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
+#include <game/server/teeinfo.h>
 #include <optional>
 #include <vector>
 
@@ -21,6 +22,13 @@ class CPlayer
 
 public:
 	void InstagibTick();
+	void RainbowTick();
+
+	int m_RainbowColor = 0;
+
+	// backup of the players skin
+	// for when cosmetics like rainbow are turned off
+	CTeeInfo m_TeeInfosNoCosmetics;
 
 	void ProcessStatsResult(CInstaSqlResult &Result);
 

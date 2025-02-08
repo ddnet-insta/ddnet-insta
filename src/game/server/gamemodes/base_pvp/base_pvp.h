@@ -101,7 +101,6 @@ public:
 	bool ForceNetworkClipping(const CEntity *pEntity, int SnappingClient, vec2 CheckPos) override;
 	bool ForceNetworkClippingLine(const CEntity *pEntity, int SnappingClient, vec2 StartPos, vec2 EndPos) override;
 
-	bool HasWinningScore(const CPlayer *pPlayer) const;
 	bool IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage) override;
 	bool IsLoser(const CPlayer *pPlayer) override;
 	bool IsStatTrack(char *pReason = nullptr, int SizeOfReason = 0) override;

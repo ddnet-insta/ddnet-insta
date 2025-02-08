@@ -2,6 +2,7 @@
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
+#include <game/server/entity.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/instagib/sql_stats.h>
@@ -96,6 +97,54 @@ void CPlayer::InstagibTick()
 	{
 		ProcessStatsResult(*m_FastcapQueryResult);
 		m_FastcapQueryResult = nullptr;
+	}
+
+	RainbowTick();
+}
+
+void CPlayer::RainbowTick()
+{
+	if(!GetCharacter())
+		return;
+	if(!GetCharacter()->HasRainbow())
+		return;
+
+	m_TeeInfos.m_UseCustomColor = true;
+	m_RainbowColor = (m_RainbowColor + 1) % 256;
+	m_TeeInfos.m_ColorBody = m_RainbowColor * 0x010000 + 0xff00;
+	m_TeeInfos.m_ColorFeet = m_RainbowColor * 0x010000 + 0xff00;
+
+	// ratelimit the 0.7 stuff because it requires net messages
+	if(Server()->Tick() % 4 != 0)
+		return;
+
+	m_TeeInfos.ToSixup();
+
+	protocol7::CNetMsg_Sv_SkinChange Msg;
+	Msg.m_ClientId = GetCid();
+	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+	{
+		Msg.m_apSkinPartNames[p] = m_TeeInfos.m_apSkinPartNames[p];
+		Msg.m_aSkinPartColors[p] = m_TeeInfos.m_aSkinPartColors[p];
+		Msg.m_aUseCustomColors[p] = m_TeeInfos.m_aUseCustomColors[p];
+	}
+
+	for(CPlayer *pRainbowReceiverPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pRainbowReceiverPlayer)
+			continue;
+		if(!Server()->IsSixup(pRainbowReceiverPlayer->GetCid()))
+			continue;
+
+		const bool IsTopscorer = !GameServer()->m_pController->IsTeamPlay() && GameServer()->m_pController->HasWinningScore(this);
+
+		// never clip when in scoreboard or the top scorer
+		// to see the rainbow in scoreboard and hud in the bottom right
+		if(!(pRainbowReceiverPlayer->m_PlayerFlags & PLAYERFLAG_SCOREBOARD) && !IsTopscorer)
+			if(NetworkClipped(GameServer(), pRainbowReceiverPlayer->GetCid(), GetCharacter()->GetPos()))
+				continue;
+
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, pRainbowReceiverPlayer->GetCid());
 	}
 }
 
