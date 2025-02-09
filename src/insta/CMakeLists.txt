@@ -34,6 +34,8 @@ function(insta_patch_server)
     file(GLOB_RECURSE INSTA_EXTERNAL_GAMEMODES "src/external_gamemodes/*.cpp" "src/external_gamemodes/*.h")
 
     set_src(INSTA_SERVER GLOB_RECURSE src/insta/server
+      account.cpp
+      account.h
       antibob.cpp
       antibob.h
       chat_commands.cpp
@@ -81,6 +83,7 @@ function(insta_patch_server)
       gamemodes/ddrace/block/block.h
       gamemodes/ddrace/block/tblock.cpp
       gamemodes/ddrace/block/tblock.h
+      gamemodes/insta_core/accounts.cpp
       gamemodes/insta_core/insta_core.cpp
       gamemodes/insta_core/insta_core.h
       gamemodes/instagib/base_fng.cpp
@@ -148,11 +151,15 @@ function(insta_patch_server)
       gamemodes/vanilla/tsmash/tsmash.h
       ip_storage.cpp
       ip_storage.h
+      password_hash.cpp
+      password_hash.h
       persistent_client_data.h
       persistent_data.h
       player.cpp
       player.h
       protocol.h
+      ratelimits.cpp
+      ratelimits.h
       rcon_commands.cpp
       rcon_commands.h
       rcon_configs.cpp
@@ -163,6 +170,8 @@ function(insta_patch_server)
       round_stats_player.h
       skin_info_manager.cpp
       skin_info_manager.h
+      sql_accounts.cpp
+      sql_accounts.h
       sql_columns_all.h
       sql_stats.cpp
       sql_stats.h

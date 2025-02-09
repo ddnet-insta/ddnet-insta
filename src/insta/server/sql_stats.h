@@ -1,6 +1,8 @@
 #ifndef INSTA_SERVER_SQL_STATS_H
 #define INSTA_SERVER_SQL_STATS_H
 
+#include "sql_accounts.h"
+
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/protocol.h>
 
@@ -120,6 +122,66 @@ struct CSqlPlayerStatsRequest : CSqlInstaData
 	char m_aOrderBy[128];
 };
 
+// read request
+struct CSqlPlayerAccountRequest : CSqlInstaData
+{
+	CSqlPlayerAccountRequest(std::shared_ptr<CAccountPlayerResult> pResult, int DebugStats) :
+		CSqlInstaData(std::move(pResult))
+	{
+		m_DebugStats = DebugStats;
+	}
+	EAccountPlayerRequestType m_RequestType = EAccountPlayerRequestType::DIRECT;
+
+	// warning do not access anything from the main thread
+	// using m_ClientId
+	// this should only be used for logging
+	// the player might already by disconnected when
+	// the thread pool picks it up
+	int m_ClientId;
+	char m_aUsername[MAX_NAME_LENGTH];
+	char m_aOldPassword[MAX_NAME_LENGTH];
+	char m_aNewPassword[MAX_NAME_LENGTH];
+	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
+
+	char m_aServerIp[64];
+	int m_ServerPort;
+	char m_aUserIpAddr[64];
+};
+
+// data to be writtem
+struct CSqlPlayerAccountData : CSqlInstaData
+{
+	CSqlPlayerAccountData(std::shared_ptr<CAccountManagementResult> pResult, int DebugStats) :
+		CSqlInstaData(std::move(pResult))
+	{
+		m_DebugStats = DebugStats;
+	}
+
+	CAccount m_Account;
+};
+
+// data to be writtem
+struct CSqlPlayerAccountRconCmdData : CSqlInstaData
+{
+	CSqlPlayerAccountRconCmdData(std::shared_ptr<CAccountRconCmdResult> pResult, int DebugStats) :
+		CSqlInstaData(std::move(pResult))
+	{
+		m_DebugStats = DebugStats;
+	}
+
+	EAccountRconPlayerRequestType m_RequestType = EAccountRconPlayerRequestType::LOG_INFO;
+
+	// name of the admin that ran the rcon
+	// command that triggered the request
+	char m_aAdminName[MAX_NAME_LENGTH];
+
+	char m_aUsername[MAX_NAME_LENGTH];
+	char m_aPassword[MAX_NAME_LENGTH];
+
+	char m_aServerIp[64];
+	int m_ServerPort;
+};
+
 // data to be writtem
 struct CSqlPlayerFastcapData : CSqlInstaData
 {
@@ -179,6 +241,17 @@ struct CSqlSaveRoundStatsData : CSqlInstaData
 	CSqlStatsPlayer m_Stats;
 };
 
+struct CSqlLogoutAllRequest : CSqlInstaData
+{
+	CSqlLogoutAllRequest(int DebugStats) :
+		CSqlInstaData(nullptr)
+	{
+		m_DebugStats = DebugStats;
+	}
+	char m_aServerIp[128];
+	int m_ServerPort;
+};
+
 struct CSqlCreateTableRequest : ISqlData
 {
 	CSqlCreateTableRequest() :
@@ -203,6 +276,7 @@ class CSqlStats
 	static bool CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 	static bool CreateFastcapTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 	static bool SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
+	static bool LogoutAllAccountsOnCurrentServerThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 
 	// ratelimited user queries
 
@@ -215,6 +289,7 @@ class CSqlStats
 	static bool SaveFastcapWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 
 	std::shared_ptr<CInstaSqlResult> NewInstaSqlResult(int ClientId);
+	std::shared_ptr<CAccountPlayerResult> NewInstaAccountResult(int ClientId);
 
 	// Creates for player database requests
 	void ExecPlayerStatsThread(
@@ -247,16 +322,31 @@ class CSqlStats
 		bool OnlyStatTrack,
 		int Offset);
 
+	// TODO: make sure this is not used for saving because it can be ratelimited
+	//
+	// should be used for register and login and not for logout
+	void ExecPlayerAccountThread(
+		bool (*pFuncPtr)(IDbConnection *, const ISqlData *, Write w, char *pError, int ErrorSize),
+		const char *pThreadName,
+		int ClientId,
+		const char *pUsername,
+		const char *pOldPassword,
+		const char *pNewPassword,
+		EAccountPlayerRequestType RequestType);
+
 	bool RateLimitPlayer(int ClientId);
 
 public:
 	CSqlStats(CGameContext *pGameServer, CDbConnectionPool *pPool);
 	~CSqlStats() = default;
 
+	bool IsRateLimitedPlayer(int ClientId) const;
+
 	void SetExtraColumns(CExtraColumns *pExtraColumns);
 
 	void CreateTable(const char *pName);
 	void CreateFastcapTable();
+	void CreateAccountsTable();
 	void SaveRoundStats(const char *pName, const char *pTable, CSqlStatsPlayer *pStats);
 	void SaveFastcap(int ClientId, int TimeTicks, const char *pTimestamp, bool Grenade, bool StatTrack);
 
@@ -267,6 +357,27 @@ public:
 	void ShowTop(int ClientId, const char *pName, const char *pRankColumnDisplay, const char *pRankColumnSql, const char *pTable, const char *pOrderBy, int Offset);
 	void ShowFastcapRank(int ClientId, const char *pName, const char *pMap, const char *pGametype, bool Grenade, bool OnlyStatTrack);
 	void ShowFastcapTop(int ClientId, const char *pName, const char *pMap, const char *pGametype, bool Grenade, bool OnlyStatTrack, int Offset);
+
+	// TODO: horrible name should register and login really be shared?
+	//       should the argument be a union struct?
+	// ratelimited per player account requests
+	void Account(int ClientId, const char *pUsername, const char *pOldPassword, const char *pNewPassword, EAccountPlayerRequestType RequestType);
+
+	// for now only used for resetting passwords
+	// can in the future also be used to
+	// - freeze
+	// - unfreeze
+	// - force logout if stuck
+	// - dump account info
+	void AccountRconCmd(int ClientId, const char *pUsername, const char *pPassword, EAccountRconPlayerRequestType RequestType);
+
+	// unratelimited management request
+	void SaveAndLogoutAccount(class CPlayer *pPlayer, const char *pSuccessMessage);
+
+	// performs only one sql query to set all accounts to logged out in the db
+	// does not actually operate on in game player instances
+	// you still have to logout all CPlayer instances
+	void LogoutAllAccountsOnCurrentServer();
 };
 
 #endif

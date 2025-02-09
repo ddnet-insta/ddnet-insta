@@ -8,6 +8,7 @@
 
 #include <insta/server/dead_spec_controller.h>
 #include <insta/server/enums.h>
+#include <insta/server/ratelimits.h>
 
 // base functionality of the ddnet-insta server
 // should be inherited from in all gametypes
@@ -43,7 +44,7 @@ public:
 	void OnKillChatCmd(IConsole::IResult *pResult, void *pUserData) override;
 
 	void OnReset() override;
-	void OnInit() override;
+	void OnInit(bool ServerStart) override;
 	void OnPlayerConnect(CPlayer *pPlayer) override;
 	void OnPlayerDisconnect(CPlayer *pPlayer, const char *pReason) override;
 
@@ -132,6 +133,33 @@ public:
 	bool CanStillJoinDeadSpecGame(const CPlayer *pPlayerOrNullptr, char *pMsg, size_t MsgLen) override;
 	int FreeInGameSlots() override;
 
+	// accounts.cpp
+	void OnLogin(const CAccount *pAccount, class CPlayer *pPlayer) override;
+	void OnRegister(class CPlayer *pPlayer) override;
+	void LogoutAccount(class CPlayer *pPlayer, const char *pSuccessMessage) override;
+	void LogoutAllAccounts() override;
+	void OnLogout(class CPlayer *pPlayer, const char *pMessage) override;
+	void OnShutdown() override;
+	void RequestChangePassword(class CPlayer *pPlayer, const char *pOldPassword, const char *pNewPassword) override;
+	void OnChangePassword(class CPlayer *pPlayer) override;
+	void OnFailedAccountLogin(class CPlayer *pPlayer, const char *pErrorMsg) override;
+	bool IsAccountRatelimited(int ClientId, char *pReason, int ReasonSize) override;
+	void OnAccountInfo(int AdminUniqueClientId, const char *pUsername, CAccount *pAccount);
+	void CheckAccountsConfig();
+	// returns player pointer or nullptr if none is found
+	// of the player that is connected to the server and is
+	// logged into the account with the matching username
+	CPlayer *GetPlayerByAccountUsername(const char *pUsername);
+	// rcon commands
+	bool IsAccountRconCmdRatelimited(int ClientId, char *pReason, int ReasonSize) override;
+	void RconAccountList(const char *pSearch) override;
+	void RconForceSetPassword(int ClientId, const char *pUsername, const char *pPassword) override;
+	void RconForceLogout(int ClientId, const char *pUsername) override;
+	void RconLockAccount(int ClientId, const char *pUsername) override;
+	void RconUnlockAccount(int ClientId, const char *pUsername) override;
+	void RconAccountInfo(int ClientId, const char *pUsername) override;
+	void ProcessAccountRconCmdResult(CAccountRconCmdResult &Result);
+
 private:
 	bool m_InvalidateConnectedIpsCache = true;
 	int m_NumConnectedIpsCached = 0;
@@ -184,6 +212,8 @@ public:
 		Checkout gctf/gctf.h gctf/gctf.cpp and gctf/sql_columns.h for an example
 	*/
 	CExtraColumns *m_pExtraColumns = nullptr;
+
+	std::vector<CIpRatelimit> m_vIpRatelimits;
 
 	// ***************
 	// generic helpers

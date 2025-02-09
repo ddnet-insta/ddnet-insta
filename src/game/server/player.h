@@ -11,6 +11,7 @@
 
 #include <game/alloc.h> // ddnet-insta
 #include <game/server/save.h> // ddnet-insta
+#include <game/server/teeinfo.h>
 
 #include <insta/server/enums.h> // ddnet-insta
 #include <insta/server/ip_storage.h> // ddnet-insta

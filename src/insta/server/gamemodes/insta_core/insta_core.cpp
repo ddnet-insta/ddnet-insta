@@ -42,6 +42,7 @@ CGameControllerInstaCore::CGameControllerInstaCore(class CGameContext *pGameServ
 
 	UpdateSpawnWeapons(true, true);
 	m_vFrozenQuitters.clear();
+	m_vIpRatelimits.clear();
 	g_AntibobContext.m_pConsole = Console();
 
 	m_vMysteryRounds.clear();
@@ -169,8 +170,38 @@ void CGameControllerInstaCore::OnReset()
 	}
 }
 
-void CGameControllerInstaCore::OnInit()
+void CGameControllerInstaCore::OnInit(bool ServerStart)
 {
+	if(ServerStart)
+	{
+		GameServer()->m_ServerPortOnLaunch = g_Config.m_SvPort;
+	}
+
+	// TODO: move to insta core
+	CheckAccountsConfig(); // can activate sv_accounts
+
+	if(g_Config.m_SvAccounts)
+	{
+		m_pSqlStats->CreateAccountsTable();
+
+		dbg_assert(g_Config.m_SvPort != 0, "sv_port can not be 0 when sv_accounts is on! Otherwise wrong accounts get logged out");
+		dbg_assert(GameServer()->GetHostname(nullptr, 0), "sv_hostname can not be empty when sv_accounts is on! Otherwise wrong accounts get logged out");
+
+		if(ServerStart)
+		{
+			// cleanup stale accounts
+			m_pSqlStats->LogoutAllAccountsOnCurrentServer();
+
+			// this should do nothing because it only affects in game
+			// accounts which there should be none on server start
+			// this is just here to make sure that
+			// we never have in game accounts logged in
+			// while logged_in is 0 in the db
+			// if this branch gets executed somehow later in the
+			// lifetime of the server because of some bug
+			LogoutAllAccounts();
+		}
+	}
 }
 
 void CGameControllerInstaCore::OnPlayerConnect(CPlayer *pPlayer)
@@ -300,6 +331,7 @@ void CGameControllerInstaCore::InstaCoreDisconnect(CPlayer *pPlayer, const char 
 
 	if(GameState() != IGS_END_ROUND)
 		SaveStatsOnDisconnect(pPlayer);
+	LogoutAccount(pPlayer, "Logged out of account");
 }
 
 void CGameControllerInstaCore::PrintDisconnect(CPlayer *pPlayer, const char *pReason)
@@ -691,6 +723,32 @@ void CGameControllerInstaCore::Tick()
 		log_info("ddnet-insta", "all freeze quitter punishments expired. cleaning up ...");
 		m_vFrozenQuitters.clear();
 	}
+
+	// holy fuck c++
+	// iterates all pending rcon cmd sql worker thread results
+	// should be max one per player and all completed ones get processed
+	// here and then deleted from the vector
+	GameServer()->m_vAccountRconCmdQueryResults.erase(
+		std::remove_if(
+			GameServer()->m_vAccountRconCmdQueryResults.begin(),
+			GameServer()->m_vAccountRconCmdQueryResults.end(),
+			[this](std::shared_ptr<CAccountRconCmdResult> pResult) {
+				// this should not be null ever anyways?
+				if(!pResult)
+					return true;
+				if(!pResult->m_Completed)
+					return false;
+
+				ProcessAccountRconCmdResult(*pResult);
+				pResult = nullptr;
+				return true;
+			}),
+		GameServer()->m_vAccountRconCmdQueryResults.end());
+
+	// only check expires every second not every tick
+	// to avoid wasting clock cycles
+	if(Server()->Tick() % Server()->TickSpeed() == 0)
+		CIpRatelimit::CheckExpireTick(m_vIpRatelimits, Server()->Tick());
 }
 
 bool CGameControllerInstaCore::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
@@ -1170,11 +1228,15 @@ void CGameControllerInstaCore::OnClientDataPersist(CPlayer *pPlayer, CGameContex
 {
 	pData->m_Insta.m_SessionStats = pPlayer->m_SessionStats;
 	pData->m_Insta.m_SessionStats.Merge(&pPlayer->m_Stats);
+	pData->m_Insta.m_Account = pPlayer->m_Account;
+	pData->m_Insta.m_FirstJoinTime = pPlayer->m_FirstJoinTime;
 }
 
 void CGameControllerInstaCore::OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData)
 {
 	pPlayer->m_SessionStats = pData->m_Insta.m_SessionStats;
+	pPlayer->m_Account = pData->m_Insta.m_Account;
+	pPlayer->m_FirstJoinTime = pData->m_Insta.m_FirstJoinTime;
 }
 
 void CGameControllerInstaCore::OnDataPersist(CGameContext::CPersistentData *pData)
@@ -1212,6 +1274,11 @@ void CGameControllerInstaCore::InitPlayer(CPlayer *pPlayer)
 
 	pPlayer->m_DeathsPerSeconds = 0;
 	pPlayer->m_pTrainSave = nullptr;
+
+	// might be loaded from persistent data on map change
+	if(!pPlayer->m_FirstJoinTime)
+		pPlayer->m_FirstJoinTime = time_get();
+
 	RoundInitPlayer(pPlayer);
 }
 

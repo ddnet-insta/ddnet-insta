@@ -1,4 +1,5 @@
 #include <base/dbg.h>
+#include <base/io.h>
 #include <base/log.h>
 #include <base/types.h>
 
@@ -12,14 +13,12 @@
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
 
-#include <insta/server/enums.h>
-#include <insta/server/ip_storage.h>
 #include <insta/server/protocol.h>
 #include <insta/server/version.h>
 
 #include <unordered_map>
 
-void CGameContext::OnInitInstagib()
+void CGameContext::OnInitInstagib(bool ServerStart)
 {
 	log_info("ddnet-insta", "running ddnet-insta version " DDNET_INSTA_VERSIONSTR);
 
@@ -34,7 +33,7 @@ void CGameContext::OnInitInstagib()
 
 	m_pHttp = Kernel()->RequestInterface<IHttp>();
 
-	m_pController->OnInit();
+	m_pController->OnInit(ServerStart);
 	m_pController->OnRoundStart();
 }
 
@@ -646,6 +645,48 @@ CIpStorage *CGameContext::FindIpStorageEntryOfflineAndOnline(int EntryId)
 		return &pPlayer->m_IpStorage.value();
 	}
 	return nullptr;
+}
+
+bool CGameContext::GetHostname(char *pHostname, int HostnameSize)
+{
+	if(pHostname && HostnameSize)
+		pHostname[0] = '\0';
+	if(g_Config.m_SvHostname[0])
+	{
+		if(pHostname)
+			str_copy(pHostname, g_Config.m_SvHostname, HostnameSize);
+		return true;
+	}
+	if(m_aHostnameCached[0])
+	{
+		if(pHostname)
+			str_copy(pHostname, m_aHostnameCached, HostnameSize);
+		return true;
+	}
+
+#if defined(CONF_PLATFORM_LINUX)
+	IOHANDLE File = io_open("/etc/hostname", IOFLAG_READ);
+	if(File)
+	{
+		char *pContent = io_read_all_str(File);
+		if(pContent && pContent[0])
+		{
+			if(pHostname)
+				str_copy(pHostname, io_read_all_str(File), HostnameSize);
+			str_copy(m_aHostnameCached, pContent);
+		}
+		free(pContent);
+		io_close(File);
+		return m_aHostnameCached[0];
+	}
+	return false;
+#elif defined(CONF_PLATFORM_WINDOWS)
+	if(pHostname)
+		str_copy(pHostname, "windows", HostnameSize);
+	return true;
+#else
+	return false;
+#endif
 }
 
 bool CGameContext::IsChatCmdAllowed(int ClientId) const

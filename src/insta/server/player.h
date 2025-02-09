@@ -35,6 +35,7 @@ public:
 	std::optional<CIpStorage> m_IpStorage;
 
 	void ProcessStatsResult(CInstaSqlResult &Result);
+	void ProcessAccountResult(CAccountPlayerResult &Result);
 
 	int m_SentWarmupAlerts = 0;
 	void WarmupAlert();
@@ -274,6 +275,10 @@ public:
 	// see m_Stats and m_SavedStats for stats that get saved
 	CRoundStatsPlayer m_RoundStats;
 
+	// you should probably check m_Account.IsLoggedIn()
+	// before accessing values
+	CAccount m_Account;
+
 	// currently active unterminated killing spree
 	int Spree() const { return m_Spree; }
 
@@ -293,6 +298,8 @@ public:
 
 	std::shared_ptr<CInstaSqlResult> m_StatsQueryResult;
 	std::shared_ptr<CInstaSqlResult> m_FastcapQueryResult;
+	std::shared_ptr<CAccountPlayerResult> m_AccountQueryResult;
+	std::shared_ptr<CAccountManagementResult> m_AccountLogoutQueryResult;
 
 	// If sv_ignore_kills_before_race_start is set to 1
 	// only kills during or after the ddrace race do count.
@@ -370,7 +377,20 @@ public:
 	// similar to ddnets m_JoinTick
 	// but uses time instead of tick
 	// so it also works when the world is paused
+	//
+	// gets reset on reload and map changes
+	// if you need original very first join time see m_FirstJoinTime
 	int64_t m_JoinTime = 0;
+
+	// similar to ddnets m_JoinTick
+	// but uses time instead of tick
+	// so it also works when the world is paused
+	//
+	// it also gets persisted across map changes
+	// and reloads
+	//
+	// if you need the last creation of the player see m_JoinTime
+	int64_t m_FirstJoinTime = 0;
 
 	// used for balancing
 	// to figure out which players score the least
