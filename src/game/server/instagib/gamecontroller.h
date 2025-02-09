@@ -14,6 +14,7 @@
 #include <game/generated/protocol7.h>
 
 #include <game/server/gamecontext.h>
+#include <game/server/instagib/account.h>
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
@@ -200,8 +201,23 @@ public:
 			and can be used in addition to the controllers constructor
 
 			Its main use case is running code in a base controller after its child constructor
+
+		Arguments:
+			ServerStart - is only true once in the very beginning when the server starts
+			              will be false for all the other calls that happen on
+				      reload, round end and map change
 	*/
-	virtual void OnInit(){};
+	virtual void OnInit(bool ServerStart){};
+
+	/*
+		Function: OnShutdown
+			Will be called once in the very end when the server is fully shutting down.
+			This is the counter part to ``OnInit(ServerStart = true)`` but not to ``OnInit(ServerStart = false)``
+
+			If you need something that is called on reloads, map changes and so on have a look at
+			``OnRoundEnd()``, ``OnRoundStart()`` or use your controllers destructor.
+	*/
+	virtual void OnShutdown(){};
 
 	/*
 		Function: ForceNetworkClipping
@@ -663,6 +679,207 @@ public:
 			pPlayer - the player to check
 	*/
 	virtual bool IsPlaying(const CPlayer *pPlayer);
+
+	/*
+		Function: OnLogin
+			Called when the login thread finished successfully
+			and a player entered a correct username password combination
+			using the /login chat command
+
+		Arguments:
+			pAccount - the account data that was loaded
+			pPlayer - player that logged in
+	*/
+	virtual void OnLogin(const CAccount *pAccount, class CPlayer *pPlayer){};
+
+	/*
+		Function: OnRegister
+			Called when the register thread finished successfully
+			this is triggered by a player using the /register chat command
+
+		Arguments:
+			pPlayer - player that logged in
+	*/
+	virtual void OnRegister(class CPlayer *pPlayer){};
+
+	/*
+		Function: LogoutAccount
+			Called when a player uses the logout chat command
+			or leaves the game.
+			Makes sure the account is correctly logged out.
+
+			You can override this method to run additional code on logout
+			but make sure to call the parents method otherwise the accounts
+			get locked on disconnect.
+
+		Arguments:
+			pPlayer - player that logged out or disconnected
+			pSuccessMessage - string that will be printed to the logged in player in chat after successful logout
+	*/
+	virtual void LogoutAccount(class CPlayer *pPlayer, const char *pSuccessMessage){};
+
+	/*
+		Function: LogoutAllAccounts
+			Logs out all players on this server.
+			Needs pvp controller to be active.
+	*/
+	virtual void LogoutAllAccounts(){};
+
+	/*
+		Function: OnLogout
+			Called on succesful logout.
+			This is not guaranteed to be called!
+			If a player disconnects this will not be called.
+			It is only used for the logout chat command.
+
+			If you need to run code on every logout.
+			Hook into the login start which is `LogoutAccount()`
+
+		Arguments:
+			pPlayer - player that logged out
+	*/
+	virtual void OnLogout(class CPlayer *pPlayer, const char *pMessage){};
+
+	/*
+		Function: AccountList
+			Called when an admin uses the "acc_list" rcon command.
+
+		Arguments:
+			pSearch - string to search for and filter the list (should show all entries when empty)
+	*/
+	virtual void AccountList(const char *pSearch){};
+
+	/*
+		Function: IsAccountRatelimited
+			If the user is ratelimited and can not run any account database actions.
+			This block chat commands such as /login, /logout, /register, /changepassword
+			if it returns true.
+
+			Can later also be extended to implement anti bruteforce protection.
+
+		Arguments:
+			ClientId - id of the player to check
+			pReason - buffer the reason for ratelimit will be written to (can be null) will be an empty string if not ratelimited
+			ReasonSize - size of the pReason in bytes
+
+		Returns:
+			true - if all account operations (except saving on disconnect) should be blocked
+			false - if all account operations are allowed
+	*/
+	virtual bool IsAccountRatelimited(int ClientId, char *pReason, int ReasonSize) { return false; }
+
+	/*
+		Function: IsAccountRconCmdRatelimited
+			If the user is ratelimited and can not run any account related rcon
+			commands that operate on the database.
+
+			This blocks rcon commands such as "acc_set_password"
+			if it returns true.
+
+		Arguments:
+			ClientId - id of the player to check
+			pReason - buffer the reason for ratelimit will be written to (can be null) will be an empty string if not ratelimited
+			ReasonSize - size of the pReason in bytes
+
+		Returns:
+			true - if all rcon account operations (not affecting own account only rcon commands)
+			false - if all rcon account operations are allowed
+	*/
+	virtual bool IsAccountRconCmdRatelimited(int ClientId, char *pReason, int ReasonSize) { return false; }
+
+	/*
+		Function: RconForceSetPassword
+			Called when an admin uses the "acc_set_password" rcon command.
+			This method initiates the process.
+
+		Arguments:
+			pPlayer - admin that initiated the request
+			pUsername - account that should be updated
+			pPassword - new password that will overwrite the old one
+	*/
+	virtual void RconForceSetPassword(class CPlayer *pPlayer, const char *pUsername, const char *pPassword){};
+
+	/*
+		Function: RconForceLogout
+			Called when an admin uses the "acc_logout" rcon command.
+			This method initiates the process.
+
+		Arguments:
+			pPlayer - admin that initiated the request
+			pUsername - account that should be logged out
+	*/
+	virtual void RconForceLogout(class CPlayer *pPlayer, const char *pUsername){};
+
+	/*
+		Function: RconLockAccount
+			Called when an admin uses the "acc_lock" rcon command.
+			This method initiates the process.
+
+		Arguments:
+			pPlayer - admin that initiated the request
+			pUsername - account that should be locked
+	*/
+	virtual void RconLockAccount(class CPlayer *pPlayer, const char *pUsername){};
+
+	/*
+		Function: RconUnlockAccount
+			Called when an admin uses the "acc_unlock" rcon command.
+			This method initiates the process.
+
+		Arguments:
+			pPlayer - admin that initiated the request
+			pUsername - account that should be unlocked
+	*/
+	virtual void RconUnlockAccount(class CPlayer *pPlayer, const char *pUsername){};
+
+	/*
+		Function: RconAccountInfo
+			Called when an admin uses the "acc_info" rcon command.
+			This method initiates the process.
+
+		Arguments:
+			pPlayer - admin that initiated the request
+			pUsername - account that should be displayed
+	*/
+	virtual void RconAccountInfo(class CPlayer *pPlayer, const char *pUsername){};
+
+	/*
+		Function: RequestChangePassword
+			Called when a player uses the changepassword chat command.
+			See also `OnChangePassword()` which is called when the password change
+			was applied successfully.
+
+			You can override this method to run additional code on password change
+			but make sure to call the parents method.
+
+		Arguments:
+			pPlayer - player that requested a password change
+	*/
+	virtual void RequestChangePassword(class CPlayer *pPlayer, const char *pOldPassword, const char *pNewPassword){};
+
+	/*
+		Function: OnChangedPassword
+			Called on succesful password change.
+			This is not guaranteed to be called!
+			If a player disconnects this will not be called.
+			It is only used for the changepassword chat command.
+
+			If you need to run code on every password change attempt.
+			Hook into the request start which is `RequestChangePassword()`
+
+		Arguments:
+			pPlayer - player that changed the password
+	*/
+	virtual void OnChangePassword(class CPlayer *pPlayer){};
+
+	/*
+		Function: OnFailedAccountLogin
+			Called if a /login chat command failed
+
+		Arguments:
+			pPlayer - player that requested the login
+	*/
+	virtual void OnFailedAccountLogin(class CPlayer *pPlayer, const char *pErrorMsg){};
 
 	/*
 		Function: OnShowStatsAll

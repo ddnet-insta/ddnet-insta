@@ -35,6 +35,15 @@ CONSOLE_COMMAND("stats_all", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, C
 CONSOLE_COMMAND("multis", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConMultis, this, "Shows the all time fng multi kill stats")
 CONSOLE_COMMAND("steals", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSteals, this, "Shows all time and round fng kill steal stats")
 
+CONSOLE_COMMAND("register", "s[username] s[password] s[repeate password]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRegister, this, "register account")
+CONSOLE_COMMAND("login", "s[username] s[password]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConLogin, this, "login to account")
+CONSOLE_COMMAND("logout", "", CFGFLAG_CHAT, ConLogoutAccount, this, "logout account")
+CONSOLE_COMMAND("changepassword", "s[old password] s[new password] s[new password repeat]", CFGFLAG_CHAT, ConChangePassword, this, "change the password of your account")
+
+#ifdef CONF_DEBUG
+CONSOLE_COMMAND("slow_account_operation", "", CFGFLAG_CHAT, ConSlowAccountOperation, this, "used to simulate high load for debugging account system stability")
+#endif
+
 // which points to display in scoreboard
 // all time stats are implicit and round stats are specific
 // so "points" is all time stats of players points

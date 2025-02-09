@@ -4253,7 +4253,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	m_pAntibot->RoundStart(this);
 
-	OnInitInstagib(); // ddnet-insta
+	OnInitInstagib(pPersistentData == nullptr); // ddnet-insta
 }
 
 void CGameContext::CreateAllEntities(bool Initial)
@@ -4512,6 +4512,10 @@ void CGameContext::OnShutdown(void *pPersistentData)
 	{
 		pPersistent->m_PrevGameUuid = m_GameUuid;
 	}
+
+	// ddnet-insta
+	if(!pPersistent)
+		m_pController->OnShutdown();
 
 	Antibot()->RoundEnd();
 

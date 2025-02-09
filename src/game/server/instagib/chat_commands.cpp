@@ -4,7 +4,12 @@
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontroller.h>
+#include <game/server/instagib/account.h>
 #include <game/server/instagib/enums.h>
+#include <game/server/instagib/password_hash.h>
+#include <game/server/instagib/sql_accounts.h>
+#include <game/server/instagib/sql_stats.h>
+#include <game/server/instagib/strhelpers.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
@@ -296,6 +301,212 @@ void CGameContext::ConSteals(IConsole::IResult *pResult, void *pUserData)
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
 	pSelf->m_pController->m_pSqlStats->ShowStats(pResult->m_ClientId, pName, pSelf->m_pController->StatsTable(), EInstaSqlRequestType::CHAT_CMD_STEALS);
+}
+
+static bool BlockAccountOperation(CGameContext *pSelf, int ClientId, const char *pOperation)
+{
+	if(!CheckClientId(ClientId))
+		return true;
+
+	if(!pSelf->m_pController)
+	{
+		pSelf->SendChatTarget(ClientId, "Something went wrong with this account request");
+		return true;
+	}
+
+	if(!g_Config.m_SvAccounts)
+	{
+		pSelf->SendChatTarget(ClientId, "Accounts are turned off");
+		return true;
+	}
+
+	char aReason[512];
+	if(pSelf->m_pController->IsAccountRatelimited(ClientId, aReason, sizeof(aReason)))
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "%s failed because of: %s", pOperation, aReason);
+		pSelf->SendChatTarget(ClientId, aBuf);
+		return true;
+	}
+	return false;
+}
+
+void CGameContext::ConRegister(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(BlockAccountOperation(pSelf, pResult->m_ClientId, "Register"))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	const char *pUsername = pResult->GetString(0);
+	const char *pPassword = pResult->GetString(1);
+	const char *pPasswordRepeat = pResult->GetString(2);
+
+	if(str_comp(pPassword, pPasswordRepeat))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Passwords do not match");
+		return;
+	}
+	char aBuf[512];
+	if(!IsValidUsernameAndPassword(pUsername, pPassword, aBuf, sizeof(aBuf)))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+		return;
+	}
+	if(g_Config.m_SvPointsNeededToRegister)
+	{
+		int Score = pPlayer->m_Score.value_or(0);
+		bool KillsNeeded = pSelf->m_pController->IsZcatchGameType();
+		if(KillsNeeded)
+			Score = pPlayer->m_Kills;
+		int Missing = g_Config.m_SvPointsNeededToRegister - Score;
+		if(Missing > 0)
+		{
+			str_format(aBuf, sizeof(aBuf), "You you need %d more %s to create an account", Missing, KillsNeeded ? "kills" : "points");
+			pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+			return;
+		}
+	}
+
+	int SecondsConnected = (time_get() - pPlayer->m_FirstJoinTime) / time_freq();
+	int SecondsUntilAllowed = maximum(0, g_Config.m_SvJoinRegisterDelay - SecondsConnected);
+	if(SecondsUntilAllowed)
+	{
+		str_format(aBuf, sizeof(aBuf), "Please wait %d more seconds before registering an account.", SecondsUntilAllowed);
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+		return;
+	}
+
+	// this is to avoid logged in players
+	// getting locked by antispam/brutforce protection
+	if(pPlayer->m_Account.IsLoggedIn())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "You are already logged in. Logout first to register a new account.");
+		return;
+	}
+
+	pSelf->m_pController->m_pSqlStats->Account(pResult->m_ClientId, pUsername, pPassword, pPassword, EAccountPlayerRequestType::CHAT_CMD_REGISTER);
+}
+
+void CGameContext::ConLogin(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(BlockAccountOperation(pSelf, pResult->m_ClientId, "Login"))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	if(pPlayer->m_Account.IsLoggedIn())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "You are already logged in");
+		return;
+	}
+
+	const char *pUsername = pResult->GetString(0);
+	const char *pPassword = pResult->GetString(1);
+
+	char aBuf[512];
+	if(!IsValidUsernameAndPassword(pUsername, pPassword, aBuf, sizeof(aBuf)))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+		return;
+	}
+
+	pSelf->m_pController->m_pSqlStats->Account(pResult->m_ClientId, pUsername, pPassword, pPassword, EAccountPlayerRequestType::CHAT_CMD_LOGIN);
+}
+
+void CGameContext::ConLogoutAccount(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(BlockAccountOperation(pSelf, pResult->m_ClientId, "Logout"))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	if(!pPlayer->m_Account.IsLoggedIn())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "You are not logged in");
+		return;
+	}
+
+	pSelf->m_pController->LogoutAccount(pPlayer, "Successfully logged out of your account");
+}
+
+void CGameContext::ConChangePassword(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(BlockAccountOperation(pSelf, pResult->m_ClientId, "Change password"))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	if(!pPlayer->m_Account.IsLoggedIn())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "You are not logged in");
+		return;
+	}
+
+	// old password could be checked against a cached password
+	// but just to be sure we check in the db thread against the latest db password
+	// then we also do not have to hold passwords in ram which seems like a security win
+
+	const char *pOldPassword = pResult->GetString(0);
+	const char *pNewPassword = pResult->GetString(1);
+	const char *pNewPasswordRepeat = pResult->GetString(2);
+
+	if(str_comp(pNewPassword, pNewPasswordRepeat))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "New passwords do not match");
+		return;
+	}
+
+	char aBuf[512];
+	if(!IsValidUsernameAndPassword(pPlayer->m_Account.m_aUsername, pNewPassword, aBuf, sizeof(aBuf)))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+		return;
+	}
+	if(!IsValidUsernameAndPassword(pPlayer->m_Account.m_aUsername, pOldPassword, aBuf, sizeof(aBuf)))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+		return;
+	}
+
+	pSelf->m_pController->RequestChangePassword(pPlayer, pOldPassword, pNewPasswordRepeat);
+}
+
+void CGameContext::ConSlowAccountOperation(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(BlockAccountOperation(pSelf, pResult->m_ClientId, "Slow account operation"))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	if(!pSelf->Server()->GetAuthedState(pResult->m_ClientId))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Missing permissions.");
+		return;
+	}
+
+	if(!g_Config.m_SvTestingCommands)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Test commands are turned off");
+		return;
+	}
+
+	pSelf->m_pController->m_pSqlStats->Account(pResult->m_ClientId, "test_user", "test_pass", "test_pass", EAccountPlayerRequestType::CHAT_CMD_SLOW_ACCOUNT_OPERATION);
 }
 
 void CGameContext::ConScore(IConsole::IResult *pResult, void *pUserData)

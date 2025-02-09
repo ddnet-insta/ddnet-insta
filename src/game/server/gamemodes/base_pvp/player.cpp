@@ -1,3 +1,4 @@
+#include <base/log.h>
 #include <base/system.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
@@ -6,6 +7,7 @@
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
+#include <game/server/instagib/sql_accounts.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
@@ -98,6 +100,23 @@ void CPlayer::InstagibTick()
 	{
 		ProcessStatsResult(*m_FastcapQueryResult);
 		m_FastcapQueryResult = nullptr;
+	}
+	if(m_AccountQueryResult != nullptr && m_AccountQueryResult->m_Completed)
+	{
+		ProcessAccountResult(*m_AccountQueryResult);
+		m_AccountQueryResult = nullptr;
+	}
+	if(m_AccountLogoutQueryResult != nullptr && m_AccountLogoutQueryResult->m_Completed)
+	{
+		if(!m_AccountLogoutQueryResult->m_Success)
+		{
+			GameServer()->SendChatTarget(GetCid(), m_AccountLogoutQueryResult->m_aMessage);
+		}
+		else if(GameServer()->m_pController)
+		{
+			GameServer()->m_pController->OnLogout(this, m_AccountLogoutQueryResult->m_aMessage);
+		}
+		m_AccountLogoutQueryResult = nullptr;
 	}
 
 	RainbowTick();
@@ -199,6 +218,76 @@ void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)
 			GameServer()->m_pController->OnLoadedNameStats(&Result.m_Stats, this);
 			break;
 		}
+	}
+}
+
+void CPlayer::ProcessAccountResult(CAccountPlayerResult &Result)
+{
+	if(!Result.m_Success)
+	{
+		GameServer()->SendChatTarget(GetCid(), "Something went wrong. Please contact an administrator.");
+		return;
+	}
+
+	switch(Result.m_MessageKind)
+	{
+	case EAccountPlayerRequestType::LOG_INFO:
+		for(auto &aMessage : Result.m_aaMessages)
+		{
+			if(aMessage[0] == 0)
+				break;
+			log_info("ddnet-insta", "%s", aMessage);
+		}
+		break;
+	case EAccountPlayerRequestType::LOG_ERROR:
+		for(auto &aMessage : Result.m_aaMessages)
+		{
+			if(aMessage[0] == 0)
+				break;
+			log_error("ddnet-insta", "%s", aMessage);
+		}
+		break;
+	case EAccountPlayerRequestType::CHAT_CMD_SLOW_ACCOUNT_OPERATION:
+	case EAccountPlayerRequestType::DIRECT:
+		for(auto &aMessage : Result.m_aaMessages)
+		{
+			if(aMessage[0] == 0)
+				break;
+			GameServer()->SendChatTarget(m_ClientId, aMessage);
+		}
+		break;
+	case EAccountPlayerRequestType::ALL:
+	{
+		bool PrimaryMessage = true;
+		for(auto &aMessage : Result.m_aaMessages)
+		{
+			if(aMessage[0] == 0)
+				break;
+
+			if(GameServer()->ProcessSpamProtection(m_ClientId) && PrimaryMessage)
+				break;
+
+			GameServer()->SendChat(-1, TEAM_ALL, aMessage, -1);
+			PrimaryMessage = false;
+		}
+		break;
+	}
+	case EAccountPlayerRequestType::BROADCAST:
+		if(Result.m_aBroadcast[0] != 0)
+			GameServer()->SendBroadcast(Result.m_aBroadcast, -1);
+		break;
+	case EAccountPlayerRequestType::CHAT_CMD_REGISTER:
+		GameServer()->m_pController->OnRegister(this);
+		break;
+	case EAccountPlayerRequestType::CHAT_CMD_LOGIN:
+		GameServer()->m_pController->OnLogin(&Result.m_Account, this);
+		break;
+	case EAccountPlayerRequestType::CHAT_CMD_CHANGE_PASSWORD:
+		GameServer()->m_pController->OnChangePassword(this);
+		break;
+	case EAccountPlayerRequestType::LOGIN_FAILED:
+		GameServer()->m_pController->OnFailedAccountLogin(this, Result.m_aaMessages[0]);
+		break;
 	}
 }
 

@@ -2772,6 +2772,7 @@ if(SERVER)
     gamecontroller.h
     gamemodes/DDRace.cpp
     gamemodes/DDRace.h
+    gamemodes/base_pvp/accounts.cpp
     gamemodes/base_pvp/base_pvp.cpp
     gamemodes/base_pvp/base_pvp.h
     gamemodes/base_pvp/character.cpp
@@ -2841,6 +2842,8 @@ if(SERVER)
     gamemodes/vanilla/fly/fly.h
     gameworld.cpp
     gameworld.h
+    instagib/account.cpp
+    instagib/account.h
     instagib/antibob.cpp
     instagib/antibob.h
     instagib/chat_commands.cpp
@@ -2857,8 +2860,12 @@ if(SERVER)
     instagib/ip_storage.h
     instagib/laser_text.cpp
     instagib/laser_text.h
+    instagib/password_hash.cpp
+    instagib/password_hash.h
     instagib/persistent_client_data.h
     instagib/protocol.h
+    instagib/ratelimits.cpp
+    instagib/ratelimits.h
     instagib/rcon_commands.cpp
     instagib/rcon_commands.h
     instagib/rcon_configs.cpp
@@ -2866,6 +2873,8 @@ if(SERVER)
     instagib/round_stats_ascii.cpp
     instagib/round_stats_csv.cpp
     instagib/round_stats_player.h
+    instagib/sql_accounts.cpp
+    instagib/sql_accounts.h
     instagib/sql_colums_all.h
     instagib/sql_stats.cpp
     instagib/sql_stats.h
@@ -3107,6 +3116,8 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     compression.cpp
     csv.cpp
     datafile.cpp
+    ddnet_insta_password_hash.cpp
+    ddnet_insta_strhelpers.cpp
     editor.cpp
     fs.cpp
     gameworld.cpp

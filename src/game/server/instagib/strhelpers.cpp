@@ -128,6 +128,29 @@ bool str_isalphanumeric(char c)
 	return str_isalpha(c) || str_isnum(c);
 }
 
+bool str_contains_only_allowed_chars(const char *pAllowedCharacters, const char *pTestedString)
+{
+	const char *pTestChar = pTestedString;
+	while(*pTestChar)
+	{
+		const char *pAllowedChar = pAllowedCharacters;
+		bool CharOk = false;
+		while(*pAllowedChar)
+		{
+			if(*pAllowedChar == *pTestChar)
+			{
+				CharOk = true;
+				break;
+			}
+			pAllowedChar++;
+		}
+		if(!CharOk)
+			return false;
+		pTestChar++;
+	}
+	return true;
+}
+
 // int test_thing()
 // {
 // 	char aMsg[512];

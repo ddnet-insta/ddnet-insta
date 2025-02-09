@@ -4,6 +4,8 @@
 
 #ifndef IN_CLASS_PERSISTENTCLIENTDATA
 
+#include <game/server/instagib/account.h>
+
 struct CPersistentClientData
 {
 #endif // IN_CLASS_PERSISTENTCLIENTDATA
@@ -12,6 +14,10 @@ struct CPersistentClientData
 	//
 	// virtual void OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPersistentClientData *pData) {};
 	// virtual void OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData) {};
+
+	CAccount m_Account;
+
+	int m_FirstJoinTime;
 
 #ifndef IN_CLASS_PERSISTENTCLIENTDATA
 };

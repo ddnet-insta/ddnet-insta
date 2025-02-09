@@ -1,6 +1,6 @@
 #include <base/log.h>
+#include <base/logger.h>
 #include <base/system.h>
-#include <cstdint>
 #include <engine/server/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
@@ -15,6 +15,7 @@
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/ip_storage.h>
 #include <game/server/instagib/laser_text.h>
+#include <game/server/instagib/sql_accounts.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/structs.h>
 #include <game/server/instagib/version.h>
@@ -25,6 +26,9 @@
 #include <game/version.h>
 
 #include <game/server/instagib/antibob.h>
+
+#include <algorithm>
+#include <cstdint>
 
 #include "base_pvp.h"
 
@@ -59,6 +63,7 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 		g_Config.m_SvTournamentChat = 0;
 
 	m_vFrozenQuitters.clear();
+	m_vIpRatelimits.clear();
 
 	m_UnbalancedTick = TBALANCE_OK;
 
@@ -79,11 +84,80 @@ void CGameControllerPvp::OnReset()
 	}
 }
 
-void CGameControllerPvp::OnInit()
+void CGameControllerPvp::CheckAccountsConfig()
 {
+	bool AccountsWereOn = g_Config.m_SvAccounts != 0;
+
+	// check activate
+	if(g_Config.m_SvAccounts == 0 && GameServer()->m_LastAccountTurnOnAttempt)
+	{
+		bool PortAndHostSet = g_Config.m_SvPort != 0 && g_Config.m_SvHostname[0] != '\0';
+		int SecondsSinceLastAttempt = (time_get() - GameServer()->m_LastAccountTurnOnAttempt) / time_freq();
+		if(PortAndHostSet && SecondsSinceLastAttempt < 10)
+		{
+			log_warn("ddnet-insta", "sv_accounts turned on because sv_port and sv_hostname are now set. Please set sv_accounts after sv_port and sv_hostname in your config.");
+			g_Config.m_SvAccounts = 1;
+		}
+	}
+
+	// check deactivate
+	if(g_Config.m_SvAccounts)
+	{
+		if(g_Config.m_SvPort == 0)
+		{
+			log_error("ddnet-insta", "sv_accounts can not be turned on if sv_port is 0");
+			g_Config.m_SvAccounts = 0;
+		}
+		if(g_Config.m_SvHostname[0] == '\0')
+		{
+			log_error("ddnet-insta", "sv_accounts can not be turned on if sv_hostname is unset");
+			g_Config.m_SvAccounts = 0;
+		}
+	}
+
+	// on deactivate
+	if(!g_Config.m_SvAccounts && AccountsWereOn)
+	{
+		log_info("ddnet-insta", "logging out all players ...");
+		LogoutAllAccounts();
+	}
+}
+
+void CGameControllerPvp::OnInit(bool ServerStart)
+{
+	if(ServerStart)
+	{
+		GameServer()->m_ServerPortOnLaunch = g_Config.m_SvPort;
+	}
+
 	if(GameFlags() & GAMEFLAG_FLAGS)
 	{
 		m_pSqlStats->CreateFastcapTable();
+	}
+
+	CheckAccountsConfig(); // can activate sv_accounts
+
+	if(g_Config.m_SvAccounts)
+	{
+		m_pSqlStats->CreateAccountsTable();
+
+		dbg_assert(g_Config.m_SvPort != 0, "sv_port can not be 0 when sv_accounts is on! Otherwise wrong accounts get logged out");
+		dbg_assert(g_Config.m_SvHostname[0] != '\0', "sv_hostname can not be empty when sv_accounts is on! Otherwise wrong accounts get logged out");
+
+		if(ServerStart)
+		{
+			// cleanup stale accounts
+			m_pSqlStats->LogoutAllAccountsOnCurrentServer();
+
+			// this should do nothing because it only affects in game
+			// accounts which there should be none on server start
+			// this is just here to make sure that
+			// we never have in game accounts logged in
+			// while logged_in is 0 in the db
+			// if this branch gets executed somehow later in the
+			// lifetime of the server because of some bug
+			LogoutAllAccounts();
+		}
 	}
 }
 
@@ -225,6 +299,10 @@ void CGameControllerPvp::InitPlayer(CPlayer *pPlayer)
 	CIpStorage *pIpStorage = GameServer()->m_IpStorageController.FindEntry(Server()->ClientAddr(0));
 	if(pIpStorage)
 		pPlayer->m_IpStorage = *pIpStorage;
+
+	// might be loaded from persistent data on map change
+	if(!pPlayer->m_FirstJoinTime)
+		pPlayer->m_FirstJoinTime = time_get();
 
 	RoundInitPlayer(pPlayer);
 }
@@ -1157,6 +1235,27 @@ void CGameControllerPvp::Tick()
 		}
 	}
 
+	// holy fuck c++
+	// iterates all pending rcon cmd sql worker thread results
+	// should be max one per player and all completed ones get processed
+	// here and then deleted from the vector
+	GameServer()->m_vAccountRconCmdQueryResults.erase(
+		std::remove_if(
+			GameServer()->m_vAccountRconCmdQueryResults.begin(),
+			GameServer()->m_vAccountRconCmdQueryResults.end(),
+			[this](std::shared_ptr<CAccountRconCmdResult> pResult) {
+				// this should not be null ever anyways?
+				if(!pResult)
+					return true;
+				if(!pResult->m_Completed)
+					return false;
+
+				ProcessAccountRconCmdResult(*pResult);
+				pResult = nullptr;
+				return true;
+			}),
+		GameServer()->m_vAccountRconCmdQueryResults.end());
+
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer)
@@ -1180,6 +1279,11 @@ void CGameControllerPvp::Tick()
 		log_info("ddnet-insta", "all freeze quitter punishments expired. cleaning up ...");
 		m_vFrozenQuitters.clear();
 	}
+
+	// only check expires every second not every tick
+	// to avoid wasting clock cycles
+	if(Server()->Tick() % Server()->TickSpeed() == 0)
+		CIpRatelimit::CheckExpireTick(m_vIpRatelimits, Server()->Tick());
 
 	// do team-balancing (skip this in survival, done there when a round starts)
 	if(IsTeamPlay()) //  && !(m_GameFlags&protocol7::GAMEFLAG_SURVIVAL))
@@ -1827,10 +1931,14 @@ bool CGameControllerPvp::LoadNewPlayerNameData(int ClientId)
 
 void CGameControllerPvp::OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPersistentClientData *pData)
 {
+	pData->m_Account = pPlayer->m_Account;
+	pData->m_FirstJoinTime = pPlayer->m_FirstJoinTime;
 }
 
 void CGameControllerPvp::OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData)
 {
+	pPlayer->m_Account = pData->m_Account;
+	pPlayer->m_FirstJoinTime = pData->m_FirstJoinTime;
 }
 
 bool CGameControllerPvp::OnSkinChange7(protocol7::CNetMsg_Cl_SkinChange *pMsg, int ClientId)
@@ -2043,6 +2151,7 @@ void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *
 {
 	if(GameState() != IGS_END_ROUND)
 		SaveStatsOnDisconnect(pPlayer);
+	LogoutAccount(pPlayer, "Logged out of account");
 
 	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
 	{

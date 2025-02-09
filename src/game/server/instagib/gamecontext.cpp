@@ -12,7 +12,7 @@
 #include <game/server/instagib/protocol.h>
 #include <game/server/player.h>
 
-void CGameContext::OnInitInstagib()
+void CGameContext::OnInitInstagib(bool ServerStart)
 {
 	UpdateVoteCheckboxes(); // ddnet-insta
 	AlertOnSpecialInstagibConfigs(); // ddnet-insta
@@ -24,7 +24,7 @@ void CGameContext::OnInitInstagib()
 
 	m_pHttp = Kernel()->RequestInterface<IHttp>();
 
-	m_pController->OnInit();
+	m_pController->OnInit(ServerStart);
 	m_pController->OnRoundStart();
 }
 
