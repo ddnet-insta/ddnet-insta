@@ -5,6 +5,7 @@
 
 #include <engine/antibot.h>
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 
 #include <generated/protocol.h>
 
@@ -206,6 +207,8 @@ void CGameContext::ConClearMapPool(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConRandomMapFromPool(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!pSelf->m_pController)
+		return;
 
 	const char *pMap = pSelf->Server()->GetRandomMapFromPool();
 	if(pMap && pMap[0])
@@ -404,4 +407,150 @@ void CGameContext::ConInstaRestart(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_pController->AbortWarmup();
 	else
 		pSelf->m_pController->DoWarmup(Seconds);
+}
+
+static bool BlockAccountRconCmd(CGameContext *pSelf, int ClientId, const char *pOperation)
+{
+	if(!pSelf->m_pController)
+	{
+		log_error("ddnet-insta", "something went wrong with this rcon command");
+		return true;
+	}
+
+	// allow admins to reset account passwords even if accounts are off
+	// if(!g_Config.m_SvAccounts)
+	// {
+	// 	log_error("ddnet-insta", "accounts are turned off");
+	// 	return true;
+	// }
+
+	char aReason[512];
+	if(pSelf->m_pController->IsAccountRconCmdRatelimited(ClientId, aReason, sizeof(aReason)))
+	{
+		log_error("ddnet-insta", "%s failed because of: %s", pOperation, aReason);
+		return true;
+	}
+	return false;
+}
+
+void CGameContext::ConAccountList(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!pSelf->m_pController)
+		return;
+
+	const char *pSearch = "";
+	if(pResult->NumArguments())
+		pSearch = pResult->GetString(0);
+
+	pSelf->m_pController->RconAccountList(pSearch);
+}
+
+void CGameContext::ConAccountForceSetPassword(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(BlockAccountRconCmd(pSelf, pResult->m_ClientId, "acc_set_password"))
+		return;
+
+	const char *pUsername = pResult->GetString(0);
+	const char *pPassword = pResult->GetString(1);
+
+	char aBuf[512];
+	if(!IsValidUsernameAndPassword(pUsername, pPassword, aBuf, sizeof(aBuf)))
+	{
+		log_error("ddnet-insta", "%s", aBuf);
+		return;
+	}
+
+	pSelf->m_pController->RconForceSetPassword(pResult->m_ClientId, pUsername, pPassword);
+}
+
+void CGameContext::ConAccountForceLogout(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(BlockAccountRconCmd(pSelf, pResult->m_ClientId, "acc_logout"))
+		return;
+
+	const char *pUsername = pResult->GetString(0);
+
+	char aBuf[512];
+	if(!IsValidUsernameAndPassword(pUsername, "placeholder", aBuf, sizeof(aBuf)))
+	{
+		log_error("ddnet-insta", "%s", aBuf);
+		return;
+	}
+
+	pSelf->m_pController->RconForceLogout(pResult->m_ClientId, pUsername);
+}
+
+void CGameContext::ConLockAccount(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(BlockAccountRconCmd(pSelf, pResult->m_ClientId, "acc_lock"))
+		return;
+
+	const char *pUsername = pResult->GetString(0);
+
+	char aBuf[512];
+	if(!IsValidUsernameAndPassword(pUsername, "placeholder", aBuf, sizeof(aBuf)))
+	{
+		log_error("ddnet-insta", "%s", aBuf);
+		return;
+	}
+
+	pSelf->m_pController->RconLockAccount(pResult->m_ClientId, pUsername);
+}
+
+void CGameContext::ConUnlockAccount(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(BlockAccountRconCmd(pSelf, pResult->m_ClientId, "acc_unlock"))
+		return;
+
+	const char *pUsername = pResult->GetString(0);
+
+	char aBuf[512];
+	if(!IsValidUsernameAndPassword(pUsername, "placeholder", aBuf, sizeof(aBuf)))
+	{
+		log_error("ddnet-insta", "%s", aBuf);
+		return;
+	}
+
+	pSelf->m_pController->RconUnlockAccount(pResult->m_ClientId, pUsername);
+}
+
+void CGameContext::ConAccountInfo(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(BlockAccountRconCmd(pSelf, pResult->m_ClientId, "acc_info"))
+		return;
+
+	const char *pUsername = pResult->GetString(0);
+
+	char aBuf[512];
+	if(!IsValidUsernameAndPassword(pUsername, "placeholder", aBuf, sizeof(aBuf)))
+	{
+		log_error("ddnet-insta", "%s", aBuf);
+		return;
+	}
+
+	pSelf->m_pController->RconAccountInfo(pResult->m_ClientId, pUsername);
+}
+
+void CGameContext::ConAccountStatus(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_pController->RconAccountStatus(pResult->m_ClientId);
+}
+
+void CGameContext::ConAddUnclaimableName(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_UnclaimableNames.insert(pResult->GetString(0));
+}
+
+void CGameContext::ConRemoveUnclaimableName(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_UnclaimableNames.erase(pResult->GetString(0));
 }

@@ -2932,29 +2932,60 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 	}
 
 	// set infos
-	if(Server()->WouldClientNameChange(ClientId, pMsg->m_pName) && !ProcessSpamProtection(ClientId))
+	if(Server()->WouldClientNameChange(ClientId, pMsg->m_pName))
 	{
-		char aOldName[MAX_NAME_LENGTH];
-		str_copy(aOldName, Server()->ClientName(ClientId), sizeof(aOldName));
+		// ddnet-insta start
+		//
+		// WARNING: if there is a git conflict here apply the new upstream changes
+		//          to CGameContext::ChangeName()
+		//          the key changes are that all the ddnet code moved to the ChangeName() method
+		//          and the ProcessSpamProtection() was removed from the if statement above
 
-		Server()->SetClientName(ClientId, pMsg->m_pName);
+		// ddnet-insta added claimable names
+		// if a user uses a claimed name without being logged in
+		// to the correct account the server forces a rename
+		// then the client will attempt renames frequently
+		// also as side effect of changing the clan for example
+		// in that case we do want to whitelist this request
+		// to avoid players getting muted without actually spamming the chat
+		bool SkipSpamProtection = false;
+		if(g_Config.m_SvClaimableNames && !str_comp(pMsg->m_pName, pPlayer->m_DisplayName.WantedName()))
+		{
+			// the client requested to the name we already knows he wants
+			// so lets skip the spam protection
+			//
+			// even better would be to check if the name lookup is currently pending
+			// and then just silently do nothing
+			SkipSpamProtection = true;
+		}
 
-		char aChatText[256];
-		str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientId));
-		SendChat(-1, TEAM_ALL, aChatText);
+		if(!SkipSpamProtection && !ProcessSpamProtection(ClientId))
+		{
+			if(g_Config.m_SvClaimableNames)
+			{
+				// request name change
+				// the actual change happens in CGamecontext::ChangeName
+				// once the db query finished
+				if(str_comp(pMsg->m_pName, pPlayer->m_DisplayName.WantedName()))
+				{
+					pPlayer->m_DisplayName.SetWantedName(pMsg->m_pName);
+					const char *pWantedName = pPlayer->m_DisplayName.WantedName();
+					if(!m_pController->Db()->Accounts()->CheckNameClaimed(ClientId, pWantedName))
+						log_error("ddnet-insta", "failed to lookup name");
+				}
+				Server()->SetClientName(ClientId, pPlayer->m_DisplayName.DisplayName());
+			}
+			else
+			{
+				pPlayer->m_DisplayName.SetWantedName(pMsg->m_pName);
+				pPlayer->m_DisplayName.SetLastBroadcastedName(pMsg->m_pName);
+				ChangeName(ClientId, pMsg->m_pName, false, false);
 
-		// reload scores
-		Score()->PlayerData(ClientId)->Reset();
-		// ddnet-insta replaced Server()->SetClientScore() with ResetPlayerScore() which calls it internally
-		m_pController->ResetPlayerScore(pPlayer);
-		Score()->LoadPlayerData(ClientId);
+				SixupNeedsUpdate = true;
+			}
+		}
 
-		// ddnet-insta
-		m_pController->LoadNewPlayerNameData(pPlayer);
-
-		SixupNeedsUpdate = true;
-
-		LogEvent("Name change", ClientId);
+		// ddnet-insta end
 	}
 
 	if(Server()->WouldClientClanChange(ClientId, pMsg->m_pClan))
@@ -4475,7 +4506,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	m_pAntibot->RoundStart(this);
 
-	OnInitInstagib(); // ddnet-insta
+	OnInitInstagib(pPersistentData == nullptr); // ddnet-insta
 }
 
 void CGameContext::CreateAllEntities(bool Initial)
@@ -4730,6 +4761,10 @@ void CGameContext::OnShutdown(void *pPersistentData)
 		// ddnet-insta
 		m_pController->OnDataPersist(pPersistent);
 	}
+
+	// ddnet-insta
+	if(!pPersistent)
+		m_pController->OnShutdown();
 
 	Antibot()->RoundEnd();
 
