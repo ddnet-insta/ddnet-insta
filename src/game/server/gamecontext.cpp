@@ -1695,6 +1695,9 @@ bool CGameContext::OnClientDataPersist(int ClientId, void *pData)
 	pPersistent->m_IsSpectator = m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS;
 	pPersistent->m_IsAfk = m_apPlayers[ClientId]->IsAfk();
 	pPersistent->m_LastWhisperTo = m_apPlayers[ClientId]->m_LastWhisperTo;
+
+	m_pController->OnClientDataPersist(m_apPlayers[ClientId], pPersistent); // ddnet-insta
+
 	return true;
 }
 
@@ -1751,6 +1754,10 @@ void CGameContext::OnClientConnected(int ClientId, void *pData)
 	SendSettings(ClientId);
 
 	Server()->ExpireServerInfo();
+
+	// ddnet-insta
+	if(pPersistentData)
+		m_pController->OnClientDataRestore(m_apPlayers[ClientId], pPersistentData);
 }
 
 void CGameContext::OnClientDrop(int ClientId, const char *pReason)

@@ -2828,6 +2828,7 @@ if(SERVER)
     instagib/gamelogic.cpp
     instagib/laser_text.cpp
     instagib/laser_text.h
+    instagib/persistent_client_data.h
     instagib/protocol.h
     instagib/rcon_commands.cpp
     instagib/rcon_commands.h

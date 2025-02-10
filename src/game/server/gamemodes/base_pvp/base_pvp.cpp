@@ -1382,6 +1382,14 @@ bool CGameControllerPvp::LoadNewPlayerNameData(int ClientId)
 	return true;
 }
 
+void CGameControllerPvp::OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPersistentClientData *pData)
+{
+}
+
+void CGameControllerPvp::OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData)
+{
+}
+
 void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 {
 	m_InvalidateConnectedIpsCache = true;

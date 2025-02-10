@@ -50,6 +50,8 @@ public:
 	void InitPlayer(class CPlayer *pPlayer) override;
 	bool LoadNewPlayerNameData(int ClientId) override;
 	void OnLoadedNameStats(const CSqlStatsPlayer *pStats, class CPlayer *pPlayer) override;
+	void OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPersistentClientData *pData) override;
+	void OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData) override;
 
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
 

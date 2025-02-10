@@ -9,6 +9,7 @@
 #include <game/server/teams.h>
 
 #include <engine/shared/http.h> // ddnet-insta
+#include <game/server/gamecontext.h> // ddnet-insta
 #include <game/server/instagib/enums.h> // ddnet-insta
 #include <game/server/instagib/sql_stats.h> // ddnet-insta
 

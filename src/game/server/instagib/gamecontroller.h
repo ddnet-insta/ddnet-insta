@@ -13,6 +13,7 @@
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 
+#include <game/server/gamecontext.h>
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
@@ -87,6 +88,43 @@ public:
 			false - to let the ddnet code decide if clipping happens or not
 	*/
 	virtual bool ForceNetworkClippingLine(const CEntity *pEntity, int SnappingClient, vec2 StartPos, vec2 EndPos) { return false; }
+
+	/*
+		Function: OnClientDataPersist
+			Will be called before map changes.
+			Store your data here that you want to keep across map changes.
+			To extended the data struct have a look at the file
+
+			src/game/server/instagib/persistent_client_data.h
+
+			And to load the data again you have to also implement
+			OnClientDataRestore()
+
+		Arguments:
+			pPlayer - the player that is about to be destroyed (read from here)
+			pData - the struct that can store the values across map changes (write to this)
+	*/
+	virtual void OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPersistentClientData *pData){};
+
+	/*
+		Function: OnClientDataRestore
+			Will be called on map load. But only for players
+			that have persisted data from the last map change.
+
+			Will be called before map changes.
+			Store your data here that you want to keep across map changes.
+			To extended the data struct have a look at the file
+
+			src/game/server/instagib/persistent_client_data.h
+
+			And to load the data again you have to also implement
+			OnClientDataRestore()
+
+		Arguments:
+			pPlayer - the player that is about to be destroyed (write to this)
+			pData - the struct that can store the values across map changes (read from here)
+	*/
+	virtual void OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData){};
 
 	/*
 		Function: OnRoundStart

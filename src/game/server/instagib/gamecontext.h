@@ -111,7 +111,7 @@ public:
 
 	static void ConCreditsGctf(IConsole::IResult *pResult, void *pUserData);
 
-private:
+public:
 #ifndef IN_CLASS_IGAMECONTEXT
 };
 #endif
