@@ -280,6 +280,11 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_fng_spike_sound` (fng only) play flag capture sound when sacrificing an enemy into the spikes
 + `sv_punish_freeze_disconnect` (fng) 0=off otherwise bantime in minutes when leaving server while being frozen
 + `sv_laser_text_points` display laser text in the world on scoring (only fng for now)
++ `sv_self_damage_respawn_delay_ms` time in miliseconds it takes to respawn after dieing by self damage
++ `sv_self_kill_respawn_delay_ms` time in miliseconds it takes to respawn after sending kill bind
++ `sv_enemy_kill_respawn_delay_ms` time in miliseconds it takes to respawn after getting killed by enemies
++ `sv_world_kill_respawn_delay_ms` time in miliseconds it takes to respawn after touching a deathtile
++ `sv_game_kill_respawn_delay_ms` time in miliseconds it takes to respawn after team change, round start and so on
 + `sv_chat_ratelimit_long_messages` Needs sv_spamprotection 0 (0=off, 1=only messages longer than 12 chars are limited)
 + `sv_chat_ratelimit_spectators` Needs sv_spamprotection 0 (0=off, 1=specs have slow chat)
 + `sv_chat_ratelimit_public_chat` Needs sv_spamprotection 0 (0=off, 1=non team chat is slow)

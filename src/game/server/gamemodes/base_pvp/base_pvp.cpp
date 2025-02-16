@@ -1,3 +1,4 @@
+#include <base/log.h>
 #include <base/system.h>
 #include <engine/server/server.h>
 #include <engine/shared/config.h>
@@ -32,7 +33,7 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	GameServer()->Tuning()->Set("shotgun_speed", 2750);
 	GameServer()->Tuning()->Set("shotgun_speeddiff", 0.8f);
 
-	dbg_msg("ddnet-insta", "connecting to database ...");
+	log_info("ddnet-insta", "connecting to database ...");
 	// set the stats table to the gametype name in all lowercase
 	// if you want to track stats in a sql database for that gametype
 	m_pStatsTable = "";
@@ -58,7 +59,7 @@ void CGameControllerPvp::OnInit()
 
 void CGameControllerPvp::OnRoundStart()
 {
-	dbg_msg(
+	log_debug(
 		"ddnet-insta",
 		"new round start! Current game state: %s",
 		GameStateToStr(GameState()));
@@ -912,9 +913,25 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 {
 	CGameControllerDDRace::OnCharacterDeath(pVictim, pKiller, Weapon);
 
-	pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
+	// this is the vanilla base default respawn delay
+	// it can not be configured
+	// but it will overwritten by configurable delays in almost all cases
+	// so this only a fallback
+	int DelayInMs = 500;
+
 	if(Weapon == WEAPON_SELF)
-		pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() * 3.0f;
+		DelayInMs = g_Config.m_SvSelfKillRespawnDelayMs;
+	else if(Weapon == WEAPON_WORLD)
+		DelayInMs = g_Config.m_SvWorldKillRespawnDelayMs;
+	else if(Weapon == WEAPON_GAME)
+		DelayInMs = g_Config.m_SvGameKillRespawnDelayMs;
+	else if(pKiller && pVictim->GetPlayer() != pKiller)
+		DelayInMs = g_Config.m_SvEnemyKillRespawnDelayMs;
+	else if(pKiller && pVictim->GetPlayer() == pKiller)
+		DelayInMs = g_Config.m_SvSelfDamageRespawnDelayMs;
+
+	int DelayInTicks = (int)(Server()->TickSpeed() * ((float)DelayInMs / 1000.0f));
+	pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + DelayInTicks;
 
 	// do scoreing
 	if(!pKiller || Weapon == WEAPON_GAME)

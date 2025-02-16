@@ -74,6 +74,11 @@ MACRO_CONFIG_INT(SvFngSpikeSound, sv_fng_spike_sound, 1, 0, 1, CFGFLAG_SERVER, "
 MACRO_CONFIG_INT(SvPunishFreezeDisconnect, sv_punish_freeze_disconnect, 1, 0, 60, CFGFLAG_SERVER, "(fng) 0=off otherwise bantime in minutes when leaving server while being frozen")
 MACRO_CONFIG_STR(SvDisplayScore, sv_display_score, 512, "round_points", CFGFLAG_SERVER, "values: points, round_points, spree, current_spree, wins, kills, round_kills")
 MACRO_CONFIG_INT(SvLaserTextPoints, sv_laser_text_points, 1, 0, 1, CFGFLAG_SERVER, "display laser text in the world on scoring (only fng for now)")
+MACRO_CONFIG_INT(SvSelfDamageRespawnDelayMs, sv_self_damage_respawn_delay_ms, 500, 0, 10000, CFGFLAG_SERVER, "time in miliseconds it takes to respawn after dieing by self damage")
+MACRO_CONFIG_INT(SvSelfKillRespawnDelayMs, sv_self_kill_respawn_delay_ms, 3000, 0, 10000, CFGFLAG_SERVER, "time in miliseconds it takes to respawn after sending kill bind")
+MACRO_CONFIG_INT(SvEnemyKillRespawnDelayMs, sv_enemy_kill_respawn_delay_ms, 500, 0, 10000, CFGFLAG_SERVER, "time in miliseconds it takes to respawn after getting killed by enemies")
+MACRO_CONFIG_INT(SvWorldKillRespawnDelayMs, sv_world_kill_respawn_delay_ms, 500, 0, 10000, CFGFLAG_SERVER, "time in miliseconds it takes to respawn after touching a deathtile")
+MACRO_CONFIG_INT(SvGameKillRespawnDelayMs, sv_game_kill_respawn_delay_ms, 500, 0, 10000, CFGFLAG_SERVER, "time in miliseconds it takes to respawn after team change, round start and so on")
 
 /*
 
