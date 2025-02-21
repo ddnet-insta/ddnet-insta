@@ -271,7 +271,7 @@ void CGameContext::SendGameMsg(int GameMsgId, int ClientId) const
 		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 		return;
 	}
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < Server()->MaxClients(); i++)
 	{
 		if(Server()->IsSixup(i))
 		{
@@ -292,8 +292,11 @@ void CGameContext::SendGameMsg(int GameMsgId, int ParaI1, int ClientId) const
 		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 		return;
 	}
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < Server()->MaxClients(); i++)
 	{
+		if(!m_apPlayers[i])
+			continue;
+
 		if(Server()->IsSixup(i))
 		{
 			Server()->SendMsg(&Msg, MSGFLAG_VITAL, i);
@@ -302,7 +305,7 @@ void CGameContext::SendGameMsg(int GameMsgId, int ParaI1, int ClientId) const
 		if(GameMsgId == protocol7::GAMEMSG_GAME_PAUSED)
 		{
 			char aBuf[512];
-			int PauseId = clamp(ParaI1, 0, MAX_CLIENTS - 1);
+			int PauseId = clamp(ParaI1, 0, Server()->MaxClients() - 1);
 			str_format(aBuf, sizeof(aBuf), "'%s' initiated a pause. If you are ready do /ready", Server()->ClientName(PauseId));
 			SendChatTarget(i, aBuf);
 		}
@@ -318,7 +321,7 @@ void CGameContext::SendGameMsg(int GameMsgId, int ParaI1, int ParaI2, int ParaI3
 	Msg.AddInt(ParaI3);
 	if(ClientId != -1)
 		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < Server()->MaxClients(); i++)
 	{
 		if(Server()->IsSixup(i))
 		{

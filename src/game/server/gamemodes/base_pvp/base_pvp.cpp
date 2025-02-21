@@ -91,7 +91,7 @@ void CGameControllerPvp::OnRoundStart()
 	// round end is too early because then players do not see the final scoreboard
 	if(g_Config.m_SvRedirectAndShutdownOnRoundEnd)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < Server()->MaxClients(); i++)
 			if(Server()->ClientIngame(i))
 				Server()->RedirectClient(i, g_Config.m_SvRedirectAndShutdownOnRoundEnd);
 

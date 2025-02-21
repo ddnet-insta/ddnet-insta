@@ -166,7 +166,7 @@ void IGameController::CheckReadyStates(int WithoutId)
 bool IGameController::GetPlayersReadyState(int WithoutId, int *pNumUnready)
 {
 	int Unready = 0;
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	for(int i = 0; i < Server()->MaxClients(); ++i)
 	{
 		if(i == WithoutId)
 			continue; // skip
@@ -277,7 +277,7 @@ bool IGameController::IsFriendlyFire(int ClientId1, int ClientId2)
 void IGameController::SendGameInfo(int ClientId)
 {
 	// ddnet-insta
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < Server()->MaxClients(); i++)
 	{
 		if(ClientId != -1)
 			if(ClientId != i)
@@ -314,7 +314,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 				// enable respawning in survival when activating warmup
 				// if(m_GameFlags&GAMEFLAG_SURVIVAL)
 				// {
-				// 	for(int i = 0; i < MAX_CLIENTS; ++i)
+				// 	for(int i = 0; i < Server()->MaxClients(); ++i)
 				// 		if(GameServer()->m_apPlayers[i])
 				// 			GameServer()->m_apPlayers[i]->m_RespawnDisabled = false;
 				// }
@@ -356,7 +356,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 				// enable respawning in survival when activating warmup
 				// if(m_GameFlags&GAMEFLAG_SURVIVAL)
 				// {
-				// 	for(int i = 0; i < MAX_CLIENTS; ++i)
+				// 	for(int i = 0; i < Server()->MaxClients(); ++i)
 				// 		if(GameServer()->m_apPlayers[i])
 				// 			GameServer()->m_apPlayers[i]->m_RespawnDisabled = false;
 				// }
