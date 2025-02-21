@@ -373,6 +373,8 @@ public:
 	void OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int Id) override;
 	void ReadCensorList();
 
+	bool PracticeByDefault() const;
+
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
 private:
@@ -452,6 +454,7 @@ private:
 	static void ConMapInfo(IConsole::IResult *pResult, void *pUserData);
 	static void ConTimeout(IConsole::IResult *pResult, void *pUserData);
 	static void ConPractice(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnPractice(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeCmdList(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwap(IConsole::IResult *pResult, void *pUserData);
 	static void ConCancelSwap(IConsole::IResult *pResult, void *pUserData);

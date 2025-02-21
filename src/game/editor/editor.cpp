@@ -969,7 +969,7 @@ bool CEditor::CallbackCustomEntities(const char *pFileName, int StorageType, voi
 	}
 
 	pEditor->m_SelectEntitiesImage = aBuf;
-	pEditor->m_AllowPlaceUnusedTiles = -1;
+	pEditor->m_AllowPlaceUnusedTiles = EUnusedEntities::ALLOWED_IMPLICIT;
 	pEditor->m_PreventUnusedTilesWasWarned = false;
 
 	pEditor->Graphics()->UnloadTexture(&pEditor->m_EntitiesTexture);
@@ -1091,8 +1091,17 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 	}
 
 	// handle shortcut for unused button
-	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_U) && ModPressed)
-		m_AllowPlaceUnusedTiles = !m_AllowPlaceUnusedTiles;
+	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_U) && ModPressed && m_AllowPlaceUnusedTiles != EUnusedEntities::ALLOWED_IMPLICIT)
+	{
+		if(m_AllowPlaceUnusedTiles == EUnusedEntities::ALLOWED_EXPLICIT)
+		{
+			m_AllowPlaceUnusedTiles = EUnusedEntities::NOT_ALLOWED;
+		}
+		else
+		{
+			m_AllowPlaceUnusedTiles = EUnusedEntities::ALLOWED_EXPLICIT;
+		}
+	}
 
 	CUIRect TB_Top, TB_Bottom;
 	CUIRect Button;
@@ -3796,6 +3805,12 @@ void CEditor::DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRG
 	}
 }
 
+bool CEditor::IsAllowPlaceUnusedTiles() const
+{
+	// explicit allow and implicit allow
+	return m_AllowPlaceUnusedTiles != EUnusedEntities::NOT_ALLOWED;
+}
+
 void CEditor::RenderLayers(CUIRect LayersBox)
 {
 	const float RowHeight = 12.0f;
@@ -4251,7 +4266,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 							}
 						}
 
-						Ui()->DoPopupMenu(&s_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 120, 270, &s_LayerPopupContext, PopupLayer);
+						Ui()->DoPopupMenu(&s_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 120, 280, &s_LayerPopupContext, PopupLayer);
 					}
 
 					SetOperation(OP_NONE);
@@ -4508,8 +4523,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 	}
 
 	std::shared_ptr<CEditorImage> pImg = m_Map.m_vpImages[m_SelectedImage];
-	Graphics()->UnloadTexture(&(pImg->m_Texture));
-	pImg->Free();
+	pImg->CEditorImage::Free();
 	pImg->m_Width = ImgInfo.m_Width;
 	pImg->m_Height = ImgInfo.m_Height;
 	pImg->m_Format = ImgInfo.m_Format;
@@ -7880,7 +7894,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	if(DoButton_Ex(&s_FileButton, "File", 0, &FileButton, 0, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
 	{
 		static SPopupMenuId s_PopupMenuFileId;
-		Ui()->DoPopupMenu(&s_PopupMenuFileId, FileButton.x, FileButton.y + FileButton.h - 1.0f, 120.0f, 174.0f, this, PopupMenuFile, PopupProperties);
+		Ui()->DoPopupMenu(&s_PopupMenuFileId, FileButton.x, FileButton.y + FileButton.h - 1.0f, 120.0f, 188.0f, this, PopupMenuFile, PopupProperties);
 	}
 
 	MenuBar.VSplitLeft(5.0f, nullptr, &MenuBar);
@@ -8464,6 +8478,10 @@ void CEditor::RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 				   (Index >= ENTITY_ARMOR_SHOTGUN && Index <= ENTITY_ARMOR_LASER)))
 				continue;
 
+			const bool DDNetOrCustomEntities = std::find_if(std::begin(gs_apModEntitiesNames), std::end(gs_apModEntitiesNames),
+								   [&](const char *pEntitiesName) { return str_comp_nocase(m_SelectEntitiesImage.c_str(), pEntitiesName) == 0 &&
+													   str_comp_nocase(pEntitiesName, "ddnet") != 0; }) == std::end(gs_apModEntitiesNames);
+
 			vec2 Pos(x * TileSize, y * TileSize);
 			vec2 Scale;
 			int VisualSize;
@@ -8519,29 +8537,34 @@ void CEditor::RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 				VisualSize = 128;
 				Pos.x -= 10.0f;
 			}
-			else if(Index == ENTITY_ARMOR_SHOTGUN)
+			else if(DDNetOrCustomEntities)
 			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorShotgun);
-				RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_SHOTGUN, Scale.x, Scale.y);
-				VisualSize = 64;
-			}
-			else if(Index == ENTITY_ARMOR_GRENADE)
-			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorGrenade);
-				RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_GRENADE, Scale.x, Scale.y);
-				VisualSize = 64;
-			}
-			else if(Index == ENTITY_ARMOR_NINJA)
-			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorNinja);
-				RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_NINJA, Scale.x, Scale.y);
-				VisualSize = 64;
-			}
-			else if(Index == ENTITY_ARMOR_LASER)
-			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorLaser);
-				RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_LASER, Scale.x, Scale.y);
-				VisualSize = 64;
+				if(Index == ENTITY_ARMOR_SHOTGUN)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorShotgun);
+					RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_SHOTGUN, Scale.x, Scale.y);
+					VisualSize = 64;
+				}
+				else if(Index == ENTITY_ARMOR_GRENADE)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorGrenade);
+					RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_GRENADE, Scale.x, Scale.y);
+					VisualSize = 64;
+				}
+				else if(Index == ENTITY_ARMOR_NINJA)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorNinja);
+					RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_NINJA, Scale.x, Scale.y);
+					VisualSize = 64;
+				}
+				else if(Index == ENTITY_ARMOR_LASER)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorLaser);
+					RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_LASER, Scale.x, Scale.y);
+					VisualSize = 64;
+				}
+				else
+					continue;
 			}
 			else
 				continue;

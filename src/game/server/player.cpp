@@ -389,7 +389,7 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_PlayerFlags = PlayerFlags_SixToSeven(m_PlayerFlags);
 		if(SnappingClientVersion >= VERSION_DDRACE && (m_PlayerFlags & PLAYERFLAG_AIM))
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_AIM;
-		if(Server()->GetAuthedState(m_ClientId) != AUTHED_NO)
+		if(Server()->GetAuthedState(m_ClientId) && ((SnappingClient >= 0 && Server()->GetAuthedState(SnappingClient)) || !Server()->HasAuthHidden(m_ClientId)))
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
 		if(!GameServer()->m_pController->IsPlayerReadyMode() || m_IsReadyToPlay)
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_READY;
@@ -443,6 +443,33 @@ void CPlayer::Snap(int SnappingClient)
 			pDDNetSpectatorInfo->m_Zoom = pSpecPlayer->m_CameraInfo.m_Zoom * 1000.0f;
 			pDDNetSpectatorInfo->m_Deadzone = pSpecPlayer->m_CameraInfo.m_Deadzone;
 			pDDNetSpectatorInfo->m_FollowFactor = pSpecPlayer->m_CameraInfo.m_FollowFactor;
+
+			if(SpectatingClient == id && SnappingClient != SERVER_DEMO_CLIENT && m_Team != TEAM_SPECTATORS && !m_Paused)
+			{
+				int SpectatorCount = 0;
+				for(auto &pPlayer : GameServer()->m_apPlayers)
+				{
+					if(!pPlayer || pPlayer->m_ClientId == id || pPlayer->m_Afk ||
+						!(pPlayer->m_Paused || pPlayer->m_Team == TEAM_SPECTATORS))
+					{
+						continue;
+					}
+
+					if(pPlayer->m_SpectatorId == id)
+					{
+						SpectatorCount++;
+					}
+					else if(GameServer()->m_apPlayers[id]->GetCharacter())
+					{
+						vec2 CheckPos = GameServer()->m_apPlayers[id]->GetCharacter()->GetPos();
+						float dx = pPlayer->m_ViewPos.x - CheckPos.x;
+						float dy = pPlayer->m_ViewPos.y - CheckPos.y;
+						if(absolute(dx) < (pPlayer->m_ShowDistance.x / 2.5f) && absolute(dy) < (pPlayer->m_ShowDistance.y / 2.3f))
+							SpectatorCount++;
+					}
+				}
+				pDDNetSpectatorInfo->m_SpectatorCount = SpectatorCount;
+			}
 		}
 	}
 
@@ -450,7 +477,11 @@ void CPlayer::Snap(int SnappingClient)
 	if(!pDDNetPlayer)
 		return;
 
-	pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(m_ClientId);
+	if((SnappingClient >= 0 && Server()->GetAuthedState(SnappingClient)) || !Server()->HasAuthHidden(m_ClientId))
+		pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(m_ClientId);
+	else
+		pDDNetPlayer->m_AuthLevel = AUTHED_NO;
+
 	pDDNetPlayer->m_Flags = 0;
 	if(m_Afk)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AFK;
@@ -555,8 +586,6 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 	// Magic number when we can hope that client has successfully identified itself
 	if(m_NumInputs == 20 && g_Config.m_SvClientSuggestion[0] != '\0' && GetClientVersion() <= VERSION_DDNET_OLD)
 		GameServer()->SendBroadcast(g_Config.m_SvClientSuggestion, m_ClientId);
-	else if(m_NumInputs == 200 && Server()->IsSixup(m_ClientId))
-		GameServer()->SendBroadcast("This server uses an experimental translation from Teeworlds 0.7 to 0.6. Please report bugs on ddnet.org/discord", m_ClientId);
 }
 
 void CPlayer::OnDirectInput(CNetObj_PlayerInput *pNewInput)
