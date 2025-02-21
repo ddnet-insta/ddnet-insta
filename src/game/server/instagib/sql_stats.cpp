@@ -42,6 +42,12 @@ void CInstaSqlResult::SetVariant(EInstaSqlRequestType RequestType)
 	}
 }
 
+// hack to avoid editing connection.h in ddnet code
+ESqlBackend CSqlStats::DetectBackend(IDbConnection *pSqlServer)
+{
+	return str_comp(pSqlServer->BinaryCollate(), "BINARY") == 0 ? ESqlBackend::SQLITE3 : ESqlBackend::MYSQL;
+}
+
 std::shared_ptr<CInstaSqlResult> CSqlStats::NewInstaSqlResult(int ClientId)
 {
 	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientId];
@@ -336,7 +342,7 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 		sizeof(aBuf),
 		"SELECT"
 		" points, kills, deaths, spree,"
-		" wins, losses, shots_fired, shots_hit %s "
+		" win_points, wins, losses, shots_fired, shots_hit %s "
 		"FROM %s "
 		"WHERE name = ?;",
 		!pData->m_pExtraColumns ? "" : pData->m_pExtraColumns->SelectColumns(),
@@ -374,6 +380,7 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 		pResult->m_Stats.m_Kills = pSqlServer->GetInt(Offset++);
 		pResult->m_Stats.m_Deaths = pSqlServer->GetInt(Offset++);
 		pResult->m_Stats.m_BestSpree = pSqlServer->GetInt(Offset++);
+		pResult->m_Stats.m_WinPoints = pSqlServer->GetInt(Offset++);
 		pResult->m_Stats.m_Wins = pSqlServer->GetInt(Offset++);
 		pResult->m_Stats.m_Losses = pSqlServer->GetInt(Offset++);
 		pResult->m_Stats.m_ShotsFired = pSqlServer->GetInt(Offset++);
@@ -784,7 +791,7 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 		sizeof(aBuf),
 		"SELECT"
 		" name, points, kills, deaths, spree,"
-		" wins, losses, shots_fired, shots_hit %s "
+		" win_points, wins, losses, shots_fired, shots_hit %s "
 		"FROM %s "
 		"WHERE name = ?;",
 		!pData->m_pExtraColumns ? "" : pData->m_pExtraColumns->SelectColumns(),
@@ -821,7 +828,7 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 			"%s INTO %s%s(" // INSERT INTO
 			" name,"
 			" points, kills, deaths, spree,"
-			" wins, losses,"
+			" win_points, wins, losses,"
 			" shots_fired, shots_hit  %s"
 			") VALUES ("
 			" ?,"
@@ -850,6 +857,7 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 		pSqlServer->BindInt(Offset++, pData->m_Stats.m_Kills);
 		pSqlServer->BindInt(Offset++, pData->m_Stats.m_Deaths);
 		pSqlServer->BindInt(Offset++, pData->m_Stats.m_BestSpree);
+		pSqlServer->BindInt(Offset++, pData->m_Stats.m_WinPoints);
 		pSqlServer->BindInt(Offset++, pData->m_Stats.m_Wins);
 		pSqlServer->BindInt(Offset++, pData->m_Stats.m_Losses);
 		pSqlServer->BindInt(Offset++, pData->m_Stats.m_ShotsFired);
@@ -884,6 +892,7 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 		MergeStats.m_Kills = pSqlServer->GetInt(Offset++);
 		MergeStats.m_Deaths = pSqlServer->GetInt(Offset++);
 		MergeStats.m_BestSpree = pSqlServer->GetInt(Offset++);
+		MergeStats.m_WinPoints = pSqlServer->GetInt(Offset++);
 		MergeStats.m_Wins = pSqlServer->GetInt(Offset++);
 		MergeStats.m_Losses = pSqlServer->GetInt(Offset++);
 		MergeStats.m_ShotsFired = pSqlServer->GetInt(Offset++);
@@ -911,7 +920,7 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 			"UPDATE %s%s "
 			"SET"
 			" points = ?, kills = ?, deaths = ?, spree = ?,"
-			" wins = ?, losses = ?,"
+			" win_points = ?, wins = ?, losses = ?,"
 			" shots_fired = ?, shots_hit = ? %s"
 			"WHERE name = ?;",
 			pData->m_aTable,
@@ -929,6 +938,7 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 		pSqlServer->BindInt(Offset++, MergeStats.m_Kills);
 		pSqlServer->BindInt(Offset++, MergeStats.m_Deaths);
 		pSqlServer->BindInt(Offset++, MergeStats.m_BestSpree);
+		pSqlServer->BindInt(Offset++, MergeStats.m_WinPoints);
 		pSqlServer->BindInt(Offset++, MergeStats.m_Wins);
 		pSqlServer->BindInt(Offset++, MergeStats.m_Losses);
 		pSqlServer->BindInt(Offset++, MergeStats.m_ShotsFired);
@@ -1010,6 +1020,7 @@ bool CSqlStats::CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGa
 		"kills       INTEGER       DEFAULT 0,"
 		"deaths      INTEGER       DEFAULT 0,"
 		"spree       INTEGER       DEFAULT 0,"
+		"win_points  INTEGER       DEFAULT 0,"
 		"wins        INTEGER       DEFAULT 0,"
 		"losses      INTEGER       DEFAULT 0,"
 		"shots_fired INTEGER       DEFAULT 0,"
@@ -1029,7 +1040,106 @@ bool CSqlStats::CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGa
 	}
 	pSqlServer->Print();
 	int NumInserted;
+	if(pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
+		return true;
+
+	// apply missing migrations
+	// this is for seamless backwards compatibility
+	// upgrade database schema automatically
+
+	bool (*pfnAddInt)(IDbConnection *, const char *, const char *, char *, int) = nullptr;
+
+	if(DetectBackend(pSqlServer) == ESqlBackend::SQLITE3)
+		pfnAddInt = AddColumnIntDefault0Sqlite3;
+	else if(DetectBackend(pSqlServer) == ESqlBackend::MYSQL)
+		pfnAddInt = AddColumnIntDefault0Mysql;
+
+	if(pfnAddInt)
+		pfnAddInt(pSqlServer, pData->m_aName, "win_points", pError, ErrorSize);
+
+	return false;
+}
+
+bool CSqlStats::AddIntColumn(IDbConnection *pSqlServer, const char *pTableName, const char *pColumnName, int Default, char *pError, int ErrorSize)
+{
+	char aBuf[4096];
+	str_format(
+		aBuf,
+		sizeof(aBuf),
+		"ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT %d;", pTableName, pColumnName, Default);
+
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->Print();
+	int NumInserted;
 	return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
+}
+
+bool CSqlStats::AddColumnIntDefault0Sqlite3(IDbConnection *pSqlServer, const char *pTableName, const char *pColumnName, char *pError, int ErrorSize)
+{
+	char aBuf[4096];
+	str_copy(
+		aBuf,
+		"SELECT COUNT() FROM pragma_table_info(?) WHERE name = ?;");
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
+		return true;
+	}
+	pSqlServer->BindString(1, pTableName);
+	pSqlServer->BindString(2, pColumnName);
+	pSqlServer->Print();
+
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		dbg_msg("sql-thread", "step failed query: %s", aBuf);
+		return true;
+	}
+
+	if(End)
+	{
+		// we expect 0 or 1 but never nothing
+		dbg_msg("sql-thread", "something went wrong failed query: %s", aBuf);
+		return true;
+	}
+	if(pSqlServer->GetInt(1) == 0)
+	{
+		log_info("sql-thread", "adding missing sqlite3 column '%s' to '%s'", pColumnName, pTableName);
+		return AddIntColumn(pSqlServer, pTableName, pColumnName, 0, pError, ErrorSize);
+	}
+	return false;
+}
+
+bool CSqlStats::AddColumnIntDefault0Mysql(IDbConnection *pSqlServer, const char *pTableName, const char *pColumnName, char *pError, int ErrorSize)
+{
+	char aBuf[4096];
+	str_format(
+		aBuf,
+		sizeof(aBuf),
+		"show columns from %s where Field = ?;",
+		pTableName);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
+		return true;
+	}
+	pSqlServer->BindString(1, pColumnName);
+	pSqlServer->Print();
+
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		dbg_msg("sql-thread", "step failed query: %s", aBuf);
+		return true;
+	}
+	if(!End)
+		return false;
+
+	log_info("sql-thread", "adding missing mysql column '%s' to '%s'", pColumnName, pTableName);
+	return AddIntColumn(pSqlServer, pTableName, pColumnName, 0, pError, ErrorSize);
 }
 
 bool CSqlStats::CreateFastcapTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)

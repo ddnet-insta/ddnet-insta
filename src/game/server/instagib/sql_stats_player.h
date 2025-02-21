@@ -21,6 +21,7 @@ public:
 	int m_Kills;
 	int m_Deaths;
 	// in zCatch wins and losses are only counted if enough players are connected
+	int m_WinPoints;
 	int m_Wins;
 	int m_Losses;
 	// used to track accuracy in any gametype
@@ -103,6 +104,7 @@ public:
 		m_BestSpree = 0;
 		m_Wins = 0;
 		m_Losses = 0;
+		m_WinPoints = 0;
 		m_ShotsFired = 0;
 		m_ShotsHit = 0;
 
@@ -136,6 +138,7 @@ public:
 		m_Kills += pOther->m_Kills;
 		m_Deaths += pOther->m_Deaths;
 		m_BestSpree = std::max(m_BestSpree, pOther->m_BestSpree);
+		m_WinPoints += pOther->m_WinPoints;
 		m_Wins += pOther->m_Wins;
 		m_Losses += pOther->m_Losses;
 		m_ShotsFired += pOther->m_ShotsFired;
@@ -150,6 +153,7 @@ public:
 		dbg_msg(pSystem, "  kills: %d", m_Kills);
 		dbg_msg(pSystem, "  deaths: %d", m_Deaths);
 		dbg_msg(pSystem, "  spree: %d", m_BestSpree);
+		dbg_msg(pSystem, "  win_points: %d", m_WinPoints);
 		dbg_msg(pSystem, "  wins: %d", m_Wins);
 		dbg_msg(pSystem, "  losses: %d", m_Losses);
 		dbg_msg(pSystem, "  shots_fired: %d", m_ShotsFired);
@@ -166,6 +170,7 @@ public:
 		       m_Kills ||
 		       m_Deaths ||
 		       m_BestSpree ||
+		       m_WinPoints ||
 		       m_Wins ||
 		       m_Losses ||
 		       m_ShotsFired ||
