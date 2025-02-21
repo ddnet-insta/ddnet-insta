@@ -1011,7 +1011,6 @@ void CCharacter::StopRecording()
 void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 {
 	StopRecording();
-	m_pPlayer->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, (Killer < 0) ? nullptr : GameServer()->m_apPlayers[Killer], Weapon);
 
 	char aBuf[512];
