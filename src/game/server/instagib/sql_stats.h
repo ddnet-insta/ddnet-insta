@@ -183,6 +183,12 @@ struct CSqlCreateTableRequest : ISqlData
 	char m_aColumns[2048];
 };
 
+enum class ESqlBackend
+{
+	SQLITE3,
+	MYSQL
+};
+
 class CSqlStats
 {
 	CDbConnectionPool *m_pPool;
@@ -192,6 +198,14 @@ class CSqlStats
 	IServer *m_pServer;
 
 	CExtraColumns *m_pExtraColumns = nullptr;
+
+	// hack to avoid editing connection.h in ddnet code
+	static ESqlBackend DetectBackend(IDbConnection *pSqlServer);
+
+	static bool AddIntColumn(IDbConnection *pSqlServer, const char *pTableName, const char *pColumnName, int Default, char *pError, int ErrorSize);
+
+	static bool AddColumnIntDefault0Sqlite3(IDbConnection *pSqlServer, const char *pTableName, const char *pColumnName, char *pError, int ErrorSize);
+	static bool AddColumnIntDefault0Mysql(IDbConnection *pSqlServer, const char *pTableName, const char *pColumnName, char *pError, int ErrorSize);
 
 	// non ratelimited server side queries
 	static bool CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
