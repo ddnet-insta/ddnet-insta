@@ -48,6 +48,15 @@ public:
 	*/
 	bool IsTouchingTile(int Tile);
 
+	// High sensitive tile collision checker. Used for fng spikes.
+	// Same radius as vanilla death tiles.
+	// If we touch multiple tiles at the same time it returns the closest distance.
+	//
+	// Basically the same as IsTouchingTile()
+	// but it returns 1024.0f if not close enough
+	// and otherwise the distance to the tile.
+	float DistToTouchingTile(int Tile);
+
 	void Rainbow(bool Activate);
 	bool HasRainbow() const { return m_Rainbow; }
 

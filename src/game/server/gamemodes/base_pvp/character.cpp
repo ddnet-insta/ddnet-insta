@@ -45,6 +45,67 @@ bool CCharacter::IsTouchingTile(int Tile)
 	return false;
 }
 
+float CCharacter::DistToTouchingTile(int Tile)
+{
+#define NOT_FOUND 1024.0f
+
+	if(!Collision()->GameLayer())
+		return NOT_FOUND;
+
+	float Prox = GetProximityRadius() / 3.f;
+	int Left = (m_Pos.x - Prox) / 32;
+	int Right = (m_Pos.x + Prox) / 32;
+	int Up = (m_Pos.y - Prox) / 32;
+	int Down = (m_Pos.y + Prox) / 32;
+
+	vec2 TeeCenter = m_Pos;
+
+	int aPositionsX[] = {Left, Right};
+	int aPositionsY[] = {Up, Down};
+
+	float ClosestDistance = NOT_FOUND;
+
+	for(int PosX : aPositionsX)
+	{
+		for(int PosY : aPositionsY)
+		{
+			if((Collision()->GetIndex(PosX, PosY) == Tile))
+			{
+				vec2 TileCenter = vec2(PosX, PosY);
+				TileCenter.x *= 32;
+				TileCenter.y *= 32;
+				TileCenter.x += 16;
+				TileCenter.y += 16;
+				float Dist = distance(TileCenter, TeeCenter);
+				if(Dist < ClosestDistance)
+					ClosestDistance = Dist;
+			}
+		}
+	}
+
+	if(!Collision()->FrontLayer())
+		return ClosestDistance;
+
+	for(int PosX : aPositionsX)
+	{
+		for(int PosY : aPositionsY)
+		{
+			if((Collision()->GetFrontIndex(PosX, PosY) == Tile))
+			{
+				vec2 TileCenter = vec2(PosX / 32, PosY / 32);
+				TileCenter.x += 16;
+				TileCenter.y += 16;
+				float Dist = distance(TileCenter, TeeCenter);
+				if(Dist < ClosestDistance)
+					ClosestDistance = Dist;
+			}
+		}
+	}
+
+#undef NOT_FOUND
+	return ClosestDistance;
+}
+
 bool CCharacter::OnFngFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos)
 {
 	if(Weapon != WEAPON_HAMMER)

@@ -46,18 +46,30 @@ void CGameControllerBaseFng::Tick()
 		if(!pChr || !pChr->IsAlive())
 			continue;
 
-		if(pChr->IsTouchingTile(TILE_FNG_SPIKE_RED))
-			OnSpike(pChr, TILE_FNG_SPIKE_RED);
-		if(pChr->IsTouchingTile(TILE_FNG_SPIKE_BLUE))
-			OnSpike(pChr, TILE_FNG_SPIKE_BLUE);
-		if(pChr->IsTouchingTile(TILE_FNG_SPIKE_NORMAL))
-			OnSpike(pChr, TILE_FNG_SPIKE_NORMAL);
-		if(pChr->IsTouchingTile(TILE_FNG_SPIKE_GOLD))
-			OnSpike(pChr, TILE_FNG_SPIKE_GOLD);
-		if(pChr->IsTouchingTile(TILE_FNG_SPIKE_GREEN))
-			OnSpike(pChr, TILE_FNG_SPIKE_GREEN);
-		if(pChr->IsTouchingTile(TILE_FNG_SPIKE_PURPLE))
-			OnSpike(pChr, TILE_FNG_SPIKE_PURPLE);
+		int aSpikeTiles[] = {
+			TILE_FNG_SPIKE_RED,
+			TILE_FNG_SPIKE_BLUE,
+			TILE_FNG_SPIKE_NORMAL,
+			TILE_FNG_SPIKE_GOLD,
+			TILE_FNG_SPIKE_GREEN,
+			TILE_FNG_SPIKE_PURPLE};
+		int ClosestTile = 0;
+		float ClosestDistance = 1000;
+
+		for(int Spike : aSpikeTiles)
+		{
+			float Dist = pChr->DistToTouchingTile(Spike);
+			if(Dist > 1000)
+				continue;
+			if(Dist > ClosestDistance)
+				continue;
+
+			ClosestDistance = Dist;
+			ClosestTile = Spike;
+		}
+
+		if(ClosestTile)
+			OnSpike(pChr, ClosestTile);
 	}
 
 	if(m_ReleaseAllFrozenQuittersTick < Server()->Tick() && !m_vFrozenQuitters.empty())
