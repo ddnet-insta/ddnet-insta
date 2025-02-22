@@ -412,6 +412,24 @@ void CGameControllerZcatch::OnCaught(class CPlayer *pVictim, class CPlayer *pKil
 
 int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
+	if(pKiller && GameState() != IGS_END_ROUND && WeaponId != WEAPON_GAME)
+	{
+		// +1 extra score point for killing players
+		// that already made kills
+		// https://github.com/ddnet-insta/ddnet-insta/issues/274#issuecomment-2668575613
+		if(pVictim->GetPlayer()->m_Spree && pKiller != pVictim->GetPlayer())
+			pKiller->IncrementScore();
+		// -2 extra score punishment in zCatch for dieing in world
+		// or suicide
+		//
+		// this is also called on disconnect but it is fine
+		// because the disconnecting player will be saved first
+		// and then punished
+		// so the value is never persisted in the database
+		if(pKiller == pVictim->GetPlayer())
+			pKiller->AddScore(-2);
+	}
+
 	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
 	pVictim->GetPlayer()->m_KillsThatCount = 0;
 
