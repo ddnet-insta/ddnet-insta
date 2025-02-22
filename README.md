@@ -31,6 +31,16 @@ of your gamemode directory. Just look at the existing gamemodes for examples. A 
 [vanilla deathmatch](https://github.com/ddnet-insta/ddnet-insta/tree/ba38c11ccf46e888786c90c7dc0f09503be19a49/src/game/server/gamemodes/vanilla/dm).
 Adding your own stats columns and rank/top commands can be done in a few lines of code without writing any SQL.
 
+# Project goals
+
+- Stay close and up to date with upstream ddnet. Keep the git diff in files edited by ddnet as minimal as possible to keep merging cheap.
+- Be generic, consistent and configurable. If possible the same config variables and concepts should be applied to all gametypes.
+  For example configs such as anticamper should not be ``sv_zcatch_anticamper`` but ``sv_anticamper`` and work in all gametypes.
+- Support latest ddnet and teeworlds clients fully and correctly.
+- Be friendly to downstream projects. Commits and releases should warn about breaking changes.
+  Downstream projects should have an easy time to add new gametypes that can be updated to new ddnet-insta versions
+  without a lot of effort.
+
 # Features
 
 ## Stats tracked in sql database
