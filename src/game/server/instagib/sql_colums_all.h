@@ -26,9 +26,11 @@
 #include <game/server/gamemodes/vanilla/ctf/sql_columns.h>
 #include <game/server/gamemodes/vanilla/dm/sql_columns.h>
 
+MACRO_RANK_COLUMN(WinPoints, win_points, "Win points", "DESC")
 MACRO_RANK_COLUMN(Wins, wins, "Wins", "DESC")
 MACRO_RANK_COLUMN(BestSpree, spree, "killing spree", "DESC")
 
+MACRO_TOP_COLUMN(WinPoints, win_points, "Win points", "DESC")
 MACRO_TOP_COLUMN(Wins, wins, "Wins", "DESC")
 MACRO_TOP_COLUMN(BestSpree, spree, "killing spree", "DESC")
 MACRO_TOP_COLUMN(Points, points, "Points", "DESC")
