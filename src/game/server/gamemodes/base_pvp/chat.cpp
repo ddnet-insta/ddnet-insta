@@ -265,7 +265,7 @@ bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumAr
 	if(SetSlots != -1)
 	{
 		char aCmd[512];
-		str_format(aCmd, sizeof(aCmd), "sv_spectator_slots %d", MAX_CLIENTS - (SetSlots * 2));
+		str_format(aCmd, sizeof(aCmd), "sv_spectator_slots %d", Server()->MaxClients() - (SetSlots * 2));
 		char aDesc[512];
 		str_format(aDesc, sizeof(aDesc), "%dvs%d", SetSlots, SetSlots);
 		GameServer()->BangCommandVote(ClientId, aCmd, aDesc);
