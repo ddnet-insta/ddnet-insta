@@ -363,6 +363,9 @@ bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, i
 	if(IsChatBlocked(pMsg, Length, Team, pPlayer))
 		return true;
 
+	if(!pMsg->m_Team && !AllowPublicChat(pPlayer) && Server()->GetAuthedState(pPlayer->GetCid()))
+		GameServer()->SendChatTarget(pPlayer->GetCid(), "To use public chat use the rcon command 'chat'");
+
 	if(pMsg->m_Team || !AllowPublicChat(pPlayer))
 		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? TEAM_SPECTATORS : pPlayer->GetTeam()); // ddnet-insta
 	else

@@ -90,6 +90,12 @@ void CGameContext::ConForceReady(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_pController->CheckReadyStates();
 }
 
+void CGameContext::ConChat(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->SendChat(pResult->m_ClientId, TEAM_ALL, pResult->GetString(0));
+}
+
 void CGameContext::ConShuffleTeams(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

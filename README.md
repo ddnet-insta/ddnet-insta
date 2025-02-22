@@ -333,6 +333,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `godmode` Removes damage
 + `rainbow` Toggle rainbow skin on or off
 + `force_ready` Sets a player to ready (when the game is paused)
++ `chat` Send a message in chat bypassing all mute features
 + `shuffle_teams` Shuffle the current teams
 + `swap_teams` Swap the current teams
 + `swap_teams_random` Swap the current teams or not (random chance)

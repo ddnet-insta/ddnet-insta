@@ -12,6 +12,7 @@ CONSOLE_COMMAND("godmode", "?v[id]", CFGFLAG_SERVER | CMDFLAG_TEST, ConGodmode, 
 CONSOLE_COMMAND("rainbow", "?v[id]", CFGFLAG_SERVER | CMDFLAG_TEST, ConRainbow, this, "Toggle rainbow skin on or off")
 
 CONSOLE_COMMAND("force_ready", "?v[id]", CFGFLAG_SERVER | CMDFLAG_TEST, ConForceReady, this, "Sets a player to ready (when the game is paused)")
+CONSOLE_COMMAND("chat", "r[message]", CFGFLAG_SERVER | CMDFLAG_TEST, ConChat, this, "Send a message in chat bypassing all mute features")
 
 CONSOLE_COMMAND("shuffle_teams", "", CFGFLAG_SERVER, ConShuffleTeams, this, "Shuffle the current teams")
 CONSOLE_COMMAND("swap_teams", "", CFGFLAG_SERVER, ConSwapTeams, this, "Swap the current teams")

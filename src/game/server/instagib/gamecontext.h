@@ -70,6 +70,7 @@ public:
 	static void ConGodmode(IConsole::IResult *pResult, void *pUserData);
 	static void ConRainbow(IConsole::IResult *pResult, void *pUserData);
 	static void ConForceReady(IConsole::IResult *pResult, void *pUserData);
+	static void ConChat(IConsole::IResult *pResult, void *pUserData);
 	static void ConShuffleTeams(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwapTeams(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserData);
