@@ -9,6 +9,7 @@ enum class EDisplayScore
 	// all time best spree
 	SPREE,
 	CURRENT_SPREE,
+	WIN_POINTS,
 	WINS,
 	KILLS,
 	ROUND_KILLS,
@@ -16,7 +17,7 @@ enum class EDisplayScore
 	NUM_SCORES,
 };
 
-#define DISPLAY_SCORE_VALUES "points, round_points, spree, current_spree, wins, kills, round_kills"
+#define DISPLAY_SCORE_VALUES "points, round_points, spree, current_spree, win_points, wins, kills, round_kills"
 
 // writes based on the input pInputText the output pDisplayScore
 // returns true on match

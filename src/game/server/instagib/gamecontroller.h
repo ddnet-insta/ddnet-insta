@@ -318,13 +318,16 @@ public:
 	virtual bool IsLoser(const CPlayer *pPlayer) { return false; }
 
 	/*
-		Function: PointsForWin
-			Computes the amount of points for winning a round
+		Function: WinPointsForWin
+			Computes the amount of win points for winning a round.
+			"win points" are points you can only get by winning.
+			By default the reward will be higher if you had more enemies.
+			These are WinPoints are not to be confused with regular round Points.
 
 		Arguments:
 			pPlayer - the player that won
 	*/
-	virtual int PointsForWin(const CPlayer *pPlayer) { return 1; }
+	virtual int WinPointsForWin(const CPlayer *pPlayer);
 
 	/*
 		Function: IsPlaying

@@ -1,3 +1,4 @@
+#include <base/log.h>
 #include <base/system.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
@@ -48,6 +49,9 @@ void CGameControllerZcatch::OnShowStatsAll(const CSqlStatsPlayer *pStats, class 
 	pStats->Dump(m_pExtraColumns);
 
 	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "~ Win points: %d", pStats->m_WinPoints);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
 	str_format(aBuf, sizeof(aBuf), "~ Seconds in game: %d", pStats->m_TicksInGame / Server()->TickSpeed());
 	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
 
@@ -160,7 +164,7 @@ bool CGameControllerZcatch::IsPlaying(const CPlayer *pPlayer)
 	return CGameControllerInstagib::IsPlaying(pPlayer) || pPlayer->m_IsDead;
 }
 
-int CGameControllerZcatch::PointsForWin(const CPlayer *pPlayer)
+int CGameControllerZcatch::WinPointsForWin(const CPlayer *pPlayer)
 {
 	int Kills = pPlayer->m_KillsThatCount;
 	int Points = 0;
@@ -189,9 +193,9 @@ int CGameControllerZcatch::PointsForWin(const CPlayer *pPlayer)
 	else // 16+
 		Points = 16;
 
-	dbg_msg(
+	log_info(
 		"zcatch",
-		"player '%s' earned %d points for winning with %d kills",
+		"player '%s' earned %d win_points for winning with %d kills",
 		Server()->ClientName(pPlayer->GetCid()),
 		Points,
 		Kills);
@@ -667,6 +671,12 @@ bool CGameControllerZcatch::OnEntity(int Index, int x, int y, int Layer, int Fla
 
 bool CGameControllerZcatch::DoWincheckRound()
 {
+	// also allow winning by reaching scorelimit
+	// if sv_scorelimit is set
+	// https://github.com/ddnet-insta/ddnet-insta/issues/274
+	if(IGameController::DoWincheckRound())
+		return true;
+
 	if(IsCatchGameRunning() && NumNonDeadActivePlayers() <= 1)
 	{
 		bool GotWinner = false;
@@ -679,14 +689,14 @@ bool CGameControllerZcatch::DoWincheckRound()
 			if(IsWinner(pPlayer, 0, 0))
 			{
 				char aBuf[512];
-				int Points = PointsForWin(pPlayer);
+				int WinPoints = WinPointsForWin(pPlayer);
 				// if stat track is on points are given in the base controller
 				// if it is off we still want to give points
 				// because you can only win if you made enough kills
 				// if by then everyone left you should still be rewarded
 				if(!IsStatTrack())
-					pPlayer->m_Stats.m_Points += Points;
-				str_format(aBuf, sizeof(aBuf), "'%s' won the round and gained %d points.", Server()->ClientName(pPlayer->GetCid()), Points);
+					pPlayer->m_Stats.m_WinPoints += WinPoints;
+				str_format(aBuf, sizeof(aBuf), "'%s' won the round and gained %d points.", Server()->ClientName(pPlayer->GetCid()), WinPoints);
 				SendChat(-1, TEAM_ALL, aBuf);
 				GotWinner = true;
 			}

@@ -15,6 +15,8 @@ bool str_to_display_score(const char *pInputText, EDisplayScore *pDisplayScore)
 		*pDisplayScore = EDisplayScore::SPREE;
 	else if(!str_comp_nocase(pInputText, "current_spree"))
 		*pDisplayScore = EDisplayScore::CURRENT_SPREE;
+	else if(!str_comp_nocase(pInputText, "win_points"))
+		*pDisplayScore = EDisplayScore::WIN_POINTS;
 	else if(!str_comp_nocase(pInputText, "wins"))
 		*pDisplayScore = EDisplayScore::WINS;
 	else if(!str_comp_nocase(pInputText, "kills"))
@@ -40,6 +42,8 @@ const char *display_score_to_str(EDisplayScore Score)
 		return "spree";
 	case EDisplayScore::CURRENT_SPREE:
 		return "current_spree";
+	case EDisplayScore::WIN_POINTS:
+		return "win_points";
 	case EDisplayScore::WINS:
 		return "wins";
 	case EDisplayScore::KILLS:

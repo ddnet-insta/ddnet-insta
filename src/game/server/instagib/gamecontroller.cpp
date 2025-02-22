@@ -106,6 +106,27 @@ void IGameController::AddTeamscore(int Team, int Score)
 	m_aTeamscore[Team] += Score;
 }
 
+int IGameController::WinPointsForWin(const CPlayer *pPlayer)
+{
+	// in non team based modes everyone is an enemy
+	// if you manage to win you get one point for
+	// every in game player
+	if(!IsTeamPlay())
+		return m_aTeamSize[TEAM_RED] + m_aTeamSize[TEAM_BLUE];
+
+	// if it is a team based mode you get a point for every member of
+	// the enemy team
+	//
+	// not super sure how much sense this actually makes
+	// in a 3v3 the win can be less your responsibility
+	// than in a 2v2 but you would get more points.
+	//
+	// It can be argued that higher amounts of players make the games
+	// them self more valuable. They are also harder to farm.
+	// Even if the individuals participation might have less impact.
+	return m_aTeamSize[pPlayer->GetTeam() == TEAM_RED ? TEAM_BLUE : TEAM_RED];
+}
+
 bool IGameController::IsPlayerReadyMode()
 {
 	return Config()->m_SvPlayerReadyMode != 0 && (m_GameStateTimer == TIMER_INFINITE && (m_GameState == IGS_WARMUP_USER || m_GameState == IGS_GAME_PAUSED));

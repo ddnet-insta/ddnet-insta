@@ -302,6 +302,8 @@ int CGameControllerPvp::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer, in
 		return pPlayer->m_SavedStats.m_BestSpree;
 	case EDisplayScore::CURRENT_SPREE:
 		return pPlayer->Spree();
+	case EDisplayScore::WIN_POINTS:
+		return pPlayer->m_SavedStats.m_WinPoints;
 	case EDisplayScore::WINS:
 		return pPlayer->m_SavedStats.m_Wins;
 	case EDisplayScore::KILLS:
@@ -595,7 +597,8 @@ void CGameControllerPvp::SaveStatsOnRoundEnd(CPlayer *pPlayer)
 		if(Won)
 		{
 			pPlayer->m_Stats.m_Wins++;
-			pPlayer->m_Stats.m_Points += PointsForWin(pPlayer);
+			pPlayer->m_Stats.m_Points++;
+			pPlayer->m_Stats.m_WinPoints += WinPointsForWin(pPlayer);
 		}
 		if(Lost)
 			pPlayer->m_Stats.m_Losses++;
@@ -946,22 +949,16 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 	const bool SelfKill = pKiller == pVictim->GetPlayer();
 	const bool SuicideOrWorld = Weapon == WEAPON_SELF || Weapon == WEAPON_WORLD || SelfKill;
 
-	// zCatch score can never be decremented
-	// and only be incremented by wins
-	// https://github.com/ddnet-insta/ddnet-insta/issues/191
-	if(!IsZcatchGameType())
+	if(SuicideOrWorld)
 	{
-		if(SuicideOrWorld)
-		{
-			pVictim->GetPlayer()->DecrementScore();
-		}
+		pVictim->GetPlayer()->DecrementScore();
+	}
+	else
+	{
+		if(IsTeamPlay() && pVictim->GetPlayer()->GetTeam() == pKiller->GetTeam())
+			pKiller->DecrementScore(); // teamkill
 		else
-		{
-			if(IsTeamPlay() && pVictim->GetPlayer()->GetTeam() == pKiller->GetTeam())
-				pKiller->DecrementScore(); // teamkill
-			else
-				pKiller->IncrementScore(); // normal kill
-		}
+			pKiller->IncrementScore(); // normal kill
 	}
 
 	// update spectator modes for dead players in survival
