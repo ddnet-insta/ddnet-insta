@@ -916,6 +916,9 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 {
 	CGameControllerDDRace::OnCharacterDeath(pVictim, pKiller, Weapon);
 
+	if(pVictim->HasRainbow())
+		pVictim->Rainbow(false);
+
 	// this is the vanilla base default respawn delay
 	// it can not be configured
 	// but it will overwritten by configurable delays in almost all cases
