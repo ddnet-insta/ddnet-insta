@@ -833,7 +833,7 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 			") VALUES ("
 			" ?,"
 			" ?, ?, ?, ?,"
-			" ?, ?,"
+			" ?, ?, ?,"
 			" ?, ? %s"
 			");",
 			pSqlServer->InsertIgnore(),
