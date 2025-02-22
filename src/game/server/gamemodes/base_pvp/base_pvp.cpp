@@ -1191,6 +1191,9 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 			Character.GetPlayer()->UpdateLastToucher(From);
 	}
 
+	if(Character.m_FreezeTime && Weapon == WEAPON_LASER)
+		Character.UnFreeze();
+
 	CPlayer *pPlayer = Character.GetPlayer();
 	if(Character.m_IsGodmode)
 		return true;
