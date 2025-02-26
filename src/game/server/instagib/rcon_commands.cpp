@@ -1,4 +1,5 @@
 #include <base/system.h>
+#include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
@@ -75,15 +76,17 @@ void CGameContext::ConForceReady(IConsole::IResult *pResult, void *pUserData)
 	}
 	CPlayer *pPlayer = pSelf->m_apPlayers[Victim];
 	if(!pPlayer)
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "victim with that id not found");
 		return;
-	}
+	if(pPlayer->m_IsReadyToPlay)
+		return;
 
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "'%s' was forced ready by an admin!",
-		pSelf->Server()->ClientName(Victim));
-	pSelf->SendChat(-1, TEAM_ALL, aBuf);
+	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "'%s' was forced ready by an admin!",
+			pSelf->Server()->ClientName(Victim));
+		pSelf->SendChat(-1, TEAM_ALL, aBuf);
+	}
 
 	pPlayer->m_IsReadyToPlay = true;
 	pSelf->PlayerReadyStateBroadcast();
