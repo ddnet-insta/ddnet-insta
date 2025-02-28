@@ -46,6 +46,20 @@ public:
 	 * zCatch                                                          *
 	 *******************************************************************/
 
+	// used only for zcatch! do not use anywhere else.
+	// the name is misleading
+	// it will not be set on every spawn
+	// only on spawns during active zcatch rounds
+	// if it is a release game the value will be zero
+	int m_AliveSinceTick = 0;
+
+	// used only for zcatch! do not use anywhere else.
+	// the name is misleading
+	// it will not be set on every death
+	// only on deaths during active zcatch rounds
+	// if it is a release game the value will be zero
+	int m_DeadSinceTick = 0;
+
 	// Will be -1 when the player is alive
 	int m_KillerId = -1;
 

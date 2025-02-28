@@ -96,7 +96,8 @@ void CGameControllerZcatch::SetCatchGameState(ECatchGameState State)
 		m_CatchGameState = ECatchGameState::RELEASE_GAME;
 		return;
 	}
-	if(State != m_CatchGameState)
+	bool Changed = State != m_CatchGameState;
+	if(Changed)
 	{
 		if(State == ECatchGameState::RUNNING)
 		{
@@ -107,6 +108,22 @@ void CGameControllerZcatch::SetCatchGameState(ECatchGameState State)
 	}
 
 	m_CatchGameState = State;
+
+	// set and reset spawn timer for all
+	// to track their in game ticks
+	if(Changed)
+	{
+		for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+
+			if(!IsCatchGameRunning())
+				UpdateCatchTicks(pPlayer, ECatchUpdate::ROUND_END);
+			else
+				UpdateCatchTicks(pPlayer, ECatchUpdate::CONNECT);
+		}
+	}
 }
 
 bool CGameControllerZcatch::IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage)
@@ -230,6 +247,25 @@ void CGameControllerZcatch::OnRoundStart()
 		SetCatchGameState(ECatchGameState::WAITING_FOR_PLAYERS);
 	}
 	StartZcatchRound();
+
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		UpdateCatchTicks(pPlayer, ECatchUpdate::CONNECT);
+	}
+}
+
+void CGameControllerZcatch::OnRoundEnd()
+{
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		UpdateCatchTicks(pPlayer, ECatchUpdate::ROUND_END);
+	}
 }
 
 CGameControllerZcatch::~CGameControllerZcatch() = default;
@@ -262,8 +298,7 @@ void CGameControllerZcatch::OnCharacterSpawn(class CCharacter *pChr)
 
 	SetSpawnWeapons(pChr);
 
-	// just to be sure
-	pChr->GetPlayer()->m_KillsThatCount = 0;
+	pChr->GetPlayer()->m_KillsThatCount = 0; // just to be sure
 }
 
 int CGameControllerZcatch::GetPlayerTeam(class CPlayer *pPlayer, bool Sixup)
@@ -279,8 +314,8 @@ int CGameControllerZcatch::GetPlayerTeam(class CPlayer *pPlayer, bool Sixup)
 void CGameControllerZcatch::ReleasePlayer(class CPlayer *pPlayer, const char *pMsg)
 {
 	GameServer()->SendChatTarget(pPlayer->GetCid(), pMsg);
+	UpdateCatchTicks(pPlayer, ECatchUpdate::RELEASE);
 
-	UpdateCatchTicks(pPlayer);
 	pPlayer->m_IsDead = false;
 	pPlayer->m_KillerId = -1;
 
@@ -371,7 +406,7 @@ void CGameControllerZcatch::KillPlayer(class CPlayer *pVictim, class CPlayer *pK
 	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
 	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
 
-	UpdateCatchTicks(pVictim);
+	UpdateCatchTicks(pVictim, ECatchUpdate::CAUGHT);
 	pVictim->m_IsDead = true;
 	pVictim->m_KillerId = pKiller->GetCid();
 	if(pVictim->GetTeam() != TEAM_SPECTATORS)
@@ -517,10 +552,10 @@ bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisId, char *pErrorRea
 
 int CGameControllerZcatch::GetAutoTeam(int NotThisId)
 {
-	if(IsCatchGameRunning() && IsGameRunning() && PlayerWithMostKillsThatCount())
-	{
-		return TEAM_SPECTATORS;
-	}
+	// if(IsCatchGameRunning() && IsGameRunning() && PlayerWithMostKillsThatCount())
+	// {
+	// 	return TEAM_SPECTATORS;
+	// }
 
 	return CGameControllerInstagib::GetAutoTeam(NotThisId);
 }
@@ -547,34 +582,29 @@ int CGameControllerZcatch::FreeInGameSlots()
 
 void CGameControllerZcatch::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 {
-	UpdateCatchTicks(pPlayer);
-
 	CGameControllerInstagib::DoTeamChange(pPlayer, Team, DoChatMsg);
 
+	if(Team != pPlayer->GetTeam())
+	{
+		if(g_Config.m_SvDebugCatch)
+		{
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "team change '%s' new=%d old=%d", Server()->ClientName(pPlayer->GetCid()), Team, pPlayer->GetTeam());
+			SendChat(-1, TEAM_ALL, aBuf);
+		}
+
+		if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+			UpdateCatchTicks(pPlayer, ECatchUpdate::SPECTATE);
+		else if(pPlayer->GetTeam() == TEAM_RED)
+			UpdateCatchTicks(pPlayer, ECatchUpdate::CONNECT);
+		else
+		{
+			// TODO: does not get triggered by "set_team 1 1" because the team is clamped based on IsTeamPlay in ClampTeam()
+			dbg_assert(false, "player tried to join invalid team. zcatch only supports team red and team spectators");
+		}
+	}
+
 	CheckChangeGameState();
-}
-
-void CGameControllerZcatch::UpdateCatchTicks(class CPlayer *pPlayer)
-{
-	char aBuf[512];
-	int Ticks = Server()->Tick() - pPlayer->m_LastSetTeam;
-	if(pPlayer->m_IsDead)
-	{
-		str_format(aBuf, sizeof(aBuf), "'%s' was caught for %d ticks", Server()->ClientName(pPlayer->GetCid()), Ticks);
-		pPlayer->m_Stats.m_TicksCaught += Ticks;
-	}
-	else if(!pPlayer->m_IsDead && pPlayer->GetTeam() != TEAM_SPECTATORS)
-	{
-		str_format(aBuf, sizeof(aBuf), "'%s' was in game for %d ticks", Server()->ClientName(pPlayer->GetCid()), Ticks);
-		pPlayer->m_Stats.m_TicksInGame += Ticks;
-	}
-	else
-	{
-		str_format(aBuf, sizeof(aBuf), "spectating player '%s' left or joined (no ticks tracked)", Server()->ClientName(pPlayer->GetCid()));
-	}
-
-	if(g_Config.m_SvDebugStats > 1)
-		SendChat(-1, TEAM_ALL, aBuf);
 }
 
 bool CGameControllerZcatch::CheckChangeGameState()
@@ -606,18 +636,9 @@ bool CGameControllerZcatch::CheckChangeGameState()
 
 void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 {
-	// SetTeam is not called on join and m_LastSetTeam is initialized to zero
-	// m_LastSetTeam is used to track the caught and in game ticks
-	// to avoid getting a wrong (too high tick count on join)
-	// we set it manually here
-	//
-	// this also means that zCatch now has a team change cool down on first join
-	if(!pPlayer->m_LastSetTeam)
-	{
-		pPlayer->m_LastSetTeam = Server()->Tick();
-	}
-
 	CGameControllerInstagib::OnPlayerConnect(pPlayer);
+
+	UpdateCatchTicks(pPlayer, pPlayer->GetTeam() == TEAM_SPECTATORS ? ECatchUpdate::SPECTATE : ECatchUpdate::CONNECT);
 
 	// if a player joins as spectator that means
 	// either the in game slots are full
@@ -666,7 +687,7 @@ void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 
 void CGameControllerZcatch::OnPlayerDisconnect(class CPlayer *pDisconnectingPlayer, const char *pReason)
 {
-	UpdateCatchTicks(pDisconnectingPlayer);
+	UpdateCatchTicks(pDisconnectingPlayer, ECatchUpdate::DISCONNECT);
 
 	CGameControllerInstagib::OnPlayerDisconnect(pDisconnectingPlayer, pReason);
 
@@ -723,6 +744,7 @@ bool CGameControllerZcatch::DoWincheckRound()
 		{
 			SendChatTarget(-1, "Nobody won. Starting release game.");
 			SetCatchGameState(ECatchGameState::WAITING_FOR_PLAYERS);
+			ReleaseAllPlayers();
 			return false;
 		}
 

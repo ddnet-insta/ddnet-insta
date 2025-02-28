@@ -113,6 +113,7 @@ public:
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 	bool DoWincheckRound() override;
 	void OnRoundStart() override;
+	void OnRoundEnd() override;
 	bool OnSelfkill(int ClientId) override;
 	bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) override;
 	int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup) override;
@@ -123,7 +124,26 @@ public:
 	int WinPointsForWin(const CPlayer *pPlayer) override;
 	void OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
 	void OnShowRoundStats(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
-	void UpdateCatchTicks(class CPlayer *pPlayer);
+
+	enum class ECatchUpdate
+	{
+		// called when a player joins the game
+		// either on server join
+		// or on join from spectators
+		CONNECT,
+		DISCONNECT,
+
+		// called when a player joins spectators
+		SPECTATE,
+
+		// also called when players leave
+		// and it becomes a release game
+		ROUND_END,
+		CAUGHT,
+		RELEASE,
+	};
+
+	void UpdateCatchTicks(class CPlayer *pPlayer, ECatchUpdate Update);
 
 	enum class ECatchGameState
 	{
