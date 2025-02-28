@@ -352,20 +352,22 @@ bool CGameControllerPvp::ForceNetworkClipping(const CEntity *pEntity, int Snappi
 	if(SnappingClient < 0 || SnappingClient >= MAX_CLIENTS)
 		return false;
 
-	const bool ForceDefaultView = !g_Config.m_SvAllowZoom && GameServer()->m_apPlayers[SnappingClient]->GetTeam() != TEAM_SPECTATORS;
+	CPlayer *pPlayer = GameServer()->m_apPlayers[SnappingClient];
+	const bool IsSpectator = pPlayer->GetTeam() == TEAM_SPECTATORS;
+	const bool ForceDefaultView = !g_Config.m_SvAllowZoom && !IsSpectator;
 
 	// ddnet-insta: snap default if player is ingame
-	vec2 &ShowDistance = GameServer()->m_apPlayers[SnappingClient]->m_ShowDistance;
+	vec2 &ShowDistance = pPlayer->m_ShowDistance;
 
 	// https://github.com/teeworlds/teeworlds/blob/93f5bf632a3859e97d527fc93a26b6dced767fbc/src/game/server/entity.cpp#L44
 	if(ForceDefaultView)
 		ShowDistance = vec2(1000, 800);
 
-	float dx = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.x - CheckPos.x;
+	float dx = pPlayer->m_ViewPos.x - CheckPos.x;
 	if(absolute(dx) > ShowDistance.x)
 		return true;
 
-	float dy = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.y - CheckPos.y;
+	float dy = pPlayer->m_ViewPos.y - CheckPos.y;
 	return absolute(dy) > ShowDistance.y;
 }
 
@@ -376,10 +378,12 @@ bool CGameControllerPvp::ForceNetworkClippingLine(const CEntity *pEntity, int Sn
 	if(SnappingClient < 0 || SnappingClient >= MAX_CLIENTS)
 		return false;
 
-	const bool ForceDefaultView = !g_Config.m_SvAllowZoom && GameServer()->m_apPlayers[SnappingClient]->GetTeam() != TEAM_SPECTATORS;
+	CPlayer *pPlayer = GameServer()->m_apPlayers[SnappingClient];
+	const bool IsSpectator = pPlayer->GetTeam() == TEAM_SPECTATORS;
+	const bool ForceDefaultView = !g_Config.m_SvAllowZoom && !IsSpectator;
 
-	vec2 &ViewPos = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos;
-	vec2 &ShowDistance = GameServer()->m_apPlayers[SnappingClient]->m_ShowDistance;
+	vec2 &ViewPos = pPlayer->m_ViewPos;
+	vec2 &ShowDistance = pPlayer->m_ShowDistance;
 
 	// https://github.com/teeworlds/teeworlds/blob/93f5bf632a3859e97d527fc93a26b6dced767fbc/src/game/server/entity.cpp#L44
 	if(ForceDefaultView)
