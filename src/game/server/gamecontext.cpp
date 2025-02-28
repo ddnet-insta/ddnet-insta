@@ -1619,7 +1619,7 @@ void CGameContext::OnClientEnter(int ClientId)
 	protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg;
 	NewClientInfoMsg.m_ClientId = ClientId;
 	NewClientInfoMsg.m_Local = 0;
-	NewClientInfoMsg.m_Team = pNewPlayer->GetTeam();
+	NewClientInfoMsg.m_Team = m_pController->GetPlayerTeam(pNewPlayer, true); // ddnet-insta
 	NewClientInfoMsg.m_pName = Server()->ClientName(ClientId);
 	NewClientInfoMsg.m_pClan = Server()->ClientClan(ClientId);
 	NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientId);
