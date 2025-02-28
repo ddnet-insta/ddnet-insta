@@ -356,6 +356,9 @@ bool CGameControllerPvp::ForceNetworkClipping(const CEntity *pEntity, int Snappi
 	const bool IsSpectator = pPlayer->GetTeam() == TEAM_SPECTATORS;
 	const bool ForceDefaultView = !g_Config.m_SvAllowZoom && !IsSpectator;
 
+	if(!ForceDefaultView && pPlayer->m_ShowAll)
+		return false;
+
 	// ddnet-insta: snap default if player is ingame
 	vec2 &ShowDistance = pPlayer->m_ShowDistance;
 
@@ -381,6 +384,9 @@ bool CGameControllerPvp::ForceNetworkClippingLine(const CEntity *pEntity, int Sn
 	CPlayer *pPlayer = GameServer()->m_apPlayers[SnappingClient];
 	const bool IsSpectator = pPlayer->GetTeam() == TEAM_SPECTATORS;
 	const bool ForceDefaultView = !g_Config.m_SvAllowZoom && !IsSpectator;
+
+	if(!ForceDefaultView && pPlayer->m_ShowAll)
+		return false;
 
 	vec2 &ViewPos = pPlayer->m_ViewPos;
 	vec2 &ShowDistance = pPlayer->m_ShowDistance;
