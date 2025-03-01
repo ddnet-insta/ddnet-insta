@@ -1704,8 +1704,53 @@ void CGameControllerPvp::Anticamper()
 	}
 }
 
+bool CGameControllerPvp::BlockFirstShotOnSpawn(class CCharacter *pChr, int Weapon) const
+{
+	// WEAPON_GUN is not full auto
+	// this makes sure that vanilla gamemodes are not affected
+	// by any side effects that this fix might have
+	if(Weapon == WEAPON_GUN)
+		return false;
+
+	// if a player holds down the fire key forever
+	// we eventually activate the full auto weapon
+	int TicksAlive = Server()->Tick() - pChr->m_SpawnTick;
+	constexpr int HalfSecond = SERVER_TICK_SPEED / 2;
+	if(TicksAlive > HalfSecond)
+		return false;
+
+	// all the ddrace edge cases still apply
+	// except the ones that activate full auto for certain weapons
+	bool FullAuto = false;
+	if(pChr->m_Core.m_Jetpack && pChr->m_Core.m_ActiveWeapon == WEAPON_GUN)
+		FullAuto = true;
+	// allow firing directly after coming out of freeze or being unfrozen
+	// by something
+	if(pChr->m_FrozenLastTick)
+		FullAuto = true;
+
+	// check if we gonna fire
+	if(CountInput(pChr->m_LatestPrevInput.m_Fire, pChr->m_LatestInput.m_Fire).m_Presses)
+		return false;
+	if(FullAuto && (pChr->m_LatestInput.m_Fire & 1) && pChr->m_Core.m_aWeapons[pChr->m_Core.m_ActiveWeapon].m_Ammo)
+		return false;
+	return true;
+}
+
 bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos)
 {
+	// https://github.com/ddnet-insta/ddnet-insta/issues/289
+	// left clicking during death screen can decrease the spawn delay
+	// but in modes where players spawn with full auto weapons such as
+	// grenade and laser this can fire a shot on spawn
+	//
+	// so this shot is intentionally blocked here
+	// to avoid messing with hit accuracy stats
+	// and also fix players doing potentially unwanted kills
+	// by just trying to respawn
+	if(BlockFirstShotOnSpawn(&Character, Weapon))
+		return true;
+
 	if(IsStatTrack() && Weapon != WEAPON_HAMMER)
 		Character.GetPlayer()->m_Stats.m_ShotsFired++;
 
