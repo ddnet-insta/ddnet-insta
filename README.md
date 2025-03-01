@@ -230,6 +230,8 @@ sv_destroy_bullets_on_death 0
 sv_destroy_lasers_on_death 0
 sv_no_weak_hook 1
 sv_vote_veto_time 0
+conn_timeout 10
+conn_timeout_protection 5
 ```
 
 ddnet also has something called a reset file. Which is a special config.
