@@ -223,11 +223,29 @@ The following ddnet configs are highly recommended to set in ddnet-insta to get 
 experience.
 
 ```
+# autoexec_server.cfg
+
 sv_tune_reset 0
 sv_destroy_bullets_on_death 0
 sv_destroy_lasers_on_death 0
 sv_no_weak_hook 1
 sv_vote_veto_time 0
+```
+
+ddnet also has something called a reset file. Which is a special config.
+By default it is loaded from reset.cfg and it can be set to a custom location
+using the config ``sv_reset_file``
+
+
+In this **reset.cfg** it is recommeded to set the following configs
+to get a more classic pvp experience.
+
+```
+# reset.cfg
+
+sv_team 0
+sv_old_laser 1 # wallshot should not collide with own tee
+tune laser_bounce_num 1
 ```
 
 Below is a list of all the settings that were added in ddnet-insta.
