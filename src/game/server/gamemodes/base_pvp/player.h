@@ -104,8 +104,6 @@ public:
 	 *******************************************************************/
 	// see also m_LastToucherId
 	int m_OriginalFreezerId = -1;
-	// amount of seconds to freeze on next spawn
-	int m_FreezeOnSpawn = 0;
 
 	int m_Multi = 1;
 
@@ -115,10 +113,15 @@ public:
 	/*******************************************************************
 	 * shared                                                          *
 	 *******************************************************************/
-	//Anticamper
+	// anticamper
 	bool m_SentCampMsg;
 	int m_CampTick;
 	vec2 m_CampPos;
+
+	// amount of seconds to freeze on next spawn
+	// used for sv_punish_freeze_disconnect
+	// useful for fng and modes with anticamper
+	int m_FreezeOnSpawn = 0;
 
 	// fng and block
 	int m_LastToucherId = -1;

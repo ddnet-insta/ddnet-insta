@@ -18,7 +18,6 @@
 CGameControllerBaseFng::CGameControllerBaseFng(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)
 {
-	m_vFrozenQuitters.clear();
 }
 
 CGameControllerBaseFng::~CGameControllerBaseFng() = default;
@@ -70,12 +69,6 @@ void CGameControllerBaseFng::Tick()
 
 		if(ClosestTile)
 			OnSpike(pChr, ClosestTile);
-	}
-
-	if(m_ReleaseAllFrozenQuittersTick < Server()->Tick() && !m_vFrozenQuitters.empty())
-	{
-		dbg_msg("fng", "all freeze quitter punishments expired. cleaning up ...");
-		m_vFrozenQuitters.clear();
 	}
 }
 
@@ -163,54 +156,12 @@ void CGameControllerBaseFng::OnPlayerDisconnect(class CPlayer *pPlayer, const ch
 			pOther->m_OriginalFreezerId = -1;
 	}
 
-	while(true)
-	{
-		if(!g_Config.m_SvPunishFreezeDisconnect)
-			break;
-
-		CCharacter *pChr = pPlayer->GetCharacter();
-		if(!pChr)
-			break;
-		if(!pChr->m_FreezeTime)
-			break;
-
-		const NETADDR *pAddr = Server()->ClientAddr(pPlayer->GetCid());
-		m_vFrozenQuitters.emplace_back(*pAddr);
-
-		// frozen quit punishment expires after 5 minutes
-		// to avoid memory leaks
-		m_ReleaseAllFrozenQuittersTick = Server()->Tick() + Server()->TickSpeed() * 300;
-		break;
-	}
-
 	CGameControllerInstagib::OnPlayerDisconnect(pPlayer, pReason);
 }
 
 void CGameControllerBaseFng::OnPlayerConnect(CPlayer *pPlayer)
 {
 	CGameControllerInstagib::OnPlayerConnect(pPlayer);
-
-	const NETADDR *pAddr = Server()->ClientAddr(pPlayer->GetCid());
-
-	bool Match = false;
-	int Index = -1;
-	for(const auto &Quitter : m_vFrozenQuitters)
-	{
-		Index++;
-		if(!net_addr_comp_noport(&Quitter, pAddr))
-		{
-			Match = true;
-			break;
-		}
-	}
-
-	if(Match)
-	{
-		dbg_msg("fng", "a frozen player rejoined removing slot %d (%zu left)", Index, m_vFrozenQuitters.size() - 1);
-		m_vFrozenQuitters.erase(m_vFrozenQuitters.begin() + Index);
-
-		pPlayer->m_FreezeOnSpawn = 20;
-	}
 }
 
 void CGameControllerBaseFng::OnCharacterSpawn(class CCharacter *pChr)
@@ -218,20 +169,6 @@ void CGameControllerBaseFng::OnCharacterSpawn(class CCharacter *pChr)
 	CGameControllerInstagib::OnCharacterSpawn(pChr);
 
 	pChr->GiveWeapon(WEAPON_HAMMER, false, -1);
-
-	if(pChr->GetPlayer()->m_FreezeOnSpawn)
-	{
-		pChr->Freeze(pChr->GetPlayer()->m_FreezeOnSpawn);
-		pChr->GetPlayer()->m_FreezeOnSpawn = 0;
-
-		char aBuf[512];
-		str_format(
-			aBuf,
-			sizeof(aBuf),
-			"'%s' spawned frozen because he quit while being frozen",
-			Server()->ClientName(pChr->GetPlayer()->GetCid()));
-		SendChat(-1, TEAM_ALL, aBuf);
-	}
 }
 
 int CGameControllerBaseFng::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)

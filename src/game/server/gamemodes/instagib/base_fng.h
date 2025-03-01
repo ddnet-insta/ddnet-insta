@@ -13,9 +13,6 @@ public:
 	CGameControllerBaseFng(class CGameContext *pGameServer);
 	~CGameControllerBaseFng() override;
 
-	std::vector<NETADDR> m_vFrozenQuitters;
-	int64_t m_ReleaseAllFrozenQuittersTick = 0;
-
 	void Tick() override;
 	void Snap(int SnappingClient) override;
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;

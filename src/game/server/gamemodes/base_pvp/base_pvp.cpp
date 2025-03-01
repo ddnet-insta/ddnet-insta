@@ -47,6 +47,8 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	// this contructor is not called on "restart" commands
 	if(g_Config.m_SvTournamentChatSmart)
 		g_Config.m_SvTournamentChat = 0;
+
+	m_vFrozenQuitters.clear();
 }
 
 void CGameControllerPvp::OnInit()
@@ -1093,6 +1095,12 @@ void CGameControllerPvp::Tick()
 	if(g_Config.m_SvTournamentChatSmart)
 		SmartChatTick();
 
+	if(m_ReleaseAllFrozenQuittersTick < Server()->Tick() && !m_vFrozenQuitters.empty())
+	{
+		log_info("ddnet-insta", "all freeze quitter punishments expired. cleaning up ...");
+		m_vFrozenQuitters.clear();
+	}
+
 	// win check
 	if((m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_GAME_PAUSED) && !GameServer()->m_World.m_ResetRequested)
 	{
@@ -1328,6 +1336,20 @@ void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)
 	pChr->IncreaseHealth(10);
 
 	pChr->GetPlayer()->UpdateLastToucher(-1);
+
+	if(pChr->GetPlayer()->m_FreezeOnSpawn)
+	{
+		pChr->Freeze(pChr->GetPlayer()->m_FreezeOnSpawn);
+		pChr->GetPlayer()->m_FreezeOnSpawn = 0;
+
+		char aBuf[512];
+		str_format(
+			aBuf,
+			sizeof(aBuf),
+			"'%s' spawned frozen because he quit while being frozen",
+			Server()->ClientName(pChr->GetPlayer()->GetCid()));
+		SendChat(-1, TEAM_ALL, aBuf);
+	}
 }
 
 void CGameControllerPvp::AddSpree(class CPlayer *pPlayer)
@@ -1457,10 +1479,34 @@ void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 		pPlayer->m_VerifiedForChat = true;
 	}
 
-	CheckReadyStates(); // ddnet-insta
+	CheckReadyStates();
+	SendGameInfo(ClientId); // update game info
+	RestoreFreezeStateOnRejoin(pPlayer);
+}
 
-	// update game info
-	SendGameInfo(ClientId);
+void CGameControllerPvp::RestoreFreezeStateOnRejoin(CPlayer *pPlayer)
+{
+	const NETADDR *pAddr = Server()->ClientAddr(pPlayer->GetCid());
+
+	bool Match = false;
+	int Index = -1;
+	for(const auto &Quitter : m_vFrozenQuitters)
+	{
+		Index++;
+		if(!net_addr_comp_noport(&Quitter, pAddr))
+		{
+			Match = true;
+			break;
+		}
+	}
+
+	if(Match)
+	{
+		log_info("ddnet-insta", "a frozen player rejoined removing slot %d (%zu left)", Index, m_vFrozenQuitters.size() - 1);
+		m_vFrozenQuitters.erase(m_vFrozenQuitters.begin() + Index);
+
+		pPlayer->m_FreezeOnSpawn = 20;
+	}
 }
 
 void CGameControllerPvp::SendChatSpectators(const char *pMessage, int Flags)
@@ -1484,6 +1530,26 @@ void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *
 {
 	if(GameState() != IGS_END_ROUND)
 		SaveStatsOnDisconnect(pPlayer);
+
+	while(true)
+	{
+		if(!g_Config.m_SvPunishFreezeDisconnect)
+			break;
+
+		CCharacter *pChr = pPlayer->GetCharacter();
+		if(!pChr)
+			break;
+		if(!pChr->m_FreezeTime)
+			break;
+
+		const NETADDR *pAddr = Server()->ClientAddr(pPlayer->GetCid());
+		m_vFrozenQuitters.emplace_back(*pAddr);
+
+		// frozen quit punishment expires after 5 minutes
+		// to avoid memory leaks
+		m_ReleaseAllFrozenQuittersTick = Server()->Tick() + Server()->TickSpeed() * 300;
+		break;
+	}
 
 	m_InvalidateConnectedIpsCache = true;
 	pPlayer->OnDisconnect();

@@ -308,7 +308,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_melt_hammer_scale_y` (fng) linearly scale up hammer y power, percentage, for hammering frozen teammates
 + `sv_fng_hammer` (fng only) use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer
 + `sv_fng_spike_sound` (fng only) play flag capture sound when sacrificing an enemy into the spikes
-+ `sv_punish_freeze_disconnect` (fng) 0=off otherwise bantime in minutes when leaving server while being frozen
++ `sv_punish_freeze_disconnect` freeze player for 20 seconds on rejoin when leaving server while being frozen
 + `sv_laser_text_points` display laser text in the world on scoring (only fng for now)
 + `sv_self_damage_respawn_delay_ms` time in miliseconds it takes to respawn after dieing by self damage
 + `sv_self_kill_respawn_delay_ms` time in miliseconds it takes to respawn after sending kill bind
@@ -322,6 +322,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_chat_ratelimit_spam` Needs sv_spamprotection 0 (0=off, 1=ratelimit chat detected as spam)
 + `sv_chat_ratelimit_debug` Logs which of the ratelimits kicked in
 + `sv_require_chat_flag_to_chat` clients have to send playerflag chat to use public chat (commands are unrelated)
++ `sv_debug_catch` Debug zCatch ticks caught and in game
 + `sv_debug_stats` Verbose logging for the SQL player stats
 + `sv_vote_checkboxes` Fill [ ] checkbox in vote name if the config is already set
 + `sv_hide_admins` Only send admin status to other authed players
