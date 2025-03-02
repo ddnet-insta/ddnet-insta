@@ -267,6 +267,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_force_ready_all` minutes after which a game will be force unpaused (0=off) related to sv_player_ready_mode
 + `sv_stop_and_go_chat` pause then game when someone writes 'pause' or 'stop' and start with 'go' or 'start'
 + `sv_powerups` Allow powerups like ninja
++ `sv_teambalance_time` How many minutes to wait before autobalancing teams
 + `sv_team_score_normal` Points a team receives for grabbing into normal spikes
 + `sv_team_score_gold` Points a team receives for grabbing into golden spikes
 + `sv_team_score_green` Points a team receives for grabbing into green spikes(non 4-teams fng only)
@@ -358,6 +359,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `shuffle_teams` Shuffle the current teams
 + `swap_teams` Swap the current teams
 + `swap_teams_random` Swap the current teams or not (random chance)
++ `force_teambalance` Force team balance"
 + `add_map_to_pool` Can be picked by random_map_from_pool command (entries can be duplicated to increase chance)
 + `clear_map_pool` Clears pool used by random_map_from_pool command
 + `random_map_from_pool` Changes to random map from pool (see add_map_to_pool)
