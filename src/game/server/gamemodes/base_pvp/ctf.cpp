@@ -14,9 +14,6 @@ CGameControllerBaseCTF::CGameControllerBaseCTF(class CGameContext *pGameServer) 
 	CGameControllerPvp(pGameServer)
 {
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
-
-	m_apFlags[0] = 0;
-	m_apFlags[1] = 0;
 }
 
 CGameControllerBaseCTF::~CGameControllerBaseCTF() = default;
@@ -169,11 +166,11 @@ bool CGameControllerBaseCTF::OnEntity(int Index, int x, int y, int Layer, int Fl
 	if(Team == -1 || m_apFlags[Team])
 		return false;
 
-	CFlag *F = new CFlag(&GameServer()->m_World, Team);
-	F->m_StandPos = Pos;
-	F->m_Pos = Pos;
-	m_apFlags[Team] = F;
-	GameServer()->m_World.InsertEntity(F);
+	CFlag *pFlag = new CFlag(&GameServer()->m_World, Team);
+	pFlag->m_StandPos = Pos;
+	pFlag->m_Pos = Pos;
+	m_apFlags[Team] = pFlag;
+	GameServer()->m_World.InsertEntity(pFlag);
 	return true;
 }
 
@@ -192,10 +189,10 @@ void CGameControllerBaseCTF::OnFlagGrab(class CFlag *pFlag)
 		return;
 	if(!pFlag->IsAtStand())
 		return;
-	if(!pFlag->m_pCarrier)
+	if(!pFlag->GetCarrier())
 		return;
 
-	CPlayer *pPlayer = pFlag->m_pCarrier->GetPlayer();
+	CPlayer *pPlayer = pFlag->GetCarrier()->GetPlayer();
 	if(IsStatTrack())
 		pPlayer->m_Stats.m_FlagGrabs++;
 }
@@ -206,10 +203,10 @@ void CGameControllerBaseCTF::OnFlagCapture(class CFlag *pFlag, float Time, int T
 
 	if(!pFlag)
 		return;
-	if(!pFlag->m_pCarrier)
+	if(!pFlag->GetCarrier())
 		return;
 
-	CPlayer *pPlayer = pFlag->m_pCarrier->GetPlayer();
+	CPlayer *pPlayer = pFlag->GetCarrier()->GetPlayer();
 	if(IsStatTrack())
 		pPlayer->m_Stats.m_FlagCaptures++;
 }

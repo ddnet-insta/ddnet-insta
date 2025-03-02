@@ -534,6 +534,21 @@ public:
 	virtual int SnapTimeLimit(int SnappingClient);
 
 	/*
+		Function: GetCarriedFlag
+			Returns the type of flag the given player is currently carrying.
+			Flag refers here to a CTF gametype flag which is either red, blue or none.
+
+		Arguments:
+			pPlayer - player to check
+
+		Returns:
+			FLAG_NONE -1
+			FLAG_RED  0
+			FLAG_BLUE 2
+	*/
+	virtual int GetCarriedFlag(class CPlayer *pPlayer);
+
+	/*
 		Function: InitPlayer
 			Called once for every new CPlayer object that is being constructed
 			is only called when a new player connects
@@ -776,6 +791,9 @@ public:
 
 	// get client id by in game name
 	int GetCidByName(const char *pName);
+
+	// only used in ctf gametypes
+	class CFlag *m_apFlags[NUM_FLAGS];
 
 	CSqlStats *m_pSqlStats = nullptr;
 	const char *m_pStatsTable = "";

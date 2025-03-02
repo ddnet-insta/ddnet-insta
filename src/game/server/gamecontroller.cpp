@@ -42,6 +42,8 @@ IGameController::IGameController(class CGameContext *pGameServer) :
 	m_CurrentRecord = 0;
 
 	// ddnet-insta
+	m_apFlags[0] = nullptr;
+	m_apFlags[1] = nullptr;
 	m_Warmup = 0;
 	m_GameState = IGS_GAME_RUNNING;
 	m_GameStateTimer = TIMER_INFINITE;

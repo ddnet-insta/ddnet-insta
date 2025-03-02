@@ -5,7 +5,6 @@
 
 class CGameControllerInstaBaseCTF : public CGameControllerInstagib
 {
-	class CFlag *m_apFlags[2];
 	bool DoWincheckRound() override;
 
 public:

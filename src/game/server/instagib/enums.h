@@ -1,6 +1,14 @@
 #ifndef GAME_SERVER_INSTAGIB_ENUMS_H
 #define GAME_SERVER_INSTAGIB_ENUMS_H
 
+enum
+{
+	FLAG_NONE = -1,
+	FLAG_RED = 0,
+	FLAG_BLUE = 1,
+	NUM_FLAGS = 2
+};
+
 enum class EDisplayScore
 {
 	ROUND_POINTS,

@@ -5,7 +5,6 @@
 
 class CGameControllerBaseCTF : public CGameControllerPvp
 {
-	class CFlag *m_apFlags[2];
 	bool DoWincheckRound() override;
 
 public:

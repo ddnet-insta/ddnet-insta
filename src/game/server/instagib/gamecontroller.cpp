@@ -12,6 +12,7 @@
 #include <game/server/entities/character.h>
 #include <game/server/entities/door.h>
 #include <game/server/entities/dragger.h>
+#include <game/server/entities/flag.h>
 #include <game/server/entities/gun.h>
 #include <game/server/entities/light.h>
 #include <game/server/entities/pickup.h>
@@ -63,6 +64,18 @@ int IGameController::SnapTimeLimit(int SnappingClient)
 	}
 
 	return g_Config.m_SvTimelimit;
+}
+
+int IGameController::GetCarriedFlag(CPlayer *pPlayer)
+{
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return FLAG_NONE;
+
+	for(int FlagIndex = FLAG_RED; FlagIndex < NUM_FLAGS; FlagIndex++)
+		if(m_apFlags[FlagIndex] && m_apFlags[FlagIndex]->GetCarrier() == pChr)
+			return FlagIndex;
+	return FLAG_NONE;
 }
 
 CClientMask IGameController::FreezeDamageIndicatorMask(class CCharacter *pChr)
