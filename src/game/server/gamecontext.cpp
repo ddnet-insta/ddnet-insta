@@ -1988,6 +1988,9 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 
 			pPlayer->m_LastChangeInfo = Server()->Tick();
 
+			if(m_pController->OnSkinChange7(pMsg, ClientId)) // ddnet-insta
+				return nullptr;
+
 			CTeeInfo Info(pMsg->m_apSkinPartNames, pMsg->m_aUseCustomColors, pMsg->m_aSkinPartColors);
 			Info.FromSixup();
 			pPlayer->m_TeeInfos = Info;
@@ -1997,12 +2000,8 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 			for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 			{
 				Msg.m_apSkinPartNames[p] = pMsg->m_apSkinPartNames[p];
-				// ddnet-insta
-				if(m_pController->IsSkinColorChangeAllowed())
-				{
-					Msg.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
-					Msg.m_aUseCustomColors[p] = pMsg->m_aUseCustomColors[p];
-				}
+				Msg.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
+				Msg.m_aUseCustomColors[p] = pMsg->m_aUseCustomColors[p];
 			}
 
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);

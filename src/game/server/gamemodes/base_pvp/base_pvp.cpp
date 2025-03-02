@@ -1474,6 +1474,39 @@ void CGameControllerPvp::OnClientDataRestore(CPlayer *pPlayer, const CGameContex
 {
 }
 
+bool CGameControllerPvp::OnSkinChange7(protocol7::CNetMsg_Cl_SkinChange *pMsg, int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+
+	CTeeInfo Info(pMsg->m_apSkinPartNames, pMsg->m_aUseCustomColors, pMsg->m_aSkinPartColors);
+	Info.FromSixup();
+
+	CTeeInfo OldInfo = pPlayer->m_TeeInfos;
+	pPlayer->m_TeeInfos = Info;
+
+	// restore old color
+	if(!IsSkinColorChangeAllowed())
+	{
+		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+		{
+			pPlayer->m_TeeInfos.m_aSkinPartColors[p] = OldInfo.m_aSkinPartColors[p];
+			pPlayer->m_TeeInfos.m_aUseCustomColors[p] = OldInfo.m_aUseCustomColors[p];
+		}
+	}
+
+	protocol7::CNetMsg_Sv_SkinChange Msg;
+	Msg.m_ClientId = ClientId;
+	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+	{
+		Msg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
+		Msg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
+		Msg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
+	}
+
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
+	return true;
+}
+
 void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 {
 	m_InvalidateConnectedIpsCache = true;
