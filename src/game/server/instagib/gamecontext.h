@@ -74,6 +74,7 @@ public:
 	static void ConShuffleTeams(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwapTeams(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserData);
+	static void ConForceTeamBalance(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddMapToPool(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearMapPool(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomMapFromPool(IConsole::IResult *pResult, void *pUserData);

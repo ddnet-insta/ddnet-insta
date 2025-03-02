@@ -537,7 +537,6 @@ void IGameController::OnReset()
 		pPlayer->Respawn();
 		pPlayer->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
 		pPlayer->m_Score = 0;
-		pPlayer->m_IsReadyToPlay = true; // ddnet-insta
 	}
 }
 

@@ -1,4 +1,5 @@
 // ddnet-insta specific gamecontroller methods
+#include <base/log.h>
 #include <base/system.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocolglue.h>
@@ -138,6 +139,89 @@ int IGameController::WinPointsForWin(const CPlayer *pPlayer)
 	// them self more valuable. They are also harder to farm.
 	// Even if the individuals participation might have less impact.
 	return m_aTeamSize[pPlayer->GetTeam() == TEAM_RED ? TEAM_BLUE : TEAM_RED];
+}
+
+// balancing
+void IGameController::CheckTeamBalance()
+{
+	if(!IsTeamPlay() || !Config()->m_SvTeambalanceTime)
+	{
+		m_UnbalancedTick = TBALANCE_OK;
+		return;
+	}
+
+	// check if teams are unbalanced
+	if(absolute(m_aTeamSize[TEAM_RED] - m_aTeamSize[TEAM_BLUE]) >= protocol7::NUM_TEAMS)
+	{
+		log_info("game", "Teams are NOT balanced (red=%d blue=%d)", m_aTeamSize[TEAM_RED], m_aTeamSize[TEAM_BLUE]);
+		if(m_UnbalancedTick <= TBALANCE_OK)
+			m_UnbalancedTick = Server()->Tick();
+	}
+	else
+	{
+		log_info("game", "Teams are balanced (red=%d blue=%d)", m_aTeamSize[TEAM_RED], m_aTeamSize[TEAM_BLUE]);
+		m_UnbalancedTick = TBALANCE_OK;
+	}
+}
+
+void IGameController::DoTeamBalance()
+{
+	if(!IsTeamPlay() || absolute(m_aTeamSize[TEAM_RED] - m_aTeamSize[TEAM_BLUE]) < protocol7::NUM_TEAMS)
+		return;
+	// if(m_GameFlags&GAMEFLAG_SURVIVAL)
+	// 	return;
+
+	log_info("game", "Balancing teams");
+
+	float aTeamScore[protocol7::NUM_TEAMS] = {0};
+	float aPlayerScore[MAX_CLIENTS] = {0.0f};
+
+	// gather stats
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+		{
+			aPlayerScore[i] = GameServer()->m_apPlayers[i]->m_Score.value_or(0) * Server()->TickSpeed() * 60.0f /
+					  (Server()->Tick() - GameServer()->m_apPlayers[i]->m_ScoreStartTick);
+			aTeamScore[GameServer()->m_apPlayers[i]->GetTeam()] += aPlayerScore[i];
+		}
+	}
+
+	int BiggerTeam = (m_aTeamSize[TEAM_RED] > m_aTeamSize[TEAM_BLUE]) ? TEAM_RED : TEAM_BLUE;
+	int NumBalance = absolute(m_aTeamSize[TEAM_RED] - m_aTeamSize[TEAM_BLUE]) / protocol7::NUM_TEAMS;
+
+	// balance teams
+	do
+	{
+		CPlayer *pPlayer = nullptr;
+		float ScoreDiff = aTeamScore[BiggerTeam];
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(!GameServer()->m_apPlayers[i] || !CanBeMovedOnBalance(i))
+				continue;
+
+			// remember the player whom would cause lowest score-difference
+			if(GameServer()->m_apPlayers[i]->GetTeam() == BiggerTeam &&
+				(!pPlayer || absolute((aTeamScore[BiggerTeam ^ 1] + aPlayerScore[i]) - (aTeamScore[BiggerTeam] - aPlayerScore[i])) < ScoreDiff))
+			{
+				pPlayer = GameServer()->m_apPlayers[i];
+				ScoreDiff = absolute((aTeamScore[BiggerTeam ^ 1] + aPlayerScore[i]) - (aTeamScore[BiggerTeam] - aPlayerScore[i]));
+			}
+		}
+
+		// move the player to the other team
+		if(pPlayer)
+		{
+			int Temp = pPlayer->m_LastActionTick;
+			DoTeamChange(pPlayer, BiggerTeam ^ 1);
+			pPlayer->m_LastActionTick = Temp;
+			pPlayer->Respawn();
+			GameServer()->SendGameMsg(protocol7::GAMEMSG_TEAM_BALANCE_VICTIM, pPlayer->GetTeam(), pPlayer->GetCid());
+		}
+	} while(--NumBalance);
+
+	m_UnbalancedTick = TBALANCE_OK;
+	GameServer()->SendGameMsg(protocol7::GAMEMSG_TEAM_BALANCE, -1);
 }
 
 bool IGameController::IsPlayerReadyMode()
