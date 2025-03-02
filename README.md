@@ -301,7 +301,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_respawn_protection_ms` Delay in milliseconds a tee can not damage or get damaged after spawning
 + `sv_drop_flag_on_selfkill` drop flag on selfkill (activates chat cmd '/drop flag')
 + `sv_drop_flag_on_vote` drop flag on vote yes (activates chat cmd '/drop flag')
-+ `sv_on_fire_mode` no reload delay after hitting an enemy with rifle
++ `sv_reload_time_on_hit` 0=default/off ticks it takes to shoot again after a shot was hit
 + `sv_hammer_scale_x` (fng) linearly scale up hammer x power, percentage, for hammering enemies and unfrozen teammates
 + `sv_hammer_scale_y` (fng) linearly scale up hammer y power, percentage, for hammering enemies and unfrozen teammates
 + `sv_melt_hammer_scale_x` (fng) linearly scale up hammer x power, percentage, for hammering frozen teammates
