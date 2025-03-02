@@ -62,7 +62,7 @@ MACRO_CONFIG_INT(SvZcatchRequireMultipleIpsToStart, sv_zcatch_require_multiple_i
 MACRO_CONFIG_INT(SvRespawnProtectionMs, sv_respawn_protection_ms, 0, 0, 999999999, CFGFLAG_SERVER, "Delay in milliseconds a tee can not damage or get damaged after spawning")
 MACRO_CONFIG_INT(SvDropFlagOnSelfkill, sv_drop_flag_on_selfkill, 0, 0, 1, CFGFLAG_SERVER, "drop flag on selfkill (activates chat cmd '/drop flag')")
 MACRO_CONFIG_INT(SvDropFlagOnVote, sv_drop_flag_on_vote, 0, 0, 1, CFGFLAG_SERVER, "drop flag on vote yes (activates chat cmd '/drop flag')")
-MACRO_CONFIG_INT(SvOnFireMode, sv_on_fire_mode, 0, 0, 1, CFGFLAG_SERVER, "no reload delay after hitting an enemy with rifle")
+MACRO_CONFIG_INT(SvReloadTimeOnHit, sv_reload_time_on_hit, 0, 0, 500, CFGFLAG_SERVER, "0=default/off ticks it takes to shoot again after a shot was hit")
 // matches ddnet clients prediction code by default
 // https://github.com/ddnet/ddnet/blob/f9df4a85be4ca94ca91057cd447707bcce16fd94/src/game/client/prediction/entities/character.cpp#L334-L346
 MACRO_CONFIG_INT(SvHammerScaleX, sv_hammer_scale_x, 320, 1, 1000, CFGFLAG_SERVER, "(fng) linearly scale up hammer x power, percentage, for hammering enemies and unfrozen teammates")
