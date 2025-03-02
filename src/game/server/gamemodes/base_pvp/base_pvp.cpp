@@ -1325,6 +1325,37 @@ int CGameControllerPvp::GetDefaultWeaponBasedOnSpawnWeapons() const
 	return WEAPON_GUN;
 }
 
+bool CGameControllerPvp::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
+{
+	// spectators can't spawn
+	if(Team == TEAM_SPECTATORS)
+		return false;
+
+	CSpawnEval Eval;
+	if(IsTeamPlay()) // ddnet-insta
+	{
+		Eval.m_FriendlyTeam = Team;
+
+		// first try own team spawn, then normal spawn and then enemy
+		EvaluateSpawnType(&Eval, 1 + (Team & 1), DDTeam);
+		if(!Eval.m_Got)
+		{
+			EvaluateSpawnType(&Eval, 0, DDTeam);
+			if(!Eval.m_Got)
+				EvaluateSpawnType(&Eval, 1 + ((Team + 1) & 1), DDTeam);
+		}
+	}
+	else
+	{
+		EvaluateSpawnType(&Eval, 0, DDTeam);
+		EvaluateSpawnType(&Eval, 1, DDTeam);
+		EvaluateSpawnType(&Eval, 2, DDTeam);
+	}
+
+	*pOutPos = Eval.m_Pos;
+	return Eval.m_Got;
+}
+
 void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)
 {
 	OnCharacterConstruct(pChr);

@@ -25,6 +25,7 @@ public:
 	void OnPlayerTick(class CPlayer *pPlayer);
 	void OnCharacterTick(class CCharacter *pChr);
 
+	bool CanSpawn(int Team, vec2 *pOutPos, int DDTeam) override;
 	bool BlockFirstShotOnSpawn(class CCharacter *pChr, int Weapon) const;
 	void SendChatSpectators(const char *pMessage, int Flags);
 	void OnInit() override;
