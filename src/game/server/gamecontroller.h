@@ -75,8 +75,6 @@ protected:
 	int m_RoundCount;
 
 	int m_GameFlags;
-	int m_UnbalancedTick;
-	bool m_ForceBalanced;
 
 public:
 	const char *m_pGameType;
@@ -137,8 +135,6 @@ public:
 	/*
 
 	*/
-	virtual bool CanBeMovedOnBalance(int ClientId);
-
 	virtual void Tick();
 
 	virtual void Snap(int SnappingClient);
