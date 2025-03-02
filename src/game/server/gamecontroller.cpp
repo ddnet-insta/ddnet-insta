@@ -518,8 +518,6 @@ void IGameController::StartRound()
 	m_SuddenDeath = 0;
 	m_GameOverTick = -1;
 	GameServer()->m_World.m_Paused = false;
-	m_aTeamscore[TEAM_RED] = 0; // ddnet-insta
-	m_aTeamscore[TEAM_BLUE] = 0; // ddnet-insta
 	m_ForceBalanced = false;
 	Server()->DemoRecorder_HandleAutoStart();
 	char aBuf[256];

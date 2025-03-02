@@ -68,11 +68,12 @@ void CGameControllerPvp::OnRoundStart()
 
 	int StartGameState = GameState();
 
-	// ddnet-insta
 	m_GameStartTick = Server()->Tick();
 	SetGameState(IGS_GAME_RUNNING);
 	m_GameStartTick = Server()->Tick();
 	m_SuddenDeath = 0;
+	m_aTeamscore[TEAM_RED] = 0;
+	m_aTeamscore[TEAM_BLUE] = 0;
 
 	// only auto start round if we are in casual mode and there is no tournament running
 	// otherwise set infinite warmup and wait for !restart
