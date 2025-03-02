@@ -572,6 +572,41 @@ public:
 	virtual void RoundInitPlayer(class CPlayer *pPlayer){};
 
 	/*
+		Function: DoTeamBalance
+			Makes sure players are evenly distributed
+			across team red and blue.
+
+			Only affects team based modes.
+
+			Will be called automatically if the user set
+			the config variable.
+			Or if an admin used the force_teambalance rcon command
+	*/
+	virtual void DoTeamBalance();
+
+	/*
+		Function: CanBeMovedOnBalance
+			Check if a player can be moved during balance
+
+		Arguments:
+			ClientId - id of the player that is a candidate for balance move
+
+		Returns:
+			true - allow to move this player to another team
+			false - do not allow to move this player to another team
+	*/
+	virtual bool CanBeMovedOnBalance(int ClientId) { return true; };
+
+	/*
+		Function: CheckTeamBalance
+			Called on tick to check if teams should be balanced.
+			Will then call DoteamBalance() to do the actual balancing.
+
+			TODO: should this really be virtual?
+	*/
+	virtual void CheckTeamBalance();
+
+	/*
 		Function: FreeInGameSlots
 			The amount of free in game slots.
 			Used to block players from joining the game if
@@ -640,7 +675,17 @@ public:
 
 	void AddTeamscore(int Team, int Score);
 
+	// balancing
+	enum
+	{
+		TBALANCE_CHECK = -2,
+		TBALANCE_OK,
+	};
 	int m_aTeamSize[protocol7::NUM_TEAMS];
+	// will be the first server tick where
+	// teams started to be unbalanced
+	// or the magic values TBALANCE_CHECK and TBALANCE_OK
+	int m_UnbalancedTick = TBALANCE_OK;
 
 	// game
 	enum EGameState

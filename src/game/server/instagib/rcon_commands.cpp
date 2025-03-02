@@ -161,6 +161,15 @@ void CGameContext::SwapTeams()
 	m_pController->SwapTeamscore();
 }
 
+void CGameContext::ConForceTeamBalance(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!pSelf->m_pController)
+		return;
+
+	pSelf->m_pController->DoTeamBalance();
+}
+
 void CGameContext::ConAddMapToPool(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

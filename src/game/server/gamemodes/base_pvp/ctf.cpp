@@ -174,6 +174,11 @@ bool CGameControllerBaseCTF::OnEntity(int Index, int x, int y, int Layer, int Fl
 	return true;
 }
 
+bool CGameControllerBaseCTF::CanBeMovedOnBalance(int ClientId)
+{
+	return GetCarriedFlag(GameServer()->m_apPlayers[ClientId]) == FLAG_NONE;
+}
+
 void CGameControllerBaseCTF::OnFlagReturn(CFlag *pFlag)
 {
 	CGameControllerPvp::OnFlagReturn(pFlag);

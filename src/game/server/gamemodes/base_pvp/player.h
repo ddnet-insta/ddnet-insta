@@ -252,6 +252,10 @@ public:
 	// so it also works when the world is paused
 	int64_t m_JoinTime = 0;
 
+	// used for balacing
+	// to figure out which players score the least
+	int m_ScoreStartTick = 0;
+
 #ifndef IN_CLASS_PLAYER
 };
 #endif

@@ -17,6 +17,7 @@ CONSOLE_COMMAND("chat", "r[message]", CFGFLAG_SERVER | CMDFLAG_TEST, ConChat, th
 CONSOLE_COMMAND("shuffle_teams", "", CFGFLAG_SERVER, ConShuffleTeams, this, "Shuffle the current teams")
 CONSOLE_COMMAND("swap_teams", "", CFGFLAG_SERVER, ConSwapTeams, this, "Swap the current teams")
 CONSOLE_COMMAND("swap_teams_random", "", CFGFLAG_SERVER, ConSwapTeamsRandom, this, "Swap the current teams or not (random chance)")
+CONSOLE_COMMAND("force_teambalance", "", CFGFLAG_SERVER, ConForceTeamBalance, this, "Force team balance");
 
 CONSOLE_COMMAND("add_map_to_pool", "s[map name]", CFGFLAG_SERVER, ConAddMapToPool, this, "Can be picked by random_map_from_pool command (entries can be duplicated to increase chance)")
 CONSOLE_COMMAND("clear_map_pool", "", CFGFLAG_SERVER, ConClearMapPool, this, "Clears pool used by random_map_from_pool command")

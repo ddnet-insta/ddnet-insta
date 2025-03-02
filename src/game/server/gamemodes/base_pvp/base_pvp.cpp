@@ -49,6 +49,22 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 		g_Config.m_SvTournamentChat = 0;
 
 	m_vFrozenQuitters.clear();
+
+	m_UnbalancedTick = TBALANCE_OK;
+}
+
+void CGameControllerPvp::OnReset()
+{
+	CGameControllerDDRace::OnReset();
+
+	for(auto &pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		pPlayer->m_IsReadyToPlay = true;
+		pPlayer->m_ScoreStartTick = Server()->Tick();
+	}
 }
 
 void CGameControllerPvp::OnInit()
@@ -1102,6 +1118,22 @@ void CGameControllerPvp::Tick()
 		m_vFrozenQuitters.clear();
 	}
 
+	// do team-balancing (skip this in survival, done there when a round starts)
+	if(IsTeamPlay()) //  && !(m_GameFlags&protocol7::GAMEFLAG_SURVIVAL))
+	{
+		switch(m_UnbalancedTick)
+		{
+		case TBALANCE_CHECK:
+			CheckTeamBalance();
+			break;
+		case TBALANCE_OK:
+			break;
+		default:
+			if(g_Config.m_SvTeambalanceTime && Server()->Tick() > m_UnbalancedTick + g_Config.m_SvTeambalanceTime * Server()->TickSpeed() * 60)
+				DoTeamBalance();
+		}
+	}
+
 	// win check
 	if((m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_GAME_PAUSED) && !GameServer()->m_World.m_ResetRequested)
 	{
@@ -1113,12 +1145,23 @@ void CGameControllerPvp::OnPlayerTick(class CPlayer *pPlayer)
 {
 	pPlayer->InstagibTick();
 
-	// this is needed for the smart tournament chat
-	// otherwise players get marked as afk during pause
-	// and then the game is considered not competitive anymore
-	// which is wrong
 	if(GameServer()->m_World.m_Paused)
+	{
+		// this is needed for the smart tournament chat
+		// otherwise players get marked as afk during pause
+		// and then the game is considered not competitive anymore
+		// which is wrong
 		pPlayer->UpdatePlaytime();
+
+		// all these are set in player.cpp
+		// ++m_RespawnTick;
+		// ++m_DieTick;
+		// ++m_PreviousDieTick;
+		// ++m_JoinTick;
+		// ++m_LastActionTick;
+		// ++m_TeamChangeTick;
+		++pPlayer->m_ScoreStartTick;
+	}
 
 	if(pPlayer->m_GameStateBroadcast)
 	{
@@ -1639,6 +1682,7 @@ void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *
 	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
 	{
 		--m_aTeamSize[pPlayer->GetTeam()];
+		m_UnbalancedTick = TBALANCE_CHECK;
 	}
 }
 
@@ -1676,12 +1720,12 @@ void CGameControllerPvp::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg
 	if(OldTeam != TEAM_SPECTATORS)
 	{
 		--m_aTeamSize[OldTeam];
-		// m_UnbalancedTick = TBALANCE_CHECK;
+		m_UnbalancedTick = TBALANCE_CHECK;
 	}
 	if(Team != TEAM_SPECTATORS)
 	{
 		++m_aTeamSize[Team];
-		// m_UnbalancedTick = TBALANCE_CHECK;
+		m_UnbalancedTick = TBALANCE_CHECK;
 		// if(m_GameState == IGS_WARMUP_GAME && HasEnoughPlayers())
 		// 	SetGameState(IGS_WARMUP_GAME, 0);
 		// pPlayer->m_IsReadyToPlay = !IsPlayerReadyMode();
