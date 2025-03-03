@@ -49,6 +49,8 @@ int CGameControllerFly::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 
 	if(pKiller && pKiller != pVictim->GetPlayer() && Weapon == WEAPON_WORLD)
 	{
+		pKiller->IncrementScore();
+
 		// TODO: the kill message will also be sent in CCharacter::Die which is a bit annoying
 
 		// kill message
