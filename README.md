@@ -359,7 +359,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `shuffle_teams` Shuffle the current teams
 + `swap_teams` Swap the current teams
 + `swap_teams_random` Swap the current teams or not (random chance)
-+ `force_teambalance` Force team balance"
++ `force_teambalance` Force team balance
 + `add_map_to_pool` Can be picked by random_map_from_pool command (entries can be duplicated to increase chance)
 + `clear_map_pool` Clears pool used by random_map_from_pool command
 + `random_map_from_pool` Changes to random map from pool (see add_map_to_pool)
