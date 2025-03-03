@@ -182,6 +182,18 @@ public:
 	virtual bool OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos) { return false; };
 
 	/*
+		Function: AmmoRegen
+			Called directly after FireWeapon().
+			Implements the vanilla weapon ammo reloading for the gun in ctf gametypes.
+			And also handles the ammo regeneration for grenades in instagib modes such as
+			gdm, gctf and zCatch if ammo limits are configured for these modes
+
+		Arguments:
+			pChr - Character that might gain new ammo
+	*/
+	virtual void AmmoRegen(CCharacter *pChr);
+
+	/*
 		Function: OnChatMessage
 			hooks into CGameContext::OnSayNetMessage()
 			after unicode check and teehistorian already happend

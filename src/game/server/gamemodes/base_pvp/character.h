@@ -40,6 +40,7 @@ public:
 
 	bool OnFngFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos);
 	void TakeHammerHit(CCharacter *pFrom);
+	void AmmoRegen();
 	/*
 		Function: IsTouchingTile
 

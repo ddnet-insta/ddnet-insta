@@ -234,6 +234,44 @@ void CCharacter::TakeHammerHit(CCharacter *pFrom)
 	}
 }
 
+void CCharacter::AmmoRegen()
+{
+	// ammo regen on Grenade
+	int AmmoRegenTime = 0;
+	int MaxAmmo = 0;
+	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE && g_Config.m_SvGrenadeAmmoRegen)
+	{
+		AmmoRegenTime = g_Config.m_SvGrenadeAmmoRegenTime;
+		MaxAmmo = g_Config.m_SvGrenadeAmmoRegenNum;
+	}
+	else
+	{
+		// ammo regen
+		AmmoRegenTime = g_pData->m_Weapons.m_aId[m_Core.m_ActiveWeapon].m_Ammoregentime;
+		MaxAmmo = g_pData->m_Weapons.m_aId[m_Core.m_ActiveWeapon].m_Maxammo;
+	}
+	if(AmmoRegenTime && m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo >= 0)
+	{
+		// If equipped and not active, regen ammo?
+		if(m_ReloadTimer <= 0)
+		{
+			if(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart < 0)
+				m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = Server()->Tick();
+
+			if((Server()->Tick() - m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart) >= AmmoRegenTime * Server()->TickSpeed() / 1000)
+			{
+				// Add some ammo
+				m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo = minimum(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo + 1, MaxAmmo);
+				m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
+			}
+		}
+		else
+		{
+			m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
+		}
+	}
+}
+
 void CCharacter::ResetInstaSettings()
 {
 	int Ammo = -1;

@@ -224,6 +224,11 @@ void IGameController::DoTeamBalance()
 	GameServer()->SendGameMsg(protocol7::GAMEMSG_TEAM_BALANCE, -1);
 }
 
+void IGameController::AmmoRegen(CCharacter *pChr)
+{
+	pChr->AmmoRegen();
+}
+
 bool IGameController::IsPlayerReadyMode()
 {
 	return Config()->m_SvPlayerReadyMode != 0 && (m_GameStateTimer == TIMER_INFINITE && (m_GameState == IGS_WARMUP_USER || m_GameState == IGS_GAME_PAUSED));
