@@ -29,6 +29,9 @@ int CGameControllerBaseFng::SnapGameInfoExFlags(int SnappingClient, int DDRaceFl
 	Flags &= ~(GAMEINFOFLAG_ENTITIES_DDRACE);
 	Flags &= ~(GAMEINFOFLAG_ENTITIES_RACE);
 	Flags |= GAMEINFOFLAG_ENTITIES_FNG;
+
+	// to make ddnet clients "snd_long_pain" work https://github.com/ddnet-insta/ddnet-insta/issues/298
+	Flags |= GAMEINFOFLAG_GAMETYPE_FNG;
 	return Flags;
 }
 
