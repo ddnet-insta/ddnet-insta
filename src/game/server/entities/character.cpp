@@ -421,7 +421,7 @@ void CCharacter::HandleWeaponSwitch()
 
 void CCharacter::FireWeapon()
 {
-	if(m_ReloadTimer != 0)
+	if(m_aReloadTimer[GetActiveWeaponForReload()] != 0)
 	{
 		if(m_LatestInput.m_Fire & 1)
 		{
@@ -643,10 +643,13 @@ void CCharacter::HandleWeapons()
 		m_PainSoundTimer--;
 
 	// check reload timer
-	if(m_ReloadTimer)
+	for(int &ReloadTimer : m_aReloadTimer) // ddnet-insta uses m_aReloadTimer instead of m_ReloadTimer
 	{
-		m_ReloadTimer--;
-		return;
+		if(ReloadTimer)
+		{
+			ReloadTimer--;
+			return;
+		}
 	}
 
 	// fire Weapon, if wanted

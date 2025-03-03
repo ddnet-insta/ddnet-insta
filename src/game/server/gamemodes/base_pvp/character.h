@@ -4,6 +4,7 @@
 
 #ifndef IN_CLASS_CHARACTER
 
+#include <game/generated/protocol.h>
 #include <game/server/entity.h>
 #include <game/server/save.h>
 
@@ -27,6 +28,14 @@ public:
 
 	// player can not be damaged with weapons
 	bool m_IsGodmode = false;
+
+	// ddnet-insta has a per weapon reload timer
+	// DO NOT USE m_ReloadTimer!
+	// it is unused in ddnet-insta and only kept
+	// to keep the diff to ddnet minimal
+	int m_aReloadTimer[NUM_WEAPONS];
+
+	int GetActiveWeaponForReload() const;
 
 	int Health() { return m_Health; };
 	int Armor() { return m_Armor; };
