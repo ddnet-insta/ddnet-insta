@@ -647,12 +647,12 @@ public:
 	// See also ddnet's SetArmorProgress() and ddnet-insta's SetArmorProgressEmpty()
 	// used to keep armor progress bar in ddnet gametype
 	// but remove it in favor of correct armor in vanilla based gametypes
-	virtual void SetArmorProgressFull(CCharacter *pCharacer);
+	virtual void SetArmorProgressFull(CCharacter *pCharacter);
 
 	// See also ddnet's SetArmorProgress() and ddnet-insta's SetArmorProgressFull()
 	// used to keep armor progress bar in ddnet gametype
 	// but remove it in favor of correct armor in vanilla based gametypes
-	virtual void SetArmorProgressEmpty(CCharacter *pCharacer);
+	virtual void SetArmorProgressEmpty(CCharacter *pCharacter);
 
 	// ddnet has grenade
 	// but the actual implementation is in CGameControllerPvp::IsGrenadeGameType()

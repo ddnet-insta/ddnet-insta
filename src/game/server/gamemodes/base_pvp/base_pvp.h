@@ -94,9 +94,9 @@ public:
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 	bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) override;
 	bool OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos) override;
-	void SetArmorProgress(CCharacter *pCharacer, int Progress) override{};
-	void SetArmorProgressFull(CCharacter *pCharacer) override{};
-	void SetArmorProgressEmpty(CCharacter *pCharacer) override{};
+	void SetArmorProgress(CCharacter *pCharacter, int Progress) override{};
+	void SetArmorProgressFull(CCharacter *pCharacter) override{};
+	void SetArmorProgressEmpty(CCharacter *pCharacter) override{};
 	bool OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId) override;
 	void OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
 	void OnShowRank(int Rank, int RankedScore, const char *pRankType, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
