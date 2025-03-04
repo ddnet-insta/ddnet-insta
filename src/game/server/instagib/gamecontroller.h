@@ -116,6 +116,22 @@ public:
 	virtual void OnAppliedDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter){};
 
 	/*
+		Function: ApplyVanillaDamage
+			Creates the damage indicator effect.
+			Plays the pain and hit sounds.
+			Decreases the armor.
+			But DOES NOT DECREASE HEALTH OR KILL.
+			You have to applay the remaining Dmg to the characters health.
+
+		Arguments:
+			Dmg - Input and outoput damage. It might be decreased if it is self damage or hits armor.
+			From - Client Id of the player who delt the damage
+			Weapon - Weapon id that was causing the damage see the WEAPON_* enums
+			Character - Character that was damaged
+	*/
+	virtual void ApplyVanillaDamage(int &Dmg, int From, int Weapon, CCharacter *pCharacter){};
+
+	/*
 		Function: OnInit
 			Will be called at the end of CGameContext::OnInit
 			and can be used in addition to the controllers constructor

@@ -91,6 +91,7 @@ public:
 	// ddnet-insta only
 	// return false to not cause any damage
 	bool OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim) override;
+	void ApplyVanillaDamage(int &Dmg, int From, int Weapon, CCharacter *pCharacter) override;
 	bool SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce) override;
 	void OnAnyDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter) override;
 	void OnAppliedDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter) override;

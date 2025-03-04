@@ -1242,6 +1242,72 @@ bool CGameControllerPvp::IsSpawnProtected(const CPlayer *pVictim, const CPlayer 
 	return false;
 }
 
+void CGameControllerPvp::ApplyVanillaDamage(int &Dmg, int From, int Weapon, CCharacter *pCharacter)
+{
+	CPlayer *pPlayer = pCharacter->GetPlayer();
+	if(From == pPlayer->GetCid())
+	{
+		// m_pPlayer only inflicts half damage on self
+		Dmg = maximum(1, Dmg / 2);
+
+		// do not cause self damage with jetpack
+		if(Weapon == WEAPON_GUN && pCharacter->Core()->m_Jetpack)
+		{
+			Dmg = 0;
+			return;
+		}
+	}
+
+	pCharacter->m_DamageTaken++;
+
+	// create healthmod indicator
+	if(Server()->Tick() < pCharacter->m_DamageTakenTick + 25)
+	{
+		// make sure that the damage indicators doesn't group together
+		GameServer()->CreateDamageInd(pCharacter->m_Pos, pCharacter->m_DamageTaken * 0.25f, Dmg);
+	}
+	else
+	{
+		pCharacter->m_DamageTaken = 0;
+		GameServer()->CreateDamageInd(pCharacter->m_Pos, 0, Dmg);
+	}
+
+	if(Dmg)
+	{
+		if(pCharacter->m_Armor)
+		{
+			if(Dmg > 1)
+			{
+				pCharacter->m_Health--;
+				Dmg--;
+			}
+
+			if(Dmg > pCharacter->m_Armor)
+			{
+				Dmg -= pCharacter->m_Armor;
+				pCharacter->m_Armor = 0;
+			}
+			else
+			{
+				pCharacter->m_Armor -= Dmg;
+				Dmg = 0;
+			}
+		}
+	}
+
+	pCharacter->m_DamageTakenTick = Server()->Tick();
+
+	if(From >= 0 && From < MAX_CLIENTS && From != pCharacter->GetPlayer()->GetCid() && GameServer()->m_apPlayers[From])
+	{
+		DoDamageHitSound(From);
+	}
+
+	if(Dmg > 2)
+		GameServer()->CreateSound(pCharacter->m_Pos, SOUND_PLAYER_PAIN_LONG);
+	else
+		GameServer()->CreateSound(pCharacter->m_Pos, SOUND_PLAYER_PAIN_SHORT);
+}
+
 bool CGameControllerPvp::SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce)
 {
 	ApplyForce = true;
