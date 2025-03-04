@@ -1267,10 +1267,6 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 		Dmg = 0;
 		return false;
 	}
-	if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
-	{
-		return false;
-	}
 	CPlayer *pKiller = nullptr;
 	if(From >= 0 && From <= MAX_CLIENTS)
 		pKiller = GameServer()->m_apPlayers[From];
