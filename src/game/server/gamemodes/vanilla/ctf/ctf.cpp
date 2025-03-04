@@ -48,9 +48,6 @@ int CGameControllerCTF::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
 
 bool CGameControllerCTF::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
-	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
-		return CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
-
 	if(Weapon == WEAPON_GUN || Weapon == WEAPON_SHOTGUN)
 		Dmg = 1;
 	if(Weapon == WEAPON_LASER)
@@ -59,6 +56,10 @@ bool CGameControllerCTF::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 	// https://github.com/ddnet-insta/ddnet-insta/issues/135
 	// if(Weapon == WEAPON_GRENADE)
 	// 	Dmg = 6;
+
+	bool ApplyForce = true;
+	if(SkipDamage(Dmg, From, Weapon, &Character, ApplyForce))
+		return CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
 
 	if(From == Character.GetPlayer()->GetCid())
 	{

@@ -379,7 +379,7 @@ void IGameController::CheckGameInfo()
 		SendGameInfo(-1);
 }
 
-bool IGameController::IsFriendlyFire(int ClientId1, int ClientId2)
+bool IGameController::IsFriendlyFire(int ClientId1, int ClientId2) const
 {
 	if(ClientId1 == ClientId2)
 		return false;
@@ -652,6 +652,14 @@ int IGameController::GetCidByName(const char *pName)
 		}
 	}
 	return ClientId;
+}
+
+CPlayer *IGameController::GetPlayerOrNullptr(int ClientId) const
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return nullptr;
+
+	return GameServer()->m_apPlayers[ClientId];
 }
 
 void IGameController::SetArmorProgressFull(CCharacter *pCharacter)

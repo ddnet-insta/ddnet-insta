@@ -31,7 +31,6 @@ public:
 	// | (_| | (_| | | | |  __/ ||_____| | | | \__ \ || (_| |
 	//  \__,_|\__,_|_| |_|\___|\__|    |_|_| |_|___/\__\__,_|
 	//
-	// all code below should be ddnet-insta
 	//
 
 	// virtual bool OnLaserHitCharacter(vec2 From, vec2 To, class CLaser &Laser) {};
@@ -40,12 +39,81 @@ public:
 			this function was added in ddnet-insta and is a non standard controller method.
 			neither ddnet nor teeworlds have this
 
+		Arguments:
+			Force - Reference to force. Set this vector and it will be applied to the target characters velocity
+			Dmg - Input and outoput damage that was applied. You can read and write it.
+			From - Client Id of the player who delt the damage
+			Weapon - Weapon id that was causing the damage see the WEAPON_* enums
+			Character - Character that was damaged
+
 		Returns:
 			return true to skip ddnet CCharacter::TakeDamage() behavior
 			which is applying the force and moving the damaged tee
 			it also sets the happy eyes if the Dmg is not zero
 	*/
 	virtual bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) { return false; };
+
+	/*
+		Function: SkipDamage
+			Pure function without side effects to check if a damage will be applied.
+			Used to implement all kinds of damage blockers like spawn protection,
+			no self or team damage or custom configs such as hook only kills.
+
+			Will be called from OnCharacterTakeDamage()
+
+			You should never set any variables in this method.
+			It might be called multiple times per damage.
+			If you need a method with side effects that is ensured to
+			only be called checkout.
+
+			OnAnyDamage() and OnAppliedDamage()
+
+		Arguments:
+			Dmg - Input and outoput damage that was applied. You can read and write it.
+			From - Client Id of the player who delt the damage
+			Weapon - Weapon id that was causing the damage see the WEAPON_* enums
+			Character - Character that was damaged
+			ApplyForce - Output boolean if set to false will not apply force to the damaged target
+
+		Returns:
+			true - if the damage is skipped
+			false - if the damage counts and will be applied
+	*/
+	virtual bool SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce) { return false; };
+
+	/*
+		Function: OnAnyDamage
+			Side effect only function. That will be called for any damage caused.
+			It is only called once per caused damage.
+			It is also called for damage that will not be applied.
+			So it is also called for team damage even if team damage is off.
+
+			If you need only the applied damage checkout OnAppliedDamage()
+
+		Arguments:
+			Dmg - Input and outoput damage that was applied. You can read and write it.
+			From - Client Id of the player who delt the damage
+			Weapon - Weapon id that was causing the damage see the WEAPON_* enums
+			Character - Character that was damaged
+	*/
+	virtual void OnAnyDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter){};
+
+	/*
+		Function: OnAppliedDamage
+			Side effect only function. That will be called for all actually applied damage.
+			It is only called once per caused damage.
+			Any blocked damage is excluded such as hitting team mates if firendly
+			fire is off.
+
+			If you also need hits that do not cause actual damage checkout OnAnyDamage()
+
+		Arguments:
+			Dmg - Input and outoput damage that was applied. You can read and write it.
+			From - Client Id of the player who delt the damage
+			Weapon - Weapon id that was causing the damage see the WEAPON_* enums
+			Character - Character that was damaged
+	*/
+	virtual void OnAppliedDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter){};
 
 	/*
 		Function: OnInit
@@ -844,10 +912,14 @@ public:
 	bool IsSkinColorChangeAllowed() const { return m_AllowSkinColorChange; }
 	int GameFlags() const { return m_GameFlags; }
 	void CheckGameInfo();
-	bool IsFriendlyFire(int ClientId1, int ClientId2);
+	bool IsFriendlyFire(int ClientId1, int ClientId2) const;
 
 	// get client id by in game name
 	int GetCidByName(const char *pName);
+
+	// it is safe to pass in any ClientId
+	// returned value might be null
+	CPlayer *GetPlayerOrNullptr(int ClientId) const;
 
 	// only used in ctf gametypes
 	class CFlag *m_apFlags[NUM_FLAGS];

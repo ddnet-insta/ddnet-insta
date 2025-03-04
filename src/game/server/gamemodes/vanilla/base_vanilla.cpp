@@ -42,6 +42,10 @@ bool CGameControllerVanilla::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 	// if(Weapon == WEAPON_GRENADE)
 	// 	Dmg = 6;
 
+	bool ApplyForce = true;
+	if(SkipDamage(Dmg, From, Weapon, &Character, ApplyForce))
+		return CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
+
 	if(From == Character.GetPlayer()->GetCid())
 	{
 		// m_pPlayer only inflicts half damage on self

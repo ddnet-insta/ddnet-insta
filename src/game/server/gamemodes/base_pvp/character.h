@@ -61,6 +61,9 @@ public:
 	void Rainbow(bool Activate);
 	bool HasRainbow() const { return m_Rainbow; }
 
+	const class CPlayer *GetPlayer() const { return m_pPlayer; }
+	int HookedPlayer() const { return m_Core.HookedPlayer(); }
+
 private:
 	// players skin changes colors
 	bool m_Rainbow = false;

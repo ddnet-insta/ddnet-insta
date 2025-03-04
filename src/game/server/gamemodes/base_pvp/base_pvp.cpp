@@ -1210,7 +1210,7 @@ bool CGameControllerPvp::OnLaserHit(int Bounces, int From, int Weapon, CCharacte
 	return true;
 }
 
-bool CGameControllerPvp::IsSpawnProtected(CPlayer *pVictim, CPlayer *pKiller) const
+bool CGameControllerPvp::IsSpawnProtected(const CPlayer *pVictim, const CPlayer *pKiller) const
 {
 	// there has to be a valid killer to get spawn protected
 	// one should never be spawn protected from the world
@@ -1242,44 +1242,57 @@ bool CGameControllerPvp::IsSpawnProtected(CPlayer *pVictim, CPlayer *pKiller) co
 	return false;
 }
 
-bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
+bool CGameControllerPvp::SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce)
 {
+	ApplyForce = true;
+
+	const CPlayer *pPlayer = pCharacter->GetPlayer();
+	const CPlayer *pKiller = GetPlayerOrNullptr(From);
+
+	if(pCharacter->m_IsGodmode)
+		return true;
+	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(pPlayer->GetCid(), From))
+		return true;
+	if(g_Config.m_SvOnlyHookKills && pKiller)
+	{
+		const CCharacter *pKillerChr = pKiller->GetCharacter();
+		if(pKillerChr)
+			if(pKillerChr->HookedPlayer() != pPlayer->GetCid())
+				return true;
+	}
+	if(IsSpawnProtected(pPlayer, pKiller))
+		return true;
+	return false;
+}
+
+void CGameControllerPvp::OnAnyDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter)
+{
+	CPlayer *pPlayer = pCharacter->GetPlayer();
+
 	// only weapons that push the tee around are considerd a touch
 	// gun and laser do not push (as long as there is no explosive guns/lasers)
 	// and shotgun only pushes in ddrace gametypes
 	if(Weapon != WEAPON_GUN && Weapon != WEAPON_LASER)
 	{
 		if(!m_IsVanillaGameType || Weapon != WEAPON_SHOTGUN)
-			Character.GetPlayer()->UpdateLastToucher(From);
+			pPlayer->UpdateLastToucher(From);
 	}
 
-	if(Character.m_FreezeTime && Weapon == WEAPON_LASER)
-		Character.UnFreeze();
+	if(pCharacter->m_FreezeTime && Weapon == WEAPON_LASER)
+		pCharacter->UnFreeze();
 
-	CPlayer *pPlayer = Character.GetPlayer();
-	if(Character.m_IsGodmode)
-		return true;
-	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
+	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(pPlayer->GetCid(), From))
 	{
 		// boosting mates counts neither as hit nor as miss
 		if(IsStatTrack() && Weapon != WEAPON_HAMMER)
 			pPlayer->m_Stats.m_ShotsFired--;
-		Dmg = 0;
-		return false;
 	}
-	CPlayer *pKiller = nullptr;
-	if(From >= 0 && From <= MAX_CLIENTS)
-		pKiller = GameServer()->m_apPlayers[From];
-	if(g_Config.m_SvOnlyHookKills && pKiller)
-	{
-		CCharacter *pChr = pKiller->GetCharacter();
-		if(!pChr || pChr->GetCore().HookedPlayer() != Character.GetPlayer()->GetCid())
-			return false;
-	}
-	// the "true" means tees hit during spawn protection
-	// will still be pushed around
-	if(IsSpawnProtected(pPlayer, pKiller))
-		return false;
+}
+
+void CGameControllerPvp::OnAppliedDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter)
+{
+	CPlayer *pPlayer = pCharacter->GetPlayer();
+	CPlayer *pKiller = GetPlayerOrNullptr(From);
 
 	if(IsStatTrack() && Weapon != WEAPON_HAMMER)
 	{
@@ -1297,6 +1310,18 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 			pKiller->m_Stats.m_ShotsHit++;
 		}
 	}
+}
+
+bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
+{
+	OnAnyDamage(Dmg, From, Weapon, &Character);
+	bool ApplyForce = false;
+	if(SkipDamage(Dmg, From, Weapon, &Character, ApplyForce))
+	{
+		Dmg = 0;
+		return !ApplyForce;
+	}
+	OnAppliedDamage(Dmg, From, Weapon, &Character);
 
 	// instagib damage always kills no matter the armor
 	// max vanilla weapon damage is katana with 9 dmg
@@ -1313,6 +1338,7 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 	{
 		Character.Die(From, Weapon);
 
+		CPlayer *pKiller = GetPlayerOrNullptr(From);
 		if(From != Character.GetPlayer()->GetCid() && pKiller)
 		{
 			CCharacter *pChr = pKiller->GetCharacter();
