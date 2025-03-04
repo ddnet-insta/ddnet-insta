@@ -654,14 +654,14 @@ int IGameController::GetCidByName(const char *pName)
 	return ClientId;
 }
 
-void IGameController::SetArmorProgressFull(CCharacter *pCharacer)
+void IGameController::SetArmorProgressFull(CCharacter *pCharacter)
 {
-	pCharacer->SetArmor(10);
+	pCharacter->SetArmor(10);
 }
 
-void IGameController::SetArmorProgressEmpty(CCharacter *pCharacer)
+void IGameController::SetArmorProgressEmpty(CCharacter *pCharacter)
 {
-	pCharacer->SetArmor(0);
+	pCharacter->SetArmor(0);
 }
 
 bool IGameController::HasWinningScore(const CPlayer *pPlayer) const
