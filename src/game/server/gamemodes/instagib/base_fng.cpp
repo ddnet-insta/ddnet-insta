@@ -383,6 +383,16 @@ bool CGameControllerBaseFng::OnLaserHit(int Bounces, int From, int Weapon, CChar
 	return CGameControllerInstagib::OnLaserHit(Bounces, From, Weapon, pVictim);
 }
 
+bool CGameControllerBaseFng::SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce)
+{
+	ApplyForce = true;
+
+	if(pCharacter->m_FreezeTime)
+		return true;
+
+	return CGameControllerInstagib::SkipDamage(Dmg, From, Weapon, pCharacter, ApplyForce);
+}
+
 // warning this does not call the base pvp take damage method
 // so it has to reimplement all the relevant functionality
 bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
@@ -396,21 +406,12 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 		return !ApplyForce;
 	}
 
-	CPlayer *pKiller = GetPlayerOrNullptr(From);
+	OnAppliedDamage(Dmg, From, Weapon, &Character);
 
-	if(Character.m_FreezeTime)
-	{
-		Dmg = 0;
-		return false;
-	}
+	CPlayer *pKiller = GetPlayerOrNullptr(From);
 
 	if(pKiller)
 	{
-		if(IsStatTrack())
-		{
-			pKiller->m_Stats.m_ShotsHit++;
-		}
-
 		pKiller->IncrementScore();
 		AddTeamscore(pKiller->GetTeam(), 1);
 		DoDamageHitSound(From);
