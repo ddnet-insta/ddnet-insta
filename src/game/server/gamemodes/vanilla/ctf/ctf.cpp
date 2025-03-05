@@ -57,13 +57,17 @@ bool CGameControllerCTF::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 	// if(Weapon == WEAPON_GRENADE)
 	// 	Dmg = 6;
 
+	OnAnyDamage(Force, Dmg, From, Weapon, &Character);
 	bool ApplyForce = true;
 	if(SkipDamage(Dmg, From, Weapon, &Character, ApplyForce))
-		return CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
-
+	{
+		Dmg = 0;
+		return !ApplyForce;
+	}
+	OnAppliedDamage(Dmg, From, Weapon, &Character);
 	ApplyVanillaDamage(Dmg, From, Weapon, &Character);
-
-	return CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
+	DecreaseHealthAndKill(Dmg, From, Weapon, &Character);
+	return false;
 }
 
 bool CGameControllerCTF::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)

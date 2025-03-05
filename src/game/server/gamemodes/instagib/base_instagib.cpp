@@ -3,6 +3,7 @@
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
+#include <game/server/gamemodes/base_pvp/base_pvp.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
@@ -20,74 +21,20 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;
 
-bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
+bool CGameControllerInstagib::SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce)
 {
-	if(Character.m_FreezeTime && Weapon == WEAPON_LASER)
-		Character.UnFreeze();
+	ApplyForce = true;
 
-	if(From == Character.GetPlayer()->GetCid())
-	{
-		// Give back ammo on grenade self push
-		// Only if not infinite ammo and activated
-		if(Weapon == WEAPON_GRENADE && g_Config.m_SvGrenadeAmmoRegen && g_Config.m_SvGrenadeAmmoRegenSpeedNade)
-		{
-			Character.SetWeaponAmmo(WEAPON_GRENADE, minimum(Character.GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + 1, g_Config.m_SvGrenadeAmmoRegenNum));
-		}
-
-		// no pain eyes when hitting our self
-		// https://github.com/ddnet-insta/ddnet-insta/issues/232
-		Dmg = 0;
-
-		// no self damage
-		//
-		// self damage counts as boosting
-		// so the hit/misses rate should not be affected
-		//
-		// yes this means that grenade boost kills
-		// can get you a accuracy over 100%
-		if(IsStatTrack() && Weapon != WEAPON_HAMMER)
-			Character.GetPlayer()->m_Stats.m_ShotsFired--;
-		return false;
-	}
 	if(Dmg < g_Config.m_SvDamageNeededForKill && Weapon == WEAPON_GRENADE)
-	{
-		// no pain eyes if the bullet does not kill
-		// https://github.com/ddnet-insta/ddnet-insta/issues/232#issuecomment-2599690405
-		Dmg = 0;
 		return false;
-	}
+
+	return CGameControllerPvp::SkipDamage(Dmg, From, Weapon, pCharacter, ApplyForce);
+}
+
+void CGameControllerInstagib::OnAppliedDamage(int &Dmg, int &From, int &Weapon, CCharacter *pCharacter)
+{
 	Dmg = 20;
-
-	dbg_assert(Character.IsAlive(), "tried to apply damage to dead character");
-
-	if(CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character))
-		return true;
-
-	CPlayer *pFrom = nullptr;
-	if(From >= 0 && From < MAX_CLIENTS)
-		pFrom = GameServer()->m_apPlayers[From];
-
-	if(!Character.IsAlive() && From != Character.GetPlayer()->GetCid() && pFrom)
-	{
-		DoDamageHitSound(From);
-
-		CCharacter *pChr = pFrom->GetCharacter();
-		if(!pChr)
-			return false;
-
-		// refill nades
-		int RefillNades = 0;
-		if(g_Config.m_SvGrenadeAmmoRegenOnKill == 1)
-			RefillNades = 1;
-		else if(g_Config.m_SvGrenadeAmmoRegenOnKill == 2)
-			RefillNades = g_Config.m_SvGrenadeAmmoRegenNum;
-		if(RefillNades && g_Config.m_SvGrenadeAmmoRegen && Weapon == WEAPON_GRENADE)
-		{
-			pChr->SetWeaponAmmo(WEAPON_GRENADE, minimum(pChr->GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + RefillNades, g_Config.m_SvGrenadeAmmoRegenNum));
-		}
-		return false;
-	}
-	return false;
+	CGameControllerPvp::OnAppliedDamage(Dmg, From, Weapon, pCharacter);
 }
 
 bool CGameControllerInstagib::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
