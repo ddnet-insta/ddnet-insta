@@ -1346,6 +1346,16 @@ void CGameControllerPvp::OnAnyDamage(int Dmg, int From, int Weapon, CCharacter *
 
 	if(Weapon == WEAPON_LASER && !IsFngGameType())
 		pCharacter->UnFreeze();
+
+	if(From == pPlayer->GetCid() && Weapon != WEAPON_LASER)
+	{
+		// self damage counts as boosting
+		// so the hit/misses rate should not be affected
+		//
+		// yes this means that grenade boost kills
+		// can get you a accuracy over 100%
+		pPlayer->m_Stats.m_ShotsFired--;
+	}
 }
 
 void CGameControllerPvp::OnAppliedDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter)
@@ -1355,16 +1365,7 @@ void CGameControllerPvp::OnAppliedDamage(int Dmg, int From, int Weapon, CCharact
 
 	if(IsStatTrack() && Weapon != WEAPON_HAMMER)
 	{
-		if(From == pPlayer->GetCid())
-		{
-			// self damage counts as boosting
-			// so the hit/misses rate should not be affected
-			//
-			// yes this means that grenade boost kills
-			// can get you a accuracy over 100%
-			pPlayer->m_Stats.m_ShotsFired--;
-		}
-		else if(pKiller)
+		if(pKiller && From != pPlayer->GetCid())
 		{
 			pKiller->m_Stats.m_ShotsHit++;
 		}
