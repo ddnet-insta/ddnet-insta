@@ -31,7 +31,7 @@ public:
 	virtual void Snap(int SnappingClient) override;
 	virtual void SwapClients(int Client1, int Client2) override;
 
-private:
+protected: // ddnet-insta protected instead of private for vanilla proj inheritance
 	vec2 m_Direction;
 	int m_LifeSpan;
 	int m_Owner;

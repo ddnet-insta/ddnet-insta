@@ -3,9 +3,9 @@
 #ifndef GAME_SERVER_ENTITIES_DDNET_PVP_VANILLA_PROJECTILE_H
 #define GAME_SERVER_ENTITIES_DDNET_PVP_VANILLA_PROJECTILE_H
 
-#include <game/server/entity.h>
+#include <game/server/entities/projectile.h>
 
-class CVanillaProjectile : public CEntity
+class CVanillaProjectile : public CProjectile
 {
 public:
 	CVanillaProjectile(
@@ -22,39 +22,8 @@ public:
 		int Layer = 0,
 		int Number = 0);
 
-	vec2 GetPos(float Time);
-	void FillInfo(CNetObj_Projectile *pProj);
-
-	virtual void Reset() override;
-	virtual void Tick() override;
-	virtual void TickPaused() override;
-	virtual void Snap(int SnappingClient) override;
-	virtual void SwapClients(int Client1, int Client2) override;
-
-private:
-	vec2 m_Direction;
-	int m_LifeSpan;
-	int m_Owner;
-	int m_Type;
-	//int m_Damage;
-	int m_SoundImpact;
-	int m_StartTick;
-	bool m_Explosive;
-
-	// DDRace
-
-	int m_Bouncing;
-	bool m_Freeze;
-	int m_TuneZone;
-	bool m_BelongsToPracticeTeam;
-	vec2 m_InitDir;
-
-public:
-	void SetBouncing(int Value);
-	bool FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj);
-	void FillExtraInfo(CNetObj_DDNetProjectile *pProj);
-
-	virtual int GetOwnerId() const override { return m_Owner; }
+	void Tick() override;
+	void Snap(int SnappingClient) override;
 };
 
 #endif

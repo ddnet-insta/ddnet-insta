@@ -6,6 +6,7 @@
 #include <game/mapitems.h>
 
 #include <game/server/entities/character.h>
+#include <game/server/entities/projectile.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
 
@@ -24,86 +25,20 @@ CVanillaProjectile::CVanillaProjectile(
 	vec2 InitDir,
 	int Layer,
 	int Number) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
+	CProjectile(
+		pGameWorld,
+		Type,
+		Owner,
+		Pos,
+		Dir,
+		Span,
+		Freeze,
+		Explosive,
+		SoundImpact,
+		InitDir,
+		Layer,
+		Number)
 {
-	m_Type = Type;
-	m_Pos = Pos;
-	m_Direction = Dir;
-	m_LifeSpan = Span;
-	m_Owner = Owner;
-	//m_Damage = Damage;
-	m_SoundImpact = SoundImpact;
-	m_StartTick = Server()->Tick();
-	m_Explosive = Explosive;
-
-	m_Layer = Layer;
-	m_Number = Number;
-	m_Freeze = Freeze;
-
-	m_InitDir = InitDir;
-	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
-
-	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
-
-	GameWorld()->InsertEntity(this);
-}
-
-void CVanillaProjectile::Reset()
-{
-	m_MarkedForDestroy = true;
-}
-
-vec2 CVanillaProjectile::GetPos(float Time)
-{
-	float Curvature = 0;
-	float Speed = 0;
-
-	switch(m_Type)
-	{
-	case WEAPON_GRENADE:
-		if(!m_TuneZone)
-		{
-			Curvature = Tuning()->m_GrenadeCurvature;
-			Speed = Tuning()->m_GrenadeSpeed;
-		}
-		else
-		{
-			Curvature = TuningList()[m_TuneZone].m_GrenadeCurvature;
-			Speed = TuningList()[m_TuneZone].m_GrenadeSpeed;
-		}
-
-		break;
-
-	case WEAPON_SHOTGUN:
-		if(!m_TuneZone)
-		{
-			Curvature = Tuning()->m_ShotgunCurvature;
-			Speed = Tuning()->m_ShotgunSpeed;
-		}
-		else
-		{
-			Curvature = TuningList()[m_TuneZone].m_ShotgunCurvature;
-			Speed = TuningList()[m_TuneZone].m_ShotgunSpeed;
-		}
-
-		break;
-
-	case WEAPON_GUN:
-		if(!m_TuneZone)
-		{
-			Curvature = Tuning()->m_GunCurvature;
-			Speed = Tuning()->m_GunSpeed;
-		}
-		else
-		{
-			Curvature = TuningList()[m_TuneZone].m_GunCurvature;
-			Speed = TuningList()[m_TuneZone].m_GunSpeed;
-		}
-		break;
-	}
-
-	return CalcPos(m_Pos, m_Direction, Curvature, Speed, Time);
 }
 
 void CVanillaProjectile::Tick()
@@ -287,21 +222,6 @@ void CVanillaProjectile::Tick()
 	}
 }
 
-void CVanillaProjectile::TickPaused()
-{
-	++m_StartTick;
-}
-
-void CVanillaProjectile::FillInfo(CNetObj_Projectile *pProj)
-{
-	pProj->m_X = (int)m_Pos.x;
-	pProj->m_Y = (int)m_Pos.y;
-	pProj->m_VelX = (int)(m_Direction.x * 100.0f);
-	pProj->m_VelY = (int)(m_Direction.y * 100.0f);
-	pProj->m_StartTick = m_StartTick;
-	pProj->m_Type = m_Type;
-}
-
 void CVanillaProjectile::Snap(int SnappingClient)
 {
 	float Ct = (Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed();
@@ -369,91 +289,4 @@ void CVanillaProjectile::Snap(int SnappingClient)
 		}
 		FillInfo(pProj);
 	}
-}
-
-void CVanillaProjectile::SwapClients(int Client1, int Client2)
-{
-	m_Owner = m_Owner == Client1 ? Client2 : m_Owner == Client2 ? Client1 : m_Owner;
-}
-
-// DDRace
-
-void CVanillaProjectile::SetBouncing(int Value)
-{
-	m_Bouncing = Value;
-}
-
-bool CVanillaProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj)
-{
-	const int MaxPos = 0x7fffffff / 100;
-	if(absolute((int)m_Pos.y) + 1 >= MaxPos || absolute((int)m_Pos.x) + 1 >= MaxPos)
-	{
-		//If the modified data would be too large to fit in an integer, send normal data instead
-		return false;
-	}
-	//Send additional/modified info, by modifying the fields of the netobj
-	float Angle = -std::atan2(m_Direction.x, m_Direction.y);
-
-	int Data = 0;
-	Data |= (absolute(m_Owner) & 255) << 0;
-	if(m_Owner < 0)
-		Data |= LEGACYPROJECTILEFLAG_NO_OWNER;
-	//This bit tells the client to use the extra info
-	Data |= LEGACYPROJECTILEFLAG_IS_DDNET;
-	// LEGACYPROJECTILEFLAG_BOUNCE_HORIZONTAL, LEGACYPROJECTILEFLAG_BOUNCE_VERTICAL
-	Data |= (m_Bouncing & 3) << 10;
-	if(m_Explosive)
-		Data |= LEGACYPROJECTILEFLAG_EXPLOSIVE;
-	if(m_Freeze)
-		Data |= LEGACYPROJECTILEFLAG_FREEZE;
-
-	pProj->m_X = (int)(m_Pos.x * 100.0f);
-	pProj->m_Y = (int)(m_Pos.y * 100.0f);
-	pProj->m_Angle = (int)(Angle * 1000000.0f);
-	pProj->m_Data = Data;
-	pProj->m_StartTick = m_StartTick;
-	pProj->m_Type = m_Type;
-	return true;
-}
-
-void CVanillaProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj)
-{
-	int Flags = 0;
-	if(m_Bouncing & 1)
-	{
-		Flags |= PROJECTILEFLAG_BOUNCE_HORIZONTAL;
-	}
-	if(m_Bouncing & 2)
-	{
-		Flags |= PROJECTILEFLAG_BOUNCE_VERTICAL;
-	}
-	if(m_Explosive)
-	{
-		Flags |= PROJECTILEFLAG_EXPLOSIVE;
-	}
-	if(m_Freeze)
-	{
-		Flags |= PROJECTILEFLAG_FREEZE;
-	}
-
-	if(m_Owner < 0)
-	{
-		pProj->m_VelX = round_to_int(m_Direction.x * 1e6f);
-		pProj->m_VelY = round_to_int(m_Direction.y * 1e6f);
-	}
-	else
-	{
-		pProj->m_VelX = round_to_int(m_InitDir.x);
-		pProj->m_VelY = round_to_int(m_InitDir.y);
-		Flags |= PROJECTILEFLAG_NORMALIZE_VEL;
-	}
-
-	pProj->m_X = round_to_int(m_Pos.x * 100.0f);
-	pProj->m_Y = round_to_int(m_Pos.y * 100.0f);
-	pProj->m_Type = m_Type;
-	pProj->m_StartTick = m_StartTick;
-	pProj->m_Owner = m_Owner;
-	pProj->m_Flags = Flags;
-	pProj->m_SwitchNumber = m_Number;
-	pProj->m_TuneZone = m_TuneZone;
 }
