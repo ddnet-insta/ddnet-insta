@@ -1346,13 +1346,6 @@ void CGameControllerPvp::OnAnyDamage(int Dmg, int From, int Weapon, CCharacter *
 
 	if(Weapon == WEAPON_LASER && !IsFngGameType())
 		pCharacter->UnFreeze();
-
-	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(pPlayer->GetCid(), From))
-	{
-		// boosting mates counts neither as hit nor as miss
-		if(IsStatTrack() && Weapon != WEAPON_HAMMER)
-			pPlayer->m_Stats.m_ShotsFired--;
-	}
 }
 
 void CGameControllerPvp::OnAppliedDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter)
