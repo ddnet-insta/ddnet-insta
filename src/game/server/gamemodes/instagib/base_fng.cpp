@@ -391,23 +391,13 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 	if(!Character.m_FreezeTime)
 		Character.GetPlayer()->m_OriginalFreezerId = From;
 
-	if(Character.m_IsGodmode)
-		return true;
-	CPlayer *pKiller = nullptr;
-	if(From >= 0 && From <= MAX_CLIENTS)
-		pKiller = GameServer()->m_apPlayers[From];
-	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
+	CPlayer *pKiller = GetPlayerOrNullptr(From);
+	if(pKiller && GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
 	{
 		// boosting mates counts neither as hit nor as miss
 		if(IsStatTrack() && Weapon != WEAPON_HAMMER && pKiller)
 			pKiller->m_Stats.m_ShotsFired--;
 		return false;
-	}
-	if(g_Config.m_SvOnlyHookKills && pKiller)
-	{
-		CCharacter *pChr = pKiller->GetCharacter();
-		if(!pChr || pChr->GetCore().HookedPlayer() != Character.GetPlayer()->GetCid())
-			return false;
 	}
 
 	// no self damage
@@ -421,6 +411,13 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 		if(IsStatTrack() && Weapon != WEAPON_HAMMER)
 			Character.GetPlayer()->m_Stats.m_ShotsFired--;
 		return false;
+	}
+
+	bool ApplyForce = false;
+	if(SkipDamage(Dmg, From, Weapon, &Character, ApplyForce))
+	{
+		Dmg = 0;
+		return !ApplyForce;
 	}
 
 	if(Character.m_FreezeTime)
