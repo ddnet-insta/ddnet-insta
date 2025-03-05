@@ -387,9 +387,6 @@ bool CGameControllerBaseFng::OnLaserHit(int Bounces, int From, int Weapon, CChar
 // so it has to reimplement all the relevant functionality
 bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
-	if(!Character.m_FreezeTime)
-		Character.GetPlayer()->m_OriginalFreezerId = From;
-
 	OnAnyDamage(Dmg, From, Weapon, &Character);
 
 	// no self damage
@@ -450,6 +447,7 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 
 	GameServer()->CreateDeath(Character.m_Pos, Character.GetPlayer()->GetCid(), Character.TeamMask());
 
+	Character.GetPlayer()->m_OriginalFreezerId = From;
 	Character.Freeze(10);
 	return false;
 }
