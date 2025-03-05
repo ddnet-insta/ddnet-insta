@@ -3,8 +3,6 @@
 
 #include <base/types.h>
 
-#include <vector>
-
 #include "base_instagib.h"
 
 class CGameControllerBaseFng : public CGameControllerInstagib
@@ -22,7 +20,6 @@ public:
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 	bool SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce) override;
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
-	bool OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos) override;
 	int SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags) override;
 	void SnapDDNetCharacter(int SnappingClient, CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter) override;
 	CClientMask FreezeDamageIndicatorMask(class CCharacter *pChr) override;

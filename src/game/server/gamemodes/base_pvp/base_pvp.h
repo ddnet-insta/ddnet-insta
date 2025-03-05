@@ -92,9 +92,10 @@ public:
 	// return false to not cause any damage
 	bool OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim) override;
 	void ApplyVanillaDamage(int &Dmg, int From, int Weapon, CCharacter *pCharacter) override;
+	bool DecreaseHealthAndKill(int Dmg, int From, int Weapon, CCharacter *pCharacter) override;
 	bool SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce) override;
-	void OnAnyDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter) override;
-	void OnAppliedDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter) override;
+	void OnAnyDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter *pCharacter) override;
+	void OnAppliedDamage(int &Dmg, int &From, int &Weapon, CCharacter *pCharacter) override;
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 	bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) override;
 	bool OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos) override;

@@ -124,6 +124,12 @@ public:
 	int m_FreezeOnSpawn = 0;
 
 	// fng and block
+	// track the enemy that last interacted with this tee
+	// touches from team mates reset it to -1
+	// this is used to know who to set as killer when
+	// a player dies in the world
+	// for example selfkill in freeze in block
+	// spikes in fly or fng
 	int m_LastToucherId = -1;
 	void UpdateLastToucher(int ClientId);
 

@@ -303,12 +303,12 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_drop_flag_on_selfkill` drop flag on selfkill (activates chat cmd '/drop flag')
 + `sv_drop_flag_on_vote` drop flag on vote yes (activates chat cmd '/drop flag')
 + `sv_reload_time_on_hit` 0=default/off ticks it takes to shoot again after a shot was hit
-+ `sv_hammer_scale_x` (fng) linearly scale up hammer x power, percentage, for hammering enemies and unfrozen teammates
-+ `sv_hammer_scale_y` (fng) linearly scale up hammer y power, percentage, for hammering enemies and unfrozen teammates
-+ `sv_melt_hammer_scale_x` (fng) linearly scale up hammer x power, percentage, for hammering frozen teammates
-+ `sv_melt_hammer_scale_y` (fng) linearly scale up hammer y power, percentage, for hammering frozen teammates
-+ `sv_fng_hammer` (fng only) use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer
-+ `sv_fng_spike_sound` (fng only) play flag capture sound when sacrificing an enemy into the spikes
++ `sv_hammer_scale_x` linearly scale up hammer x power, percentage, for hammering enemies and unfrozen teammates (needs sv_fng_hammer)
++ `sv_hammer_scale_y` linearly scale up hammer y power, percentage, for hammering enemies and unfrozen teammates (needs sv_fng_hammer)
++ `sv_melt_hammer_scale_x` linearly scale up hammer x power, percentage, for hammering frozen teammates (needs sv_fng_hammer)
++ `sv_melt_hammer_scale_y` linearly scale up hammer y power, percentage, for hammering frozen teammates (needs sv_fng_hammer)
++ `sv_fng_hammer` use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer
++ `sv_fng_spike_sound` play flag capture sound when sacrificing an enemy into the spikes
 + `sv_punish_freeze_disconnect` freeze player for 20 seconds on rejoin when leaving server while being frozen
 + `sv_laser_text_points` display laser text in the world on scoring (only fng for now)
 + `sv_self_damage_respawn_delay_ms` time in miliseconds it takes to respawn after dieing by self damage

@@ -88,15 +88,22 @@ public:
 			It is also called for damage that will not be applied.
 			So it is also called for team damage even if team damage is off.
 
+			Implement your freeze/unfreeze effect here that would also apply to team mates.
+			Implement your custom knock back here.
+
+			But do not actually deal any damage here to the health and armor.
+			Also do not kill here!
+
 			If you need only the applied damage checkout OnAppliedDamage()
 
 		Arguments:
+			Force - Reference to force. Set this vector and it will be applied to the target characters velocity
 			Dmg - Input and outoput damage that was applied. You can read and write it.
 			From - Client Id of the player who delt the damage
 			Weapon - Weapon id that was causing the damage see the WEAPON_* enums
 			Character - Character that was damaged
 	*/
-	virtual void OnAnyDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter){};
+	virtual void OnAnyDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter *pCharacter){};
 
 	/*
 		Function: OnAppliedDamage
@@ -113,7 +120,7 @@ public:
 			Weapon - Weapon id that was causing the damage see the WEAPON_* enums
 			Character - Character that was damaged
 	*/
-	virtual void OnAppliedDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter){};
+	virtual void OnAppliedDamage(int &Dmg, int &From, int &Weapon, CCharacter *pCharacter){};
 
 	/*
 		Function: ApplyVanillaDamage
@@ -122,6 +129,7 @@ public:
 			Decreases the armor.
 			But DOES NOT DECREASE HEALTH OR KILL.
 			You have to applay the remaining Dmg to the characters health.
+			It is recommended to use DecreaseHealthAndKill() for that
 
 		Arguments:
 			Dmg - Input and outoput damage. It might be decreased if it is self damage or hits armor.
@@ -130,6 +138,27 @@ public:
 			Character - Character that was damaged
 	*/
 	virtual void ApplyVanillaDamage(int &Dmg, int From, int Weapon, CCharacter *pCharacter){};
+
+	/*
+		Function: DecreaseHealthAndKill
+			Responsible for applying the damage.
+			Decreases the health based on the damage.
+			Does not decrease armor if you want to also decrease armor
+			you need to call ApplyVanillaDamage() first.
+
+			Also triggers the death of the victim character if the health goes below 1.
+
+		Arguments:
+			Dmg - Damage to be applied
+			From - Client Id of the player who delt the damage
+			Weapon - Weapon id that was causing the damage see the WEAPON_* enums
+			Character - Character that was damaged
+
+		Returns:
+			true - if the character was killed
+			false - if the character is still alive
+	*/
+	virtual bool DecreaseHealthAndKill(int Dmg, int From, int Weapon, CCharacter *pCharacter) { return false; };
 
 	/*
 		Function: OnInit

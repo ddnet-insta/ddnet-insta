@@ -389,6 +389,8 @@ bool CGameControllerBaseFng::SkipDamage(int Dmg, int From, int Weapon, const CCh
 
 	if(pCharacter->m_FreezeTime)
 		return true;
+	if(Weapon == WEAPON_HAMMER)
+		return true;
 
 	return CGameControllerInstagib::SkipDamage(Dmg, From, Weapon, pCharacter, ApplyForce);
 }
@@ -397,9 +399,9 @@ bool CGameControllerBaseFng::SkipDamage(int Dmg, int From, int Weapon, const CCh
 // so it has to reimplement all the relevant functionality
 bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
-	OnAnyDamage(Dmg, From, Weapon, &Character);
+	OnAnyDamage(Force, Dmg, From, Weapon, &Character);
 
-	bool ApplyForce = false;
+	bool ApplyForce = true;
 	if(SkipDamage(Dmg, From, Weapon, &Character, ApplyForce))
 	{
 		Dmg = 0;
@@ -414,7 +416,6 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 	{
 		pKiller->IncrementScore();
 		AddTeamscore(pKiller->GetTeam(), 1);
-		DoDamageHitSound(From);
 	}
 
 	if(IsStatTrack())
@@ -438,14 +439,6 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 	Character.GetPlayer()->m_OriginalFreezerId = From;
 	Character.Freeze(10);
 	return false;
-}
-
-bool CGameControllerBaseFng::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos)
-{
-	if(Weapon == WEAPON_HAMMER)
-		if(Character.OnFngFireWeapon(Character, Weapon, Direction, MouseTarget, ProjStartPos))
-			return true;
-	return CGameControllerInstagib::OnFireWeapon(Character, Weapon, Direction, MouseTarget, ProjStartPos);
 }
 
 void CGameControllerBaseFng::Snap(int SnappingClient)

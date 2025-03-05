@@ -49,6 +49,10 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) cons
 {
 	if(!g_Config.m_SvShowSettingsMotd && !Force)
 		return;
+	// should only happen in edge cases
+	// is here to avoid crashes
+	if(!m_pController)
+		return;
 
 	char aMotd[2048];
 	char aBuf[512];
@@ -72,7 +76,7 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) cons
 		str_append(aMotd, "* laser kill refills ammo (on fire mode)\n");
 	}
 
-	if(m_pController && m_pController->GameFlags() & GAMEFLAG_FLAGS)
+	if(m_pController->GameFlags() & GAMEFLAG_FLAGS)
 	{
 		if(g_Config.m_SvDropFlagOnVote || g_Config.m_SvDropFlagOnSelfkill)
 		{
@@ -86,12 +90,6 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) cons
 
 	str_format(aBuf, sizeof(aBuf), "* allow spec public chat: %s\n", g_Config.m_SvTournamentChat ? "no" : "yes");
 	str_append(aMotd, aBuf);
-
-	if(str_find_nocase(g_Config.m_SvGametype, "fng"))
-	{
-		str_format(aBuf, sizeof(aBuf), "* fng hammer tuning: %s\n", g_Config.m_SvFngHammer ? "on" : "off");
-		str_append(aMotd, aBuf);
-	}
 
 	if(g_Config.m_SvGametype[0] == 'g')
 	{
@@ -125,6 +123,16 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) cons
 	// because we are not correctly implementing vanilla physics that should be noted
 	if(m_pController && m_pController->IsVanillaGameType())
 		str_append(aMotd, "* hammer through walls: on\n");
+
+	if(m_pController->IsFngGameType())
+	{
+		str_format(aBuf, sizeof(aBuf), "* fng hammer tuning: %s\n", g_Config.m_SvFngHammer ? "on" : "off");
+		str_append(aMotd, aBuf);
+	}
+	else if(g_Config.m_SvFngHammer)
+	{
+		str_append(aMotd, "! WARNING: fng hammer tuning: on\n");
+	}
 
 	if(g_Config.m_SvAllowZoom)
 		str_append(aMotd, "! WARNING: using zoom is allowed\n");

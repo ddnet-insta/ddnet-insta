@@ -1205,6 +1205,9 @@ bool CGameControllerPvp::OnLaserHit(int Bounces, int From, int Weapon, CCharacte
 	if(IsStatTrack() && Bounces != 0)
 		pPlayer->m_Stats.m_Wallshots++;
 
+	if(!IsFngGameType())
+		pVictim->UnFreeze();
+
 	if(g_Config.m_SvOnlyWallshotKills)
 		return Bounces != 0;
 	return true;
@@ -1249,13 +1252,6 @@ void CGameControllerPvp::ApplyVanillaDamage(int &Dmg, int From, int Weapon, CCha
 	{
 		// m_pPlayer only inflicts half damage on self
 		Dmg = maximum(1, Dmg / 2);
-
-		// do not cause self damage with jetpack
-		if(Weapon == WEAPON_GUN && pCharacter->Core()->m_Jetpack)
-		{
-			Dmg = 0;
-			return;
-		}
 	}
 
 	pCharacter->m_DamageTaken++;
@@ -1297,15 +1293,42 @@ void CGameControllerPvp::ApplyVanillaDamage(int &Dmg, int From, int Weapon, CCha
 
 	pCharacter->m_DamageTakenTick = Server()->Tick();
 
-	if(From >= 0 && From < MAX_CLIENTS && From != pCharacter->GetPlayer()->GetCid() && GameServer()->m_apPlayers[From])
-	{
-		DoDamageHitSound(From);
-	}
-
 	if(Dmg > 2)
 		GameServer()->CreateSound(pCharacter->m_Pos, SOUND_PLAYER_PAIN_LONG);
 	else
 		GameServer()->CreateSound(pCharacter->m_Pos, SOUND_PLAYER_PAIN_SHORT);
+}
+
+bool CGameControllerPvp::DecreaseHealthAndKill(int Dmg, int From, int Weapon, CCharacter *pCharacter)
+{
+	// instagib damage always kills no matter the armor
+	// max vanilla weapon damage is katana with 9 dmg
+	if(Dmg >= 10)
+	{
+		pCharacter->SetArmor(0);
+		pCharacter->SetHealth(0);
+	}
+
+	pCharacter->AddHealth(-Dmg);
+
+	// check for death
+	if(pCharacter->Health() <= 0)
+	{
+		pCharacter->Die(From, Weapon);
+
+		CPlayer *pKiller = GetPlayerOrNullptr(From);
+		if(From != pCharacter->GetPlayer()->GetCid() && pKiller)
+		{
+			CCharacter *pKillerChr = pKiller->GetCharacter();
+			if(pKillerChr)
+			{
+				// set attacker's face to happy (taunt!)
+				pKillerChr->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed());
+			}
+		}
+		return true;
+	}
+	return false;
 }
 
 bool CGameControllerPvp::SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce)
@@ -1319,6 +1342,13 @@ bool CGameControllerPvp::SkipDamage(int Dmg, int From, int Weapon, const CCharac
 	{
 		if(!m_SelfDamage)
 			return true;
+
+		// do not cause self damage with jetpack
+		// in any mode ever
+		if(Weapon == WEAPON_GUN && pCharacter->Core()->m_Jetpack)
+		{
+			return true;
+		}
 	}
 
 	if(pCharacter->m_IsGodmode)
@@ -1337,9 +1367,10 @@ bool CGameControllerPvp::SkipDamage(int Dmg, int From, int Weapon, const CCharac
 	return false;
 }
 
-void CGameControllerPvp::OnAnyDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter)
+void CGameControllerPvp::OnAnyDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter *pCharacter)
 {
 	CPlayer *pPlayer = pCharacter->GetPlayer();
+	CPlayer *pKiller = GetPlayerOrNullptr(From);
 
 	// only weapons that push the tee around are considerd a touch
 	// gun and laser do not push (as long as there is no explosive guns/lasers)
@@ -1350,11 +1381,22 @@ void CGameControllerPvp::OnAnyDamage(int Dmg, int From, int Weapon, CCharacter *
 			pPlayer->UpdateLastToucher(From);
 	}
 
-	if(Weapon == WEAPON_LASER && !IsFngGameType())
-		pCharacter->UnFreeze();
+	if(IsTeamPlay() && pKiller && pPlayer->GetTeam() == pKiller->GetTeam())
+	{
+		// interaction from team mates protects from spikes in fng
+		// and from counting as enemy kill in fly
+		pPlayer->UpdateLastToucher(-1);
+	}
 
 	if(From == pPlayer->GetCid() && Weapon != WEAPON_LASER)
 	{
+		// Give back ammo on grenade self push
+		// Only if not infinite ammo and activated
+		if(Weapon == WEAPON_GRENADE && g_Config.m_SvGrenadeAmmoRegen && g_Config.m_SvGrenadeAmmoRegenSpeedNade)
+		{
+			pCharacter->SetWeaponAmmo(WEAPON_GRENADE, minimum(pCharacter->GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + 1, g_Config.m_SvGrenadeAmmoRegenNum));
+		}
+
 		// self damage counts as boosting
 		// so the hit/misses rate should not be affected
 		//
@@ -1362,9 +1404,22 @@ void CGameControllerPvp::OnAnyDamage(int Dmg, int From, int Weapon, CCharacter *
 		// can get you a accuracy over 100%
 		pPlayer->m_Stats.m_ShotsFired--;
 	}
+
+	if(Weapon == WEAPON_LASER)
+	{
+		if(!IsFngGameType())
+			pCharacter->UnFreeze();
+	}
+	else if(Weapon == WEAPON_HAMMER)
+	{
+		dbg_assert(pKiller, "invalid player hammered someone");
+		dbg_assert(pKiller->GetCharacter(), "dead player hammered someone");
+
+		pCharacter->TakeHammerHit(pKiller->GetCharacter(), Force);
+	}
 }
 
-void CGameControllerPvp::OnAppliedDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter)
+void CGameControllerPvp::OnAppliedDamage(int &Dmg, int &From, int &Weapon, CCharacter *pCharacter)
 {
 	CPlayer *pPlayer = pCharacter->GetPlayer();
 	CPlayer *pKiller = GetPlayerOrNullptr(From);
@@ -1376,54 +1431,41 @@ void CGameControllerPvp::OnAppliedDamage(int Dmg, int From, int Weapon, CCharact
 			pKiller->m_Stats.m_ShotsHit++;
 		}
 	}
+
+	if(From != pPlayer->GetCid())
+		DoDamageHitSound(From);
+
+	// TODO: refactor this to a method called RefillNadesOnHit
+	if(!pCharacter->IsAlive() && From != pCharacter->GetPlayer()->GetCid() && pKiller)
+	{
+		CCharacter *pKillerChr = pKiller->GetCharacter();
+		if(!pKillerChr)
+			return;
+
+		// refill nades
+		int RefillNades = 0;
+		if(g_Config.m_SvGrenadeAmmoRegenOnKill == 1)
+			RefillNades = 1;
+		else if(g_Config.m_SvGrenadeAmmoRegenOnKill == 2)
+			RefillNades = g_Config.m_SvGrenadeAmmoRegenNum;
+		if(RefillNades && g_Config.m_SvGrenadeAmmoRegen && Weapon == WEAPON_GRENADE)
+		{
+			pKillerChr->SetWeaponAmmo(WEAPON_GRENADE, minimum(pKillerChr->GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + RefillNades, g_Config.m_SvGrenadeAmmoRegenNum));
+		}
+	}
 }
 
 bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
-	OnAnyDamage(Dmg, From, Weapon, &Character);
-	bool ApplyForce = false;
+	OnAnyDamage(Force, Dmg, From, Weapon, &Character);
+	bool ApplyForce = true;
 	if(SkipDamage(Dmg, From, Weapon, &Character, ApplyForce))
 	{
 		Dmg = 0;
 		return !ApplyForce;
 	}
 	OnAppliedDamage(Dmg, From, Weapon, &Character);
-
-	// instagib damage always kills no matter the armor
-	// max vanilla weapon damage is katana with 9 dmg
-	if(Dmg >= 10)
-	{
-		Character.SetArmor(0);
-		Character.SetHealth(0);
-	}
-
-	Character.AddHealth(-Dmg);
-
-	// check for death
-	if(Character.Health() <= 0)
-	{
-		Character.Die(From, Weapon);
-
-		CPlayer *pKiller = GetPlayerOrNullptr(From);
-		if(From != Character.GetPlayer()->GetCid() && pKiller)
-		{
-			CCharacter *pChr = pKiller->GetCharacter();
-			if(pChr)
-			{
-				// set attacker's face to happy (taunt!)
-				pChr->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed());
-			}
-			DoDamageHitSound(From);
-		}
-		return false;
-	}
-
-	/*
-	if (Dmg > 2)
-		GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG);
-	else
-		GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);*/
-
+	DecreaseHealthAndKill(Dmg, From, Weapon, &Character);
 	return false;
 }
 

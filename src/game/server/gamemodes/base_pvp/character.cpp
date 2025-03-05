@@ -108,82 +108,19 @@ float CCharacter::DistToTouchingTile(int Tile)
 	return ClosestDistance;
 }
 
-bool CCharacter::OnFngFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos)
+void CCharacter::TakeHammerHit(CCharacter *pFrom, vec2 &Force)
 {
-	if(Weapon != WEAPON_HAMMER)
-		return false;
-
-	// reset objects Hit
-	m_NumObjectsHit = 0;
-	GameServer()->CreateSound(m_Pos, SOUND_HAMMER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
-
-	Antibot()->OnHammerFire(m_pPlayer->GetCid());
-
-	if(m_Core.m_HammerHitDisabled)
-		return true;
-
-	CEntity *apEnts[MAX_CLIENTS];
-	int Hits = 0;
-	int Num = GameServer()->m_World.FindEntities(ProjStartPos, GetProximityRadius() * 0.5f, apEnts,
-		MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
-
-	for(int i = 0; i < Num; ++i)
-	{
-		auto *pTarget = static_cast<CCharacter *>(apEnts[i]);
-
-		//if ((pTarget == this) || Collision()->IntersectLine(ProjStartPos, pTarget->m_Pos, NULL, NULL))
-		if((pTarget == this || (pTarget->IsAlive() && !CanCollide(pTarget->GetPlayer()->GetCid()))))
-			continue;
-
-		// set his velocity to fast upward (for now)
-		if(length(pTarget->m_Pos - ProjStartPos) > 0.0f)
-			GameServer()->CreateHammerHit(pTarget->m_Pos - normalize(pTarget->m_Pos - ProjStartPos) * GetProximityRadius() * 0.5f, TeamMask());
-		else
-			GameServer()->CreateHammerHit(ProjStartPos, TeamMask());
-
-		pTarget->TakeHammerHit(this);
-
-		if(m_FreezeHammer)
-			pTarget->Freeze();
-
-		Antibot()->OnHammerHit(m_pPlayer->GetCid(), pTarget->GetPlayer()->GetCid());
-
-		Hits++;
-	}
-
-	// if we Hit anything, we have to wait for the reload
-	if(Hits)
-	{
-		float FireDelay = GetTuning(m_TuneZone)->m_HammerHitFireDelay;
-		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
-	}
-
-	// we consume the CCharacter::FireWeapon() event
-	// so we have to set the reload timer in the end
-
-	m_AttackTick = Server()->Tick();
-
-	if(!m_ReloadTimer)
-	{
-		float FireDelay;
-		GetTuning(m_TuneZone)->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
-		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
-	}
-
-	return true;
-}
-
-void CCharacter::TakeHammerHit(CCharacter *pFrom)
-{
-	vec2 Dir;
-	if(length(m_Pos - pFrom->m_Pos) > 0.0f)
-		Dir = normalize(m_Pos - pFrom->m_Pos);
-	else
-		Dir = vec2(0.f, -1.f);
-
-	vec2 Push = vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
 	if(g_Config.m_SvFngHammer)
 	{
+		// TODO: can we get this value from Force without recomputing it?
+		vec2 Dir;
+		if(length(m_Pos - pFrom->m_Pos) > 0.0f)
+			Dir = normalize(m_Pos - pFrom->m_Pos);
+		else
+			Dir = vec2(0.f, -1.f);
+
+		vec2 Push = vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+
 		// matches ddnet clients prediction code by default
 		// https://github.com/ddnet/ddnet/blob/f9df4a85be4ca94ca91057cd447707bcce16fd94/src/game/client/prediction/entities/character.cpp#L334-L346
 		if(GameServer()->m_pController->IsTeamPlay() && pFrom->GetPlayer() && m_pPlayer->GetTeam() == pFrom->GetPlayer()->GetTeam() && m_FreezeTime)
@@ -196,10 +133,9 @@ void CCharacter::TakeHammerHit(CCharacter *pFrom)
 			Push.x *= g_Config.m_SvHammerScaleX * 0.01f;
 			Push.y *= g_Config.m_SvHammerScaleY * 0.01f;
 		}
-	}
 
-	vec2 Temp = m_Core.m_Vel + Push;
-	m_Core.m_Vel = ClampVel(m_MoveRestrictions, Temp);
+		Force = Push;
+	}
 
 	CPlayer *pPlayer = pFrom->GetPlayer();
 
@@ -207,30 +143,30 @@ void CCharacter::TakeHammerHit(CCharacter *pFrom)
 	if(!pPlayer)
 		return;
 
-	if(GameServer()->m_pController->IsTeamPlay() && pPlayer->GetTeam() == m_pPlayer->GetTeam())
+	// TODO: this should be refactored into a descriptive method
+	//       called fng unmelt hammer or something like that
+	//       and it should also be behind a config so that all modes could use it
+	//       i can also see this being fun in ddrace ctf
+	if(GameServer()->m_pController->IsFngGameType())
 	{
-		// interaction from team mates protects from spikes
-		m_pPlayer->UpdateLastToucher(-1);
-
-		if(m_FreezeTime)
+		if(GameServer()->m_pController->IsTeamPlay() && pPlayer->GetTeam() == m_pPlayer->GetTeam())
 		{
-			m_FreezeTime -= Server()->TickSpeed() * 3;
-
-			// make sure we don't got negative and let the ddrace tick trigger the unfreeeze
-			if(m_FreezeTime < 2)
+			if(m_FreezeTime)
 			{
-				m_FreezeTime = 2;
+				m_FreezeTime -= Server()->TickSpeed() * 3;
 
-				// reward the unfreezer with one point
-				pPlayer->AddScore(1);
-				if(GameServer()->m_pController->IsStatTrack())
-					pPlayer->m_Stats.m_Unfreezes++;
+				// make sure we don't got negative and let the ddrace tick trigger the unfreeeze
+				if(m_FreezeTime < 2)
+				{
+					m_FreezeTime = 2;
+
+					// reward the unfreezer with one point
+					pPlayer->AddScore(1);
+					if(GameServer()->m_pController->IsStatTrack())
+						pPlayer->m_Stats.m_Unfreezes++;
+				}
 			}
 		}
-	}
-	else
-	{
-		m_pPlayer->UpdateLastToucher(pPlayer->GetCid());
 	}
 }
 
