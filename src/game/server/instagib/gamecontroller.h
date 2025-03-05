@@ -236,6 +236,24 @@ public:
 	virtual void OnRoundEnd(){};
 
 	/*
+		Function: GetWeaponHitEffectOnTarget
+			Pure function without side effects.
+			Finds the affect that should be applied to a target once it
+			gets hit with a weapon.
+			But does not actually apply the effect.
+
+		Arguments:
+			pVictim - character that was hit
+			pKiller - player that fired the shot
+			Weapon - Weapon that hit the target
+			Bounces - 1 and more is a wallshot (only for lasers)
+
+		Returns:
+			The type of effect that should be applied
+	*/
+	virtual EWeaponHitEffect GetWeaponHitEffectOnTarget(CCharacter *pVictim, CPlayer *pKiller, int Weapon, int Bounces);
+
+	/*
 		Function: OnLaserHit
 			Will be called before Character::TakeDamage() and CGameController::OnCharacterTakeDamage()
 

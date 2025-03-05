@@ -5,6 +5,7 @@
 #include <game/server/instagib/sql_stats.h>
 
 #include "../DDRace.h"
+#include "game/server/instagib/enums.h"
 
 class CGameControllerPvp : public CGameControllerDDRace
 {
@@ -91,6 +92,9 @@ public:
 	// ddnet-insta only
 	// return false to not cause any damage
 	bool OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim) override;
+	// do we really need get and apply effect? or can they be merged?
+	void ApplyWeaponHitEffectOnTarget(int Dmg, int From, int Weapon, CCharacter *pCharacter, EWeaponHitEffect Effect);
+	EWeaponHitEffect GetWeaponHitEffectOnTarget(CCharacter *pVictim, CPlayer *pKiller, int Weapon, int Bounces) override;
 	void ApplyVanillaDamage(int &Dmg, int From, int Weapon, CCharacter *pCharacter) override;
 	bool SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce) override;
 	void OnAnyDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter) override;

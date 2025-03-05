@@ -9,6 +9,16 @@ enum
 	NUM_FLAGS = 2
 };
 
+// what does the weapon bullet cause
+// on the target once it his
+enum class EWeaponHitEffect {
+	NONE,
+	UNFREEZE,
+	FREEZE,
+	VANILLA_DAMAGE,
+	INSTANT_KILL
+};
+
 enum class EDisplayScore
 {
 	ROUND_POINTS,

@@ -8,6 +8,7 @@
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
+#include <game/server/instagib/enums.h>
 #include <game/teamscore.h>
 
 #include <game/server/entities/character.h>
@@ -635,6 +636,13 @@ void IGameController::OnFlagGrab(CFlag *pFlag)
 
 void IGameController::OnFlagCapture(CFlag *pFlag, float Time, int TimeTicks)
 {
+}
+
+EWeaponHitEffect IGameController::GetWeaponHitEffectOnTarget(CCharacter *pVictim, CPlayer *pKiller, int Weapon, int Bounces)
+{
+	if(Weapon == WEAPON_LASER)
+		return EWeaponHitEffect::UNFREEZE;
+	return EWeaponHitEffect::NONE;
 }
 
 int IGameController::GetCidByName(const char *pName)

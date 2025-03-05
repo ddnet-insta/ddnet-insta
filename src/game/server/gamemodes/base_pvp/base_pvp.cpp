@@ -17,6 +17,7 @@
 #include <game/version.h>
 
 #include "base_pvp.h"
+#include "game/generated/client_data.h"
 
 CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	CGameControllerDDRace(pGameServer)
@@ -1196,16 +1197,45 @@ void CGameControllerPvp::OnCharacterTick(CCharacter *pChr)
 		pChr->GetPlayer()->m_TicksSpentChatting++;
 }
 
+
+// bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
+
+
+void CGameControllerPvp::ApplyWeaponHitEffectOnTarget(int Dmg, int From, int Weapon, CCharacter *pCharacter, EWeaponHitEffect Effect)
+{
+	switch (Effect) {
+		case EWeaponHitEffect::NONE:
+			break;
+		case EWeaponHitEffect::FREEZE:
+			pCharacter->Freeze();
+			break;
+		case EWeaponHitEffect::UNFREEZE:
+			pCharacter->UnFreeze();
+			break;
+		case EWeaponHitEffect::VANILLA_DAMAGE:
+			ApplyVanillaDamage(Dmg, From, Weapon, pCharacter);
+			break;
+		case EWeaponHitEffect::INSTANT_KILL:
+			// TODO: should this really be handled here? that should be take damage
+			break;
+	}
+}
+
 bool CGameControllerPvp::OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim)
 {
 	CPlayer *pPlayer = GameServer()->m_apPlayers[From];
 	if(!pPlayer)
 		return true;
 
+	int Dmg = g_pData->m_Weapons.m_Laser.m_pBase->m_Damage;
+	bool ApplyForce;
+	if(!SkipDamage(Dmg, From, Weapon, pVictim, ApplyForce))
+		ApplyWeaponHitEffectOnTarget(Dmg, From, Weapon, pVictim, GetWeaponHitEffectOnTarget(pVictim, pPlayer, Weapon, Bounces));
+
 	if(IsStatTrack() && Bounces != 0)
 		pPlayer->m_Stats.m_Wallshots++;
 
-	if(g_Config.m_SvOnlyWallshotKills)
+	if(g_Config.m_SvOnlyWallshotKills) // TODO: this shouldnt break
 		return Bounces != 0;
 	return true;
 }
