@@ -366,6 +366,26 @@ public:
 	virtual int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup);
 
 	/*
+		Function: HasVanillaShotgun
+			Check if a given player currently has a vanilla
+			or ddrace shotgun.
+			Where vanilla shotgun is defined as a shotgun that
+			shoots multiple bullets which damage on hit.
+			And a ddrace shotgun is a shotgun that shoots a single laser which pulls on hit.
+
+			Even instagib shotguns where every bullet kills instantly
+			are considered vanilla shotguns in this case.
+
+		Arguments:
+			pPlayer - player that will be checked
+
+		Returns:
+			true - if that pPlayer currently has a vanilla shotgun equipped
+			false - if that pPlayer has a ddrace shotgun
+	*/
+	virtual bool HasVanillaShotgun(class CPlayer *pPlayer) { return m_IsVanillaGameType; };
+
+	/*
 		Function: GetDefaultWeapon
 			Returns the weapon the tee should spawn with.
 			Is not a complete list of all weapons the tee gets on spawn.
