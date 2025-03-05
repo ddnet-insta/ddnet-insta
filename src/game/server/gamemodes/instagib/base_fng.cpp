@@ -387,18 +387,10 @@ bool CGameControllerBaseFng::OnLaserHit(int Bounces, int From, int Weapon, CChar
 // so it has to reimplement all the relevant functionality
 bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
-	Character.GetPlayer()->UpdateLastToucher(From);
 	if(!Character.m_FreezeTime)
 		Character.GetPlayer()->m_OriginalFreezerId = From;
 
-	CPlayer *pKiller = GetPlayerOrNullptr(From);
-	if(pKiller && GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
-	{
-		// boosting mates counts neither as hit nor as miss
-		if(IsStatTrack() && Weapon != WEAPON_HAMMER && pKiller)
-			pKiller->m_Stats.m_ShotsFired--;
-		return false;
-	}
+	OnAnyDamage(Dmg, From, Weapon, &Character);
 
 	// no self damage
 	if(From == Character.GetPlayer()->GetCid())
@@ -419,6 +411,8 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 		Dmg = 0;
 		return !ApplyForce;
 	}
+
+	CPlayer *pKiller = GetPlayerOrNullptr(From);
 
 	if(Character.m_FreezeTime)
 	{

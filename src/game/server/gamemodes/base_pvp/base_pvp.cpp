@@ -1344,7 +1344,7 @@ void CGameControllerPvp::OnAnyDamage(int Dmg, int From, int Weapon, CCharacter *
 			pPlayer->UpdateLastToucher(From);
 	}
 
-	if(pCharacter->m_FreezeTime && Weapon == WEAPON_LASER)
+	if(Weapon == WEAPON_LASER && !IsFngGameType())
 		pCharacter->UnFreeze();
 
 	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(pPlayer->GetCid(), From))
