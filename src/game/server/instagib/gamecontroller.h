@@ -766,6 +766,10 @@ public:
 	bool IsVanillaGameType() const { return m_IsVanillaGameType; }
 	virtual bool IsDDRaceGameType() const { return true; }
 	bool m_IsVanillaGameType = false;
+	// decides if own grenade explosions
+	// or laser wallshots should harm the own tee
+	// that includes vanilla damage, fng freeze and instagib kills
+	bool m_SelfDamage = true;
 	int m_DefaultWeapon = WEAPON_GUN;
 	void CheckReadyStates(int WithoutId = -1);
 	bool GetPlayersReadyState(int WithoutId = -1, int *pNumUnready = nullptr);

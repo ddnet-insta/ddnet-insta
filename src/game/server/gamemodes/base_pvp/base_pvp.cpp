@@ -1315,6 +1315,12 @@ bool CGameControllerPvp::SkipDamage(int Dmg, int From, int Weapon, const CCharac
 	const CPlayer *pPlayer = pCharacter->GetPlayer();
 	const CPlayer *pKiller = GetPlayerOrNullptr(From);
 
+	if(From == pPlayer->GetCid())
+	{
+		if(!m_SelfDamage)
+			return true;
+	}
+
 	if(pCharacter->m_IsGodmode)
 		return true;
 	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(pPlayer->GetCid(), From))

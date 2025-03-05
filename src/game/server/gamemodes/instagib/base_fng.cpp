@@ -389,19 +389,6 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 {
 	OnAnyDamage(Dmg, From, Weapon, &Character);
 
-	// no self damage
-	if(From == Character.GetPlayer()->GetCid())
-	{
-		// self damage counts as boosting
-		// so the hit/misses rate should not be affected
-		//
-		// yes this means that grenade boost kills
-		// can get you a accuracy over 100%
-		if(IsStatTrack() && Weapon != WEAPON_HAMMER)
-			Character.GetPlayer()->m_Stats.m_ShotsFired--;
-		return false;
-	}
-
 	bool ApplyForce = false;
 	if(SkipDamage(Dmg, From, Weapon, &Character, ApplyForce))
 	{
