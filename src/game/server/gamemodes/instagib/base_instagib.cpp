@@ -26,7 +26,7 @@ bool CGameControllerInstagib::SkipDamage(int Dmg, int From, int Weapon, const CC
 	ApplyForce = true;
 
 	if(Dmg < g_Config.m_SvDamageNeededForKill && Weapon == WEAPON_GRENADE)
-		return false;
+		return true;
 
 	return CGameControllerPvp::SkipDamage(Dmg, From, Weapon, pCharacter, ApplyForce);
 }
