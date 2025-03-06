@@ -134,6 +134,8 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) cons
 		str_append(aMotd, "! WARNING: fng hammer tuning: on\n");
 	}
 
+	if(g_Config.m_SvSwapFlags)
+		str_append(aMotd, "! WARNING: flag spawns are swapped\n");
 	if(g_Config.m_SvAllowZoom)
 		str_append(aMotd, "! WARNING: using zoom is allowed\n");
 	if(g_Config.m_SvOnlyHookKills)
