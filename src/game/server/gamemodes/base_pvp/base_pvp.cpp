@@ -53,6 +53,14 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	m_UnbalancedTick = TBALANCE_OK;
 }
 
+void CGameControllerPvp::SetDefaultConfigValues()
+{
+	log_info("ddnet-insta", "setting default configs in base pvp");
+
+	if(g_Config.m_SvFngHammer == CFG_VALUE_UNSET)
+		g_Config.m_SvFngHammer = 0;
+}
+
 void CGameControllerPvp::OnReset()
 {
 	CGameControllerDDRace::OnReset();

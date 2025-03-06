@@ -688,6 +688,14 @@ public:
 	virtual void RoundInitPlayer(class CPlayer *pPlayer){};
 
 	/*
+		Function: SetDefaultConfigValues
+			ddnet-insta supports different default values
+			for config variables depending on the active gamemode.
+			This method should be called every time new configs are loaded.
+	*/
+	virtual void SetDefaultConfigValues(){};
+
+	/*
 		Function: DoTeamBalance
 			Makes sure players are evenly distributed
 			across team red and blue.

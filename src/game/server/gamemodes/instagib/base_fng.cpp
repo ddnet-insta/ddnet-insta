@@ -1,3 +1,4 @@
+#include <base/log.h>
 #include <base/system.h>
 #include <base/types.h>
 #include <engine/server.h>
@@ -18,6 +19,14 @@
 CGameControllerBaseFng::CGameControllerBaseFng(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)
 {
+}
+
+void CGameControllerBaseFng::SetDefaultConfigValues()
+{
+	log_info("ddnet-insta", "setting default configs in base fng");
+
+	if(g_Config.m_SvFngHammer == CFG_VALUE_UNSET)
+		g_Config.m_SvFngHammer = 1;
 }
 
 CGameControllerBaseFng::~CGameControllerBaseFng() = default;

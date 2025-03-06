@@ -13,6 +13,7 @@ public:
 	CGameControllerBaseFng(class CGameContext *pGameServer);
 	~CGameControllerBaseFng() override;
 
+	void SetDefaultConfigValues() override;
 	void Tick() override;
 	void Snap(int SnappingClient) override;
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;

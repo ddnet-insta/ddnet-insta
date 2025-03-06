@@ -28,6 +28,7 @@ public:
 	bool CanSpawn(int Team, vec2 *pOutPos, int DDTeam) override;
 	bool BlockFirstShotOnSpawn(class CCharacter *pChr, int Weapon) const;
 	void SendChatSpectators(const char *pMessage, int Flags);
+	void SetDefaultConfigValues() override;
 	void OnReset() override;
 	void OnInit() override;
 	void OnPlayerConnect(CPlayer *pPlayer) override;

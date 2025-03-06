@@ -9,8 +9,6 @@
 #include <engine/shared/protocol.h>
 #include <engine/storage.h>
 
-#include <game/server/instagib/enums.h> // ddnet-insta
-
 CConfig g_Config;
 
 // ----------------------- Config Variables

@@ -3,6 +3,14 @@
 
 enum
 {
+	// if the default value of a config is CFG_VALUE_UNSET
+	// it base to be set in the base pvp controller
+	// it is used to have different defaults per gamemode
+	CFG_VALUE_UNSET = -999999999,
+};
+
+enum
+{
 	FLAG_NONE = -1,
 	FLAG_RED = 0,
 	FLAG_BLUE = 1,

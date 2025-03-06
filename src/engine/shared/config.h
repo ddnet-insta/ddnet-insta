@@ -11,6 +11,9 @@
 
 #include <vector>
 
+// include enums for CFG_VALUE_UNSERT in variables_insta.h
+#include <game/server/instagib/enums.h> // ddnet-insta
+
 // include protocol for MAX_CLIENT used in config_variables
 #include <engine/shared/protocol.h>
 

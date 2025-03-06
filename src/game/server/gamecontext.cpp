@@ -4081,6 +4081,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gametype", "unknown gametype falling back to ddnet");
 		m_pController = new CGameControllerDDRace(this);
 	}
+	m_pController->SetDefaultConfigValues(); // ddnet-insta
 
 	ReadCensorList();
 

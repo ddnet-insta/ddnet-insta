@@ -70,7 +70,7 @@ MACRO_CONFIG_INT(SvHammerScaleX, sv_hammer_scale_x, 320, 1, 1000, CFGFLAG_SERVER
 MACRO_CONFIG_INT(SvHammerScaleY, sv_hammer_scale_y, 120, 1, 1000, CFGFLAG_SERVER, "(fng) linearly scale up hammer y power, percentage, for hammering enemies and unfrozen teammates")
 MACRO_CONFIG_INT(SvMeltHammerScaleX, sv_melt_hammer_scale_x, 50, 1, 1000, CFGFLAG_SERVER, "(fng) linearly scale up hammer x power, percentage, for hammering frozen teammates")
 MACRO_CONFIG_INT(SvMeltHammerScaleY, sv_melt_hammer_scale_y, 50, 1, 1000, CFGFLAG_SERVER, "(fng) linearly scale up hammer y power, percentage, for hammering frozen teammates")
-MACRO_CONFIG_INT(SvFngHammer, sv_fng_hammer, 1, 0, 1, CFGFLAG_SERVER, "(fng only) use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer")
+MACRO_CONFIG_INT(SvFngHammer, sv_fng_hammer, CFG_VALUE_UNSET, 0, 1, CFGFLAG_SERVER, "(fng only) use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer")
 MACRO_CONFIG_INT(SvFngSpikeSound, sv_fng_spike_sound, 1, 0, 1, CFGFLAG_SERVER, "(fng only) play flag capture sound when sacrificing an enemy into the spikes")
 MACRO_CONFIG_INT(SvPunishFreezeDisconnect, sv_punish_freeze_disconnect, 1, 0, 1, CFGFLAG_SERVER, "freeze player for 20 seconds on rejoin when leaving server while being frozen")
 MACRO_CONFIG_STR(SvDisplayScore, sv_display_score, 512, "round_points", CFGFLAG_SERVER, "values: points, round_points, spree, current_spree, wins, kills, round_kills")
