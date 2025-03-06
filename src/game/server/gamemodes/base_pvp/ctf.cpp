@@ -1,5 +1,6 @@
 #include <engine/server.h>
 #include <engine/shared/config.h>
+#include <game/generated/protocol.h>
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/entities/flag.h>
@@ -163,6 +164,10 @@ bool CGameControllerBaseCTF::OnEntity(int Index, int x, int y, int Layer, int Fl
 		Team = TEAM_RED;
 	if(Index == ENTITY_FLAGSTAND_BLUE)
 		Team = TEAM_BLUE;
+
+	if(Team != -1 && g_Config.m_SvSwapFlags)
+		Team = Team == TEAM_RED ? TEAM_BLUE : TEAM_RED;
+
 	if(Team == -1 || m_apFlags[Team])
 		return false;
 

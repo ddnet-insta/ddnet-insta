@@ -50,6 +50,7 @@ MACRO_CONFIG_INT(SvKillHook, sv_kill_hook, 0, 0, 1, CFGFLAG_SERVER, "Hook kills"
 MACRO_CONFIG_INT(SvKillingspreeKills, sv_killingspree_kills, 0, 0, 20, CFGFLAG_SERVER, "How many kills are needed to be on a killing-spree (0=off)")
 MACRO_CONFIG_INT(SvKillingspreeResetOnRoundEnd, sv_killingspree_reset_on_round_end, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "0=allow spreeing across games 1=end spree on round end")
 MACRO_CONFIG_INT(SvDamageNeededForKill, sv_damage_needed_for_kill, 4, 0, 5, CFGFLAG_SERVER, "Grenade damage needed to kill in instagib modes")
+MACRO_CONFIG_INT(SvSwapFlags, sv_swap_flags, 0, 0, 1, CFGFLAG_SERVER, "swap blue and red flag spawns in ctf modes")
 MACRO_CONFIG_INT(SvAllowZoom, sv_allow_zoom, 0, 0, 1, CFGFLAG_SERVER, "allow ddnet clients to use the client side zoom feature")
 MACRO_CONFIG_INT(SvStrictSnapDistance, sv_strict_snap_distance, 1, 0, 1, CFGFLAG_SERVER, "only send players close by (helps against zoom cheats)")
 MACRO_CONFIG_STR(SvSpawnWeapons, sv_spawn_weapons, 900, "grenade", CFGFLAG_SERVER, "possible values: grenade, laser")

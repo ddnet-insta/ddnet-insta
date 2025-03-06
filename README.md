@@ -290,7 +290,8 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_kill_hook` Hook kills
 + `sv_killingspree_kills` How many kills are needed to be on a killing-spree (0=off)
 + `sv_killingspree_reset_on_round_end` 0=allow spreeing across games 1=end spree on round end
-+ `sv_damage_needed_for_kill` Damage needed to kill
++ `sv_damage_needed_for_kill` Grenade damage needed to kill in instagib modes
++ `sv_swap_flags` swap blue and red flag spawns in ctf modes
 + `sv_allow_zoom` allow ddnet clients to use the client side zoom feature
 + `sv_strict_snap_distance` only send players close by (helps against zoom cheats)
 + `sv_anticamper` Toggle to enable/disable Anticamper
