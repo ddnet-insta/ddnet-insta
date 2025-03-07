@@ -1413,9 +1413,10 @@ void CGameControllerPvp::OnAnyDamage(vec2 &Force, int &Dmg, int &From, int &Weap
 	else if(Weapon == WEAPON_HAMMER)
 	{
 		dbg_assert(pKiller, "invalid player hammered someone");
-		dbg_assert(pKiller->GetCharacter(), "dead player hammered someone");
+		// dbg_assert(pKiller->GetCharacter(), "dead player hammered someone");
 
-		pCharacter->TakeHammerHit(pKiller->GetCharacter(), Force);
+		if(pKiller->GetCharacter())
+			pCharacter->TakeHammerHit(pKiller->GetCharacter(), Force);
 	}
 }
 
