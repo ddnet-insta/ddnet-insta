@@ -1555,7 +1555,7 @@ void CGameControllerPvp::OnAppliedDamage(int &Dmg, int &From, int &Weapon, CChar
 		DoDamageHitSound(From);
 
 	// TODO: refactor this to a method called RefillNadesOnHit
-	if(!pCharacter->IsAlive() && From != pCharacter->GetPlayer()->GetCid() && pKiller)
+	if(From != pCharacter->GetPlayer()->GetCid() && pKiller)
 	{
 		CCharacter *pKillerChr = pKiller->GetCharacter();
 		if(!pKillerChr)
