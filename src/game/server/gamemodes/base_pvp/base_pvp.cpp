@@ -582,6 +582,13 @@ bool CGameControllerPvp::IsStatTrack(char *pReason, int SizeOfReason)
 	if(pReason)
 		pReason[0] = '\0';
 
+	if(g_Config.m_SvAlwaysTrackStats)
+	{
+		if(g_Config.m_SvDebugStats)
+			log_debug("stats", "tracking stats no matter what because sv_always_track_stats is set");
+		return true;
+	}
+
 	if(IsWarmup())
 	{
 		if(pReason)
@@ -593,7 +600,7 @@ bool CGameControllerPvp::IsStatTrack(char *pReason, int SizeOfReason)
 	int Count = NumConnectedIps();
 	bool Track = Count >= MinPlayers;
 	if(g_Config.m_SvDebugStats)
-		dbg_msg("stats", "connected unique ips=%d (%d+ needed to track) tracking=%d", Count, MinPlayers, Track);
+		log_debug("stats", "connected unique ips=%d (%d+ needed to track) tracking=%d", Count, MinPlayers, Track);
 
 	if(!Track)
 	{

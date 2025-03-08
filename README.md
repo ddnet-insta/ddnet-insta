@@ -325,6 +325,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_chat_ratelimit_spam` Needs sv_spamprotection 0 (0=off, 1=ratelimit chat detected as spam)
 + `sv_chat_ratelimit_debug` Logs which of the ratelimits kicked in
 + `sv_require_chat_flag_to_chat` clients have to send playerflag chat to use public chat (commands are unrelated)
++ `sv_always_track_stats` Track stats no matter how many players are online
 + `sv_debug_catch` Debug zCatch ticks caught and in game
 + `sv_debug_stats` Verbose logging for the SQL player stats
 + `sv_vote_checkboxes` Fill [ ] checkbox in vote name if the config is already set
