@@ -29,11 +29,6 @@ public:
 	// amount of damage the explosion caused
 	int m_Dmg;
 
-	// Can be -1 if the explosion got triggered by the world
-	// such as crazy shotgun turrets
-	// the client id of the person who caused the explosion
-	int m_OwnerId = -1;
-
 	// the weapon that created the explosion
 	// could be for example WEAPON_GRENADE
 	int m_Weapon = WEAPON_GRENADE;
@@ -65,7 +60,6 @@ public:
 		class CCharacter *pCharacter,
 		vec2 Force,
 		int Dmg,
-		int OwnerId,
 		int Weapon,
 		bool NoDamage,
 		int ActivatedTeam,
@@ -76,7 +70,6 @@ public:
 		m_pCharacter = pCharacter;
 		m_Force = Force;
 		m_Dmg = Dmg;
-		m_OwnerId = OwnerId;
 		m_Weapon = Weapon;
 		m_NoDamage = NoDamage;
 		m_ActivatedTeam = ActivatedTeam;

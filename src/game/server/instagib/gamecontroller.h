@@ -327,9 +327,10 @@ public:
 			Do not use this method to deal damage that should happen in CGameController::OnCharacterTakeDamage().
 
 		Arguments:
+			OwnerId - Client Id of the player that triggered the explosion. Might be -1 if its not coming from a player but from the world.
 			ExplosionHits - Characters that got hit by the explosion. They are not filtered yet by SkipDamage() you have to do that!
 	*/
-	virtual void OnExplosionHits(CExplosionTarget *pTargets, int NumTargets){};
+	virtual void OnExplosionHits(int OwnerId, CExplosionTarget *pTargets, int NumTargets){};
 
 	/*
 		Function: ApplyFngHammerForce

@@ -11,6 +11,7 @@
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/laser_text.h>
 #include <game/server/instagib/sql_stats.h>
+#include <game/server/instagib/structs.h>
 #include <game/server/instagib/version.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
@@ -1220,6 +1221,60 @@ bool CGameControllerPvp::OnLaserHit(int Bounces, int From, int Weapon, CCharacte
 	return true;
 }
 
+void CGameControllerPvp::OnExplosionHits(int OwnerId, CExplosionTarget *pTargets, int NumTargets)
+{
+	CPlayer *pKiller = GetPlayerOrNullptr(OwnerId);
+	if(!pKiller)
+		return;
+
+	int HitTeamMates = 0;
+	int HitEnemies = 0;
+	bool SelfDamage = false;
+
+	for(int i = 0; i < NumTargets; i++)
+	{
+		CExplosionTarget *pTarget = &pTargets[i];
+		int HitId = pTarget->m_pCharacter->GetPlayer()->GetCid();
+
+		// do not count self damage
+		// as team or enemy hit
+		if(HitId == OwnerId)
+		{
+			SelfDamage = true;
+			continue;
+		}
+
+		if(GameServer()->m_pController->IsFriendlyFire(HitId, pKiller->GetCid()))
+			HitTeamMates++;
+		else
+			HitEnemies++;
+	}
+
+	// this if statement is a bit bloated
+	// but it allows for detailed debug logs
+	if(SelfDamage && !HitEnemies)
+	{
+		// self damage counts as boosting
+		// so the hit/misses rate should not be affected
+		if(IsStatTrack())
+		{
+			if(g_Config.m_SvDebugStats)
+				log_info("ddnet-insta", "shot did not count because it boosted the shooter");
+			pKiller->m_Stats.m_ShotsFired--;
+		}
+	}
+	else if(HitTeamMates && !HitEnemies)
+	{
+		// boosting mates counts neither as hit nor as miss
+		if(IsStatTrack())
+		{
+			if(g_Config.m_SvDebugStats)
+				log_info("ddnet-insta", "shot did not count because it boosted %d team mates", HitTeamMates);
+			pKiller->m_Stats.m_ShotsFired--;
+		}
+	}
+}
+
 void CGameControllerPvp::OnHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force)
 {
 	// not sure if these asserts should be kept
@@ -1475,14 +1530,6 @@ void CGameControllerPvp::OnAnyDamage(vec2 &Force, int &Dmg, int &From, int &Weap
 		{
 			pCharacter->SetWeaponAmmo(WEAPON_GRENADE, minimum(pCharacter->GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + 1, g_Config.m_SvGrenadeAmmoRegenNum));
 		}
-
-		// self damage counts as boosting
-		// so the hit/misses rate should not be affected
-		//
-		// yes this means that grenade boost kills
-		// can get you a accuracy over 100%
-		if(IsStatTrack())
-			pPlayer->m_Stats.m_ShotsFired--;
 	}
 
 	if(Weapon == WEAPON_HAMMER)

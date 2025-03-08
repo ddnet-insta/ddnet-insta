@@ -371,14 +371,14 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			// ddnet-insta start
 			if(g_Config.m_SvSprayprotection && !SprayMask.test(pChr->GetPlayer()->GetCid()))
 				continue;
-			aTargets[NumTargets++].Init(pChr, ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon, NoDamage, ActivatedTeam, Mask, SprayMask, Pos);
+			aTargets[NumTargets++].Init(pChr, ForceDir * Dmg * 2, (int)Dmg, Weapon, NoDamage, ActivatedTeam, Mask, SprayMask, Pos);
 			// ddnet-insta end
 
 			pChr->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
 		}
 	}
 
-	m_pController->OnExplosionHits(aTargets, NumTargets); // ddnet-insta
+	m_pController->OnExplosionHits(Owner, aTargets, NumTargets); // ddnet-insta
 }
 
 void CGameContext::CreatePlayerSpawn(vec2 Pos, CClientMask Mask)

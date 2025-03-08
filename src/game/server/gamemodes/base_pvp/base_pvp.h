@@ -91,6 +91,7 @@ public:
 	// ddnet-insta only
 	// return false to not cause any damage
 	bool OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim) override;
+	void OnExplosionHits(int OwnerId, CExplosionTarget *pTargets, int NumTargets) override;
 	void OnHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force) override;
 	void ApplyFngHammerForce(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force) override;
 	void FngUnmeltHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force) override;
