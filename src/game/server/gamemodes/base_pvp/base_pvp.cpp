@@ -1543,34 +1543,39 @@ void CGameControllerPvp::OnAppliedDamage(int &Dmg, int &From, int &Weapon, CChar
 	CPlayer *pPlayer = pCharacter->GetPlayer();
 	CPlayer *pKiller = GetPlayerOrNullptr(From);
 
-	if(IsStatTrack() && Weapon != WEAPON_HAMMER)
+	if(!pKiller)
+		return;
+
+	bool SelfDamage = From == pPlayer->GetCid();
+	if(SelfDamage)
+		return;
+
+	DoDamageHitSound(From);
+
+	if(Weapon != WEAPON_HAMMER && IsStatTrack())
 	{
-		if(pKiller && From != pPlayer->GetCid())
-		{
-			pKiller->m_Stats.m_ShotsHit++;
-		}
+		pKiller->m_Stats.m_ShotsHit++;
 	}
 
-	if(From != pPlayer->GetCid())
-		DoDamageHitSound(From);
+	if(Weapon == WEAPON_GRENADE)
+		RefillGrenadesOnHit(pKiller);
+}
 
-	// TODO: refactor this to a method called RefillNadesOnHit
-	if(From != pCharacter->GetPlayer()->GetCid() && pKiller)
+void CGameControllerPvp::RefillGrenadesOnHit(CPlayer *pPlayer)
+{
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	// refill nades
+	int RefillNades = 0;
+	if(g_Config.m_SvGrenadeAmmoRegenOnKill == 1)
+		RefillNades = 1;
+	else if(g_Config.m_SvGrenadeAmmoRegenOnKill == 2)
+		RefillNades = g_Config.m_SvGrenadeAmmoRegenNum;
+	if(RefillNades && g_Config.m_SvGrenadeAmmoRegen)
 	{
-		CCharacter *pKillerChr = pKiller->GetCharacter();
-		if(!pKillerChr)
-			return;
-
-		// refill nades
-		int RefillNades = 0;
-		if(g_Config.m_SvGrenadeAmmoRegenOnKill == 1)
-			RefillNades = 1;
-		else if(g_Config.m_SvGrenadeAmmoRegenOnKill == 2)
-			RefillNades = g_Config.m_SvGrenadeAmmoRegenNum;
-		if(RefillNades && g_Config.m_SvGrenadeAmmoRegen && Weapon == WEAPON_GRENADE)
-		{
-			pKillerChr->SetWeaponAmmo(WEAPON_GRENADE, minimum(pKillerChr->GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + RefillNades, g_Config.m_SvGrenadeAmmoRegenNum));
-		}
+		pChr->SetWeaponAmmo(WEAPON_GRENADE, minimum(pChr->GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + RefillNades, g_Config.m_SvGrenadeAmmoRegenNum));
 	}
 }
 
