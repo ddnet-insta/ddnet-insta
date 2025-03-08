@@ -389,8 +389,7 @@ bool IGameController::IsFriendlyFire(int ClientId1, int ClientId2) const
 		if(!GameServer()->m_apPlayers[ClientId1] || !GameServer()->m_apPlayers[ClientId2])
 			return false;
 
-		// if(!Config()->m_SvTeamdamage && GameServer()->m_apPlayers[ClientId1]->GetTeam() == GameServer()->m_apPlayers[ClientId2]->GetTeam())
-		if(true && GameServer()->m_apPlayers[ClientId1]->GetTeam() == GameServer()->m_apPlayers[ClientId2]->GetTeam())
+		if(!g_Config.m_SvTeamdamage && GameServer()->m_apPlayers[ClientId1]->GetTeam() == GameServer()->m_apPlayers[ClientId2]->GetTeam())
 			return true;
 	}
 

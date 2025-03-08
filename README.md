@@ -268,6 +268,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_stop_and_go_chat` pause then game when someone writes 'pause' or 'stop' and start with 'go' or 'start'
 + `sv_powerups` Allow powerups like ninja
 + `sv_teambalance_time` How many minutes to wait before autobalancing teams
++ `sv_teamdamage` Team damage
 + `sv_team_score_normal` Points a team receives for grabbing into normal spikes
 + `sv_team_score_gold` Points a team receives for grabbing into golden spikes
 + `sv_team_score_green` Points a team receives for grabbing into green spikes(non 4-teams fng only)
