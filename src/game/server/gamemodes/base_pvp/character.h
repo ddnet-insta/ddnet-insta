@@ -33,7 +33,9 @@ public:
 	// DO NOT USE m_ReloadTimer!
 	// it is unused in ddnet-insta and only kept
 	// to keep the diff to ddnet minimal
-	int m_aReloadTimer[NUM_WEAPONS];
+	int m_aReloadTimers[NUM_WEAPONS];
+
+	void SetReloadTimer(int Delay) { m_aReloadTimers[GetActiveWeaponForReload()] = Delay; }
 
 	int GetActiveWeaponForReload() const;
 

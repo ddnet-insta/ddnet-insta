@@ -364,6 +364,9 @@ void CCharacter::HandleNinja()
 
 void CCharacter::DoWeaponSwitch()
 {
+	if(GameServer()->m_pController->BlockWeaponSwitch(this)) // ddnet-insta
+		return;
+
 	// make sure we can switch
 	if(m_ReloadTimer != 0 || m_QueuedWeapon == -1 || m_Core.m_aWeapons[WEAPON_NINJA].m_Got || !m_Core.m_aWeapons[m_QueuedWeapon].m_Got)
 		return;
@@ -421,7 +424,8 @@ void CCharacter::HandleWeaponSwitch()
 
 void CCharacter::FireWeapon()
 {
-	if(m_aReloadTimer[GetActiveWeaponForReload()] != 0)
+#define m_ReloadTimer m_aReloadTimers[GetActiveWeaponForReload()] // ddnet-insta
+	if(m_ReloadTimer != 0)
 	{
 		if(m_LatestInput.m_Fire & 1)
 		{
@@ -631,6 +635,7 @@ void CCharacter::FireWeapon()
 		GetTuning(m_TuneZone)->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 	}
+#undef m_ReloadTimer // ddnet-insta
 }
 
 void CCharacter::HandleWeapons()
@@ -643,7 +648,7 @@ void CCharacter::HandleWeapons()
 		m_PainSoundTimer--;
 
 	// check reload timer
-	for(int &ReloadTimer : m_aReloadTimer) // ddnet-insta uses m_aReloadTimer instead of m_ReloadTimer
+	for(int &ReloadTimer : m_aReloadTimers) // ddnet-insta uses m_aReloadTimers instead of m_ReloadTimer
 	{
 		if(ReloadTimer)
 		{

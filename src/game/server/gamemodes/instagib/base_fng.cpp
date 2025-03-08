@@ -432,7 +432,7 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 	}
 
 	if(g_Config.m_SvReloadTimeOnHit > 0 && Weapon == WEAPON_LASER && pKiller && pKiller->GetCharacter())
-		pKiller->GetCharacter()->m_ReloadTimer = g_Config.m_SvReloadTimeOnHit;
+		pKiller->GetCharacter()->m_aReloadTimers[pKiller->GetCharacter()->GetActiveWeaponForReload()] = g_Config.m_SvReloadTimeOnHit;
 
 	// kill message
 	CNetMsg_Sv_KillMsg Msg;

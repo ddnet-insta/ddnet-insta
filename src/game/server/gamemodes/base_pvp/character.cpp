@@ -146,7 +146,8 @@ void CCharacter::AmmoRegen()
 	}
 }
 
-int CCharacter::GetActiveWeaponForReload() const {
+int CCharacter::GetActiveWeaponForReload() const
+{
 	if(g_Config.m_SvPerWeaponReload)
 		return m_Core.m_ActiveWeapon;
 	return 0;

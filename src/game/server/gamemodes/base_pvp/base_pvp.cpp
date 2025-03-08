@@ -2213,6 +2213,19 @@ void CGameControllerPvp::DoDamageHitSound(int KillerId)
 	GameServer()->CreateSound(pKiller->m_ViewPos, SOUND_HIT, Mask);
 }
 
+bool CGameControllerPvp::BlockWeaponSwitch(CCharacter *pCharacter)
+{
+	// m_ReloadTimer is not used in ddnet-insta
+	// we use m_aReloadTimers instead
+	// but we still set the m_ReloadTimer here
+	// so ddnet does not block the weapon switch
+	//
+	// so this is just a hack to avoid editing ddnet code
+	pCharacter->m_ReloadTimer = 0;
+
+	return false;
+}
+
 void CGameControllerPvp::MakeLaserTextPoints(vec2 Pos, int Points, int Seconds)
 {
 	if(!g_Config.m_SvLaserTextPoints)

@@ -333,6 +333,17 @@ public:
 	virtual void OnExplosionHits(int OwnerId, CExplosionTarget *pTargets, int NumTargets){};
 
 	/*
+		Function: BlockWeaponSwitch
+			Called from CCharacter::DoWeaponSwitch()
+			Implement your custom weapon switch block here.
+
+		Returns:
+			true - if switching the weapon should be blocked
+			false - if the weapon switch is allowed (can still be blocked by ddnet code)
+	*/
+	virtual bool BlockWeaponSwitch(CCharacter *pCharacter) { return false; };
+
+	/*
 		Function: ApplyFngHammerForce
 			Hammers in fng have differnt tuning.
 			If sv_fng_hammer is set the hammer is a bit stronger.
