@@ -76,6 +76,22 @@ public:
 	// try to avoid using that method because it is hacky
 	void SetTeamRaw(int Team);
 
+	// WARNING: only use this if you really know what you are doing
+	//
+	// in 99% of the cases you should use GetCharacter() instead!
+	// This method is only for edge cases when you really need
+	// a dead character.
+	// This can be used to get the information about a tee that
+	// already died in that tick and is technically already invalid.
+	// But the character pointer still holds the values.
+	//
+	// This is used in ddnet-insta for the edge case where a player
+	// landed a hammer hit in the tick they died.
+	// To fully apply the hammer hit effect we still need information
+	// about the now dead character.
+	// See https://github.com/ddnet-insta/ddnet-insta/issues/313
+	CCharacter *GetCharacterDeadOrAlive() { return m_pCharacter; };
+
 	// dead players can not respawn
 	// will be used like m_RespawnDisabled in 0.7
 	bool m_IsDead = false;

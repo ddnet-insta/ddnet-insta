@@ -1213,6 +1213,72 @@ bool CGameControllerPvp::OnLaserHit(int Bounces, int From, int Weapon, CCharacte
 	return true;
 }
 
+void CGameControllerPvp::OnHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force)
+{
+	// not sure if these asserts should be kept
+	// all of them should be save its just wasting clock cycles
+	dbg_assert(pPlayer, "invalid player caused a hammer hit");
+	dbg_assert(pTarget, "invalid player received a hammer hit");
+	dbg_assert(pTarget->GetCharacter(), "dead player received a hammer hit");
+
+	CCharacter *pTargetChr = pTarget->GetCharacter();
+
+	// TODO: refactor this into a method
+	if(g_Config.m_SvFngHammer)
+	{
+		CCharacter *pFromChr = pPlayer->GetCharacterDeadOrAlive();
+
+		vec2 Dir;
+		if(length(pTargetChr->m_Pos - pFromChr->m_Pos) > 0.0f)
+			Dir = normalize(pTargetChr->m_Pos - pFromChr->m_Pos);
+		else
+			Dir = vec2(0.f, -1.f);
+
+		vec2 Push = vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+
+		// matches ddnet clients prediction code by default
+		// https://github.com/ddnet/ddnet/blob/f9df4a85be4ca94ca91057cd447707bcce16fd94/src/game/client/prediction/entities/character.cpp#L334-L346
+		if(GameServer()->m_pController->IsTeamPlay() && pTarget->GetTeam() == pPlayer->GetTeam() && pTargetChr->m_FreezeTime)
+		{
+			Push.x *= g_Config.m_SvMeltHammerScaleX * 0.01f;
+			Push.y *= g_Config.m_SvMeltHammerScaleY * 0.01f;
+		}
+		else
+		{
+			Push.x *= g_Config.m_SvHammerScaleX * 0.01f;
+			Push.y *= g_Config.m_SvHammerScaleY * 0.01f;
+		}
+
+		Force = Push;
+	}
+
+	// TODO: this should be refactored into a descriptive method
+	//       called fng unmelt hammer or something like that
+	//       and it should also be behind a config so that all modes could use it
+	//       i can also see this being fun in ddrace ctf
+	if(GameServer()->m_pController->IsFngGameType())
+	{
+		if(GameServer()->m_pController->IsTeamPlay() && pPlayer->GetTeam() == pTarget->GetTeam())
+		{
+			if(pTargetChr->m_FreezeTime)
+			{
+				pTargetChr->m_FreezeTime -= Server()->TickSpeed() * 3;
+
+				// make sure we don't got negative and let the ddrace tick trigger the unfreeeze
+				if(pTargetChr->m_FreezeTime < 2)
+				{
+					pTargetChr->m_FreezeTime = 2;
+
+					// reward the unfreezer with one point
+					pPlayer->AddScore(1);
+					if(GameServer()->m_pController->IsStatTrack())
+						pPlayer->m_Stats.m_Unfreezes++;
+				}
+			}
+		}
+	}
+}
+
 bool CGameControllerPvp::IsSpawnProtected(const CPlayer *pVictim, const CPlayer *pKiller) const
 {
 	// there has to be a valid killer to get spawn protected
@@ -1407,16 +1473,13 @@ void CGameControllerPvp::OnAnyDamage(vec2 &Force, int &Dmg, int &From, int &Weap
 
 	if(Weapon == WEAPON_LASER)
 	{
+		// TODO: i do not think this is needed anymore
 		if(!IsFngGameType())
 			pCharacter->UnFreeze();
 	}
 	else if(Weapon == WEAPON_HAMMER)
 	{
-		dbg_assert(pKiller, "invalid player hammered someone");
-		// dbg_assert(pKiller->GetCharacter(), "dead player hammered someone");
-
-		if(pKiller->GetCharacter())
-			pCharacter->TakeHammerHit(pKiller->GetCharacter(), Force);
+		OnHammerHit(pKiller, pPlayer, Force);
 	}
 }
 

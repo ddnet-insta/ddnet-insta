@@ -38,7 +38,6 @@ public:
 	void AddArmor(int Amount) { m_Armor += Amount; };
 	int GetAimDir() { return m_Input.m_TargetX < 0 ? -1 : 1; };
 
-	void TakeHammerHit(CCharacter *pFrom, vec2 &Force);
 	void AmmoRegen();
 	/*
 		Function: IsTouchingTile

@@ -108,68 +108,6 @@ float CCharacter::DistToTouchingTile(int Tile)
 	return ClosestDistance;
 }
 
-void CCharacter::TakeHammerHit(CCharacter *pFrom, vec2 &Force)
-{
-	if(g_Config.m_SvFngHammer)
-	{
-		// TODO: can we get this value from Force without recomputing it?
-		vec2 Dir;
-		if(length(m_Pos - pFrom->m_Pos) > 0.0f)
-			Dir = normalize(m_Pos - pFrom->m_Pos);
-		else
-			Dir = vec2(0.f, -1.f);
-
-		vec2 Push = vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
-
-		// matches ddnet clients prediction code by default
-		// https://github.com/ddnet/ddnet/blob/f9df4a85be4ca94ca91057cd447707bcce16fd94/src/game/client/prediction/entities/character.cpp#L334-L346
-		if(GameServer()->m_pController->IsTeamPlay() && pFrom->GetPlayer() && m_pPlayer->GetTeam() == pFrom->GetPlayer()->GetTeam() && m_FreezeTime)
-		{
-			Push.x *= g_Config.m_SvMeltHammerScaleX * 0.01f;
-			Push.y *= g_Config.m_SvMeltHammerScaleY * 0.01f;
-		}
-		else
-		{
-			Push.x *= g_Config.m_SvHammerScaleX * 0.01f;
-			Push.y *= g_Config.m_SvHammerScaleY * 0.01f;
-		}
-
-		Force = Push;
-	}
-
-	CPlayer *pPlayer = pFrom->GetPlayer();
-
-	// this should really never happend but is needed to calm down clang
-	if(!pPlayer)
-		return;
-
-	// TODO: this should be refactored into a descriptive method
-	//       called fng unmelt hammer or something like that
-	//       and it should also be behind a config so that all modes could use it
-	//       i can also see this being fun in ddrace ctf
-	if(GameServer()->m_pController->IsFngGameType())
-	{
-		if(GameServer()->m_pController->IsTeamPlay() && pPlayer->GetTeam() == m_pPlayer->GetTeam())
-		{
-			if(m_FreezeTime)
-			{
-				m_FreezeTime -= Server()->TickSpeed() * 3;
-
-				// make sure we don't got negative and let the ddrace tick trigger the unfreeeze
-				if(m_FreezeTime < 2)
-				{
-					m_FreezeTime = 2;
-
-					// reward the unfreezer with one point
-					pPlayer->AddScore(1);
-					if(GameServer()->m_pController->IsStatTrack())
-						pPlayer->m_Stats.m_Unfreezes++;
-				}
-			}
-		}
-	}
-}
-
 void CCharacter::AmmoRegen()
 {
 	// ammo regen on Grenade

@@ -284,6 +284,31 @@ public:
 	virtual bool OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim) { return true; };
 
 	/*
+		Function: OnHammerHit
+			Similar to CAntibot::OnHammerHit() called from the same spot.
+			With same argument order with the aditional argument Force which
+			can inform you about the Force that would be applied on hit.
+			You can also overwrite that value to change the hammer knockback.
+
+			Unlike OnLaserHit() it is called from within CGameController::OnCharacterTakeDamage()
+
+			Be careful the pPlayer that hit the hammer might not have a character anymore!
+			`pPlayer->GetCharacter()` can be `nullptr` because tees can land a hammer in the tick
+			they die.
+
+		Arguments:
+			pPlayer - The player that landed the hammer hit. Can be dead already. `pPlayer->GetCharacter()` can be `nullptr`.
+			          If you still need information about the character that landed the hit.
+				  Use `pPlayer->GetCharacterDeadOrAlive()` but be careful!
+			pTarget - The player that got hit with the hammer
+			Force - The force that will be applied to the hit character.
+			        It is already set to the default once this method is called.
+				And you can overwrite the value if you want to apply
+				a different velocity to the hit character.
+	*/
+	virtual void OnHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force){};
+
+	/*
 		Function: OnFireWeapon
 			this function was added in ddnet-insta and is a non standard controller method.
 			neither ddnet nor teeworlds have this
