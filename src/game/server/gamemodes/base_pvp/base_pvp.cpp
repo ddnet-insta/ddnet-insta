@@ -337,7 +337,7 @@ int CGameControllerPvp::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer, in
 bool CGameControllerPvp::IsGrenadeGameType() const
 {
 	// TODO: this should be done with some cleaner spawnweapons/available weapons enum flag thing
-	if(!str_comp(m_pGameType, "zCatch"))
+	if(IsZcatchGameType())
 	{
 		return m_SpawnWeapons == SPAWN_WEAPON_GRENADE;
 	}
@@ -1221,61 +1221,67 @@ void CGameControllerPvp::OnHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &F
 	dbg_assert(pTarget, "invalid player received a hammer hit");
 	dbg_assert(pTarget->GetCharacter(), "dead player received a hammer hit");
 
+	ApplyFngHammerForce(pPlayer, pTarget, Force);
+	FngUnmeltHammerHit(pPlayer, pTarget, Force);
+}
+
+void CGameControllerPvp::ApplyFngHammerForce(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force)
+{
+	if(!g_Config.m_SvFngHammer)
+		return;
+
 	CCharacter *pTargetChr = pTarget->GetCharacter();
+	CCharacter *pFromChr = pPlayer->GetCharacterDeadOrAlive();
 
-	// TODO: refactor this into a method
-	if(g_Config.m_SvFngHammer)
+	vec2 Dir;
+	if(length(pTargetChr->m_Pos - pFromChr->m_Pos) > 0.0f)
+		Dir = normalize(pTargetChr->m_Pos - pFromChr->m_Pos);
+	else
+		Dir = vec2(0.f, -1.f);
+
+	vec2 Push = vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+
+	// matches ddnet clients prediction code by default
+	// https://github.com/ddnet/ddnet/blob/f9df4a85be4ca94ca91057cd447707bcce16fd94/src/game/client/prediction/entities/character.cpp#L334-L346
+	if(GameServer()->m_pController->IsTeamPlay() && pTarget->GetTeam() == pPlayer->GetTeam() && pTargetChr->m_FreezeTime)
 	{
-		CCharacter *pFromChr = pPlayer->GetCharacterDeadOrAlive();
-
-		vec2 Dir;
-		if(length(pTargetChr->m_Pos - pFromChr->m_Pos) > 0.0f)
-			Dir = normalize(pTargetChr->m_Pos - pFromChr->m_Pos);
-		else
-			Dir = vec2(0.f, -1.f);
-
-		vec2 Push = vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
-
-		// matches ddnet clients prediction code by default
-		// https://github.com/ddnet/ddnet/blob/f9df4a85be4ca94ca91057cd447707bcce16fd94/src/game/client/prediction/entities/character.cpp#L334-L346
-		if(GameServer()->m_pController->IsTeamPlay() && pTarget->GetTeam() == pPlayer->GetTeam() && pTargetChr->m_FreezeTime)
-		{
-			Push.x *= g_Config.m_SvMeltHammerScaleX * 0.01f;
-			Push.y *= g_Config.m_SvMeltHammerScaleY * 0.01f;
-		}
-		else
-		{
-			Push.x *= g_Config.m_SvHammerScaleX * 0.01f;
-			Push.y *= g_Config.m_SvHammerScaleY * 0.01f;
-		}
-
-		Force = Push;
+		Push.x *= g_Config.m_SvMeltHammerScaleX * 0.01f;
+		Push.y *= g_Config.m_SvMeltHammerScaleY * 0.01f;
+	}
+	else
+	{
+		Push.x *= g_Config.m_SvHammerScaleX * 0.01f;
+		Push.y *= g_Config.m_SvHammerScaleY * 0.01f;
 	}
 
-	// TODO: this should be refactored into a descriptive method
-	//       called fng unmelt hammer or something like that
-	//       and it should also be behind a config so that all modes could use it
-	//       i can also see this being fun in ddrace ctf
-	if(GameServer()->m_pController->IsFngGameType())
+	Force = Push;
+}
+
+void CGameControllerPvp::FngUnmeltHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force)
+{
+	CCharacter *pTargetChr = pTarget->GetCharacter();
+
+	// only frozen team mates in fng can be unmelt hammered
+	if(!GameServer()->m_pController->IsFngGameType())
+		return;
+	if(!pTargetChr->m_FreezeTime)
+		return;
+	if(!GameServer()->m_pController->IsTeamPlay())
+		return;
+	if(pPlayer->GetTeam() != pTarget->GetTeam())
+		return;
+
+	pTargetChr->m_FreezeTime -= Server()->TickSpeed() * 3;
+
+	// make sure we don't got negative and let the ddrace tick trigger the unfreeeze
+	if(pTargetChr->m_FreezeTime < 2)
 	{
-		if(GameServer()->m_pController->IsTeamPlay() && pPlayer->GetTeam() == pTarget->GetTeam())
-		{
-			if(pTargetChr->m_FreezeTime)
-			{
-				pTargetChr->m_FreezeTime -= Server()->TickSpeed() * 3;
+		pTargetChr->m_FreezeTime = 2;
 
-				// make sure we don't got negative and let the ddrace tick trigger the unfreeeze
-				if(pTargetChr->m_FreezeTime < 2)
-				{
-					pTargetChr->m_FreezeTime = 2;
-
-					// reward the unfreezer with one point
-					pPlayer->AddScore(1);
-					if(GameServer()->m_pController->IsStatTrack())
-						pPlayer->m_Stats.m_Unfreezes++;
-				}
-			}
-		}
+		// reward the unfreezer with one point
+		pPlayer->AddScore(1);
+		if(GameServer()->m_pController->IsStatTrack())
+			pPlayer->m_Stats.m_Unfreezes++;
 	}
 }
 

@@ -309,6 +309,48 @@ public:
 	virtual void OnHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force){};
 
 	/*
+		Function: ApplyFngHammerForce
+			Hammers in fng have differnt tuning.
+			If sv_fng_hammer is set the hammer is a bit stronger.
+			This method applies this custom knock back.
+
+		Arguments:
+			pPlayer - The player that landed the hammer hit. Can be dead already. `pPlayer->GetCharacter()` can be `nullptr`.
+			          If you still need information about the character that landed the hit.
+				  Use `pPlayer->GetCharacterDeadOrAlive()` but be careful!
+			pTarget - The player that got hit with the hammer
+			Force - The force that will be applied to the hit character.
+			        It is already set to the default once this method is called.
+				And you can overwrite the value if you want to apply
+				a different velocity to the hit character.
+	*/
+	virtual void ApplyFngHammerForce(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force){};
+
+	/*
+		Function: ApplyFngHammerForce
+			Hammers in fng can unfreeze team mates.
+			But not like in ddrace with one hit.
+			It actually takes a few hits.
+			And every hit decreases the freeze time a bit.
+			This method is implementing this freeze time decrease.
+
+		Arguments:
+			pPlayer - The player that landed the hammer hit. Can be dead already. `pPlayer->GetCharacter()` can be `nullptr`.
+			          If you still need information about the character that landed the hit.
+				  Use `pPlayer->GetCharacterDeadOrAlive()` but be careful!
+			pTarget - The player that got hit with the hammer
+			Force - The force that will be applied to the hit character.
+			        It is already set to the default once this method is called.
+				And you can overwrite the value if you want to apply
+				a different velocity to the hit character.
+
+				Actually not used in ddnet-insta
+				can be used to implement your own freeze hammer that depends on how
+				how far the hammer would throw for example
+	*/
+	virtual void FngUnmeltHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force){};
+
+	/*
 		Function: OnFireWeapon
 			this function was added in ddnet-insta and is a non standard controller method.
 			neither ddnet nor teeworlds have this
