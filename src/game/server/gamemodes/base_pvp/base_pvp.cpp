@@ -1474,7 +1474,8 @@ void CGameControllerPvp::OnAnyDamage(vec2 &Force, int &Dmg, int &From, int &Weap
 		//
 		// yes this means that grenade boost kills
 		// can get you a accuracy over 100%
-		pPlayer->m_Stats.m_ShotsFired--;
+		if(IsStatTrack())
+			pPlayer->m_Stats.m_ShotsFired--;
 	}
 
 	if(Weapon == WEAPON_HAMMER)
