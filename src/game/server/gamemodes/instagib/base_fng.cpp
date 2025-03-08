@@ -412,10 +412,18 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 
 	CPlayer *pKiller = GetPlayerOrNullptr(From);
 
+	// do scoring
 	if(pKiller)
 	{
-		pKiller->IncrementScore();
-		AddTeamscore(pKiller->GetTeam(), 1);
+		if(IsTeamPlay() && Character.GetPlayer()->GetTeam() == pKiller->GetTeam())
+		{
+			pKiller->DecrementScore(); // teamkill
+		}
+		else
+		{
+			pKiller->IncrementScore(); // normal kill
+			AddTeamscore(pKiller->GetTeam(), 1);
+		}
 	}
 
 	if(IsStatTrack())

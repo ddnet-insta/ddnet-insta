@@ -968,7 +968,7 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 	int DelayInTicks = (int)(Server()->TickSpeed() * ((float)DelayInMs / 1000.0f));
 	pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + DelayInTicks;
 
-	// do scoreing
+	// do scoring
 	if(!pKiller || Weapon == WEAPON_GAME)
 		return 0;
 
