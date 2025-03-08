@@ -12,6 +12,7 @@
 #include <game/server/gamecontext.h> // ddnet-insta
 #include <game/server/instagib/enums.h> // ddnet-insta
 #include <game/server/instagib/sql_stats.h> // ddnet-insta
+#include <game/server/instagib/structs.h> // ddnet-insta
 
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>

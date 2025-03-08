@@ -17,6 +17,7 @@
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
+#include <game/server/instagib/structs.h>
 
 struct CScoreLoadBestTimeResult;
 
@@ -307,6 +308,28 @@ public:
 				a different velocity to the hit character.
 	*/
 	virtual void OnHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force){};
+
+	/*
+		Function: OnExplosionHits
+			Will be called after every explosion.
+			When all hit targets are known.
+			At this point damage has already been delt
+			And players might have already been killed.
+			All of that happens in CGameController::OnCharacterTakeDamage().
+
+			Use this method if you need to know all targets of the explosion.
+
+			Try to avoid dealing damage in this method otherwise it is duplicated
+			with CGameController::OnCharacterTakeDamage().
+			If you need to know all targets to deal damage you have to skip the damage dealing
+			in CGameController::OnCharacterTakeDamage()
+			Ideally by overwriting OnAppliedDamage()
+			Do not use this method to deal damage that should happen in CGameController::OnCharacterTakeDamage().
+
+		Arguments:
+			ExplosionHits - Characters that got hit by the explosion. They are not filtered yet by SkipDamage() you have to do that!
+	*/
+	virtual void OnExplosionHits(CExplosionTarget *pTargets, int NumTargets){};
 
 	/*
 		Function: ApplyFngHammerForce

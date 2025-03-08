@@ -50,6 +50,8 @@
 #include "player.h"
 #include "score.h"
 
+#include <game/server/instagib/structs.h> // ddnet-insta
+
 // Not thread-safe!
 class CClientChatLogger : public ILogger
 {
@@ -311,6 +313,10 @@ void CGameContext::CreateHammerHit(vec2 Pos, CClientMask Mask)
 
 void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask, CClientMask SprayMask)
 {
+	// ddnet-insta
+	CExplosionTarget aTargets[MAX_CLIENTS];
+	int NumTargets = 0;
+
 	// create the event
 	CNetEvent_Explosion *pEvent = m_Events.Create<CNetEvent_Explosion>(Mask);
 	if(pEvent)
@@ -362,10 +368,17 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 				TeamMask.reset(PlayerTeam);
 			}
 
-			if(!g_Config.m_SvSprayprotection || SprayMask.test(pChr->GetPlayer()->GetCid()))
-				pChr->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
+			// ddnet-insta start
+			if(g_Config.m_SvSprayprotection && !SprayMask.test(pChr->GetPlayer()->GetCid()))
+				continue;
+			aTargets[NumTargets++].Init(pChr, ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon, NoDamage, ActivatedTeam, Mask, SprayMask, Pos);
+			// ddnet-insta end
+
+			pChr->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
 		}
 	}
+
+	m_pController->OnExplosionHits(aTargets, NumTargets); // ddnet-insta
 }
 
 void CGameContext::CreatePlayerSpawn(vec2 Pos, CClientMask Mask)

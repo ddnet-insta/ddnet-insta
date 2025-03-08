@@ -2845,6 +2845,7 @@ if(SERVER)
     instagib/sql_stats_player.h
     instagib/strhelpers.cpp
     instagib/strhelpers.h
+    instagib/structs.h
     instagib/version.h
     player.cpp
     player.h
