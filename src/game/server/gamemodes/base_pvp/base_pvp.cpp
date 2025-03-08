@@ -1477,13 +1477,7 @@ void CGameControllerPvp::OnAnyDamage(vec2 &Force, int &Dmg, int &From, int &Weap
 		pPlayer->m_Stats.m_ShotsFired--;
 	}
 
-	if(Weapon == WEAPON_LASER)
-	{
-		// TODO: i do not think this is needed anymore
-		if(!IsFngGameType())
-			pCharacter->UnFreeze();
-	}
-	else if(Weapon == WEAPON_HAMMER)
+	if(Weapon == WEAPON_HAMMER)
 	{
 		OnHammerHit(pKiller, pPlayer, Force);
 	}
