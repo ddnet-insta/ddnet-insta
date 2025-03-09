@@ -309,9 +309,8 @@ inline void CGameControllerBaseFng::UpdateScoresAndDisplayPoints(CPlayer *pKille
 	// in CGameControllerPvp::OnCharacterDeath()
 	pKiller->AddScore(PlayerScore - 1);
 	AddTeamscore(pKiller->GetTeam(), TeamScore);
-	int Score = IsTeamPlay() ? TeamScore : PlayerScore;
 	if(pKiller->IsPlaying()) // NOLINT(clang-analyzer-unix.Malloc)
-		MakeLaserTextPoints(pKiller->GetCharacter()->GetPos(), Score, 3); // NOLINT(clang-analyzer-unix.Malloc)
+		MakeLaserTextPoints(pKiller->GetCharacter()->GetPos(), PlayerScore, 3); // NOLINT(clang-analyzer-unix.Malloc)
 }
 
 void CGameControllerBaseFng::SnapDDNetCharacter(int SnappingClient, CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter)
