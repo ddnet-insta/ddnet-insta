@@ -252,6 +252,9 @@ int CGameControllerPvp::SnapGameInfoExFlags2(int SnappingClient, int DDRaceFlags
 
 int CGameControllerPvp::SnapPlayerFlags7(int SnappingClient, CPlayer *pPlayer, int PlayerFlags7)
 {
+	if(SnappingClient < 0 || SnappingClient >= MAX_CLIENTS)
+		return PlayerFlags7;
+
 	if(pPlayer->m_IsDead && (!pPlayer->GetCharacter() || !pPlayer->GetCharacter()->IsAlive()))
 		PlayerFlags7 |= protocol7::PLAYERFLAG_DEAD;
 	// hack to let 0.7 players vote as spectators
@@ -284,13 +287,16 @@ void CGameControllerPvp::SnapPlayer6(int SnappingClient, CPlayer *pPlayer, CNetO
 
 void CGameControllerPvp::SnapDDNetPlayer(int SnappingClient, CPlayer *pPlayer, CNetObj_DDNetPlayer *pDDNetPlayer)
 {
+	if(SnappingClient < 0 || SnappingClient >= MAX_CLIENTS)
+		return;
+
 	if(g_Config.m_SvHideAdmins && Server()->GetAuthedState(SnappingClient) == AUTHED_NO)
 		pDDNetPlayer->m_AuthLevel = AUTHED_NO;
 }
 
 int CGameControllerPvp::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer, int DDRaceScore)
 {
-	CPlayer *pSnapReceiver = GameServer()->m_apPlayers[SnappingClient];
+	CPlayer *pSnapReceiver = GetPlayerOrNullptr(SnappingClient);
 	if(!pSnapReceiver)
 		return DDRaceScore;
 
