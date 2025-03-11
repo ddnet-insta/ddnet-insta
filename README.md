@@ -310,7 +310,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_melt_hammer_scale_x` linearly scale up hammer x power, percentage, for hammering frozen teammates (needs sv_fng_hammer)
 + `sv_melt_hammer_scale_y` linearly scale up hammer y power, percentage, for hammering frozen teammates (needs sv_fng_hammer)
 + `sv_fng_hammer` use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer
-+ `sv_fng_spike_sound` play flag capture sound when sacrificing an enemy into the spikes
++ `sv_fng_spike_sound` Play flag capture sound when sacrificing an enemy into the spikes !0.6 only! (0=off/1=only the killer and the victim/2=everyone near the victim)
 + `sv_punish_freeze_disconnect` freeze player for 20 seconds on rejoin when leaving server while being frozen
 + `sv_laser_text_points` display laser text in the world on scoring (only fng for now)
 + `sv_self_damage_respawn_delay_ms` time in miliseconds it takes to respawn after dieing by self damage
