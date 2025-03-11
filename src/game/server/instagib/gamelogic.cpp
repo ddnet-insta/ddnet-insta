@@ -1,6 +1,7 @@
 #include <base/system.h>
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
+#include <game/generated/protocol7.h>
 #include <game/server/instagib/protocol.h>
 
 #include "../entities/character.h"
@@ -274,6 +275,15 @@ void CGameContext::PlayerReadyStateBroadcast()
 
 void CGameContext::SendGameMsg(int GameMsgId, int ClientId) const
 {
+	dbg_assert(
+		GameMsgId == protocol7::GAMEMSG_TEAM_SWAP ||
+			GameMsgId == protocol7::GAMEMSG_SPEC_INVALIDID ||
+			GameMsgId == protocol7::GAMEMSG_TEAM_SHUFFLE ||
+			GameMsgId == protocol7::GAMEMSG_TEAM_BALANCE ||
+			GameMsgId == protocol7::GAMEMSG_CTF_DROP ||
+			GameMsgId == protocol7::GAMEMSG_CTF_RETURN,
+		"the passed game message id does not take 0 arguments");
+
 	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG, false, true);
 	Msg.AddInt(GameMsgId);
 	if(ClientId != -1 && Server()->IsSixup(ClientId))
@@ -294,6 +304,13 @@ void CGameContext::SendGameMsg(int GameMsgId, int ClientId) const
 
 void CGameContext::SendGameMsg(int GameMsgId, int ParaI1, int ClientId) const
 {
+	dbg_assert(
+		GameMsgId == protocol7::GAMEMSG_TEAM_ALL ||
+			GameMsgId == protocol7::GAMEMSG_TEAM_BALANCE_VICTIM ||
+			GameMsgId == protocol7::GAMEMSG_CTF_GRAB ||
+			GameMsgId == protocol7::GAMEMSG_GAME_PAUSED,
+		"the passed game message id does not take 1 argument");
+
 	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG, false, true);
 	Msg.AddInt(GameMsgId);
 	Msg.AddInt(ParaI1);
@@ -324,6 +341,8 @@ void CGameContext::SendGameMsg(int GameMsgId, int ParaI1, int ClientId) const
 
 void CGameContext::SendGameMsg(int GameMsgId, int ParaI1, int ParaI2, int ParaI3, int ClientId) const
 {
+	dbg_assert(GameMsgId == protocol7::GAMEMSG_CTF_CAPTURE, "the passed game message id does not take 3 arguments");
+
 	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG, false, true);
 	Msg.AddInt(GameMsgId);
 	Msg.AddInt(ParaI1);
