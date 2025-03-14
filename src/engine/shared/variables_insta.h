@@ -38,6 +38,17 @@ MACRO_CONFIG_INT(SvPlayerScoreSpikeGreen, sv_player_score_green, 6, 0, 100, CFGF
 MACRO_CONFIG_INT(SvPlayerScoreSpikePurple, sv_player_score_purple, 10, 0, 100, CFGFLAG_SERVER, "Points a player receives for grabbing into purple spikes(non 4-teams fng only)")
 MACRO_CONFIG_INT(SvPlayerScoreSpikeTeam, sv_player_score_team, 5, 0, 100, CFGFLAG_SERVER, "Points a player receives for grabbing into team spikes")
 
+MACRO_CONFIG_INT(SvWrongSpikeFreeze, sv_wrong_spike_freeze, 10, 0, 30, CFGFLAG_SERVER, "The time, in seconds, a player gets frozen, if he grabbed a frozen opponent into the opponents spikes (0=off, fng only)")
+// matches ddnet clients prediction code by default
+// https://github.com/ddnet/ddnet/blob/f9df4a85be4ca94ca91057cd447707bcce16fd94/src/game/client/prediction/entities/character.cpp#L334-L346
+MACRO_CONFIG_INT(SvHammerScaleX, sv_hammer_scale_x, 320, 1, 1000, CFGFLAG_SERVER, "linearly scale up hammer x power, percentage, for hammering enemies and unfrozen teammates (needs sv_fng_hammer)")
+MACRO_CONFIG_INT(SvHammerScaleY, sv_hammer_scale_y, 120, 1, 1000, CFGFLAG_SERVER, "linearly scale up hammer y power, percentage, for hammering enemies and unfrozen teammates (needs sv_fng_hammer)")
+MACRO_CONFIG_INT(SvMeltHammerScaleX, sv_melt_hammer_scale_x, 50, 1, 1000, CFGFLAG_SERVER, "linearly scale up hammer x power, percentage, for hammering frozen teammates (needs sv_fng_hammer)")
+MACRO_CONFIG_INT(SvMeltHammerScaleY, sv_melt_hammer_scale_y, 50, 1, 1000, CFGFLAG_SERVER, "linearly scale up hammer y power, percentage, for hammering frozen teammates (needs sv_fng_hammer)")
+MACRO_CONFIG_INT(SvFngHammer, sv_fng_hammer, 0, 0, 1, CFGFLAG_SERVER, "use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer")
+MACRO_CONFIG_INT(SvFngSpikeSound, sv_fng_spike_sound, 2, 0, 2, CFGFLAG_SERVER, "Play flag capture sound when sacrificing an enemy into the spikes !0.6 only! (0=off/1=only the killer and the victim/2=everyone near the victim)")
+MACRO_CONFIG_INT(SvLaserTextPoints, sv_laser_text_points, 1, 0, 1, CFGFLAG_SERVER, "display laser text in the world on scoring (only fng for now)")
+
 MACRO_CONFIG_INT(SvGrenadeAmmoRegen, sv_grenade_ammo_regen, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Activate or deactivate grenade ammo regeneration in general")
 MACRO_CONFIG_INT(SvGrenadeAmmoRegenTime, sv_grenade_ammo_regen_time, 128, 1, 9000, CFGFLAG_SAVE | CFGFLAG_SERVER, "Grenade ammo regeneration time in miliseconds")
 MACRO_CONFIG_INT(SvGrenadeAmmoRegenNum, sv_grenade_ammo_regen_num, 6, 1, 10, CFGFLAG_SAVE | CFGFLAG_SERVER, "Maximum number of grenades if ammo regeneration on")
@@ -66,17 +77,8 @@ MACRO_CONFIG_INT(SvRespawnProtectionMs, sv_respawn_protection_ms, 0, 0, 99999999
 MACRO_CONFIG_INT(SvDropFlagOnSelfkill, sv_drop_flag_on_selfkill, 0, 0, 1, CFGFLAG_SERVER, "drop flag on selfkill (activates chat cmd '/drop flag')")
 MACRO_CONFIG_INT(SvDropFlagOnVote, sv_drop_flag_on_vote, 0, 0, 1, CFGFLAG_SERVER, "drop flag on vote yes (activates chat cmd '/drop flag')")
 MACRO_CONFIG_INT(SvReloadTimeOnHit, sv_reload_time_on_hit, 0, 0, 500, CFGFLAG_SERVER, "0=default/off ticks it takes to shoot again after a shot was hit")
-// matches ddnet clients prediction code by default
-// https://github.com/ddnet/ddnet/blob/f9df4a85be4ca94ca91057cd447707bcce16fd94/src/game/client/prediction/entities/character.cpp#L334-L346
-MACRO_CONFIG_INT(SvHammerScaleX, sv_hammer_scale_x, 320, 1, 1000, CFGFLAG_SERVER, "linearly scale up hammer x power, percentage, for hammering enemies and unfrozen teammates (needs sv_fng_hammer)")
-MACRO_CONFIG_INT(SvHammerScaleY, sv_hammer_scale_y, 120, 1, 1000, CFGFLAG_SERVER, "linearly scale up hammer y power, percentage, for hammering enemies and unfrozen teammates (needs sv_fng_hammer)")
-MACRO_CONFIG_INT(SvMeltHammerScaleX, sv_melt_hammer_scale_x, 50, 1, 1000, CFGFLAG_SERVER, "linearly scale up hammer x power, percentage, for hammering frozen teammates (needs sv_fng_hammer)")
-MACRO_CONFIG_INT(SvMeltHammerScaleY, sv_melt_hammer_scale_y, 50, 1, 1000, CFGFLAG_SERVER, "linearly scale up hammer y power, percentage, for hammering frozen teammates (needs sv_fng_hammer)")
-MACRO_CONFIG_INT(SvFngHammer, sv_fng_hammer, 0, 0, 1, CFGFLAG_SERVER, "use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer")
-MACRO_CONFIG_INT(SvFngSpikeSound, sv_fng_spike_sound, 2, 0, 2, CFGFLAG_SERVER, "Play flag capture sound when sacrificing an enemy into the spikes !0.6 only! (0=off/1=only the killer and the victim/2=everyone near the victim)")
 MACRO_CONFIG_INT(SvPunishFreezeDisconnect, sv_punish_freeze_disconnect, 1, 0, 1, CFGFLAG_SERVER, "freeze player for 20 seconds on rejoin when leaving server while being frozen")
 MACRO_CONFIG_STR(SvDisplayScore, sv_display_score, 512, "round_points", CFGFLAG_SERVER, "values: points, round_points, spree, current_spree, wins, kills, round_kills")
-MACRO_CONFIG_INT(SvLaserTextPoints, sv_laser_text_points, 1, 0, 1, CFGFLAG_SERVER, "display laser text in the world on scoring (only fng for now)")
 MACRO_CONFIG_INT(SvSelfDamageRespawnDelayMs, sv_self_damage_respawn_delay_ms, 500, 0, 10000, CFGFLAG_SERVER, "time in miliseconds it takes to respawn after dieing by self damage")
 MACRO_CONFIG_INT(SvSelfKillRespawnDelayMs, sv_self_kill_respawn_delay_ms, 3000, 0, 10000, CFGFLAG_SERVER, "time in miliseconds it takes to respawn after sending kill bind")
 MACRO_CONFIG_INT(SvEnemyKillRespawnDelayMs, sv_enemy_kill_respawn_delay_ms, 500, 0, 10000, CFGFLAG_SERVER, "time in miliseconds it takes to respawn after getting killed by enemies")
@@ -129,6 +131,5 @@ MACRO_CONFIG_STR(SvRoundStatsOutputFile, sv_round_stats_output_file, 512, "", CF
 MACRO_CONFIG_INT(SvRoundStatsFormatDiscord, sv_round_stats_format_discord, 1, 0, 4, CFGFLAG_SERVER, "0=csv 1=psv 2=ascii table 3=markdown table 4=json")
 MACRO_CONFIG_INT(SvRoundStatsFormatHttp, sv_round_stats_format_http, 4, 0, 4, CFGFLAG_SERVER, "0=csv 1=psv 2=ascii table 3=markdown table 4=json")
 MACRO_CONFIG_INT(SvRoundStatsFormatFile, sv_round_stats_format_file, 1, 0, 4, CFGFLAG_SERVER, "0=csv 1=psv 2=ascii table 3=markdown table 4=json")
-MACRO_CONFIG_INT(SvWrongSpikeFreeze, sv_wrong_spike_freeze, 5, 0, 30, CFGFLAG_SERVER, "The time, in seconds, a player gets frozen, if he grabbed a frozen opponent into the opponents spikes (0=off, fng only)")
 
 #endif

@@ -279,6 +279,14 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_player_score_green` Points a player receives for grabbing into green spikes(non 4-teams fng only)
 + `sv_player_score_purple` Points a player receives for grabbing into purple spikes(non 4-teams fng only)
 + `sv_player_score_team` Points a player receives for grabbing into team spikes
++ `sv_wrong_spike_freeze` The time, in seconds, a player gets frozen, if he grabbed a frozen opponent into the opponents spikes (0=off, fng only)
++ `sv_hammer_scale_x` linearly scale up hammer x power, percentage, for hammering enemies and unfrozen teammates (needs sv_fng_hammer)
++ `sv_hammer_scale_y` linearly scale up hammer y power, percentage, for hammering enemies and unfrozen teammates (needs sv_fng_hammer)
++ `sv_melt_hammer_scale_x` linearly scale up hammer x power, percentage, for hammering frozen teammates (needs sv_fng_hammer)
++ `sv_melt_hammer_scale_y` linearly scale up hammer y power, percentage, for hammering frozen teammates (needs sv_fng_hammer)
++ `sv_fng_hammer` use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer
++ `sv_fng_spike_sound` Play flag capture sound when sacrificing an enemy into the spikes !0.6 only! (0=off/1=only the killer and the victim/2=everyone near the victim)
++ `sv_laser_text_points` display laser text in the world on scoring (only fng for now)
 + `sv_grenade_ammo_regen` Activate or deactivate grenade ammo regeneration in general
 + `sv_grenade_ammo_regen_time` Grenade ammo regeneration time in miliseconds
 + `sv_grenade_ammo_regen_num` Maximum number of grenades if ammo regeneration on
@@ -305,14 +313,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_drop_flag_on_selfkill` drop flag on selfkill (activates chat cmd '/drop flag')
 + `sv_drop_flag_on_vote` drop flag on vote yes (activates chat cmd '/drop flag')
 + `sv_reload_time_on_hit` 0=default/off ticks it takes to shoot again after a shot was hit
-+ `sv_hammer_scale_x` linearly scale up hammer x power, percentage, for hammering enemies and unfrozen teammates (needs sv_fng_hammer)
-+ `sv_hammer_scale_y` linearly scale up hammer y power, percentage, for hammering enemies and unfrozen teammates (needs sv_fng_hammer)
-+ `sv_melt_hammer_scale_x` linearly scale up hammer x power, percentage, for hammering frozen teammates (needs sv_fng_hammer)
-+ `sv_melt_hammer_scale_y` linearly scale up hammer y power, percentage, for hammering frozen teammates (needs sv_fng_hammer)
-+ `sv_fng_hammer` use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer
-+ `sv_fng_spike_sound` Play flag capture sound when sacrificing an enemy into the spikes !0.6 only! (0=off/1=only the killer and the victim/2=everyone near the victim)
 + `sv_punish_freeze_disconnect` freeze player for 20 seconds on rejoin when leaving server while being frozen
-+ `sv_laser_text_points` display laser text in the world on scoring (only fng for now)
 + `sv_self_damage_respawn_delay_ms` time in miliseconds it takes to respawn after dieing by self damage
 + `sv_self_kill_respawn_delay_ms` time in miliseconds it takes to respawn after sending kill bind
 + `sv_enemy_kill_respawn_delay_ms` time in miliseconds it takes to respawn after getting killed by enemies
@@ -341,7 +342,6 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_round_stats_format_discord` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
 + `sv_round_stats_format_http` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
 + `sv_round_stats_format_file` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
-+ `sv_wrong_spike_freeze` The time, in seconds, a player gets frozen, if he grabbed a frozen opponent into the opponents spikes (0=off, fng only)
 + `sv_spawn_weapons` possible values: grenade, laser
 + `sv_zcatch_colors` Color scheme for zCatch options: teetime, savander
 + `sv_display_score` values: points, round_points, spree, current_spree, wins, kills, round_kills
