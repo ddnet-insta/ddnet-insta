@@ -31,7 +31,7 @@ public:
 
 	void UpdateScoresAndDisplayPoints(CPlayer *pKiller, int PlayerScore, int TeamScore);
 	void OnSpike(class CCharacter *pChr, int SpikeTile);
-	void OnWrongSpike(class CPlayer *pPlayer);
+	void OnWrongSpike(class CPlayer *pPlayer, int RemoveScore);
 
 	bool IsFngGameType() const override { return true; }
 };

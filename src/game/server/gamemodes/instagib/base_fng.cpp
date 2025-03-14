@@ -186,11 +186,11 @@ bool CGameControllerBaseFng::OnEntity(int Index, int x, int y, int Layer, int Fl
 	return false;
 }
 
-void CGameControllerBaseFng::OnWrongSpike(class CPlayer *pPlayer)
+void CGameControllerBaseFng::OnWrongSpike(class CPlayer *pPlayer, int RemoveScore)
 {
 	if(IsStatTrack())
 		pPlayer->m_Stats.m_WrongSpikes++;
-	pPlayer->AddScore(-6);
+	pPlayer->AddScore(RemoveScore - 1);
 	CCharacter *pChr = pPlayer->GetCharacter();
 	// this means you can selfkill before the wrong spike hits
 	// to bypass getting frozen
@@ -199,7 +199,8 @@ void CGameControllerBaseFng::OnWrongSpike(class CPlayer *pPlayer)
 		return;
 
 	pPlayer->UpdateLastToucher(-1);
-	pChr->Freeze(10);
+	if(g_Config.m_SvWrongSpikeFreeze)
+		pChr->Freeze(g_Config.m_SvWrongSpikeFreeze);
 }
 
 void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
@@ -211,7 +212,7 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 	}
 
 	CPlayer *pKiller = nullptr;
-	int LastToucherId = pChr->GetPlayer()->m_LastToucherId;
+	const int LastToucherId = pChr->GetPlayer()->m_LastToucherId;
 	if(LastToucherId >= 0 && LastToucherId < MAX_CLIENTS)
 		pKiller = GameServer()->m_apPlayers[LastToucherId];
 
@@ -241,13 +242,13 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 			if(pKiller->GetTeam() == TEAM_RED || !IsTeamPlay())
 				UpdateScoresAndDisplayPoints(pKiller, g_Config.m_SvPlayerScoreSpikeTeam, g_Config.m_SvTeamScoreSpikeTeam);
 			else
-				OnWrongSpike(pKiller);
+				OnWrongSpike(pKiller, -g_Config.m_SvPlayerScoreSpikeTeam);
 			break;
 		case TILE_FNG_SPIKE_BLUE:
 			if(pKiller->GetTeam() == TEAM_BLUE || !IsTeamPlay())
 				UpdateScoresAndDisplayPoints(pKiller, g_Config.m_SvPlayerScoreSpikeTeam, g_Config.m_SvTeamScoreSpikeTeam);
 			else
-				OnWrongSpike(pKiller);
+				OnWrongSpike(pKiller, -g_Config.m_SvPlayerScoreSpikeTeam);
 			break;
 		default:
 			break;
