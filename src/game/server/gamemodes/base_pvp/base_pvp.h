@@ -1,6 +1,7 @@
 #ifndef GAME_SERVER_GAMEMODES_BASE_PVP_BASE_PVP_H
 #define GAME_SERVER_GAMEMODES_BASE_PVP_BASE_PVP_H
 
+#include <cstdint>
 #include <game/server/instagib/extra_columns.h>
 #include <game/server/instagib/sql_stats.h>
 
@@ -181,6 +182,11 @@ public:
 
 	// kills the tee of all connected players
 	void KillAllPlayers();
+
+	// returns player pointer or nullptr if none is found
+	// UniqueId unlike regular ClientIds are not reused
+	// they start at one and get incremented for every new player that gets created
+	CPlayer *GetPlayerByUniqueId(uint32_t UniqueId);
 
 	/*
 		m_pExtraColums

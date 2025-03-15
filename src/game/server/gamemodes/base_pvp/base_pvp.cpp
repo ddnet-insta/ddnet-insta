@@ -1,5 +1,6 @@
 #include <base/log.h>
 #include <base/system.h>
+#include <cstdint>
 #include <engine/server/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
@@ -2304,4 +2305,12 @@ void CGameControllerPvp::KillAllPlayers()
 
 		pPlayer->KillCharacter();
 	}
+}
+
+CPlayer *CGameControllerPvp::GetPlayerByUniqueId(uint32_t UniqueId)
+{
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+		if(pPlayer && pPlayer->GetUniqueCid() == UniqueId)
+			return pPlayer;
+	return nullptr;
 }
