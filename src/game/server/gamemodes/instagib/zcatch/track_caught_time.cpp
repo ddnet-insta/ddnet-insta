@@ -89,7 +89,8 @@ void CGameControllerZcatch::UpdateCatchTicks(class CPlayer *pPlayer, ECatchUpdat
 		if(Ticks)
 		{
 			str_format(aBuf, sizeof(aBuf), "'%s' got caught and was alive for %d ticks", Server()->ClientName(pPlayer->GetCid()), Ticks);
-			SendChat(-1, TEAM_ALL, aBuf);
+			if(g_Config.m_SvDebugCatch)
+				SendChat(-1, TEAM_ALL, aBuf);
 			pPlayer->m_Stats.m_TicksInGame += Ticks;
 		}
 		else if(g_Config.m_SvDebugCatch)
@@ -109,7 +110,8 @@ void CGameControllerZcatch::UpdateCatchTicks(class CPlayer *pPlayer, ECatchUpdat
 		if(Ticks)
 		{
 			str_format(aBuf, sizeof(aBuf), "'%s' got released and was dead for %d ticks", Server()->ClientName(pPlayer->GetCid()), Ticks);
-			SendChat(-1, TEAM_ALL, aBuf);
+			if(g_Config.m_SvDebugCatch)
+				SendChat(-1, TEAM_ALL, aBuf);
 			pPlayer->m_Stats.m_TicksCaught += Ticks;
 		}
 		else if(g_Config.m_SvDebugCatch)
