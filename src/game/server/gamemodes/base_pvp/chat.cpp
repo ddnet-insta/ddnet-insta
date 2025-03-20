@@ -503,6 +503,10 @@ bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, i
 				"deff",
 				"BACK!!!",
 				"safe",
+				"Camping!",
+				"Double Attack!",
+				"Double Attack!!",
+				"Enemy is camping!!!",
 			};
 			bool IsCall = false;
 			for(const char *aCall : aaCalls)
