@@ -55,6 +55,39 @@ public:
 	virtual bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) { return false; };
 
 	/*
+		Function: OnKill
+			This method is called when one player kills another (no selfkills).
+			It should be called before the victims character is marked as dead.
+			It is similar to OnCharacterTakeDamage() and OnCharacterDeath()
+			and is here to stadardize the concept of what a kill is across game types.
+
+			Some modes have kills triggered by death and some triggered by damage.
+			Some by both and some by only one of these.
+
+			For example in fng the OnCharacterTakeDamage() is called on laser hit which is never a
+			kill only a freeze.
+			The real kill comes from a death triggered by the world.
+
+			Modes like block and fly work similar to fng.
+
+			And then there is modes like color catch where shots do not kill a tee in the world
+			but conceptually a hit counts as a kill.
+
+			So kill here conceptually stands for whatever the current gametype interprets as
+			one player killing another player.
+
+			The base implementation only sets the killers eye emote to happy.
+			You can add additional things in here that you want to happen on kill.
+
+		Arguments:
+			pVictim - Player that died. Its character should be still alive but might die in this tick (depending on the gametype)
+			pKiller - Player that causes the kill. Will never be nullptr. We need a killer for it to count as a kill.
+			          Which means this method is not called if the killer left the game and his projectile hits after that.
+			Weapon - Weapon id that was causing the damage see the WEAPON_* enums
+	*/
+	virtual void OnKill(class CPlayer *pVictim, class CPlayer *pKiller, int Weapon){};
+
+	/*
 		Function: SkipDamage
 			Pure function without side effects to check if a damage will be applied.
 			Used to implement all kinds of damage blockers like spawn protection,

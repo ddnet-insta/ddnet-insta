@@ -301,6 +301,8 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 			GameServer()->CreateSound(pChr->GetPos(), SOUND_CTF_GRAB_PL, Mask);
 			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE, pKiller->GetCid());
 		}
+
+		OnKill(pChr->GetPlayer(), pKiller, WEAPON_WORLD);
 	}
 
 	if(LastToucherId == -1)

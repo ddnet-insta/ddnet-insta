@@ -1440,6 +1440,15 @@ void CGameControllerPvp::ApplyVanillaDamage(int &Dmg, int From, int Weapon, CCha
 		GameServer()->CreateSound(pCharacter->m_Pos, SOUND_PLAYER_PAIN_SHORT);
 }
 
+void CGameControllerPvp::OnKill(CPlayer *pVictim, CPlayer *pKiller, int Weapon)
+{
+	if(pKiller->GetCharacter())
+	{
+		// set attacker's face to happy (taunt!)
+		pKiller->GetCharacter()->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed());
+	}
+}
+
 bool CGameControllerPvp::DecreaseHealthAndKill(int Dmg, int From, int Weapon, CCharacter *pCharacter)
 {
 	// instagib damage always kills no matter the armor
@@ -1455,18 +1464,10 @@ bool CGameControllerPvp::DecreaseHealthAndKill(int Dmg, int From, int Weapon, CC
 	// check for death
 	if(pCharacter->Health() <= 0)
 	{
-		pCharacter->Die(From, Weapon);
-
 		CPlayer *pKiller = GetPlayerOrNullptr(From);
 		if(From != pCharacter->GetPlayer()->GetCid() && pKiller)
-		{
-			CCharacter *pKillerChr = pKiller->GetCharacter();
-			if(pKillerChr)
-			{
-				// set attacker's face to happy (taunt!)
-				pKillerChr->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed());
-			}
-		}
+			OnKill(pCharacter->GetPlayer(), pKiller, Weapon);
+		pCharacter->Die(From, Weapon);
 		return true;
 	}
 	return false;
