@@ -40,7 +40,6 @@ void CGameControllerFly::Tick()
 
 int CGameControllerFly::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
-
 	int OldScore = pVictim->GetPlayer()->m_Score.value_or(0);
 
 	// spike kills

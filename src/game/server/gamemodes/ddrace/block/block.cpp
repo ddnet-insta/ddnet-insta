@@ -57,6 +57,15 @@ void CGameControllerBlock::Tick()
 	CGameControllerPvp::Tick();
 }
 
+bool CGameControllerBlock::SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce)
+{
+	ApplyForce = true;
+
+	// there is never damage in block
+	// it is ddrace like
+	return true;
+}
+
 int CGameControllerBlock::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
 	// this is a edge case

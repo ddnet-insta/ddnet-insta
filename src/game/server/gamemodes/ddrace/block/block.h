@@ -11,6 +11,7 @@ public:
 
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	void Tick() override;
+	bool SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce) override;
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 };
 #endif
