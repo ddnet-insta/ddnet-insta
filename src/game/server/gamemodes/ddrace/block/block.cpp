@@ -74,6 +74,8 @@ int CGameControllerBlock::OnCharacterDeath(class CCharacter *pVictim, class CPla
 
 	if(pKiller && pKiller != pVictim->GetPlayer() && pVictim->m_FreezeTime)
 	{
+		OnKill(pVictim->GetPlayer(), pKiller, Weapon);
+
 		// TODO: the kill message will also be sent in CCharacter::Die which is a bit annoying
 
 		// kill message
