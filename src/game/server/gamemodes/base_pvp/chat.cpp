@@ -469,7 +469,9 @@ bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, i
 				"back!!",
 				"left",
 				"READY !",
+				"Double Attack!",
 				"Double Attack!!",
+				"DoubleAttack!",
 				"Mid!",
 				"Help! / Back!",
 				"bot!",
@@ -489,7 +491,6 @@ bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, i
 				"pos?",
 				"atk",
 				"ready!",
-				"DoubleAttack!",
 				"Our base!!!",
 				"HELP !",
 				"def",
@@ -504,8 +505,6 @@ bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, i
 				"BACK!!!",
 				"safe",
 				"Camping!",
-				"Double Attack!",
-				"Double Attack!!",
 				"Enemy is camping!!!",
 			};
 			bool IsCall = false;
