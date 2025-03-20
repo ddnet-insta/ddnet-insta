@@ -40,6 +40,7 @@ void CGameControllerFly::Tick()
 
 int CGameControllerFly::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
+
 	int OldScore = pVictim->GetPlayer()->m_Score.value_or(0);
 
 	// spike kills
@@ -49,6 +50,8 @@ int CGameControllerFly::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 
 	if(pKiller && pKiller != pVictim->GetPlayer() && Weapon == WEAPON_WORLD)
 	{
+		OnKill(pVictim->GetPlayer(), pKiller, Weapon);
+
 		pKiller->IncrementScore();
 
 		// TODO: the kill message will also be sent in CCharacter::Die which is a bit annoying
