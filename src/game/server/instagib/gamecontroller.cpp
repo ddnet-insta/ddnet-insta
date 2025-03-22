@@ -236,6 +236,16 @@ bool IGameController::IsPlayerReadyMode()
 
 void IGameController::OnPlayerReadyChange(CPlayer *pPlayer)
 {
+	// ready change can only be used to pause and unpause the game
+	// during warmup and countdown and round end it should never have any effect
+	// otherwise we can get into a bad state where only half the players are ready
+	// but the game is actually running
+	// in ddnet-insta the game should be fully paused as soon as one player is not ready
+	// ready changes are not used to skip the warmup phase!
+	//
+	// https://github.com/ddnet-insta/ddnet-insta/issues/331
+	if(m_GameState != IGS_GAME_RUNNING && m_GameState != IGS_GAME_PAUSED)
+		return;
 	if(pPlayer->m_LastReadyChangeTick && pPlayer->m_LastReadyChangeTick + Server()->TickSpeed() * 1 > Server()->Tick())
 		return;
 
