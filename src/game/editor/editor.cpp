@@ -3675,7 +3675,8 @@ void CEditor::DoMapEditor(CUIRect View)
 		Graphics()->LinesEnd();
 	}
 
-	MapView()->ProofMode()->RenderScreenSizes();
+	if(!m_ShowPicker)
+		MapView()->ProofMode()->RenderScreenSizes();
 
 	if(!m_ShowPicker && m_ShowTileInfo != SHOW_TILE_OFF && m_ShowEnvelopePreview != SHOWENV_NONE && GetSelectedLayer(0) && GetSelectedLayer(0)->m_Type == LAYERTYPE_QUADS)
 	{
@@ -4240,6 +4241,13 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 
 						if(m_vSelectedLayers.size() > 1)
 						{
+							// move right clicked layer to first index to render correct popup
+							if(m_vSelectedLayers[0] != i)
+							{
+								auto Position = std::find(m_vSelectedLayers.begin(), m_vSelectedLayers.end(), i);
+								std::swap(m_vSelectedLayers[0], *Position);
+							}
+
 							bool AllTile = true;
 							for(size_t j = 0; AllTile && j < m_vSelectedLayers.size(); j++)
 							{
@@ -9300,7 +9308,8 @@ void CEditor::RedoLastAction()
 
 void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 {
-	// Adjust m_Number field of tune, switch and tele tiles by `Adjust` if `UseNextFree` is false
+	// Adjust m_Angle of speedup or m_Number field of tune, switch and tele tiles by `Adjust` if `UseNextFree` is false
+	// If `Adjust` is 0 and `UseNextFree` is false, then update numbers of brush tiles to global values
 	// If true, then use the next free number instead
 
 	auto &&AdjustNumber = [Adjust](auto &Number, short Limit = 255) {
@@ -9386,18 +9395,29 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 				}
 			}
 		}
-		else if(pLayerTiles->m_Speedup && !UseNextFree && Adjust != 0)
+		else if(pLayerTiles->m_Speedup)
 		{
-			std::shared_ptr<CLayerSpeedup> pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pLayer);
-			for(int y = 0; y < pSpeedupLayer->m_Height; y++)
+			if(!UseNextFree)
 			{
-				for(int x = 0; x < pSpeedupLayer->m_Width; x++)
+				std::shared_ptr<CLayerSpeedup> pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pLayer);
+				for(int y = 0; y < pSpeedupLayer->m_Height; y++)
 				{
-					int i = y * pSpeedupLayer->m_Width + x;
-					if(!IsValidSpeedupTile(pSpeedupLayer->m_pTiles[i].m_Index))
-						continue;
+					for(int x = 0; x < pSpeedupLayer->m_Width; x++)
+					{
+						int i = y * pSpeedupLayer->m_Width + x;
+						if(!IsValidSpeedupTile(pSpeedupLayer->m_pTiles[i].m_Index))
+							continue;
 
-					AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_Angle, 359);
+						if(Adjust != 0)
+						{
+							AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_Angle, 359);
+						}
+						else
+						{
+							pSpeedupLayer->m_pSpeedupTile[i].m_Angle = m_SpeedupAngle;
+							pSpeedupLayer->m_SpeedupAngle = m_SpeedupAngle;
+						}
+					}
 				}
 			}
 		}
