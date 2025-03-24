@@ -344,7 +344,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_round_stats_format_file` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
 + `sv_spawn_weapons` possible values: grenade, laser
 + `sv_zcatch_colors` Color scheme for zCatch options: teetime, savander
-+ `sv_display_score` values: points, round_points, spree, current_spree, wins, kills, round_kills
++ `sv_display_score` values: points, round_points, spree, current_spree, win_points, wins, kills, round_kills
 + `sv_tournament_welcome_chat` Chat message shown in chat on join when sv_tournament is 1
 + `sv_round_stats_discord_webhooks` If set will post score stats there on round end. Can be a comma separated list.
 + `sv_round_stats_http_endpoints` If set will post score stats there on round end. Can be a comma separated list.
