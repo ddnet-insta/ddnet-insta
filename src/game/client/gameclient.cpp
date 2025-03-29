@@ -7,6 +7,7 @@
 #include <engine/client/checksum.h>
 #include <engine/client/enums.h>
 #include <engine/demo.h>
+#include <engine/discord.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
 #include <engine/favorites.h>
@@ -105,6 +106,7 @@ void CGameClient::OnConsoleInit()
 	m_pFavorites = Kernel()->RequestInterface<IFavorites>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
 	m_pFoes = Client()->Foes();
+	m_pDiscord = Kernel()->RequestInterface<IDiscord>();
 #if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
@@ -1970,6 +1972,11 @@ void CGameClient::OnNewSnapshot()
 		}
 	}
 
+	if(Client()->State() == IClient::STATE_ONLINE)
+	{
+		m_pDiscord->UpdatePlayerCount(m_Snap.m_NumPlayers);
+	}
+
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		// update friend state
@@ -2704,7 +2711,12 @@ void CGameClient::CClientData::Reset()
 	m_Predicted.Reset();
 	m_PrevPredicted.Reset();
 
-	m_pSkinInfo = nullptr;
+	if(m_pSkinInfo != nullptr)
+	{
+		// Make sure other `shared_ptr`s to this skin info will not use the refresh callback that refers to this reset client data
+		m_pSkinInfo->SetRefreshCallback(nullptr);
+		m_pSkinInfo = nullptr;
+	}
 	m_RenderInfo.Reset();
 
 	m_Angle = 0.0f;
