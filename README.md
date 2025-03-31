@@ -282,6 +282,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_wrong_spike_freeze` The time, in seconds, a player gets frozen, if he grabbed a frozen opponent into the opponents spikes (0=off, fng only)
 + `sv_hammer_scale_x` linearly scale up hammer x power, percentage, for hammering enemies and unfrozen teammates (needs sv_fng_hammer)
 + `sv_hammer_scale_y` linearly scale up hammer y power, percentage, for hammering enemies and unfrozen teammates (needs sv_fng_hammer)
++ `sv_hit_freeze_delay` How many seconds will players remain frozen after being hit with a weapon (only fng)
 + `sv_melt_hammer_scale_x` linearly scale up hammer x power, percentage, for hammering frozen teammates (needs sv_fng_hammer)
 + `sv_melt_hammer_scale_y` linearly scale up hammer y power, percentage, for hammering frozen teammates (needs sv_fng_hammer)
 + `sv_fng_hammer` use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer

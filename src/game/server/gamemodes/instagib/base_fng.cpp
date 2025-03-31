@@ -454,7 +454,7 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 	GameServer()->CreateDeath(Character.m_Pos, Character.GetPlayer()->GetCid(), Character.TeamMask());
 
 	Character.GetPlayer()->m_OriginalFreezerId = From;
-	Character.Freeze(10);
+	Character.Freeze(g_Config.m_SvHitFreezeDelay);
 	return false;
 }
 
