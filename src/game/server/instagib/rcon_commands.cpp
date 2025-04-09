@@ -1,4 +1,5 @@
 #include <base/system.h>
+#include <engine/antibot.h>
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontroller.h>
@@ -189,4 +190,10 @@ void CGameContext::ConRandomMapFromPool(IConsole::IResult *pResult, void *pUserD
 	const char *pMap = pSelf->Server()->GetRandomMapFromPool();
 	if(pMap && pMap[0])
 		pSelf->m_pController->ChangeMap(pMap);
+}
+
+void CGameContext::ConGctfAntibot(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->Antibot()->ConsoleCommand("gctf");
 }

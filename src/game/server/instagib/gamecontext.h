@@ -78,6 +78,7 @@ public:
 	static void ConAddMapToPool(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearMapPool(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomMapFromPool(IConsole::IResult *pResult, void *pUserData);
+	static void ConGctfAntibot(IConsole::IResult *pResult, void *pUserData);
 
 	// chat
 	static void ConReadyChange(IConsole::IResult *pResult, void *pUserData);
