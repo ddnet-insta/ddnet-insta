@@ -259,6 +259,8 @@ void CGameControllerZcatch::OnRoundStart()
 
 void CGameControllerZcatch::OnRoundEnd()
 {
+	CGameControllerInstagib::OnRoundEnd();
+
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer)
