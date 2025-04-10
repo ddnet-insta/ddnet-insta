@@ -259,8 +259,6 @@ void CGameControllerZcatch::OnRoundStart()
 
 void CGameControllerZcatch::OnRoundEnd()
 {
-	CGameControllerInstagib::OnRoundEnd();
-
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer)
@@ -268,6 +266,8 @@ void CGameControllerZcatch::OnRoundEnd()
 
 		UpdateCatchTicks(pPlayer, ECatchUpdate::ROUND_END);
 	}
+
+	CGameControllerInstagib::OnRoundEnd();
 }
 
 CGameControllerZcatch::~CGameControllerZcatch() = default;
