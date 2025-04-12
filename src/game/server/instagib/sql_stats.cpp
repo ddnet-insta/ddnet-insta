@@ -347,19 +347,19 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 		"WHERE name = ?;",
 		!pData->m_pExtraColumns ? "" : pData->m_pExtraColumns->SelectColumns(),
 		pData->m_aTable);
-	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
-		return true;
+		return false;
 	}
 	pSqlServer->BindString(1, pData->m_aName);
 	pSqlServer->Print();
 
 	bool End;
-	if(pSqlServer->Step(&End, pError, ErrorSize))
+	if(!pSqlServer->Step(&End, pError, ErrorSize))
 	{
 		dbg_msg("sql-thread", "step failed query: %s", aBuf);
-		return true;
+		return false;
 	}
 
 	if(End)
@@ -412,7 +412,7 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 			}
 		}
 	}
-	return false;
+	return true;
 }
 
 bool CSqlStats::ShowRankWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
@@ -432,19 +432,19 @@ bool CSqlStats::ShowRankWorker(IDbConnection *pSqlServer, const ISqlData *pGameD
 		pData->m_aRankColumnSql,
 		pData->m_aOrderBy,
 		pData->m_aTable);
-	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
-		return true;
+		return false;
 	}
 	pSqlServer->BindString(1, pData->m_aName);
 	pSqlServer->Print();
 
 	bool End;
-	if(pSqlServer->Step(&End, pError, ErrorSize))
+	if(!pSqlServer->Step(&End, pError, ErrorSize))
 	{
 		dbg_msg("sql-thread", "step failed query: %s", aBuf);
-		return true;
+		return false;
 	}
 
 	if(End)
@@ -464,7 +464,7 @@ bool CSqlStats::ShowRankWorker(IDbConnection *pSqlServer, const ISqlData *pGameD
 		pResult->m_RankedScore = pSqlServer->GetInt(1);
 		pResult->m_Rank = pSqlServer->GetInt(2);
 	}
-	return false;
+	return true;
 }
 
 bool CSqlStats::ShowTopWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
@@ -490,10 +490,10 @@ bool CSqlStats::ShowTopWorker(IDbConnection *pSqlServer, const ISqlData *pGameDa
 		pData->m_aRankColumnSql,
 		pData->m_aTable,
 		pData->m_aRankColumnSql);
-	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		dbg_msg("sql-thread", "prepare top failed query: %s", aBuf);
-		return true;
+		return false;
 	}
 	pSqlServer->BindInt(1, LimitStart + 5);
 	pSqlServer->BindInt(2, LimitStart);
@@ -502,7 +502,7 @@ bool CSqlStats::ShowTopWorker(IDbConnection *pSqlServer, const ISqlData *pGameDa
 	str_format(paMessages[0], sizeof(paMessages[0]), "-------- Top %s --------", pData->m_aRankColumnDisplay);
 	bool End = false;
 	int Line = 1;
-	while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
+	while(pSqlServer->Step(&End, pError, ErrorSize) && !End)
 	{
 		int Rank = pSqlServer->GetInt(1);
 		int Points = pSqlServer->GetInt(2);
@@ -514,11 +514,11 @@ bool CSqlStats::ShowTopWorker(IDbConnection *pSqlServer, const ISqlData *pGameDa
 	}
 	if(!End)
 	{
-		return true;
+		return false;
 	}
 	str_copy(paMessages[Line], "-------------------------------", sizeof(paMessages[Line]));
 
-	return false;
+	return true;
 }
 
 bool CSqlStats::ShowFastcapTopWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
@@ -552,10 +552,10 @@ bool CSqlStats::ShowFastcapTopWorker(IDbConnection *pSqlServer, const ISqlData *
 		pOrder,
 		LimitStart);
 
-	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		dbg_msg("sql-thread", "prepare top failed query: %s", aBuf);
-		return true;
+		return false;
 	}
 
 	// TODO: grenade and stat track filters
@@ -572,7 +572,7 @@ bool CSqlStats::ShowFastcapTopWorker(IDbConnection *pSqlServer, const ISqlData *
 	char aTime[32];
 	bool End = false;
 
-	while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
+	while(pSqlServer->Step(&End, pError, ErrorSize) && !End)
 	{
 		char aName[MAX_NAME_LENGTH];
 		pSqlServer->GetString(1, aName, sizeof(aName));
@@ -586,7 +586,7 @@ bool CSqlStats::ShowFastcapTopWorker(IDbConnection *pSqlServer, const ISqlData *
 	}
 
 	str_copy(pResult->m_aaMessages[Line], "----------------------------------------------", sizeof(pResult->m_aaMessages[Line]));
-	return !End;
+	return End;
 }
 
 bool CSqlStats::ShowFastcapRankWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
@@ -614,19 +614,19 @@ bool CSqlStats::ShowFastcapRankWorker(IDbConnection *pSqlServer, const ISqlData 
 		"WHERE name = ?",
 		pData->m_Grenade ? pSqlServer->True() : pSqlServer->False());
 
-	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		dbg_msg("sql-thread", "prepare top failed query: %s", aBuf);
-		return true;
+		return false;
 	}
 	pSqlServer->BindString(1, pData->m_aMap);
 	pSqlServer->BindString(2, pData->m_aName);
 	pSqlServer->Print();
 
 	bool End;
-	if(pSqlServer->Step(&End, pError, ErrorSize))
+	if(!pSqlServer->Step(&End, pError, ErrorSize))
 	{
-		return true;
+		return false;
 	}
 
 	if(!End)
@@ -658,7 +658,7 @@ bool CSqlStats::ShowFastcapRankWorker(IDbConnection *pSqlServer, const ISqlData 
 		str_format(pResult->m_aaMessages[0], sizeof(pResult->m_aaMessages[0]),
 			"'%s' is not ranked", pData->m_aName);
 	}
-	return false;
+	return true;
 }
 
 bool CSqlStats::SaveFastcapWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
@@ -676,25 +676,25 @@ bool CSqlStats::SaveFastcapWorker(IDbConnection *pSqlServer, const ISqlData *pGa
 		str_format(aBuf, sizeof(aBuf),
 			"DELETE FROM fastcaps_backup WHERE game_id=? AND name=? AND timestamp=%s",
 			pSqlServer->InsertTimestampAsUtc());
-		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
 			dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
-			return true;
+			return false;
 		}
 		pSqlServer->BindString(1, pData->m_aGameUuid);
 		pSqlServer->BindString(2, pData->m_aName);
 		pSqlServer->BindString(3, pData->m_aTimestamp);
 		pSqlServer->Print();
 		int NumDeleted;
-		if(pSqlServer->ExecuteUpdate(&NumDeleted, pError, ErrorSize))
+		if(!pSqlServer->ExecuteUpdate(&NumDeleted, pError, ErrorSize))
 		{
-			return true;
+			return false;
 		}
 		if(NumDeleted == 0)
 		{
 			log_warn("sql", "Fastcap rank got moved out of backup database, will show up as duplicate rank in MySQL");
 		}
-		return false;
+		return true;
 	}
 	if(w == Write::NORMAL_FAILED)
 	{
@@ -703,42 +703,42 @@ bool CSqlStats::SaveFastcapWorker(IDbConnection *pSqlServer, const ISqlData *pGa
 		str_format(aBuf, sizeof(aBuf),
 			"INSERT INTO fastcaps SELECT * FROM fastcaps_backup WHERE game_id=? AND name=? AND timestamp=%s",
 			pSqlServer->InsertTimestampAsUtc());
-		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
 			dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
-			return true;
+			return false;
 		}
 		pSqlServer->BindString(1, pData->m_aGameUuid);
 		pSqlServer->BindString(2, pData->m_aName);
 		pSqlServer->BindString(3, pData->m_aTimestamp);
 		pSqlServer->Print();
-		if(pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
+		if(!pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
 		{
-			return true;
+			return false;
 		}
 
 		// move to non-tmp table succeeded. delete from backup again
 		str_format(aBuf, sizeof(aBuf),
 			"DELETE FROM fastcaps_backup WHERE game_id=? AND name=? AND timestamp=%s",
 			pSqlServer->InsertTimestampAsUtc());
-		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
 			dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
-			return true;
+			return false;
 		}
 		pSqlServer->BindString(1, pData->m_aGameUuid);
 		pSqlServer->BindString(2, pData->m_aName);
 		pSqlServer->BindString(3, pData->m_aTimestamp);
 		pSqlServer->Print();
-		if(pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
+		if(!pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
 		{
-			return true;
+			return false;
 		}
 		if(NumUpdated == 0)
 		{
 			log_warn("sql", "Fastcap rank got moved out of backup database, will show up as duplicate rank in MySQL");
 		}
-		return false;
+		return true;
 	}
 
 	// save fastcap. Can't fail, because no UNIQUE/PRIMARY KEY constrain is defined.
@@ -757,10 +757,10 @@ bool CSqlStats::SaveFastcapWorker(IDbConnection *pSqlServer, const ISqlData *pGa
 		pSqlServer->InsertTimestampAsUtc(), pData->m_Time,
 		pData->m_Grenade ? pSqlServer->True() : pSqlServer->False(),
 		pData->m_StatTrack ? pSqlServer->True() : pSqlServer->False());
-	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
-		return true;
+		return false;
 	}
 	pSqlServer->BindString(1, pData->m_aName);
 	pSqlServer->BindString(2, pData->m_aMap);
@@ -776,7 +776,7 @@ bool CSqlStats::SaveFastcapWorker(IDbConnection *pSqlServer, const ISqlData *pGa
 bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
 	if(w != Write::NORMAL)
-		return false;
+		return true;
 
 	const CSqlSaveRoundStatsData *pData = dynamic_cast<const CSqlSaveRoundStatsData *>(pGameData);
 	if(pData->m_DebugStats > 1)
@@ -796,10 +796,10 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 		"WHERE name = ?;",
 		!pData->m_pExtraColumns ? "" : pData->m_pExtraColumns->SelectColumns(),
 		pData->m_aTable);
-	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
-		return true;
+		return false;
 	}
 	pSqlServer->BindString(1, pData->m_aName);
 	pSqlServer->Print();
@@ -808,10 +808,10 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 		dbg_msg("sql-thread", "select query: %s", aBuf);
 
 	bool End;
-	if(pSqlServer->Step(&End, pError, ErrorSize))
+	if(!pSqlServer->Step(&End, pError, ErrorSize))
 	{
 		dbg_msg("sql-thread", "step failed");
-		return true;
+		return false;
 	}
 	if(End)
 	{
@@ -842,10 +842,10 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 			!pData->m_pExtraColumns ? "" : pData->m_pExtraColumns->InsertColumns(),
 			!pData->m_pExtraColumns ? "" : pData->m_pExtraColumns->InsertValues());
 
-		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
 			dbg_msg("sql-thread", "prepare insert failed query=%s", aBuf);
-			return true;
+			return false;
 		}
 
 		if(pData->m_DebugStats > 1)
@@ -875,9 +875,9 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 		pSqlServer->Print();
 
 		int NumInserted;
-		if(pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
+		if(!pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
 		{
-			return true;
+			return false;
 		}
 	}
 	else
@@ -927,10 +927,10 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 			w == Write::NORMAL ? "" : "_backup",
 			!pData->m_pExtraColumns ? "" : pData->m_pExtraColumns->UpdateColumns());
 
-		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
 			dbg_msg("sql-thread", "prepare update failed query=%s", aBuf);
-			return true;
+			return false;
 		}
 
 		Offset = 1;
@@ -952,25 +952,25 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 		pSqlServer->Print();
 
 		int NumUpdated;
-		if(pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
+		if(!pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
 		{
-			return true;
+			return false;
 		}
 
 		if(NumUpdated == 0 && pData->m_Stats.HasValues())
 		{
 			dbg_msg("sql-thread", "update failed no rows changed but got the following stats:");
 			pData->m_Stats.Dump(pData->m_pExtraColumns, "sql-thread");
-			return true;
+			return false;
 		}
 		else if(NumUpdated > 1)
 		{
 			dbg_msg("sql-thread", "affected %d rows when trying to update stats of one player!", NumUpdated);
 			dbg_assert(false, "FATAL ERROR: your database is probably corrupted! Time to restore the backup.");
-			return true;
+			return false;
 		}
 	}
-	return false;
+	return true;
 }
 
 void CSqlStats::CreateTable(const char *pName)
@@ -999,11 +999,11 @@ bool CSqlStats::CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGa
 		if(!MysqlAvailable())
 		{
 			dbg_msg("sql-thread", "failed to create table! Make sure to compile with MySQL support if you want to use stats");
-			return true;
+			return false;
 		}
 
 		dbg_assert(false, "CreateTableThread failed to write");
-		return true;
+		return false;
 	}
 	const CSqlCreateTableRequest *pData = dynamic_cast<const CSqlCreateTableRequest *>(pGameData);
 
@@ -1034,14 +1034,14 @@ bool CSqlStats::CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGa
 		pSqlServer->BinaryCollate(),
 		pData->m_aColumns);
 
-	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
-		return true;
+		return false;
 	}
 	pSqlServer->Print();
 	int NumInserted;
-	if(pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
-		return true;
+	if(!pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
+		return false;
 
 	// apply missing migrations
 	// this is for seamless backwards compatibility
@@ -1057,7 +1057,7 @@ bool CSqlStats::CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGa
 	if(pfnAddInt)
 		pfnAddInt(pSqlServer, pData->m_aName, "win_points", pError, ErrorSize);
 
-	return false;
+	return true;
 }
 
 bool CSqlStats::AddIntColumn(IDbConnection *pSqlServer, const char *pTableName, const char *pColumnName, int Default, char *pError, int ErrorSize)
@@ -1068,9 +1068,9 @@ bool CSqlStats::AddIntColumn(IDbConnection *pSqlServer, const char *pTableName, 
 		sizeof(aBuf),
 		"ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT %d;", pTableName, pColumnName, Default);
 
-	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
-		return true;
+		return false;
 	}
 	pSqlServer->Print();
 	int NumInserted;
@@ -1083,34 +1083,34 @@ bool CSqlStats::AddColumnIntDefault0Sqlite3(IDbConnection *pSqlServer, const cha
 	str_copy(
 		aBuf,
 		"SELECT COUNT() FROM pragma_table_info(?) WHERE name = ?;");
-	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
-		return true;
+		return false;
 	}
 	pSqlServer->BindString(1, pTableName);
 	pSqlServer->BindString(2, pColumnName);
 	pSqlServer->Print();
 
 	bool End;
-	if(pSqlServer->Step(&End, pError, ErrorSize))
+	if(!pSqlServer->Step(&End, pError, ErrorSize))
 	{
 		dbg_msg("sql-thread", "step failed query: %s", aBuf);
-		return true;
+		return false;
 	}
 
 	if(End)
 	{
 		// we expect 0 or 1 but never nothing
 		dbg_msg("sql-thread", "something went wrong failed query: %s", aBuf);
-		return true;
+		return false;
 	}
 	if(pSqlServer->GetInt(1) == 0)
 	{
 		log_info("sql-thread", "adding missing sqlite3 column '%s' to '%s'", pColumnName, pTableName);
-		return AddIntColumn(pSqlServer, pTableName, pColumnName, 0, pError, ErrorSize);
+		return !AddIntColumn(pSqlServer, pTableName, pColumnName, 0, pError, ErrorSize);
 	}
-	return false;
+	return true;
 }
 
 bool CSqlStats::AddColumnIntDefault0Mysql(IDbConnection *pSqlServer, const char *pTableName, const char *pColumnName, char *pError, int ErrorSize)
@@ -1121,25 +1121,25 @@ bool CSqlStats::AddColumnIntDefault0Mysql(IDbConnection *pSqlServer, const char 
 		sizeof(aBuf),
 		"show columns from %s where Field = ?;",
 		pTableName);
-	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
-		return true;
+		return false;
 	}
 	pSqlServer->BindString(1, pColumnName);
 	pSqlServer->Print();
 
 	bool End;
-	if(pSqlServer->Step(&End, pError, ErrorSize))
+	if(!pSqlServer->Step(&End, pError, ErrorSize))
 	{
 		dbg_msg("sql-thread", "step failed query: %s", aBuf);
-		return true;
+		return false;
 	}
 	if(!End)
-		return false;
+		return true;
 
 	log_info("sql-thread", "adding missing mysql column '%s' to '%s'", pColumnName, pTableName);
-	return AddIntColumn(pSqlServer, pTableName, pColumnName, 0, pError, ErrorSize);
+	return !AddIntColumn(pSqlServer, pTableName, pColumnName, 0, pError, ErrorSize);
 }
 
 bool CSqlStats::CreateFastcapTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
@@ -1149,11 +1149,11 @@ bool CSqlStats::CreateFastcapTableThread(IDbConnection *pSqlServer, const ISqlDa
 		if(!MysqlAvailable())
 		{
 			dbg_msg("sql-thread", "failed to create fastcap table! Make sure to compile with MySQL support if you want to use stats");
-			return true;
+			return false;
 		}
 
 		dbg_assert(false, "CreateFastcapTableThread failed to write");
-		return true;
+		return false;
 	}
 
 	char aBuf[4096];
@@ -1176,9 +1176,9 @@ bool CSqlStats::CreateFastcapTableThread(IDbConnection *pSqlServer, const ISqlDa
 		pSqlServer->BinaryCollate(),
 		pSqlServer->BinaryCollate());
 
-	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
-		return true;
+		return false;
 	}
 	pSqlServer->Print();
 	int NumInserted;
