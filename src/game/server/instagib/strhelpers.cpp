@@ -118,6 +118,16 @@ char *str_escape_csv(char *pBuffer, int BufferSize, const char *pString)
 	return pBuffer;
 }
 
+bool str_isalpha(char c)
+{
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
+bool str_isalphanumeric(char c)
+{
+	return str_isalpha(c) || str_isnum(c);
+}
+
 // int test_thing()
 // {
 // 	char aMsg[512];

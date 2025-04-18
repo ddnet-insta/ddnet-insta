@@ -39,4 +39,7 @@ void str_expand_timestamps(const char *pStr, char *pBuf, size_t SizeOfBuf);
  */
 char *str_escape_csv(char *pBuffer, int BufferSize, const char *pString);
 
+bool str_isalpha(char c);
+bool str_isalphanumeric(char c);
+
 #endif

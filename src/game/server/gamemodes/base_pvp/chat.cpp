@@ -557,9 +557,9 @@ bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, i
 	}
 
 	// ddnet-insta bang commands
-	// allow sending ! to chat or !!
+	// allow sending "!" to chat or "!!" or "! " or "!¼"
 	// swallow all other ! prefixed chat messages
-	if(pMsg->m_pMessage[0] == '!' && pMsg->m_pMessage[1] && pMsg->m_pMessage[1] != '!')
+	if(pMsg->m_pMessage[0] == '!' && pMsg->m_pMessage[1] && str_isalphanumeric(pMsg->m_pMessage[1]))
 	{
 		ParseChatCmd('!', ClientId, pMsg->m_pMessage + 1);
 		return true;
