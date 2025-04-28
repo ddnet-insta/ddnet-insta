@@ -202,13 +202,14 @@ void CGameContext::ConchainOnlyWallshotKills(IConsole::IResult *pResult, void *p
 
 void CGameContext::ConchainAllowZoom(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
-	CGameContext *pSelf = (CGameContext *)pUserData;
 	pfnCallback(pResult, pCallbackUserData);
+
+#ifdef CONF_ANTIBOT
+	CGameContext *pSelf = (CGameContext *)pUserData;
 
 	if(pResult->NumArguments() == 0)
 		return;
 
-#ifdef CONF_ANTIBOT
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "antibot sv_allow_zoom %d", g_Config.m_SvAllowZoom);
 	pSelf->Console()->ExecuteLine(aBuf);
