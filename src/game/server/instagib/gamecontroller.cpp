@@ -116,6 +116,8 @@ void IGameController::AddTeamscore(int Team, int Score)
 {
 	if(IsWarmup())
 		return;
+	if(Team != TEAM_RED && Team != TEAM_BLUE)
+		return;
 
 	m_aTeamscore[Team] += Score;
 }
