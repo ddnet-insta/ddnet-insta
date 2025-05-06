@@ -331,8 +331,11 @@ void CGameControllerBaseFng::SnapDDNetCharacter(int SnappingClient, CCharacter *
 		return;
 
 	CPlayer *pSnapReceiver = GameServer()->m_apPlayers[SnappingClient];
+	if(!pSnapReceiver)
+		return;
+
 	bool IsTeamMate = pChr->GetPlayer()->GetCid() == SnappingClient;
-	if(pSnapReceiver && IsTeamPlay() && pChr->GetPlayer()->GetTeam() == pSnapReceiver->GetTeam())
+	if(IsTeamPlay() && pChr->GetPlayer()->GetTeam() == pSnapReceiver->GetTeam())
 		IsTeamMate = true;
 	if(!IsTeamMate && pDDNetCharacter->m_FreezeEnd)
 		pDDNetCharacter->m_FreezeEnd = -1;
