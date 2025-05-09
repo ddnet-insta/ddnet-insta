@@ -18,6 +18,8 @@
 #include <game/server/score.h>
 #include <game/version.h>
 
+#include <game/server/instagib/antibob.h>
+
 #include "base_pvp.h"
 
 CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
@@ -53,6 +55,8 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	m_vFrozenQuitters.clear();
 
 	m_UnbalancedTick = TBALANCE_OK;
+
+	g_AntibobContext.m_pConsole = Console();
 }
 
 void CGameControllerPvp::OnReset()
