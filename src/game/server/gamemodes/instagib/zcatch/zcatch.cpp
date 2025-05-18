@@ -378,7 +378,10 @@ bool CGameControllerZcatch::OnSelfkill(int ClientId)
 			str_format(aBuf, sizeof(aBuf), "You were released by '%s'", Server()->ClientName(pPlayer->GetCid()));
 			ReleasePlayer(pVictim, aBuf);
 		}
-		str_format(aBuf, sizeof(aBuf), "You released %zu remaining spectators because your kill count reached 0.", pPlayer->m_vVictimIds.size());
+		if(pPlayer->m_vVictimIds.empty())
+			str_copy(aBuf, "You released all players. The next selfkill will kill you!");
+		else
+			str_format(aBuf, sizeof(aBuf), "You released %zu remaining spectators because your kill count reached 0.", pPlayer->m_vVictimIds.size());
 		SendChatTarget(ClientId, aBuf);
 		pPlayer->m_vVictimIds.clear();
 	}
