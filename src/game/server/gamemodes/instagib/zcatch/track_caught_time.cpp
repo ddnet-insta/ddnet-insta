@@ -103,7 +103,7 @@ void CGameControllerZcatch::UpdateCatchTicks(class CPlayer *pPlayer, ECatchUpdat
 		pPlayer->m_AliveSinceTick = 0;
 		break;
 	case ECatchUpdate::RELEASE:
-		dbg_assert(pPlayer->m_IsDead == true, "alive player has been released");
+		dbg_assert(pPlayer->m_IsDead == true, "alive player has been released cid=%d alive_since_s=%d", pPlayer->GetCid(), (Server()->Tick() - pPlayer->m_AliveSinceTick) / Server()->TickSpeed());
 		dbg_assert(pPlayer->m_AliveSinceTick == 0, "player has been released but already has alive ticks set");
 
 		Ticks = Server()->Tick() - pPlayer->m_DeadSinceTick;
