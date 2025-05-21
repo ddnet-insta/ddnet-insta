@@ -123,6 +123,7 @@ public:
 	bool OnRaceStart(int ClientId) override;
 	bool IsPureDDNetGameType() const override { return false; }
 	bool IsPlaying(const CPlayer *pPlayer) override;
+	bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) override;
 
 	void OnPlayerTick(class CPlayer *pPlayer);
 	void OnCharacterTick(class CCharacter *pChr);
@@ -143,6 +144,8 @@ public:
 	void RequestChangePassword(class CPlayer *pPlayer, const char *pOldPassword, const char *pNewPassword) override;
 	void OnChangePassword(class CPlayer *pPlayer) override;
 	void OnFailedAccountLogin(class CPlayer *pPlayer, const char *pErrorMsg) override;
+	void RequestClaimName(class CPlayer *pPlayer) override;
+	void OnNameClaimed(class CPlayer *pPlayer, const char *pDisplayName, const char *pUsername) override;
 	bool IsAccountRatelimited(int ClientId, char *pReason, int ReasonSize) override;
 	void OnAccountInfo(int AdminUniqueClientId, const char *pUsername, CAccount *pAccount);
 	void CheckAccountsConfig();

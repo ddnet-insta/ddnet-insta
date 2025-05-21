@@ -1182,6 +1182,30 @@ public:
 	virtual void OnFailedAccountLogin(class CPlayer *pPlayer, const char *pErrorMsg) {}
 
 	/*
+		Function: RequestClaimName
+			Called when a player uses the claimname chat command.
+
+			You can override this method to run additional code on name claim attempt
+			but make sure to call the parents method.
+
+		Arguments:
+			pPlayer - player that requested a name claim
+	*/
+	virtual void RequestClaimName(class CPlayer *pPlayer) {}
+
+	/*
+		Function: OnNameClaimed
+			Called when a name was successfully claimed
+			using the /claimname chat command
+
+		Arguments:
+			pPlayer - player that requested a name claim
+			pDisplayName - the display name that was claimed
+			pUsername - username of the account that now owns the name
+	*/
+	virtual void OnNameClaimed(class CPlayer *pPlayer, const char *pDisplayName, const char *pUsername) {}
+
+	/*
 		Function: OnShowStatsAll
 			called from the main thread when a SQL worker finished querying stats from the database
 

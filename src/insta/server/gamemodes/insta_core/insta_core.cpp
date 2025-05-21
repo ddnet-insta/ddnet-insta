@@ -232,8 +232,24 @@ void CGameControllerInstaCore::OnPlayerConnect(CPlayer *pPlayer)
 		pPlayer->m_VerifiedForChat = true;
 	}
 
+	pPlayer->m_DisplayName.SetWantedName(Server()->ClientName(ClientId));
+	const char *pWantedName = pPlayer->m_DisplayName.WantedName();
+	pPlayer->m_DisplayName.SetLastBroadcastedName(pWantedName);
+
+	if(g_Config.m_SvClaimableNames)
+	{
+		if(!m_pSqlStats->CheckNameClaimed(ClientId, pWantedName))
+			log_error("ddnet-insta", "failed to lookup name");
+
+		// TODO: make sure to properly test that with players that have empty names
+		//       and players that have names starting with (...)
+
+		// sets (..) prefix for now
+		Server()->SetClientName(ClientId, pPlayer->m_DisplayName.DisplayName());
+	}
+
 	RestoreFreezeStateOnRejoin(pPlayer);
-	PrintConnect(pPlayer, Server()->ClientName(pPlayer->GetCid()));
+	PrintConnect(pPlayer, pWantedName);
 	if(!Server()->ClientPrevIngame(ClientId))
 	{
 		PrintModWelcome(pPlayer);
@@ -1230,6 +1246,7 @@ void CGameControllerInstaCore::OnClientDataPersist(CPlayer *pPlayer, CGameContex
 	pData->m_Insta.m_SessionStats.Merge(&pPlayer->m_Stats);
 	pData->m_Insta.m_Account = pPlayer->m_Account;
 	pData->m_Insta.m_FirstJoinTime = pPlayer->m_FirstJoinTime;
+	pData->m_Insta.m_DisplayName = pPlayer->m_DisplayName;
 }
 
 void CGameControllerInstaCore::OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData)
@@ -1237,6 +1254,7 @@ void CGameControllerInstaCore::OnClientDataRestore(CPlayer *pPlayer, const CGame
 	pPlayer->m_SessionStats = pData->m_Insta.m_SessionStats;
 	pPlayer->m_Account = pData->m_Insta.m_Account;
 	pPlayer->m_FirstJoinTime = pData->m_Insta.m_FirstJoinTime;
+	pPlayer->m_DisplayName = pData->m_Insta.m_DisplayName;
 }
 
 void CGameControllerInstaCore::OnDataPersist(CGameContext::CPersistentData *pData)
@@ -1612,6 +1630,23 @@ bool CGameControllerInstaCore::IsPlaying(const CPlayer *pPlayer)
 	//
 	// all other modes never set m_IsDead to true
 	return CGameControllerDDNet::IsPlaying(pPlayer) || pPlayer->m_IsDead;
+}
+
+bool CGameControllerInstaCore::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+
+	// ratelimit info changes
+	// if we are still looking up a name
+	if(pPlayer->m_CheckClaimNameQueryResult != nullptr)
+	{
+		log_warn("names", "name change claim lookup ratelimit");
+		return true;
+	}
+
+	return false;
 }
 
 void CGameControllerInstaCore::OnPlayerTick(class CPlayer *pPlayer)

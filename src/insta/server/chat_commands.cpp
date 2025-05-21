@@ -1,3 +1,4 @@
+#include <base/str.h>
 #include <base/time.h>
 
 #include <engine/shared/config.h>
@@ -586,7 +587,13 @@ void CGameContext::ConRegister(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	pSelf->m_pController->m_pSqlStats->Account(pResult->m_ClientId, pUsername, pPassword, pPassword, EAccountPlayerRequestType::CHAT_CMD_REGISTER);
+	pSelf->m_pController->m_pSqlStats->Account(
+		pResult->m_ClientId,
+		pUsername,
+		pSelf->Server()->ClientName(pResult->m_ClientId),
+		pPassword,
+		pPassword,
+		EAccountPlayerRequestType::CHAT_CMD_REGISTER);
 }
 
 void CGameContext::ConLogin(IConsole::IResult *pResult, void *pUserData)
@@ -615,7 +622,13 @@ void CGameContext::ConLogin(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	pSelf->m_pController->m_pSqlStats->Account(pResult->m_ClientId, pUsername, pPassword, pPassword, EAccountPlayerRequestType::CHAT_CMD_LOGIN);
+	pSelf->m_pController->m_pSqlStats->Account(
+		pResult->m_ClientId,
+		pUsername,
+		pSelf->Server()->ClientName(pResult->m_ClientId),
+		pPassword,
+		pPassword,
+		EAccountPlayerRequestType::CHAT_CMD_LOGIN);
 }
 
 void CGameContext::ConLogoutAccount(IConsole::IResult *pResult, void *pUserData)
@@ -682,6 +695,80 @@ void CGameContext::ConChangePassword(IConsole::IResult *pResult, void *pUserData
 	pSelf->m_pController->RequestChangePassword(pPlayer, pOldPassword, pNewPasswordRepeat);
 }
 
+void CGameContext::ConClaimName(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(BlockAccountOperation(pSelf, pResult->m_ClientId, "Claim name"))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	if(!pPlayer->m_Account.IsLoggedIn())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "You are not logged in");
+		return;
+	}
+
+	if(g_Config.m_SvClaimableNames < 2)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "This command is currently deactivated");
+		return;
+	}
+
+	char aBuf[512];
+	const char *pName = pSelf->Server()->ClientName(pResult->m_ClientId);
+
+	bool InvalidName = false;
+
+	// There might be some edge case where modded clients
+	// manage to request an empty name
+	// standard clients fall back to "nameless tee"
+	// and the server falls back to "(1)"
+	// but just to be sure to avoid some annoying bug
+	if(pName[0] == '\0')
+		InvalidName = true;
+
+	// There are a few magic names used by the teeworlds engine
+	// for connecting and disconnected players
+	// I could imagine some nasty edge case bugs if these get claimed
+	if(!str_comp_nocase(pName, "(invalid)") || !str_comp_nocase(pName, "(connecting)"))
+		InvalidName = true;
+
+	// "(..)" is ddnet-insta's magic prefix for unverified names
+	// to avoid thinking about all the edge cases for when someone claims
+	// the name "(..) (..)" and someone claims the name "(..)"
+	// and someone joins with the name "(..)" but is not verified
+	// and the server prefixes it to "(..) (..)" which results in a collision
+	// with a claimed name
+	if(str_startswith(pName, "(..)"))
+		InvalidName = true;
+
+	if(InvalidName)
+	{
+		str_format(aBuf, sizeof(aBuf), "The name '%s' can not be claimed", pName);
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+		return;
+	}
+
+	if(auto Iter = pSelf->m_UnclaimableNames.find(pName); Iter != pSelf->m_UnclaimableNames.end())
+	{
+		str_format(aBuf, sizeof(aBuf), "The name '%s' not be claimed (please contact server staff)", pName);
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+		return;
+	}
+
+	if(!str_comp(pPlayer->m_Account.m_aDisplayName, pName))
+	{
+		str_format(aBuf, sizeof(aBuf), "You already claimed the name '%s' nobody else can use it", pName);
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+		return;
+	}
+
+	pSelf->m_pController->RequestClaimName(pPlayer);
+}
+
 void CGameContext::ConSlowAccountOperation(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -704,7 +791,7 @@ void CGameContext::ConSlowAccountOperation(IConsole::IResult *pResult, void *pUs
 		return;
 	}
 
-	pSelf->m_pController->m_pSqlStats->Account(pResult->m_ClientId, "test_user", "test_pass", "test_pass", EAccountPlayerRequestType::CHAT_CMD_SLOW_ACCOUNT_OPERATION);
+	pSelf->m_pController->m_pSqlStats->Account(pResult->m_ClientId, "test_user", "test_name", "test_pass", "test_pass", EAccountPlayerRequestType::CHAT_CMD_SLOW_ACCOUNT_OPERATION);
 }
 
 void CGameContext::ConScore(IConsole::IResult *pResult, void *pUserData)

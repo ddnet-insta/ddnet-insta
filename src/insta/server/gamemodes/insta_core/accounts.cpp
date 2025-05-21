@@ -25,6 +25,25 @@ void CGameControllerInstaCore::OnLogin(const CAccount *pAccount, class CPlayer *
 
 	pPlayer->m_Account = *pAccount;
 	pPlayer->m_Account.m_IsLoggedIn = true;
+
+	bool CouldNotUseName = !pPlayer->m_DisplayName.CanUseName();
+	pPlayer->m_DisplayName.SetAccountUsername(pAccount->Username());
+
+	if(pPlayer->m_DisplayName.CanUseName() && CouldNotUseName)
+	{
+		GameServer()->SendChatTarget(pPlayer->GetCid(), "You can use this name because you logged in");
+		GameServer()->ChangeName(
+			pPlayer->GetCid(),
+			pPlayer->m_DisplayName.DisplayName(),
+			/*
+			 * Do not show a "changed the name" chat message
+			 * if the user did not request a name change
+			 * this is just changing the name from a pending
+			 * name to a confirmed name
+			 *
+			 */
+			pPlayer->m_DisplayName.NumChanges() == 1);
+	}
 }
 
 void CGameControllerInstaCore::OnRegister(class CPlayer *pPlayer)
@@ -38,6 +57,12 @@ void CGameControllerInstaCore::LogoutAccount(class CPlayer *pPlayer, const char 
 		return;
 
 	m_pSqlStats->SaveAndLogoutAccount(pPlayer, pSuccessMessage);
+	pPlayer->m_DisplayName.SetAccountUsername("");
+	if(!pPlayer->m_DisplayName.CanUseName())
+	{
+		GameServer()->SendChatTarget(pPlayer->GetCid(), "You can no longer use this name because you logged out");
+		GameServer()->ChangeName(pPlayer->GetCid(), pPlayer->m_DisplayName.DisplayName(), false);
+	}
 }
 
 void CGameControllerInstaCore::OnLogout(class CPlayer *pPlayer, const char *pMessage)
@@ -83,7 +108,7 @@ void CGameControllerInstaCore::OnShutdown()
 void CGameControllerInstaCore::RequestChangePassword(class CPlayer *pPlayer, const char *pOldPassword, const char *pNewPassword)
 {
 	dbg_assert(pPlayer->m_Account.IsLoggedIn(), "player without active account tried to change password");
-	m_pSqlStats->Account(pPlayer->GetCid(), pPlayer->m_Account.m_aUsername, pOldPassword, pNewPassword, EAccountPlayerRequestType::CHAT_CMD_CHANGE_PASSWORD);
+	m_pSqlStats->Account(pPlayer->GetCid(), pPlayer->m_Account.m_aUsername, Server()->ClientName(pPlayer->GetCid()), pOldPassword, pNewPassword, EAccountPlayerRequestType::CHAT_CMD_CHANGE_PASSWORD);
 }
 
 void CGameControllerInstaCore::OnChangePassword(class CPlayer *pPlayer)
@@ -95,6 +120,33 @@ void CGameControllerInstaCore::OnFailedAccountLogin(class CPlayer *pPlayer, cons
 {
 	SendChatTarget(pPlayer->GetCid(), pErrorMsg);
 	CIpRatelimit::TrackWrongLogin(m_vIpRatelimits, Server()->ClientAddr(pPlayer->GetCid()), Server()->Tick());
+}
+
+void CGameControllerInstaCore::RequestClaimName(class CPlayer *pPlayer)
+{
+	m_pSqlStats->Account(pPlayer->GetCid(), pPlayer->m_Account.m_aUsername, Server()->ClientName(pPlayer->GetCid()), "", "", EAccountPlayerRequestType::CHAT_CMD_CLAIM_NAME);
+}
+
+void CGameControllerInstaCore::OnNameClaimed(class CPlayer *pPlayer, const char *pDisplayName, const char *pUsername)
+{
+	// the player can logout or switch accounts
+	// while the name claim is pending
+	// in that case we drop this event
+	if(!pPlayer->m_Account.IsLoggedIn())
+		return;
+	if(str_comp(pPlayer->m_Account.Username(), pUsername))
+		return;
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "You claimed the name '%s'. Nobody else can use it now.", pDisplayName);
+	GameServer()->SendChatTarget(pPlayer->GetCid(), aBuf);
+
+	str_copy(pPlayer->m_Account.m_aDisplayName, pDisplayName);
+
+	// the player could have performed a name change
+	// while the name claim was pending
+	if(!str_comp(pPlayer->m_DisplayName.WantedName(), pDisplayName))
+		pPlayer->m_DisplayName.SetNameOwner(pUsername);
 }
 
 bool CGameControllerInstaCore::IsAccountRatelimited(int ClientId, char *pReason, int ReasonSize)

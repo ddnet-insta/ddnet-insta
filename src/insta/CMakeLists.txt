@@ -45,6 +45,8 @@ function(insta_patch_server)
       ddnet_db_utils/ddnet_db_utils.h
       dead_spec_controller.cpp
       dead_spec_controller.h
+      display_name.cpp
+      display_name.h
       entities/character.cpp
       entities/character.h
       entities/ddnet_pvp/vanilla_pickup.cpp

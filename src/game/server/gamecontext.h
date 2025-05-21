@@ -31,6 +31,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_set> // ddnet-insta unclaimable names
 #include <vector> // ddnet-insta map pool
 
 // ddnet-insta

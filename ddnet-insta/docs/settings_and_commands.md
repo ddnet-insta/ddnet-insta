@@ -116,6 +116,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_always_track_stats` Track stats no matter how many players are online
 + `sv_ignore_kills_before_race_start` Hide kills from feed and reward no points if the involved players did not touch the start line yet
 + `sv_accounts` See /register and /login chat commands
++ `sv_claimable_names` 0=off 1=lock claimed names but no /claimname cmd 2=fully on
 + `sv_points_needed_to_register` Amount of round points needed to be able to /register an account (anti spam)
 + `sv_join_register_delay` Delay in seconds after join before one can /register an account (anti spam)
 + `sv_debug_catch` Debug zCatch ticks caught and in game
@@ -207,6 +208,8 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `acc_lock` Lock account and logout players logged in to it
 + `acc_unlock` Unlock account
 + `acc_info` Get information about an account
++ `add_unclaimable_name` Exclude given name from /claimname chat command
++ `remove_unclaimable_name` Make given name available to /claimname chat command
 
 # Chat commands
 
@@ -239,6 +242,7 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `/login` login to account
 + `/logout` logout account
 + `/changepassword` change the password of your account
++ `/claimname` claim the current nick name so nobody else can use it
 + `/slow_account_operation` used to simulate high load for debugging account system stability
 + `/score` change which type of score is displayed in scoreboard
 + `/points` Shows the all time points rank of player name (your stats by default)

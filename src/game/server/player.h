@@ -13,6 +13,7 @@
 #include <game/server/save.h> // ddnet-insta
 #include <game/server/teeinfo.h>
 
+#include <insta/server/display_name.h> // ddnet-insta
 #include <insta/server/enums.h> // ddnet-insta
 #include <insta/server/ip_storage.h> // ddnet-insta
 #include <insta/server/round_stats_player.h> // ddnet-insta

@@ -15,6 +15,8 @@
 #include <insta/server/ip_storage.h>
 #include <insta/server/strhelpers.h>
 
+#include <string>
+#include <unordered_set>
 #include <vector>
 
 class CGameContext : public IGameServer
@@ -85,6 +87,31 @@ public:
 	// are not allowed
 	// returns true and prints nothing otherwise
 	bool IsChatCmdAllowed(int ClientId) const;
+
+	/*
+		Function: ChangeName
+			Perform a full name change for the given player
+			Sets the new name on the server side
+			sends the new name to all clients in a name change message
+			loads new stats for that player based on the name
+
+			does not do ratelimiting or name claim checks
+
+			this function is not called for ALL name changes
+			do not use this as a change name event
+			but as a change name action
+
+		Arguments:
+			ClientId - the client who will receive the new name
+			pName - the new name that will be set
+			Silent - if false it sends a chat message that the name was changed
+	*/
+	void ChangeName(int ClientId, const char *pName, bool Silent);
+
+	// list of names that can not be claimed
+	// with the /claimname chat command
+	// this is used to block names such as "nameless tee"
+	std::unordered_set<std::string> m_UnclaimableNames;
 
 	// results of the sql worker thread
 	// for rcon commands operating on accounts
@@ -165,6 +192,7 @@ public:
 	static void ConchainFngHammerScale(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainGrenadeAmmoRegenSetting(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainAccounts(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainClaimableNames(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	// rcon_commands.cpp
 	static void ConHammer(IConsole::IResult *pResult, void *pUserData);
@@ -204,6 +232,8 @@ public:
 	static void ConLockAccount(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnlockAccount(IConsole::IResult *pResult, void *pUserData);
 	static void ConAccountInfo(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddUnclaimableName(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveUnclaimableName(IConsole::IResult *pResult, void *pUserData);
 
 	// chat_commands.cpp
 	static void ConInstaModeCredits(IConsole::IResult *pResult, void *pUserData);
@@ -235,6 +265,7 @@ public:
 	static void ConLogin(IConsole::IResult *pResult, void *pUserData);
 	static void ConLogoutAccount(IConsole::IResult *pResult, void *pUserData);
 	static void ConChangePassword(IConsole::IResult *pResult, void *pUserData);
+	static void ConClaimName(IConsole::IResult *pResult, void *pUserData);
 	static void ConSlowAccountOperation(IConsole::IResult *pResult, void *pUserData);
 	static void ConScore(IConsole::IResult *pResult, void *pUserData);
 	static void ConRankKills(IConsole::IResult *pResult, void *pUserData);

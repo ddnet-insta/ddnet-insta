@@ -300,6 +300,9 @@ public:
 	std::shared_ptr<CInstaSqlResult> m_FastcapQueryResult;
 	std::shared_ptr<CAccountPlayerResult> m_AccountQueryResult;
 	std::shared_ptr<CAccountManagementResult> m_AccountLogoutQueryResult;
+	std::shared_ptr<CCheckNameClaimResult> m_CheckClaimNameQueryResult;
+
+	CDisplayName m_DisplayName;
 
 	// If sv_ignore_kills_before_race_start is set to 1
 	// only kills during or after the ddrace race do count.
