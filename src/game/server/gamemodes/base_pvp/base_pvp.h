@@ -87,6 +87,8 @@ public:
 	void RequestChangePassword(class CPlayer *pPlayer, const char *pOldPassword, const char *pNewPassword) override;
 	void OnChangePassword(class CPlayer *pPlayer) override;
 	void OnFailedAccountLogin(class CPlayer *pPlayer, const char *pErrorMsg) override;
+	void RequestClaimName(class CPlayer *pPlayer, const char *pName) override;
+	void OnNameClaimed(class CPlayer *pPlayer, const char *pDisplayName, const char *pUsername) override;
 	bool IsAccountRatelimited(int ClientId, char *pReason, int ReasonSize) override;
 	void OnAccountInfo(int AdminUniqueClientId, const char *pUsername, CAccount *pAccount);
 	// rcon commands
@@ -149,6 +151,7 @@ public:
 	bool ForceNetworkClipping(const CEntity *pEntity, int SnappingClient, vec2 CheckPos) override;
 	bool ForceNetworkClippingLine(const CEntity *pEntity, int SnappingClient, vec2 StartPos, vec2 EndPos) override;
 	bool OnClientPacket(int ClientId, bool Sys, int MsgId, struct CNetChunk *pPacket, class CUnpacker *pUnpacker) override;
+	bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) override;
 
 	// pPlayer is the player that just hit
 	// an enemy with the grenade

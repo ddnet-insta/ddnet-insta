@@ -118,6 +118,37 @@ void CPlayer::InstagibTick()
 		}
 		m_AccountLogoutQueryResult = nullptr;
 	}
+	if(m_CheckClaimNameQueryResult != nullptr && m_CheckClaimNameQueryResult->m_Completed)
+	{
+		auto pResult = m_CheckClaimNameQueryResult;
+
+		if(str_comp(m_DisplayName.WantedName(), pResult->m_aDisplayName))
+		{
+			// log error may seem a bit strict
+			// but name changes should be dropped
+			// if a old name is still being looked up
+			// so if we hit this branch something got into a bad state
+			log_error(
+				"names",
+				"got claim name result for display name '%s' but wanted name is '%s'",
+				pResult->m_aDisplayName, m_DisplayName.WantedName());
+		}
+		else
+		{
+			// log_debug("names", "name owner for '%s' is '%s'", pResult->m_aDisplayName, pResult->m_aOwnerUsername);
+
+			m_DisplayName.SetNameOwner(pResult->m_aOwnerUsername);
+
+			// if players join with an unclaimed name
+			// the change from pending to confirmed should be silent
+			// the join message already contained this name
+			bool Silent = m_DisplayName.NumChanges() == 1;
+
+			GameServer()->ChangeName(GetCid(), m_DisplayName.DisplayName(), Silent);
+		}
+
+		m_CheckClaimNameQueryResult = nullptr;
+	}
 
 	RainbowTick();
 }
@@ -232,7 +263,7 @@ void CPlayer::ProcessAccountResult(CAccountPlayerResult &Result)
 	switch(Result.m_MessageKind)
 	{
 	case EAccountPlayerRequestType::LOG_INFO:
-		for(auto &aMessage : Result.m_aaMessages)
+		for(auto &aMessage : Result.m_Data.m_aaMessages)
 		{
 			if(aMessage[0] == 0)
 				break;
@@ -240,7 +271,7 @@ void CPlayer::ProcessAccountResult(CAccountPlayerResult &Result)
 		}
 		break;
 	case EAccountPlayerRequestType::LOG_ERROR:
-		for(auto &aMessage : Result.m_aaMessages)
+		for(auto &aMessage : Result.m_Data.m_aaMessages)
 		{
 			if(aMessage[0] == 0)
 				break;
@@ -249,7 +280,7 @@ void CPlayer::ProcessAccountResult(CAccountPlayerResult &Result)
 		break;
 	case EAccountPlayerRequestType::CHAT_CMD_SLOW_ACCOUNT_OPERATION:
 	case EAccountPlayerRequestType::DIRECT:
-		for(auto &aMessage : Result.m_aaMessages)
+		for(auto &aMessage : Result.m_Data.m_aaMessages)
 		{
 			if(aMessage[0] == 0)
 				break;
@@ -259,7 +290,7 @@ void CPlayer::ProcessAccountResult(CAccountPlayerResult &Result)
 	case EAccountPlayerRequestType::ALL:
 	{
 		bool PrimaryMessage = true;
-		for(auto &aMessage : Result.m_aaMessages)
+		for(auto &aMessage : Result.m_Data.m_aaMessages)
 		{
 			if(aMessage[0] == 0)
 				break;
@@ -273,20 +304,23 @@ void CPlayer::ProcessAccountResult(CAccountPlayerResult &Result)
 		break;
 	}
 	case EAccountPlayerRequestType::BROADCAST:
-		if(Result.m_aBroadcast[0] != 0)
-			GameServer()->SendBroadcast(Result.m_aBroadcast, -1);
+		if(Result.m_Data.m_aBroadcast[0] != 0)
+			GameServer()->SendBroadcast(Result.m_Data.m_aBroadcast, -1);
 		break;
 	case EAccountPlayerRequestType::CHAT_CMD_REGISTER:
 		GameServer()->m_pController->OnRegister(this);
 		break;
 	case EAccountPlayerRequestType::CHAT_CMD_LOGIN:
-		GameServer()->m_pController->OnLogin(&Result.m_Account, this);
+		GameServer()->m_pController->OnLogin(&Result.m_Data.m_Account, this);
 		break;
 	case EAccountPlayerRequestType::CHAT_CMD_CHANGE_PASSWORD:
 		GameServer()->m_pController->OnChangePassword(this);
 		break;
+	case EAccountPlayerRequestType::CHAT_CMD_CLAIM_NAME:
+		GameServer()->m_pController->OnNameClaimed(this, Result.m_Data.m_NameClaim.m_aDisplayName, Result.m_Data.m_NameClaim.m_aNameOwner);
+		break;
 	case EAccountPlayerRequestType::LOGIN_FAILED:
-		GameServer()->m_pController->OnFailedAccountLogin(this, Result.m_aaMessages[0]);
+		GameServer()->m_pController->OnFailedAccountLogin(this, Result.m_Data.m_aaMessages[0]);
 		break;
 	}
 }

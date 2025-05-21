@@ -18,13 +18,10 @@
 
 class IDbConnection;
 
-// TODO: scroll through this entire file and check all "true" "false" returns and also the if statements that read them
-// TODO: properly separate the switch statements from the methods
-
 CAccountPlayerResult::CAccountPlayerResult()
 {
 	SetVariant(EAccountPlayerRequestType::DIRECT);
-	m_Account.Reset();
+	m_Data.m_Account.Reset();
 }
 
 CAccountManagementResult::CAccountManagementResult(const char *pSuccessMessage)
@@ -47,17 +44,21 @@ void CAccountPlayerResult::SetVariant(EAccountPlayerRequestType RequestType)
 	case EAccountPlayerRequestType::CHAT_CMD_REGISTER:
 	case EAccountPlayerRequestType::CHAT_CMD_LOGIN:
 	case EAccountPlayerRequestType::CHAT_CMD_CHANGE_PASSWORD:
+	case EAccountPlayerRequestType::CHAT_CMD_CLAIM_NAME:
+		m_Data.m_NameClaim.m_aDisplayName[0] = '\0';
+		m_Data.m_NameClaim.m_aNameOwner[0] = '\0';
+		break;
 	case EAccountPlayerRequestType::CHAT_CMD_SLOW_ACCOUNT_OPERATION:
 	case EAccountPlayerRequestType::DIRECT:
 	case EAccountPlayerRequestType::ALL:
 	case EAccountPlayerRequestType::LOG_INFO:
 	case EAccountPlayerRequestType::LOG_ERROR:
 	case EAccountPlayerRequestType::LOGIN_FAILED:
-		for(auto &aMessage : m_aaMessages)
+		for(auto &aMessage : m_Data.m_aaMessages)
 			aMessage[0] = 0;
 		break;
 	case EAccountPlayerRequestType::BROADCAST:
-		m_aBroadcast[0] = 0;
+		m_Data.m_aBroadcast[0] = 0;
 		break;
 		break;
 	}
@@ -125,41 +126,41 @@ bool CSqlAccounts::AccountWorker(IDbConnection *pSqlServer, const ISqlData *pGam
 
 	if(pData->m_RequestType == EAccountPlayerRequestType::CHAT_CMD_LOGIN)
 	{
-		if(!LoadAccount(pSqlServer, pData->m_aUsername, &pResult->m_Account, pError, ErrorSize))
+		if(!LoadAccount(pSqlServer, pData->m_aUsername, &pResult->m_Data.m_Account, pError, ErrorSize))
 		{
 			pResult->m_MessageKind = EAccountPlayerRequestType::LOGIN_FAILED;
-			str_copy(pResult->m_aaMessages[0], "Wrong username or password"); // wrong username
+			str_copy(pResult->m_Data.m_aaMessages[0], "Wrong username or password"); // wrong username
 			return true;
 		}
 
-		if(pResult->m_Account.IsLoggedIn())
+		if(pResult->m_Data.m_Account.IsLoggedIn())
 		{
 			pResult->m_MessageKind = EAccountPlayerRequestType::DIRECT;
-			str_copy(pResult->m_aaMessages[0], "This account is already logged in");
+			str_copy(pResult->m_Data.m_aaMessages[0], "This account is already logged in");
 			return true;
 		}
-		if(pResult->m_Account.IsLocked())
+		if(pResult->m_Data.m_Account.IsLocked())
 		{
 			pResult->m_MessageKind = EAccountPlayerRequestType::DIRECT;
-			str_copy(pResult->m_aaMessages[0], "This account is locked");
+			str_copy(pResult->m_Data.m_aaMessages[0], "This account is locked");
 			return true;
 		}
 
 		char aHashWithSalt[MAX_HASH_WITH_SALT_LENGTH];
 		char aSalt[MAX_SALT_LENGTH];
-		pass_get_salt(pResult->m_Account.m_aHashWithSalt, aSalt, sizeof(aSalt));
+		pass_get_salt(pResult->m_Data.m_Account.m_aHashWithSalt, aSalt, sizeof(aSalt));
 		pass_gen_hash_with_salt(aSalt, pData->m_aOldPassword, aHashWithSalt, sizeof(aHashWithSalt));
 
-		if(str_comp(aHashWithSalt, pResult->m_Account.m_aHashWithSalt))
+		if(str_comp(aHashWithSalt, pResult->m_Data.m_Account.m_aHashWithSalt))
 		{
 			pResult->m_MessageKind = EAccountPlayerRequestType::LOGIN_FAILED;
-			str_copy(pResult->m_aaMessages[0], "Wrong username or password"); // wrong password
+			str_copy(pResult->m_Data.m_aaMessages[0], "Wrong username or password"); // wrong password
 			return true;
 		}
 
 		if(pData->m_DebugStats > 1)
 		{
-			log_debug("sql-thread", "cid=%d correct password for account '%s'", pData->m_ClientId, pResult->m_Account.m_aUsername);
+			log_debug("sql-thread", "cid=%d correct password for account '%s'", pData->m_ClientId, pResult->m_Data.m_Account.m_aUsername);
 		}
 
 		// set logged in
@@ -227,7 +228,7 @@ bool CSqlAccounts::AccountWorker(IDbConnection *pSqlServer, const ISqlData *pGam
 		if(!End)
 		{
 			pResult->m_MessageKind = EAccountPlayerRequestType::DIRECT;
-			str_copy(pResult->m_aaMessages[0], "Username already taken");
+			str_copy(pResult->m_Data.m_aaMessages[0], "Username already taken");
 			return true;
 		}
 
@@ -271,7 +272,7 @@ bool CSqlAccounts::AccountWorker(IDbConnection *pSqlServer, const ISqlData *pGam
 			{
 				log_info("sql-thread", "cid=%d register blocked (%s created %d accounts in the last 6 hours)", pData->m_ClientId, pData->m_aUserIpAddr, AccountsCreated);
 				pResult->m_MessageKind = EAccountPlayerRequestType::DIRECT;
-				str_copy(pResult->m_aaMessages[0], "You already created an account. Try again later.");
+				str_copy(pResult->m_Data.m_aaMessages[0], "You already created an account. Try again later.");
 				return true;
 			}
 		}
@@ -327,6 +328,8 @@ bool CSqlAccounts::AccountWorker(IDbConnection *pSqlServer, const ISqlData *pGam
 	}
 	else if(pData->m_RequestType == EAccountPlayerRequestType::CHAT_CMD_CHANGE_PASSWORD)
 		return ChangePasswordRequest(pSqlServer, pGameData, pError, ErrorSize);
+	else if(pData->m_RequestType == EAccountPlayerRequestType::CHAT_CMD_CLAIM_NAME)
+		return ClaimNameRequest(pSqlServer, pGameData, pError, ErrorSize);
 	else if(pData->m_RequestType == EAccountPlayerRequestType::CHAT_CMD_SLOW_ACCOUNT_OPERATION)
 	{
 		log_info("sql-thread", "starting slooooooooooooooooooooooooooooooooow debug operation ...");
@@ -334,7 +337,7 @@ bool CSqlAccounts::AccountWorker(IDbConnection *pSqlServer, const ISqlData *pGam
 		std::this_thread::sleep_for(10000ms);
 		log_info("sql-thread", "finished slow debug operation");
 		pResult->m_MessageKind = EAccountPlayerRequestType::CHAT_CMD_SLOW_ACCOUNT_OPERATION;
-		str_copy(pResult->m_aaMessages[0], "slow debug operation reached main thread");
+		str_copy(pResult->m_Data.m_aaMessages[0], "slow debug operation reached main thread");
 	}
 	else
 	{
@@ -636,7 +639,7 @@ bool CSqlAccounts::ChangePasswordRequest(IDbConnection *pSqlServer, const ISqlDa
 	auto *pResult = dynamic_cast<CAccountPlayerResult *>(pGameData->m_pResult.get());
 	dbg_assert(pData->m_RequestType == EAccountPlayerRequestType::CHAT_CMD_CHANGE_PASSWORD, "ChangePassword called with wrong request type");
 	pResult->m_MessageKind = EAccountPlayerRequestType::DIRECT;
-	str_copy(pResult->m_aaMessages[0], "Something went wrong");
+	str_copy(pResult->m_Data.m_aaMessages[0], "Something went wrong");
 
 	char aBuf[4096];
 	str_copy(
@@ -664,38 +667,38 @@ bool CSqlAccounts::ChangePasswordRequest(IDbConnection *pSqlServer, const ISqlDa
 	if(End)
 	{
 		pResult->m_MessageKind = EAccountPlayerRequestType::DIRECT;
-		str_copy(pResult->m_aaMessages[0], "Account not found please contact an administrator");
+		str_copy(pResult->m_Data.m_aaMessages[0], "Account not found please contact an administrator");
 		log_error("sql-thread", "change password request did not find account '%s'", pData->m_aUsername);
 		return false;
 	}
 
 	// read account data
 	int Offset = 1;
-	pSqlServer->GetString(Offset++, pResult->m_Account.m_aHashWithSalt, sizeof(pResult->m_Account.m_aHashWithSalt));
+	pSqlServer->GetString(Offset++, pResult->m_Data.m_Account.m_aHashWithSalt, sizeof(pResult->m_Data.m_Account.m_aHashWithSalt));
 	int LoggedIn = pSqlServer->GetInt(Offset++);
 	if(LoggedIn == 0)
 	{
 		pResult->m_MessageKind = EAccountPlayerRequestType::DIRECT;
-		str_copy(pResult->m_aaMessages[0], "Your account is not logged in. Try reconnecting.");
+		str_copy(pResult->m_Data.m_aaMessages[0], "Your account is not logged in. Try reconnecting.");
 		return true;
 	}
 	int Locked = pSqlServer->GetInt(Offset++);
 	if(Locked)
 	{
 		pResult->m_MessageKind = EAccountPlayerRequestType::DIRECT;
-		str_copy(pResult->m_aaMessages[0], "Your account is locked.");
+		str_copy(pResult->m_Data.m_aaMessages[0], "Your account is locked.");
 		return true;
 	}
 
 	char aHashWithSalt[MAX_HASH_WITH_SALT_LENGTH];
 	char aSalt[MAX_SALT_LENGTH];
-	pass_get_salt(pResult->m_Account.m_aHashWithSalt, aSalt, sizeof(aSalt));
+	pass_get_salt(pResult->m_Data.m_Account.m_aHashWithSalt, aSalt, sizeof(aSalt));
 	pass_gen_hash_with_salt(aSalt, pData->m_aOldPassword, aHashWithSalt, sizeof(aHashWithSalt));
 
-	if(str_comp(aHashWithSalt, pResult->m_Account.m_aHashWithSalt))
+	if(str_comp(aHashWithSalt, pResult->m_Data.m_Account.m_aHashWithSalt))
 	{
 		pResult->m_MessageKind = EAccountPlayerRequestType::DIRECT;
-		str_copy(pResult->m_aaMessages[0], "Wrong old password");
+		str_copy(pResult->m_Data.m_aaMessages[0], "Wrong old password");
 		return true;
 	}
 
@@ -703,10 +706,34 @@ bool CSqlAccounts::ChangePasswordRequest(IDbConnection *pSqlServer, const ISqlDa
 	if(!SetPassword(pSqlServer, pData->m_aUsername, pData->m_aNewPassword, pError, ErrorSize))
 	{
 		pResult->m_MessageKind = EAccountPlayerRequestType::DIRECT;
-		str_copy(pResult->m_aaMessages[0], "Criticial database error. Please contact an administrator.");
+		str_copy(pResult->m_Data.m_aaMessages[0], "Criticial database error. Please contact an administrator.");
 		return false;
 	}
 	pResult->m_MessageKind = EAccountPlayerRequestType::CHAT_CMD_CHANGE_PASSWORD;
+	return true;
+}
+
+bool CSqlAccounts::ClaimNameRequest(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlPlayerAccountRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CAccountPlayerResult *>(pGameData->m_pResult.get());
+	dbg_assert(pData->m_RequestType == EAccountPlayerRequestType::CHAT_CMD_CLAIM_NAME, "ClaimName called with wrong request type");
+	pResult->m_MessageKind = EAccountPlayerRequestType::DIRECT;
+	str_copy(pResult->m_Data.m_aaMessages[0], "Something went wrong");
+
+	if(!GetDisplayNameOwnerUsername(pSqlServer, pData->m_aDisplayName, nullptr, 0, pError, ErrorSize))
+	{
+		str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]), "The display name '%s' is already claimed.", pData->m_aDisplayName);
+		return true;
+	}
+
+	if(!SetAccountString(pSqlServer, pData->m_aUsername, "display_name", pData->m_aDisplayName, pError, ErrorSize))
+		return false;
+
+	str_copy(pResult->m_Data.m_NameClaim.m_aDisplayName, pData->m_aDisplayName);
+	str_copy(pResult->m_Data.m_NameClaim.m_aNameOwner, pData->m_aUsername);
+
+	pResult->m_MessageKind = EAccountPlayerRequestType::CHAT_CMD_CLAIM_NAME;
 	return true;
 }
 
@@ -805,6 +832,38 @@ bool CSqlAccounts::LoadAccount(IDbConnection *pSqlServer, const char *pUsername,
 	return true;
 }
 
+bool CSqlAccounts::GetDisplayNameOwnerUsername(IDbConnection *pSqlServer, const char *pDisplayName, char *pUsername, int UsernameSize, char *pError, int ErrorSize)
+{
+	if(pUsername)
+		pUsername[0] = '\0';
+
+	char aBuf[1024];
+	str_copy(
+		aBuf,
+		"SELECT"
+		" username "
+		"FROM accounts "
+		"WHERE display_name = ?;");
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		log_error("sql-thread", "prepare failed query: %s", aBuf);
+		return false;
+	}
+	pSqlServer->BindString(1, pDisplayName);
+	pSqlServer->Print();
+
+	bool End;
+	if(!pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		log_error("sql-thread", "step failed query: %s", aBuf);
+		return false;
+	}
+
+	if(!End && pUsername)
+		pSqlServer->GetString(1, pUsername, UsernameSize);
+	return true;
+}
+
 bool CSqlAccounts::SetAccountInt(IDbConnection *pSqlServer, const char *pUsername, const char *pColumn, int Value, char *pError, int ErrorSize)
 {
 	char aBuf[1024];
@@ -861,9 +920,8 @@ bool CSqlAccounts::SetAccountString(IDbConnection *pSqlServer, const char *pUser
 		log_error("sql-thread", "prepare update failed query=%s", aBuf);
 		return false;
 	}
-
-	pSqlServer->BindString(1, pUsername);
-	pSqlServer->BindString(2, pValue);
+	pSqlServer->BindString(1, pValue);
+	pSqlServer->BindString(2, pUsername);
 	pSqlServer->Print();
 
 	int NumUpdated;
@@ -876,6 +934,7 @@ bool CSqlAccounts::SetAccountString(IDbConnection *pSqlServer, const char *pUser
 	if(NumUpdated != 1)
 	{
 		log_error("sql-thread", "affected %d rows when trying to update the account of one player!", NumUpdated);
+		log_error("sql-thread", "value='%s' username='%s'; %s", pValue, pUsername, aBuf);
 		dbg_assert(false, "FATAL ERROR: your database is probably corrupted! Time to restore the backup.");
 		return false;
 	}

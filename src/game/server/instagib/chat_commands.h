@@ -39,6 +39,7 @@ CONSOLE_COMMAND("register", "s[username] s[password] s[repeate password]", CFGFL
 CONSOLE_COMMAND("login", "s[username] s[password]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConLogin, this, "login to account")
 CONSOLE_COMMAND("logout", "", CFGFLAG_CHAT, ConLogoutAccount, this, "logout account")
 CONSOLE_COMMAND("changepassword", "s[old password] s[new password] s[new password repeat]", CFGFLAG_CHAT, ConChangePassword, this, "change the password of your account")
+CONSOLE_COMMAND("claimname", "", CFGFLAG_CHAT, ConClaimName, this, "claim the current nick name so nobody else can use it")
 
 #ifdef CONF_DEBUG
 CONSOLE_COMMAND("slow_account_operation", "", CFGFLAG_CHAT, ConSlowAccountOperation, this, "used to simulate high load for debugging account system stability")

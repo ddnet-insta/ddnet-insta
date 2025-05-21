@@ -39,4 +39,7 @@ CONSOLE_COMMAND("acc_lock", "s[account username]", CFGFLAG_SERVER, ConLockAccoun
 CONSOLE_COMMAND("acc_unlock", "s[account username]", CFGFLAG_SERVER, ConUnlockAccount, this, "Unlock account")
 CONSOLE_COMMAND("acc_info", "s[account username]", CFGFLAG_SERVER, ConAccountInfo, this, "Get information about an account")
 
+CONSOLE_COMMAND("add_unclaimable_name", "s[name]", CFGFLAG_SERVER, ConAddUnclaimableName, this, "Exclude given name from /claimname chat command")
+CONSOLE_COMMAND("remove_unclaimable_name", "s[name]", CFGFLAG_SERVER, ConRemoveUnclaimableName, this, "Make given name available to /claimname chat command")
+
 #undef CONSOLE_COMMAND

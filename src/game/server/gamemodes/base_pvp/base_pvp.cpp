@@ -556,6 +556,23 @@ bool CGameControllerPvp::OnClientPacket(int ClientId, bool Sys, int MsgId, CNetC
 	return false;
 }
 
+bool CGameControllerPvp::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+
+	// ratelimit info changes
+	// if we are still looking up a name
+	if(pPlayer->m_CheckClaimNameQueryResult != nullptr)
+	{
+		log_warn("names", "name change claim lookup ratelimit");
+		return true;
+	}
+
+	return false;
+}
+
 void CGameControllerPvp::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
 {
 	char aBuf[1024];
@@ -1933,12 +1950,14 @@ void CGameControllerPvp::OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPe
 {
 	pData->m_Account = pPlayer->m_Account;
 	pData->m_FirstJoinTime = pPlayer->m_FirstJoinTime;
+	pData->m_DisplayName = pPlayer->m_DisplayName;
 }
 
 void CGameControllerPvp::OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData)
 {
 	pPlayer->m_Account = pData->m_Account;
 	pPlayer->m_FirstJoinTime = pData->m_FirstJoinTime;
+	pPlayer->m_DisplayName = pData->m_DisplayName;
 }
 
 bool CGameControllerPvp::OnSkinChange7(protocol7::CNetMsg_Cl_SkinChange *pMsg, int ClientId)
@@ -2079,10 +2098,26 @@ void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 		Score()->LoadPlayerData(ClientId);
 	}
 
+	pPlayer->m_DisplayName.SetWantedName(Server()->ClientName(ClientId));
+	const char *pWantedName = pPlayer->m_DisplayName.WantedName();
+	pPlayer->m_DisplayName.SetLastBroadcastedName(pWantedName);
+
+	if(g_Config.m_SvClaimableNames)
+	{
+		if(!m_pSqlStats->CheckNameClaimed(ClientId, pWantedName))
+			log_error("ddnet-insta", "failed to lookup name");
+
+		// TODO: make sure to properly test that with players that have empty names
+		//       and players that have names starting with (...)
+
+		// sets (..) prefix for now
+		Server()->SetClientName(ClientId, pPlayer->m_DisplayName.DisplayName());
+	}
+
 	if(!Server()->ClientPrevIngame(ClientId))
 	{
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), GetTeamName(pPlayer->GetTeam()));
+		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", pWantedName, GetTeamName(pPlayer->GetTeam()));
 		if(!g_Config.m_SvTournamentJoinMsgs || pPlayer->GetTeam() != TEAM_SPECTATORS)
 			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::FLAG_SIX);
 		else if(g_Config.m_SvTournamentJoinMsgs == 2)

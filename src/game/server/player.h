@@ -14,6 +14,7 @@
 #include <optional>
 
 #include <game/server/instagib/account.h>
+#include <game/server/instagib/display_name.h>
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/ip_storage.h>
 #include <game/server/instagib/sql_accounts.h> // ddnet-insta

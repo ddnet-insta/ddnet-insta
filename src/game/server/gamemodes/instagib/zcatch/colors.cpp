@@ -114,15 +114,11 @@ void CGameControllerZcatch::SetCatchColors(CPlayer *pPlayer)
 
 bool CGameControllerZcatch::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId)
 {
-	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
-		return false;
-
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
-	if(!pPlayer)
-		return false;
+	if(pPlayer)
+		SetCatchColors(pPlayer);
 
-	SetCatchColors(pPlayer);
-	return false;
+	return CGameControllerInstagib::OnChangeInfoNetMessage(pMsg, ClientId);
 }
 
 void CGameControllerZcatch::SendSkinBodyColor7(int ClientId, int Color)

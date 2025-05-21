@@ -5,6 +5,7 @@
 #ifndef IN_CLASS_PERSISTENTCLIENTDATA
 
 #include <game/server/instagib/account.h>
+#include <game/server/instagib/display_name.h>
 
 struct CPersistentClientData
 {
@@ -18,6 +19,8 @@ struct CPersistentClientData
 	CAccount m_Account;
 
 	int m_FirstJoinTime;
+
+	CDisplayName m_DisplayName;
 
 #ifndef IN_CLASS_PERSISTENTCLIENTDATA
 };

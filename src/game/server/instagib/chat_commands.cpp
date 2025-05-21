@@ -388,7 +388,13 @@ void CGameContext::ConRegister(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	pSelf->m_pController->m_pSqlStats->Account(pResult->m_ClientId, pUsername, pPassword, pPassword, EAccountPlayerRequestType::CHAT_CMD_REGISTER);
+	pSelf->m_pController->m_pSqlStats->Account(
+		pResult->m_ClientId,
+		pUsername,
+		pSelf->Server()->ClientName(pResult->m_ClientId),
+		pPassword,
+		pPassword,
+		EAccountPlayerRequestType::CHAT_CMD_REGISTER);
 }
 
 void CGameContext::ConLogin(IConsole::IResult *pResult, void *pUserData)
@@ -417,7 +423,13 @@ void CGameContext::ConLogin(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	pSelf->m_pController->m_pSqlStats->Account(pResult->m_ClientId, pUsername, pPassword, pPassword, EAccountPlayerRequestType::CHAT_CMD_LOGIN);
+	pSelf->m_pController->m_pSqlStats->Account(
+		pResult->m_ClientId,
+		pUsername,
+		pSelf->Server()->ClientName(pResult->m_ClientId),
+		pPassword,
+		pPassword,
+		EAccountPlayerRequestType::CHAT_CMD_LOGIN);
 }
 
 void CGameContext::ConLogoutAccount(IConsole::IResult *pResult, void *pUserData)
@@ -484,6 +496,48 @@ void CGameContext::ConChangePassword(IConsole::IResult *pResult, void *pUserData
 	pSelf->m_pController->RequestChangePassword(pPlayer, pOldPassword, pNewPasswordRepeat);
 }
 
+void CGameContext::ConClaimName(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(BlockAccountOperation(pSelf, pResult->m_ClientId, "Claim name"))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	if(!pPlayer->m_Account.IsLoggedIn())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "You are not logged in");
+		return;
+	}
+
+	if(g_Config.m_SvClaimableNames < 2)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "This command is currently deactivated");
+		return;
+	}
+
+	char aBuf[512];
+	const char *pName = pSelf->Server()->ClientName(pResult->m_ClientId);
+
+	if(auto Iter = pSelf->m_UnclaimableNames.find(pName); Iter != pSelf->m_UnclaimableNames.end())
+	{
+		str_format(aBuf, sizeof(aBuf), "The name '%s' can not be claimed", pName);
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+		return;
+	}
+
+	if(!str_comp(pPlayer->m_Account.m_aDisplayName, pName))
+	{
+		str_format(aBuf, sizeof(aBuf), "You already claimed the name '%s' nobody else can use it", pName);
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+		return;
+	}
+
+	pSelf->m_pController->RequestClaimName(pPlayer, pName);
+}
+
 void CGameContext::ConSlowAccountOperation(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -506,7 +560,7 @@ void CGameContext::ConSlowAccountOperation(IConsole::IResult *pResult, void *pUs
 		return;
 	}
 
-	pSelf->m_pController->m_pSqlStats->Account(pResult->m_ClientId, "test_user", "test_pass", "test_pass", EAccountPlayerRequestType::CHAT_CMD_SLOW_ACCOUNT_OPERATION);
+	pSelf->m_pController->m_pSqlStats->Account(pResult->m_ClientId, "test_user", "test_name", "test_pass", "test_pass", EAccountPlayerRequestType::CHAT_CMD_SLOW_ACCOUNT_OPERATION);
 }
 
 void CGameContext::ConScore(IConsole::IResult *pResult, void *pUserData)

@@ -2760,26 +2760,48 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 	// set infos
 	if(Server()->WouldClientNameChange(ClientId, pMsg->m_pName) && !ProcessSpamProtection(ClientId))
 	{
-		char aOldName[MAX_NAME_LENGTH];
-		str_copy(aOldName, Server()->ClientName(ClientId), sizeof(aOldName));
-
-		Server()->SetClientName(ClientId, pMsg->m_pName);
-
-		char aChatText[256];
-		str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientId));
-		SendChat(-1, TEAM_ALL, aChatText);
-
-		// reload scores
-		if(!m_pController->LoadNewPlayerNameData(ClientId)) // ddnet-insta
+		if(g_Config.m_SvClaimableNames)
 		{
-			Score()->PlayerData(ClientId)->Reset();
-			m_apPlayers[ClientId]->m_Score.reset();
-			Score()->LoadPlayerData(ClientId);
+			// request name change
+			// the actual change happens in CGamecontext::ChangeName
+			// once the db query finished
+			if(str_comp(pMsg->m_pName, pPlayer->m_DisplayName.WantedName()))
+			{
+				pPlayer->m_DisplayName.SetWantedName(pMsg->m_pName);
+				const char *pWantedName = pPlayer->m_DisplayName.WantedName();
+				if(!m_pController->m_pSqlStats->CheckNameClaimed(ClientId, pWantedName))
+					log_error("ddnet-insta", "failed to lookup name");
+			}
+			Server()->SetClientName(ClientId, pPlayer->m_DisplayName.DisplayName());
 		}
+		else
+		{
+			pPlayer->m_DisplayName.SetWantedName(pMsg->m_pName);
+			pPlayer->m_DisplayName.SetLastBroadcastedName(pMsg->m_pName);
 
-		SixupNeedsUpdate = true;
+			// WARNING: the code below has to be kept in sync with CGameContext::ChangeName
 
-		LogEvent("Name change", ClientId);
+			char aOldName[MAX_NAME_LENGTH];
+			str_copy(aOldName, Server()->ClientName(ClientId), sizeof(aOldName));
+
+			Server()->SetClientName(ClientId, pMsg->m_pName);
+
+			char aChatText[256];
+			str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientId));
+			SendChat(-1, TEAM_ALL, aChatText);
+
+			// reload scores
+			if(!m_pController->LoadNewPlayerNameData(ClientId)) // ddnet-insta
+			{
+				Score()->PlayerData(ClientId)->Reset();
+				m_apPlayers[ClientId]->m_Score.reset();
+				Score()->LoadPlayerData(ClientId);
+			}
+
+			SixupNeedsUpdate = true;
+
+			LogEvent("Name change", ClientId);
+		}
 	}
 
 	if(Server()->WouldClientClanChange(ClientId, pMsg->m_pClan))

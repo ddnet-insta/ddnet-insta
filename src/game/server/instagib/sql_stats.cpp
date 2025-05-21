@@ -158,6 +158,7 @@ void CSqlStats::ExecPlayerAccountThread(
 	const char *pThreadName,
 	int ClientId,
 	const char *pUsername,
+	const char *pDisplayName,
 	const char *pOldPassword,
 	const char *pNewPassword,
 	EAccountPlayerRequestType RequestType)
@@ -169,6 +170,7 @@ void CSqlStats::ExecPlayerAccountThread(
 	auto Tmp = std::make_unique<CSqlPlayerAccountRequest>(pResult, g_Config.m_SvDebugStats);
 	Tmp->m_ClientId = ClientId;
 	str_copy(Tmp->m_aUsername, pUsername, sizeof(Tmp->m_aUsername));
+	str_copy(Tmp->m_aDisplayName, pDisplayName, sizeof(Tmp->m_aDisplayName));
 	str_copy(Tmp->m_aOldPassword, pOldPassword, sizeof(Tmp->m_aOldPassword));
 	str_copy(Tmp->m_aNewPassword, pNewPassword, sizeof(Tmp->m_aNewPassword));
 	str_timestamp_format(Tmp->m_aTimestamp, sizeof(Tmp->m_aTimestamp), FORMAT_SPACE); // 2019-04-02 19:41:58
@@ -337,7 +339,7 @@ void CSqlStats::ShowFastcapTop(
 		Offset);
 }
 
-void CSqlStats::Account(int ClientId, const char *pUsername, const char *pOldPassword, const char *pNewPassword, EAccountPlayerRequestType RequestType)
+void CSqlStats::Account(int ClientId, const char *pUsername, const char *pDisplayName, const char *pOldPassword, const char *pNewPassword, EAccountPlayerRequestType RequestType)
 {
 	if(RateLimitPlayer(ClientId))
 	{
@@ -364,7 +366,21 @@ void CSqlStats::Account(int ClientId, const char *pUsername, const char *pOldPas
 		return;
 	}
 
-	ExecPlayerAccountThread(CSqlAccounts::AccountWorker, "account", ClientId, pUsername, pOldPassword, pNewPassword, RequestType);
+	ExecPlayerAccountThread(CSqlAccounts::AccountWorker, "account", ClientId, pUsername, pDisplayName, pOldPassword, pNewPassword, RequestType);
+}
+
+bool CSqlStats::CheckNameClaimed(int ClientId, const char *pName)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(pPlayer->m_CheckClaimNameQueryResult != nullptr)
+		return false;
+	pPlayer->m_CheckClaimNameQueryResult = std::make_shared<CCheckNameClaimResult>();
+
+	auto pResult = pPlayer->m_CheckClaimNameQueryResult;
+	auto Tmp = std::make_unique<CSqlCheckNameClaimRequest>(pResult);
+	str_copy(Tmp->m_aDisplayName, pName);
+	m_pPool->Execute(CheckNameClaimedWorker, std::move(Tmp), "check name claimed");
+	return true;
 }
 
 void CSqlStats::AccountRconCmd(int ClientId, const char *pUsername, const char *pPassword, EAccountRconPlayerRequestType RequestType)
@@ -915,6 +931,23 @@ bool CSqlStats::SaveFastcapWorker(IDbConnection *pSqlServer, const ISqlData *pGa
 	pSqlServer->Print();
 	int NumInserted;
 	return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
+}
+
+bool CSqlStats::CheckNameClaimedWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlCheckNameClaimRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CCheckNameClaimResult *>(pGameData->m_pResult.get());
+
+	// this may seem a bit useless
+	// but it is to ensure that we know which name was looked up
+	// because the user can request a new name while the lookup is pending
+	str_copy(pResult->m_aDisplayName, pData->m_aDisplayName);
+
+	if(!CSqlAccounts::GetDisplayNameOwnerUsername(pSqlServer, pData->m_aDisplayName, pResult->m_aOwnerUsername, sizeof(pResult->m_aOwnerUsername), pError, ErrorSize))
+	{
+		return false;
+	}
+	return true;
 }
 
 bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)

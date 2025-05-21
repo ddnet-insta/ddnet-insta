@@ -28,6 +28,7 @@ void CGameContext::RegisterInstagibCommands()
 	Console()->Chain("sv_accounts", ConchainAccounts, this);
 	Console()->Chain("sv_port", ConchainAccounts, this);
 	Console()->Chain("sv_hostname", ConchainAccounts, this);
+	Console()->Chain("sv_claimable_names", ConchainClaimableNames, this);
 
 	// generated undocumented chat commands
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;
@@ -284,5 +285,53 @@ void CGameContext::ConchainAccounts(IConsole::IResult *pResult, void *pUserData,
 	if(g_Config.m_SvAccounts && pSelf->m_pController && !AccountsWereOn)
 	{
 		pSelf->m_pController->m_pSqlStats->CreateAccountsTable();
+	}
+}
+
+void CGameContext::ConchainClaimableNames(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	bool WasOn = g_Config.m_SvClaimableNames != 0;
+	pfnCallback(pResult, pCallbackUserData);
+	bool IsOn = g_Config.m_SvClaimableNames != 0;
+
+	bool Changed = WasOn != IsOn;
+
+	if(!Changed)
+		return;
+	if(pResult->NumArguments() == 0)
+		return;
+	if(!pSelf->m_pController)
+		return;
+
+	if(IsOn)
+	{
+		for(CPlayer *pPlayer : pSelf->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+
+			const char *pWantedName = pPlayer->m_DisplayName.WantedName();
+			if(!pSelf->m_pController->m_pSqlStats->CheckNameClaimed(pPlayer->GetCid(), pWantedName))
+				log_error("ddnet-insta", "failed to lookup name for cid=%d", pPlayer->GetCid());
+
+			pSelf->Server()->SetClientName(pPlayer->GetCid(), pPlayer->m_DisplayName.DisplayName());
+		}
+	}
+	else
+	{
+		for(CPlayer *pPlayer : pSelf->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+
+			const char *pWantedName = pPlayer->m_DisplayName.WantedName();
+			const char *pCurrentName = pSelf->Server()->ClientName(pPlayer->GetCid());
+			if(!str_comp(pWantedName, pCurrentName))
+				continue;
+
+			pSelf->Server()->SetClientName(pPlayer->GetCid(), pWantedName);
+		}
 	}
 }

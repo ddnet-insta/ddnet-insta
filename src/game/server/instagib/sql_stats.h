@@ -137,6 +137,7 @@ struct CSqlPlayerAccountRequest : CSqlInstaData
 	// the thread pool picks it up
 	int m_ClientId;
 	char m_aUsername[MAX_NAME_LENGTH];
+	char m_aDisplayName[MAX_NAME_LENGTH];
 	char m_aOldPassword[MAX_NAME_LENGTH];
 	char m_aNewPassword[MAX_NAME_LENGTH];
 	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
@@ -225,6 +226,27 @@ struct CSqlPlayerFastcapRequest : CSqlInstaData
 	bool m_OnlyStatTrack = false;
 };
 
+struct CCheckNameClaimResult : ISqlResult
+{
+	// in game display name that was checked
+	char m_aDisplayName[MAX_NAME_LENGTH];
+
+	// account username
+	char m_aOwnerUsername[MAX_USERNAME_LENGTH];
+};
+
+// read request
+struct CSqlCheckNameClaimRequest : ISqlData
+{
+	CSqlCheckNameClaimRequest(std::shared_ptr<ISqlResult> pResult) :
+		ISqlData(std::move(pResult))
+	{
+	}
+
+	// in game display name
+	char m_aDisplayName[MAX_NAME_LENGTH];
+};
+
 // data to be written
 struct CSqlSaveRoundStatsData : CSqlInstaData
 {
@@ -297,6 +319,8 @@ class CSqlStats
 
 	static bool SaveFastcapWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 
+	static bool CheckNameClaimedWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+
 	std::shared_ptr<CInstaSqlResult> NewInstaSqlResult(int ClientId);
 	std::shared_ptr<CAccountPlayerResult> NewInstaAccountResult(int ClientId);
 
@@ -339,6 +363,7 @@ class CSqlStats
 		const char *pThreadName,
 		int ClientId,
 		const char *pUsername,
+		const char *pDisplayName,
 		const char *pOldPassword,
 		const char *pNewPassword,
 		EAccountPlayerRequestType RequestType);
@@ -373,7 +398,15 @@ public:
 	// TODO: horrible name should register and login really be shared?
 	//       should the argument be a union struct?
 	// ratelimited per player account requests
-	void Account(int ClientId, const char *pUsername, const char *pOldPassword, const char *pNewPassword, EAccountPlayerRequestType RequestType);
+	void Account(int ClientId, const char *pUsername, const char *pDisplayName, const char *pOldPassword, const char *pNewPassword, EAccountPlayerRequestType RequestType);
+
+	// check if the pName is claimed with the /claimname
+	// command by a account
+	// and find the account name that claimed it
+	//
+	// returns true on successful sql queue
+	// returns false if it failed to lookup the name (it should block the name change and retry in that case)
+	bool CheckNameClaimed(int ClientId, const char *pName);
 
 	// for now only used for resetting passwords
 	// can in the future also be used to

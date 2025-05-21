@@ -7,6 +7,7 @@
 #include <base/vmath.h>
 #include <cstdint>
 #include <game/server/instagib/account.h>
+#include <game/server/instagib/display_name.h>
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/ip_storage.h>
 #include <game/server/instagib/sql_accounts.h>
@@ -224,6 +225,9 @@ public:
 	std::shared_ptr<CInstaSqlResult> m_FastcapQueryResult;
 	std::shared_ptr<CAccountPlayerResult> m_AccountQueryResult;
 	std::shared_ptr<CAccountManagementResult> m_AccountLogoutQueryResult;
+	std::shared_ptr<CCheckNameClaimResult> m_CheckClaimNameQueryResult;
+
+	CDisplayName m_DisplayName;
 
 	/*
 		m_HasGhostCharInGame

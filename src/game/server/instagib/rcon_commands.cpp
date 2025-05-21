@@ -400,3 +400,15 @@ void CGameContext::ConAccountInfo(IConsole::IResult *pResult, void *pUserData)
 
 	pSelf->m_pController->RconAccountInfo(pPlayer, pUsername);
 }
+
+void CGameContext::ConAddUnclaimableName(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_UnclaimableNames.insert(pResult->GetString(0));
+}
+
+void CGameContext::ConRemoveUnclaimableName(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_UnclaimableNames.erase(pResult->GetString(0));
+}

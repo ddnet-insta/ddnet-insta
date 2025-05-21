@@ -46,6 +46,9 @@ enum class EAccountPlayerRequestType
 	// /changepassword chat command
 	CHAT_CMD_CHANGE_PASSWORD,
 
+	// /claimname chat command
+	CHAT_CMD_CLAIM_NAME,
+
 	// this is used for debugging only
 	// /slow_account_operation chat command
 	CHAT_CMD_SLOW_ACCOUNT_OPERATION,
@@ -100,9 +103,19 @@ struct CAccountPlayerResult : ISqlResult
 	};
 
 	EAccountPlayerRequestType m_MessageKind;
-	char m_aaMessages[MAX_MESSAGES][512];
-	char m_aBroadcast[1024];
-	CAccount m_Account;
+
+	union
+	{
+		char m_aaMessages[MAX_MESSAGES][512];
+		char m_aBroadcast[1024];
+		CAccount m_Account;
+		struct
+		{
+			char m_aNameOwner[MAX_USERNAME_LENGTH];
+			char m_aDisplayName[MAX_NAME_LENGTH];
+		} m_NameClaim = {};
+	} m_Data = {};
+
 	void SetVariant(EAccountPlayerRequestType RequestType);
 };
 
@@ -159,6 +172,10 @@ private:
 
 	// returns false on fatal db error
 	// and true in all other cases
+	static bool ClaimNameRequest(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+
+	// returns false on fatal db error
+	// and true in all other cases
 	static bool SetPassword(IDbConnection *pSqlServer, const char *pUsername, const char *pPassword, char *pError, int ErrorSize);
 
 	// returns false on fatal db error
@@ -198,6 +215,17 @@ private:
 	//
 	// will fail with an fatal error if pUsername is not found that should be checked first
 	static bool SetAccountString(IDbConnection *pSqlServer, const char *pUsername, const char *pColumn, const char *pValue, char *pError, int ErrorSize);
+
+public:
+	// returns false on fatal db error
+	// returns true on success which can be a found claimed name or not
+	//
+	// if an account claimed pDisplayName it will write the accounts username into pUsername
+	//
+	// pDisplayName - input nick name to check if it is claimed
+	// pUsername - output buffer where the account owner will be written to (can be nullptr if not needed)
+	// UsernameSize - size of the pUsername buffer
+	static bool GetDisplayNameOwnerUsername(IDbConnection *pSqlServer, const char *pDisplayName, char *pUsername, int UsernameSize, char *pError, int ErrorSize);
 };
 
 #endif

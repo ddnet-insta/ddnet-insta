@@ -2848,6 +2848,8 @@ if(SERVER)
     instagib/antibob.h
     instagib/chat_commands.cpp
     instagib/chat_commands.h
+    instagib/display_name.cpp
+    instagib/display_name.h
     instagib/enums.cpp
     instagib/enums.h
     instagib/extra_columns.h
