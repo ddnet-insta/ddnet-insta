@@ -632,14 +632,18 @@ void CGameControllerPvp::SaveStatsOnRoundEnd(CPlayer *pPlayer)
 	if(aMsg[0])
 		GameServer()->SendChatTarget(pPlayer->GetCid(), aMsg);
 
-	dbg_msg("sql", "saving round stats of player '%s' win=%d loss=%d msg='%s'", Server()->ClientName(pPlayer->GetCid()), Won, Lost, aMsg);
+	dbg_msg("stats", "saving round stats of player '%s' win=%d loss=%d msg='%s'", Server()->ClientName(pPlayer->GetCid()), Won, Lost, aMsg);
 
 	// the spree can not be incremented if stat track is off
 	// but the best spree will be counted even if it is off
 	// this ensures that the spree of a player counts that
 	// dominated the entire server into rq and never died
 	if(pPlayer->Spree() > pPlayer->m_Stats.m_BestSpree)
+	{
+		log_info("stats", "player '%s' has a spree of %d kills that was not tracked (force tracking it now)", Server()->ClientName(pPlayer->GetCid()), pPlayer->Spree());
+		log_info("stats", "player '%s' currently has %d tracked kills", Server()->ClientName(pPlayer->GetCid()), pPlayer->m_Stats.m_Kills);
 		pPlayer->m_Stats.m_BestSpree = pPlayer->Spree();
+	}
 	if(IsStatTrack())
 	{
 		if(Won)
