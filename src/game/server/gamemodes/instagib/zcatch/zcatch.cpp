@@ -231,7 +231,10 @@ void CGameControllerZcatch::StartZcatchRound()
 		pPlayer->m_KillerId = -1;
 
 		// resets the winners color
-		pPlayer->m_Spree = 0;
+		pPlayer->m_Spree = 0; // TODO: this is nasty it breaks sprees across rounds
+		//                             also resetting m_Spree should check first
+		//                             if it was a new spree high score and set
+		//                             m_BestSpree
 		pPlayer->m_UntrackedSpree = 0;
 	}
 }
