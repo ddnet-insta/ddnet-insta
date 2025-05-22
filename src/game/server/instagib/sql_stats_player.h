@@ -113,7 +113,6 @@ public:
 		m_FlagGrabs = 0;
 		m_FlaggerKills = 0;
 		m_Wallshots = 0;
-		m_Points = 0;
 		m_TicksCaught = 0;
 		m_TicksInGame = 0;
 		m_BestMulti = 0;
@@ -179,7 +178,6 @@ public:
 		       m_FlagGrabs ||
 		       m_FlaggerKills ||
 		       m_Wallshots ||
-		       m_Points ||
 		       m_TicksCaught ||
 		       m_TicksInGame ||
 		       m_BestMulti ||
