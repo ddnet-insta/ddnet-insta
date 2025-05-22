@@ -929,7 +929,7 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 
 		if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
-			dbg_msg("sql-thread", "prepare update failed query=%s", aBuf);
+			log_error("sql-thread", "prepare update failed query=%s", aBuf);
 			return false;
 		}
 
@@ -959,13 +959,14 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 
 		if(NumUpdated == 0 && pData->m_Stats.HasValues())
 		{
-			dbg_msg("sql-thread", "update failed no rows changed but got the following stats:");
+			log_error("sql-thread", "failed to save stats for player '%s'", pData->m_aName);
+			log_error("sql-thread", "update failed no rows changed but got the following stats:");
 			pData->m_Stats.Dump(pData->m_pExtraColumns, "sql-thread");
 			return false;
 		}
 		else if(NumUpdated > 1)
 		{
-			dbg_msg("sql-thread", "affected %d rows when trying to update stats of one player!", NumUpdated);
+			log_error("sql-thread", "affected %d rows when trying to update stats of one player!", NumUpdated);
 			dbg_assert(false, "FATAL ERROR: your database is probably corrupted! Time to restore the backup.");
 			return false;
 		}
