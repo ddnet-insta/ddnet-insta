@@ -959,10 +959,27 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 
 		if(NumUpdated == 0 && pData->m_Stats.HasValues())
 		{
-			log_error("sql-thread", "failed to save stats for player '%s'", pData->m_aName);
-			log_error("sql-thread", "update failed no rows changed but got the following stats:");
-			pData->m_Stats.Dump(pData->m_pExtraColumns, "sql-thread");
-			return false;
+			CSqlStatsPlayer StatsWithoutSpree = pData->m_Stats;
+			StatsWithoutSpree.m_BestSpree = 0;
+			if(StatsWithoutSpree.HasValues())
+			{
+				log_error("sql-thread", "failed to save stats for player '%s'", pData->m_aName);
+				log_error("sql-thread", "update failed no rows changed but got the following stats:");
+				pData->m_Stats.Dump(pData->m_pExtraColumns, "sql-thread");
+				return false;
+			}
+
+			// https://github.com/ddnet-insta/ddnet-insta/issues/336
+			// ideally this branch is never hit
+			// because the best spree should not be set to a lower value than the best spree in the db
+			// but it is an inevitable edge case
+			// the spree can be the only value set in the stats because sprees should not be reset on round ends
+			// but kills and points will be
+			// and someone else can always break the spree record on another server
+			//
+			// if this branch is confirmed to be harmless we can even remove the warning log
+			log_warn("sql-thread", "no rows changed for player '%s' whos only stat was a spree of %d kills", pData->m_aName, pData->m_Stats.m_BestSpree);
+			log_warn("sql-thread", "the current spree high score in the db for player '%s' is %d", pData->m_aName, MergeStats.m_BestSpree);
 		}
 		else if(NumUpdated > 1)
 		{
