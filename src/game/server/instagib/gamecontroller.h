@@ -440,7 +440,7 @@ public:
 			return true to consume the message and drop it before it gets passed to the server code
 			return false to let regular server code process the message
 	*/
-	virtual bool OnClientPacket(int ClientId, bool Sys, int MsgId, class CNetChunk *pPacket, class CUnpacker *pUnpacker) { return false; }
+	virtual bool OnClientPacket(int ClientId, bool Sys, int MsgId, struct CNetChunk *pPacket, class CUnpacker *pUnpacker) { return false; }
 
 	/*
 		Function: OnChatMessage
