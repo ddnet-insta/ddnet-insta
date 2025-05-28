@@ -2160,6 +2160,7 @@ set_src(GAME_SHARED GLOB src/game
   mapitems_insta.h
   prng.cpp
   prng.h
+  race_state.h
   teamscore.cpp
   teamscore.h
   tuning.h
@@ -2418,6 +2419,8 @@ if(CLIENT)
     prediction/entities/laser.h
     prediction/entities/pickup.cpp
     prediction/entities/pickup.h
+    prediction/entities/plasma.cpp
+    prediction/entities/plasma.h
     prediction/entities/projectile.cpp
     prediction/entities/projectile.h
     prediction/entity.cpp

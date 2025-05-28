@@ -5,6 +5,7 @@
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
+#include <game/race_state.h>
 #include <game/server/entities/character.h>
 #include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
 #include <game/server/entities/flag.h>
@@ -961,7 +962,7 @@ void CGameControllerPvp::ModifyWeapons(IConsole::IResult *pResult, void *pUserDa
 		pChr->GiveWeapon(Weapon, Remove);
 	}
 
-	pChr->m_DDRaceState = DDRACE_CHEAT;
+	pChr->m_DDRaceState = ERaceState::CHEATED;
 }
 
 int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
