@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <engine/server/server.h>
 #include <engine/shared/config.h>
+#include <engine/shared/network.h>
+#include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 #include <game/race_state.h>
@@ -22,8 +24,6 @@
 #include <game/server/instagib/antibob.h>
 
 #include "base_pvp.h"
-#include "engine/shared/network.h"
-#include "engine/shared/packer.h"
 
 CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	CGameControllerDDRace(pGameServer)
