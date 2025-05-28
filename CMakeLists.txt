@@ -2826,6 +2826,7 @@ if(SERVER)
     instagib/enums.cpp
     instagib/enums.h
     instagib/extra_columns.h
+    instagib/gamecontext.cpp
     instagib/gamecontext.h
     instagib/gamecontext/bangcommands.cpp
     instagib/gamecontroller.cpp

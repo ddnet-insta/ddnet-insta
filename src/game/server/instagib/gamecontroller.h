@@ -431,6 +431,18 @@ public:
 	virtual void AmmoRegen(CCharacter *pChr);
 
 	/*
+		Function: OnClientPacket
+			hooks early into CServer::ProcessClientPacket
+			similar to CGameContext::OnMessage but convers both system and game messages
+			and it can also drop the message before the server processes it
+
+		Returns:
+			return true to consume the message and drop it before it gets passed to the server code
+			return false to let regular server code process the message
+	*/
+	virtual bool OnClientPacket(int ClientId, bool Sys, int MsgId, class CNetChunk *pPacket) { return false; }
+
+	/*
 		Function: OnChatMessage
 			hooks into CGameContext::OnSayNetMessage()
 			after unicode check and teehistorian already happend

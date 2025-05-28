@@ -1642,6 +1642,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		SendMsg(&Packer, MSGFLAG_VITAL, ClientId);
 	}
 
+	// ddnet-insta
+	if(GameServer()->OnClientPacket(ClientId, Sys, Msg, pPacket))
+		return;
+
 	if(Sys)
 	{
 		// system message

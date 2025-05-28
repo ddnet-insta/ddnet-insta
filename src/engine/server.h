@@ -307,6 +307,7 @@ class IGameServer : public IInterface
 	// ddnet-insta
 public:
 	virtual const char *ServerInfoPlayerScoreKind() = 0;
+	virtual bool OnClientPacket(int ClientId, bool Sys, int MsgId, class CNetChunk *pPacket) = 0;
 
 protected:
 public:
