@@ -10,9 +10,19 @@
 
 #include <game/server/gamecontext.h>
 
-// implemented in ddracechat.cpp
-// yes that is cursed
-bool CheckClientId(int ClientId);
+void CGameContext::ConCreditsGctf(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	static constexpr const char *CREDITS[] = {
+		"DDNet-insta written by ChillerDragon",
+		"https://github.com/ddnet-insta/ddnet-insta/",
+		"Thanks to AssassinTee, Cuube, Anime-pdf, M0REKZ",
+		"JSaurusRex, jxsl13 and lukure",
+		"based on ddnet see /credits_ddnet",
+	};
+	for(const char *pLine : CREDITS)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", pLine);
+}
 
 void CGameContext::ConReadyChange(IConsole::IResult *pResult, void *pUserData)
 {
