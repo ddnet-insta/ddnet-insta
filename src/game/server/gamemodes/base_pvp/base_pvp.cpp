@@ -22,6 +22,8 @@
 #include <game/server/instagib/antibob.h>
 
 #include "base_pvp.h"
+#include "engine/shared/network.h"
+#include "engine/shared/packer.h"
 
 CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	CGameControllerDDRace(pGameServer)
@@ -439,6 +441,30 @@ bool CGameControllerPvp::ForceNetworkClippingLine(const CEntity *pEntity, int Sn
 	}
 	float ClippDistance = maximum(ShowDistance.x, ShowDistance.y);
 	return (absolute(DistanceToLine.x) > ClippDistance || absolute(DistanceToLine.y) > ClippDistance);
+}
+
+bool CGameControllerPvp::OnClientPacket(int ClientId, bool Sys, int MsgId, CNetChunk *pPacket, CUnpacker *pUnpacker)
+{
+	// make a copy so we can consume fields
+	// without breaking the state for the server
+	// in case we pass the packet on
+	CUnpacker Unpacker = *pUnpacker;
+	bool Vital = pPacket->m_Flags & NET_CHUNKFLAG_VITAL;
+
+	if(Sys && MsgId == NETMSG_RCON_AUTH && Vital && Server()->IsSixup(ClientId))
+	{
+		const char *pCredentials = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+		if(Unpacker.Error())
+			return false;
+
+		// check if 0.7 player sends valid credentials for
+		// a ddnet rcon account in the format username:pass
+		// in that case login and drop the message
+		if(Server()->SixupUsernameAuth(ClientId, pCredentials))
+			return true;
+	}
+
+	return false;
 }
 
 void CGameControllerPvp::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)

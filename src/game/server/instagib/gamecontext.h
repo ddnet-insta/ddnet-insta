@@ -19,7 +19,7 @@ class CGameContext : public IGameServer
 
 public:
 	const char *ServerInfoPlayerScoreKind() override { return "points"; }
-	bool OnClientPacket(int ClientId, bool Sys, int MsgId, class CNetChunk *pPacket) override;
+	bool OnClientPacket(int ClientId, bool Sys, int MsgId, class CNetChunk *pPacket, class CUnpacker *pUnpacker) override;
 
 	// set by the config sv_display_score
 	EDisplayScore m_DisplayScore = EDisplayScore::ROUND_POINTS;

@@ -1643,7 +1643,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	}
 
 	// ddnet-insta
-	if(GameServer()->OnClientPacket(ClientId, Sys, Msg, pPacket))
+	if(GameServer()->OnClientPacket(ClientId, Sys, Msg, pPacket, &Unpacker))
 		return;
 
 	if(Sys)

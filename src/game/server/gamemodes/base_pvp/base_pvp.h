@@ -118,6 +118,7 @@ public:
 	void OnFlagCapture(class CFlag *pFlag, float Time, int TimeTicks) override;
 	bool ForceNetworkClipping(const CEntity *pEntity, int SnappingClient, vec2 CheckPos) override;
 	bool ForceNetworkClippingLine(const CEntity *pEntity, int SnappingClient, vec2 StartPos, vec2 EndPos) override;
+	bool OnClientPacket(int ClientId, bool Sys, int MsgId, class CNetChunk *pPacket, class CUnpacker *pUnpacker) override;
 
 	// pPlayer is the player that just hit
 	// an enemy with the grenade

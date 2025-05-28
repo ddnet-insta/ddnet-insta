@@ -100,6 +100,15 @@ To make `sv_spectator_votes` portable and fair for both 0.6 and 0.7 players ther
 when that is set it will make the 0.7 clients believe they are in game and unlock the call vote menu.
 But this also means that to join the game the users have to press the "spectate" button.
 
+## DDNet rcon user support for 0.7
+
+The vanilla teeworlds client does not send a rcon username but the ddnet client does.
+DDNet servers and thus also ddnet-insta have regular rcon passwords but also users with username and password.
+These can be added using the rcon command ``auth_add`` or ``auth_add_p``.
+On regular ddnet servers it is impossible for teeworlds clients to login using these credentials.
+In ddnet-insta it is possible for 0.7 players to send ``username:password`` as the password.
+And it will log them in if those are valid credentials.
+
 ## Lots of little fun opt in features
 
 By default ddnet-insta tries to be ready to be used in competetive games. Being as close to prior implementations

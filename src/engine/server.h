@@ -19,6 +19,8 @@
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>
 
+class CAuthManager; // ddnet-insta
+
 struct CAntibotRoundData;
 
 // When recording a demo on the server, the ClientId -1 is used
@@ -36,6 +38,13 @@ public:
 	virtual const char *GetRandomMapFromPool() = 0;
 	// ddnet-insta method that force stops the server
 	virtual void ShutdownServer() = 0;
+	// called when a 0.7 player sends rcon credentials
+	// returns true if these were in the format username:password
+	// and matched some ddnet rcon user
+	// in that case the player will also be logged in
+	// returns false otherwise
+	virtual bool SixupUsernameAuth(int ClientId, const char *pCredentials) = 0;
+	virtual CAuthManager *AuthManager() = 0;
 
 	MACRO_INTERFACE("server")
 protected:
@@ -307,7 +316,7 @@ class IGameServer : public IInterface
 	// ddnet-insta
 public:
 	virtual const char *ServerInfoPlayerScoreKind() = 0;
-	virtual bool OnClientPacket(int ClientId, bool Sys, int MsgId, class CNetChunk *pPacket) = 0;
+	virtual bool OnClientPacket(int ClientId, bool Sys, int MsgId, class CNetChunk *pPacket, class CUnpacker *pUnpacker) = 0;
 
 protected:
 public:
