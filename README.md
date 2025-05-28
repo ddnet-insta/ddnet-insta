@@ -263,7 +263,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 
 ## ddnet-insta configs
 
-+ `sv_gametype` Game type (gctf, ictf, gdm, idm, gtdm, itdm, zcatch, bolofng, solofng, boomfng, fng)
++ `sv_gametype` Game type (gctf, ictf, gdm, idm, gtdm, itdm, ctf, dm, tdm, zcatch, bolofng, solofng, boomfng, fng)
 + `sv_spectator_votes` Allow spectators to vote
 + `sv_spectator_votes_sixup` Allow 0.7 players to vote as spec if sv_spectator_vote is 1 (hacky dead spec)
 + `sv_bang_commands` chat cmds like !1vs1 0=off 1=read only no votes 2=all commands
@@ -377,6 +377,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `add_map_to_pool` Can be picked by random_map_from_pool command (entries can be duplicated to increase chance)
 + `clear_map_pool` Clears pool used by random_map_from_pool command
 + `random_map_from_pool` Changes to random map from pool (see add_map_to_pool)
++ `gctf_antibot` runs the antibot command gctf (depends on closed source module)
 + `redirect` Redirect client to given port use victim \"all\" to redirect all but your self
 
 # Chat commands
