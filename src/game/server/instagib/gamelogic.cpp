@@ -1,3 +1,4 @@
+#include <base/log.h>
 #include <base/system.h>
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
@@ -19,6 +20,10 @@ void CGameContext::OnInitInstagib()
 	UpdateVoteCheckboxes(); // ddnet-insta
 	AlertOnSpecialInstagibConfigs(); // ddnet-insta
 	ShowCurrentInstagibConfigsMotd(); // ddnet-insta
+
+	// https://github.com/ddnet-insta/ddnet-insta/issues/341
+	if(!str_to_display_score(g_Config.m_SvDisplayScore, &m_DisplayScore))
+		log_warn("ddnet-insta", "'%s' is not a valid display score pick one of those: " DISPLAY_SCORE_VALUES, g_Config.m_SvDisplayScore);
 
 	m_pHttp = Kernel()->RequestInterface<IHttp>();
 
