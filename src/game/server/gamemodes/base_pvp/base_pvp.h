@@ -57,6 +57,7 @@ public:
 	void OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPersistentClientData *pData) override;
 	void OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData) override;
 	bool OnSkinChange7(protocol7::CNetMsg_Cl_SkinChange *pMsg, int ClientId) override;
+	bool OnTeamChatCmd(IConsole::IResult *pResult) override;
 
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
 

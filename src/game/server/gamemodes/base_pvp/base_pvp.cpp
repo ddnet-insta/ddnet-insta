@@ -1848,6 +1848,25 @@ bool CGameControllerPvp::OnSkinChange7(protocol7::CNetMsg_Cl_SkinChange *pMsg, i
 	return true;
 }
 
+bool CGameControllerPvp::OnTeamChatCmd(IConsole::IResult *pResult)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return false;
+
+	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Only spectators can join ddrace teams");
+		return true;
+	}
+
+	pPlayer->SetTeam(TEAM_RED, false);
+	pPlayer->m_RespawnTick = 0;
+	pPlayer->TryRespawn();
+
+	return false;
+}
+
 void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 {
 	m_InvalidateConnectedIpsCache = true;

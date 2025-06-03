@@ -454,6 +454,16 @@ public:
 	virtual bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) { return false; };
 
 	/*
+		Function: OnTeamChatCmd
+			Called when a player runs the /team ddnet chat command
+			Called before the ddnet code runs
+
+		Returns:
+			return true to not run the ddnet code
+	*/
+	virtual bool OnTeamChatCmd(IConsole::IResult *pResult) { return false; }
+
+	/*
 		Function: OnChangeInfoNetMessage
 			hooks into CGameContext::OnChangeInfoNetMessage()
 			after spam protection check
