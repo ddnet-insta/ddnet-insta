@@ -2835,7 +2835,6 @@ if(SERVER)
     instagib/gamecontext/bangcommands.cpp
     instagib/gamecontroller.cpp
     instagib/gamecontroller.h
-    instagib/gamelogic.cpp
     instagib/laser_text.cpp
     instagib/laser_text.h
     instagib/persistent_client_data.h
