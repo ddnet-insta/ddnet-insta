@@ -1387,7 +1387,7 @@ void CGameContext::ConTeam(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	// ddnet-insta
-	if(pSelf->m_pController && pSelf->m_pController->OnTeamChatCmd(pResult))
+	if(pSelf->m_pController->OnTeamChatCmd(pResult))
 		return;
 
 	if(pResult->NumArguments() > 0)
