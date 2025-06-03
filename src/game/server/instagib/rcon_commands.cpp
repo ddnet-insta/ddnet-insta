@@ -146,22 +146,6 @@ void CGameContext::ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserDat
 		dbg_msg("swap", "did not swap due to random chance");
 }
 
-void CGameContext::SwapTeams()
-{
-	if(!m_pController->IsTeamPlay())
-		return;
-
-	SendGameMsg(protocol7::GAMEMSG_TEAM_SWAP, -1);
-
-	for(CPlayer *pPlayer : m_apPlayers)
-	{
-		if(pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS)
-			m_pController->DoTeamChange(pPlayer, pPlayer->GetTeam() ^ 1, false);
-	}
-
-	m_pController->SwapTeamscore();
-}
-
 void CGameContext::ConForceTeamBalance(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

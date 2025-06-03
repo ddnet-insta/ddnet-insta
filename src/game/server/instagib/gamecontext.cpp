@@ -412,6 +412,22 @@ void CGameContext::InstagibUnstackChatMessage(char *pUnstacked, const char *pMes
 	str_copy(m_aaLastChatMessages[0], pMessage);
 }
 
+void CGameContext::SwapTeams()
+{
+	if(!m_pController->IsTeamPlay())
+		return;
+
+	SendGameMsg(protocol7::GAMEMSG_TEAM_SWAP, -1);
+
+	for(CPlayer *pPlayer : m_apPlayers)
+	{
+		if(pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS)
+			m_pController->DoTeamChange(pPlayer, pPlayer->GetTeam() ^ 1, false);
+	}
+
+	m_pController->SwapTeamscore();
+}
+
 bool CGameContext::OnClientPacket(int ClientId, bool Sys, int MsgId, CNetChunk *pPacket, CUnpacker *pUnpacker)
 {
 	if(!m_pController)
