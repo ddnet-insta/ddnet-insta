@@ -61,6 +61,8 @@ public:
 
 	const class CPlayer *GetPlayer() const { return m_pPlayer; }
 	int HookedPlayer() const { return m_Core.HookedPlayer(); }
+	int m_ReloadInstaTimer[NUM_WEAPONS];
+	int GetActiveWeaponForReload() const;
 
 private:
 	// players skin changes colors

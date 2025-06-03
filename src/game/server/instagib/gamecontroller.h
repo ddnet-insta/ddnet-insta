@@ -431,6 +431,24 @@ public:
 	virtual void AmmoRegen(CCharacter *pChr);
 
 	/*
+		Function: ReloadTimer
+			Controls custom reloading of weapons
+
+		Arguments:
+			pChr - Character that might gain new ammo
+	*/
+	virtual void ReloadTimer(CCharacter *pChr){};
+
+	/*
+		Function: DoWeaponSwitch
+
+		Returns:
+			return true to skip ddnet CCharacter::DoWeaponSwitch() behavior
+			which is doing standard ddnet fire weapon things
+	*/
+	virtual bool DoWeaponSwitch(CCharacter *pChr, int QueuedWeapon) { return false; };
+
+	/*
 		Function: OnClientPacket
 			hooks early into CServer::ProcessClientPacket
 			similar to CGameContext::OnMessage but convers both system and game messages

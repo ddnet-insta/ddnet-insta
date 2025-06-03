@@ -364,6 +364,12 @@ void CCharacter::HandleNinja()
 
 void CCharacter::DoWeaponSwitch()
 {
+	// ddnet-insta
+	if(GameServer()->m_pController->DoWeaponSwitch(this, m_QueuedWeapon))
+	{
+		return;
+	}
+
 	// make sure we can switch
 	if(m_ReloadTimer != 0 || m_QueuedWeapon == -1 || m_Core.m_aWeapons[WEAPON_NINJA].m_Got || !m_Core.m_aWeapons[m_QueuedWeapon].m_Got)
 		return;
@@ -650,6 +656,7 @@ void CCharacter::HandleWeapons()
 	FireWeapon();
 
 	// ddnet-insta
+	GameServer()->m_pController->ReloadTimer(this);
 	GameServer()->m_pController->AmmoRegen(this);
 }
 

@@ -194,3 +194,10 @@ void CCharacter::Rainbow(bool Activate)
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, pRainbowReceiverPlayer->GetCid());
 	}
 }
+
+int CCharacter::GetActiveWeaponForReload() const
+{
+	if(g_Config.m_SvPerWeaponReload)
+		return m_Core.m_ActiveWeapon;
+	return 0;
+}

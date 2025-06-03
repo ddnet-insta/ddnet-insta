@@ -11,6 +11,7 @@
 #include <game/server/entities/character.h>
 #include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
 #include <game/server/entities/flag.h>
+#include <game/server/entities/laser.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/laser_text.h>
@@ -2167,6 +2168,15 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 	if(Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_Ammo > 0) // -1 == unlimited
 		Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_Ammo--;
 
+	if(Character.m_ReloadInstaTimer[Character.GetActiveWeaponForReload()] != 0 || Character.m_ReloadTimer != 0)
+	{
+		if(Character.m_LatestInput.m_Fire & 1)
+		{
+			Character.Antibot()->OnHammerFireReloading(Character.m_pPlayer->GetCid());
+		}
+		return true;
+	}
+
 	if(Weapon == WEAPON_GUN)
 	{
 		if(!Character.m_Core.m_Jetpack || !Character.m_pPlayer->m_NinjaJetpack || Character.m_Core.m_HasTelegunGun)
@@ -2218,6 +2228,13 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 
 		GameServer()->CreateSound(Character.m_Pos, SOUND_SHOTGUN_FIRE); // NOLINT(clang-analyzer-unix.Malloc)
 	}
+	else if(Weapon == WEAPON_LASER)
+	{
+		float LaserReach = Character.GetTuning(Character.m_TuneZone)->m_LaserReach;
+
+		new CLaser(Character.GameWorld(), Character.m_Pos, Direction, LaserReach, Character.m_pPlayer->GetCid(), WEAPON_LASER);
+		GameServer()->CreateSound(Character.m_Pos, SOUND_LASER_FIRE, Character.TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+	}
 	else
 	{
 		return false;
@@ -2225,14 +2242,30 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 
 	Character.m_AttackTick = Server()->Tick();
 
-	if(!Character.m_ReloadTimer)
+	if(!Character.m_ReloadInstaTimer[Character.GetActiveWeaponForReload()])
 	{
 		float FireDelay;
 		Character.GetTuning(Character.m_TuneZone)->Get(38 + Character.m_Core.m_ActiveWeapon, &FireDelay);
-		Character.m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+		Character.m_ReloadInstaTimer[Character.GetActiveWeaponForReload()] = FireDelay * Server()->TickSpeed() / 1000;
 	}
 
 	return true;
+}
+
+bool CGameControllerPvp::DoWeaponSwitch(CCharacter *pChr, int QueuedWeapon)
+{
+	if((g_Config.m_SvPerWeaponReload == 0 && pChr->m_ReloadInstaTimer[pChr->GetActiveWeaponForReload()] != 0) || QueuedWeapon == -1 || pChr->Core()->m_aWeapons[WEAPON_NINJA].m_Got || !pChr->Core()->m_aWeapons[QueuedWeapon].m_Got)
+		return true;
+	return false;
+}
+
+void CGameControllerPvp::ReloadTimer(CCharacter *pChr)
+{
+	for(int &i : pChr->m_ReloadInstaTimer)
+	{
+		if(i)
+			i--;
+	}
 }
 
 void CGameControllerPvp::DoDamageHitSound(int KillerId)
