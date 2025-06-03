@@ -124,23 +124,60 @@ void IGameController::AddTeamscore(int Team, int Score)
 
 int IGameController::WinPointsForWin(const CPlayer *pPlayer)
 {
-	// in non team based modes everyone is an enemy
-	// if you manage to win you get one point for
-	// every in game player
-	if(!IsTeamPlay())
-		return m_aTeamSize[TEAM_RED] + m_aTeamSize[TEAM_BLUE];
+	// The amount of win points used to depend on the amount of
+	// enemies. But that does make little sense for most
+	// modes. Team based or not. The amount of enemies
+	// does not convey the value of the win.
+	// If it is a dm mode with scorelimit.
+	// The best player will usually win.
+	// And reaching the scorelimit should require the same
+	// time and difficulty with one enemy or with 100 enemies.
+	// The chance of winning is stastically lower with
+	// more competitors but I don't think thats relevant here (the more balanced the skill is the more relevant it is).
+	// In team modes getting carried in a 8v8 and barely contributing
+	// to the game should not reward you more for the 8 enemies
+	// than doing 50% of the work in 2v2.
+	//
+	// In zCatch that is different. Here every enemy has to be killed.
+	// Winning does get harder with every player that joins.
+	// So the zCatch mode overwrites this method.
+	//
+	// I decided the players score on round end is the best metric
+	// and it works suprisingly well for all current gamemodes team based
+	// or not.
+	// The players score (can vary from the scorelimit!) best reflects
+	// how much was contributed to the win in a team mode. More or less at least, team play can be complex ofc.
+	// And also how much time and effort had to be put in in a solo mode.
+	//
+	// But thinking about it again the amount of enemies is actually relevant.
+	// Because of the before mentioned chance that it includes players that are stronger (at least in non team modes).
+	// But also because of anti farming reasons. Farming wins at night with a dummy and
+	// friends in an almost empty server should be rewarded less
+	// than winning on a full server.
+	int Points = pPlayer->m_Score.value_or(0);
 
-	// if it is a team based mode you get a point for every member of
-	// the enemy team
+	// this enemie amount is rigged on public servers
+	// more correct would be the average player count during the entire game
+	// players come and go
 	//
-	// not super sure how much sense this actually makes
-	// in a 3v3 the win can be less your responsibility
-	// than in a 2v2 but you would get more points.
+	// TODO:
+	// Also it should exclude players in ddrace teams see
+	// https://github.com/ddnet-insta/ddnet-insta/issues/350
+	int Enemies = m_aTeamSize[TEAM_RED] + m_aTeamSize[TEAM_BLUE];
+	if(IsTeamPlay())
+		Enemies = m_aTeamSize[pPlayer->GetTeam() == TEAM_RED ? TEAM_BLUE : TEAM_RED];
+
+	// Not sure if enemies should be counted if team play is on
+	// assuming the teams are balanced there are only two possible winners
+	// So red or blue win chance is kind of 50% in a 1vs1 and in a 8vs8.
 	//
-	// It can be argued that higher amounts of players make the games
-	// them self more valuable. They are also harder to farm.
-	// Even if the individuals participation might have less impact.
-	return m_aTeamSize[pPlayer->GetTeam() == TEAM_RED ? TEAM_BLUE : TEAM_RED];
+	// Rewarding ctf1 players less for a win than ctf3 players seems a bit odd.
+	// So the main motivation here is to make win points harder to farm.
+	// Because bigger games are usually harder to farm or fill with friends.
+	//
+	// The amount of enemies is not weight strongly anyways.
+	// Usually the amount of points is higher than the amount of players.
+	return Enemies + Points;
 }
 
 // balancing

@@ -622,7 +622,13 @@ public:
 		Function: WinPointsForWin
 			Computes the amount of win points for winning a round.
 			"win points" are points you can only get by winning.
-			By default the reward will be higher if you had more enemies.
+			The purpose of differentiating between amount of wins and
+			win points is to have some kind of value of the win.
+			Some wins are harder to obtain than others depending on
+			the amount of enemies and scorelimit for example.
+
+			By default the reward will be amount of enemies plus score on round end.
+			In zCatch it only depends on the amount of kills in the winning streak.
 			These are WinPoints are not to be confused with regular round Points.
 
 		Arguments:
