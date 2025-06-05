@@ -970,7 +970,7 @@ void CGameControllerPvp::ModifyWeapons(IConsole::IResult *pResult, void *pUserDa
 	if(!pChr)
 		return;
 
-	if(clamp(Weapon, -1, NUM_WEAPONS - 1) != Weapon)
+	if(std::clamp(Weapon, -1, NUM_WEAPONS - 1) != Weapon)
 	{
 		pSelf->GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
 			"invalid weapon id");

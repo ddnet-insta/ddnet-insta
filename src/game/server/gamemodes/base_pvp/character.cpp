@@ -53,14 +53,14 @@ float CCharacter::DistToTouchingTile(int Tile)
 		return NOT_FOUND;
 
 	float Prox = GetProximityRadius() / 3.f;
-	int Left = clamp(round_to_int(m_Pos.x - Prox) / 32, 0, Collision()->GetWidth() - 1);
-	int Right = clamp(round_to_int(m_Pos.x + Prox) / 32, 0, Collision()->GetWidth() - 1);
-	int Up = clamp(round_to_int(m_Pos.y - Prox) / 32, 0, Collision()->GetHeight() - 1);
-	int Down = clamp(round_to_int(m_Pos.y + Prox) / 32, 0, Collision()->GetHeight() - 1);
+	int Left = std::clamp(round_to_int(m_Pos.x - Prox) / 32, 0, Collision()->GetWidth() - 1);
+	int Right = std::clamp(round_to_int(m_Pos.x + Prox) / 32, 0, Collision()->GetWidth() - 1);
+	int Up = std::clamp(round_to_int(m_Pos.y - Prox) / 32, 0, Collision()->GetHeight() - 1);
+	int Down = std::clamp(round_to_int(m_Pos.y + Prox) / 32, 0, Collision()->GetHeight() - 1);
 
 	vec2 TeeCenter;
-	TeeCenter.x = clamp(round_to_int(m_Pos.x), 0, (Collision()->GetWidth() - 1) * 32);
-	TeeCenter.y = clamp(round_to_int(m_Pos.y), 0, (Collision()->GetHeight() - 1) * 32);
+	TeeCenter.x = std::clamp(round_to_int(m_Pos.x), 0, (Collision()->GetWidth() - 1) * 32);
+	TeeCenter.y = std::clamp(round_to_int(m_Pos.y), 0, (Collision()->GetHeight() - 1) * 32);
 
 	int aPositionsX[] = {Left, Right};
 	int aPositionsY[] = {Up, Down};

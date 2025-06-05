@@ -273,7 +273,7 @@ bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumAr
 	else if(!str_comp_nocase(pCmd, "restart") || !str_comp_nocase(pCmd, "reload"))
 	{
 		int Seconds = NumArgs > 0 ? atoi(ppArgs[0]) : 10;
-		Seconds = clamp(Seconds, 1, 200);
+		Seconds = std::clamp(Seconds, 1, 200);
 		char aCmd[512];
 		str_format(aCmd, sizeof(aCmd), "restart %d", Seconds);
 		char aDesc[512];

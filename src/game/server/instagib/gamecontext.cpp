@@ -328,7 +328,7 @@ void CGameContext::SendGameMsg(int GameMsgId, int ParaI1, int ClientId) const
 		if(GameMsgId == protocol7::GAMEMSG_GAME_PAUSED)
 		{
 			char aBuf[512];
-			int PauseId = clamp(ParaI1, 0, Server()->MaxClients() - 1);
+			int PauseId = std::clamp(ParaI1, 0, Server()->MaxClients() - 1);
 			str_format(aBuf, sizeof(aBuf), "'%s' initiated a pause. If you are ready do /ready", Server()->ClientName(PauseId));
 			SendChatTarget(i, aBuf);
 		}
