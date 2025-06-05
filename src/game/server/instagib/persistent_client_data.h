@@ -13,6 +13,8 @@ struct CPersistentClientData
 	// virtual void OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPersistentClientData *pData) {};
 	// virtual void OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData) {};
 
+	int m_Team;
+
 #ifndef IN_CLASS_PERSISTENTCLIENTDATA
 };
 #endif

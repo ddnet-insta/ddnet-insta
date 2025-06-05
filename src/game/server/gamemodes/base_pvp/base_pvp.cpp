@@ -1809,10 +1809,12 @@ bool CGameControllerPvp::LoadNewPlayerNameData(int ClientId)
 
 void CGameControllerPvp::OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPersistentClientData *pData)
 {
+	pData->m_Team = pPlayer->GetTeam();
 }
 
 void CGameControllerPvp::OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData)
 {
+	pPlayer->SetTeamRaw(pData->m_Team);
 }
 
 bool CGameControllerPvp::OnSkinChange7(protocol7::CNetMsg_Cl_SkinChange *pMsg, int ClientId)
