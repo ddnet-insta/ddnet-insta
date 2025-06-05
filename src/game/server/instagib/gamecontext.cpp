@@ -414,6 +414,8 @@ void CGameContext::InstagibUnstackChatMessage(char *pUnstacked, const char *pMes
 
 void CGameContext::SwapTeams()
 {
+	if(!m_pController)
+		return;
 	if(!m_pController->IsTeamPlay())
 		return;
 
