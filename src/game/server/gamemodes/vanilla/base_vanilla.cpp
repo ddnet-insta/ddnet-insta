@@ -25,9 +25,13 @@ CGameControllerVanilla::~CGameControllerVanilla() = default;
 int CGameControllerVanilla::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
 {
 	int Flags = CGameControllerPvp::SnapGameInfoExFlags(SnappingClient, DDRaceFlags);
-	Flags &= ~(GAMEINFOFLAG_UNLIMITED_AMMO);
-	// Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE); // https://github.com/ddnet-insta/ddnet-insta/issues/120
+	// TODO: 19030 is not correct. Wait until next ddnet release.
+	//       and give this a proper constant like VERSION_DDNET_PICKUPFLAG_NO_PREDICT
+	//       https://github.com/ddnet-insta/ddnet-insta/issues/353
+	if(Server()->GetClientVersion(SnappingClient) <= 19030)
+		Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE); // https://github.com/ddnet-insta/ddnet-insta/issues/120
 	Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE_TILES); // https://github.com/ddnet-insta/ddnet-insta/issues/181
+	Flags &= ~(GAMEINFOFLAG_UNLIMITED_AMMO);
 	return Flags;
 }
 
