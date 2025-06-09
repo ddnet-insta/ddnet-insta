@@ -32,6 +32,9 @@ enum class EInstaSqlRequestType
 	// /multis chat command
 	CHAT_CMD_MULTIS,
 
+	// /steals chat command
+	CHAT_CMD_STEALS,
+
 	// initial stats load on connect
 	PLAYER_DATA,
 };

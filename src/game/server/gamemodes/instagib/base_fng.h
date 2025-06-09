@@ -28,6 +28,7 @@ public:
 	bool OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim) override;
 	void OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
 	void OnShowMultis(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
+	void OnShowSteals(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
 
 	void UpdateScoresAndDisplayPoints(CPlayer *pKiller, int PlayerScore, int TeamScore);
 	void OnSpike(class CCharacter *pChr, int SpikeTile);

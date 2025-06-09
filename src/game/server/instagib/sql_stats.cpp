@@ -29,6 +29,7 @@ void CInstaSqlResult::SetVariant(EInstaSqlRequestType RequestType)
 	case EInstaSqlRequestType::CHAT_CMD_RANK:
 	case EInstaSqlRequestType::CHAT_CMD_STATSALL:
 	case EInstaSqlRequestType::CHAT_CMD_MULTIS:
+	case EInstaSqlRequestType::CHAT_CMD_STEALS:
 	case EInstaSqlRequestType::PLAYER_DATA:
 	case EInstaSqlRequestType::DIRECT:
 	case EInstaSqlRequestType::ALL:
@@ -1073,7 +1074,11 @@ bool CSqlStats::CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGa
 		pfnAddInt = AddColumnIntDefault0Mysql;
 
 	if(pfnAddInt)
+	{
 		pfnAddInt(pSqlServer, pData->m_aName, "win_points", pError, ErrorSize);
+		pfnAddInt(pSqlServer, pData->m_aName, "steals_from_others", pError, ErrorSize);
+		pfnAddInt(pSqlServer, pData->m_aName, "steals_by_others", pError, ErrorSize);
+	}
 
 	return true;
 }

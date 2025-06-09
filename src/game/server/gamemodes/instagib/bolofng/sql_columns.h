@@ -28,3 +28,6 @@ MACRO_ADD_COLUMN(aMultis[7], "multi_x9", "INTEGER", Int, "0", Add)
 MACRO_ADD_COLUMN(aMultis[8], "multi_x10", "INTEGER", Int, "0", Add)
 MACRO_ADD_COLUMN(aMultis[9], "multi_x11", "INTEGER", Int, "0", Add)
 MACRO_ADD_COLUMN(aMultis[10], "multi_x12", "INTEGER", Int, "0", Add)
+
+MACRO_ADD_COLUMN(StealsFromOthers, "steals_from_others", "INTEGER", Int, "0", Add)
+MACRO_ADD_COLUMN(StealsByOthers, "steals_by_others", "INTEGER", Int, "0", Add)

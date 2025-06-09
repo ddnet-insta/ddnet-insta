@@ -297,6 +297,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_fng_hammer` use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer
 + `sv_fng_spike_sound` Play flag capture sound when sacrificing an enemy into the spikes !0.6 only! (0=off/1=only the killer and the victim/2=everyone near the victim)
 + `sv_laser_text_points` display laser text in the world on scoring (only fng for now)
++ `sv_announce_steals` show in chat when someone stole a kill (only fng for now)
 + `sv_grenade_ammo_regen` Activate or deactivate grenade ammo regeneration in general
 + `sv_grenade_ammo_regen_time` Grenade ammo regeneration time in miliseconds
 + `sv_grenade_ammo_regen_num` Maximum number of grenades if ammo regeneration on
@@ -403,6 +404,7 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `/statsall` Shows the all time stats of player name (your stats by default)
 + `/stats_all` Shows the all time stats of player name (your stats by default)
 + `/multis` Shows the all time fng multi kill stats
++ `/steals` Shows all time and round fng kill steal stats
 + `/score` change which type of score is displayed in scoreboard
 + `/points` Shows the all time points rank of player name (your stats by default)
 + `/rank_points` Shows the all time points rank of player name (your stats by default)

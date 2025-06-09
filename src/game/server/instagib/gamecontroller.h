@@ -689,6 +689,18 @@ public:
 	virtual void OnShowMultis(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName){};
 
 	/*
+		Function: OnShowSteals
+			called from the main thread when a SQL worker finished querying stats from the database
+			called when someone uses the /steals chat command
+
+		Arguments:
+			pStats - stats struct to display
+			pRequestingPlayer - player who initiated the stats request (might differ from the requested player)
+			pRequestedName - player name the stats belong to
+	*/
+	virtual void OnShowSteals(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName){};
+
+	/*
 		Function: OnLoadedNameStats
 			Called when the stats request finished that fetches the
 			stats for players that just connected or changed their name

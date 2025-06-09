@@ -191,6 +191,9 @@ void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)
 		case EInstaSqlRequestType::CHAT_CMD_MULTIS:
 			GameServer()->m_pController->OnShowMultis(&Result.m_Stats, this, Result.m_Info.m_aRequestedPlayer);
 			break;
+		case EInstaSqlRequestType::CHAT_CMD_STEALS:
+			GameServer()->m_pController->OnShowSteals(&Result.m_Stats, this, Result.m_Info.m_aRequestedPlayer);
+			break;
 		case EInstaSqlRequestType::PLAYER_DATA:
 			GameServer()->m_pController->OnLoadedNameStats(&Result.m_Stats, this);
 			break;

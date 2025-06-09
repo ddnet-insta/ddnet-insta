@@ -9,6 +9,3 @@
 
 MACRO_ADD_COLUMN(Unfreezes, "unfreezes", "INTEGER", Int, "0", Add)
 MACRO_ADD_COLUMN(WrongSpikes, "wrong_spikes", "INTEGER", Int, "0", Add)
-
-MACRO_ADD_COLUMN(StealsFromOthers, "steals_from_others", "INTEGER", Int, "0", Add)
-MACRO_ADD_COLUMN(StealsByOthers, "steals_by_others", "INTEGER", Int, "0", Add)
