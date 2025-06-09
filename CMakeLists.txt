@@ -2384,6 +2384,8 @@ if(CLIENT)
     components/players.h
     components/race_demo.cpp
     components/race_demo.h
+    components/render_layer.cpp
+    components/render_layer.h
     components/scoreboard.cpp
     components/scoreboard.h
     components/skins.cpp
@@ -2854,6 +2856,7 @@ if(SERVER)
     instagib/strhelpers.h
     instagib/structs.h
     instagib/version.h
+    mutes.cpp
     player.cpp
     player.h
     save.cpp
