@@ -291,11 +291,13 @@ void CPlayer::SetTeamNoKill(int Team, bool DoChatMsg)
 
 	if(OldTeam != TEAM_SPECTATORS)
 	{
-		--GameServer()->m_pController->m_aTeamSize[OldTeam];
+		if(GameServer()->GetDDRaceTeam(GetCid()) == 0)
+			--GameServer()->m_pController->m_aTeamSize[OldTeam];
 	}
 	if(Team != TEAM_SPECTATORS)
 	{
-		++GameServer()->m_pController->m_aTeamSize[Team];
+		if(GameServer()->GetDDRaceTeam(GetCid()) == 0)
+			++GameServer()->m_pController->m_aTeamSize[Team];
 	}
 
 	Server()->ExpireServerInfo();
@@ -306,11 +308,13 @@ void CPlayer::SetTeamRaw(int Team)
 	int OldTeam = m_Team;
 	if(OldTeam != TEAM_SPECTATORS)
 	{
-		--GameServer()->m_pController->m_aTeamSize[OldTeam];
+		if(GameServer()->GetDDRaceTeam(GetCid()) == 0)
+			--GameServer()->m_pController->m_aTeamSize[OldTeam];
 	}
 	if(Team != TEAM_SPECTATORS)
 	{
-		++GameServer()->m_pController->m_aTeamSize[Team];
+		if(GameServer()->GetDDRaceTeam(GetCid()) == 0)
+			++GameServer()->m_pController->m_aTeamSize[Team];
 	}
 
 	m_Team = Team;

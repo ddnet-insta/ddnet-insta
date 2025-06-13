@@ -903,7 +903,8 @@ int CGameControllerPvp::GetAutoTeam(int NotThisId)
 	// check if there're enough player slots left
 	if(FreeInGameSlots())
 	{
-		++m_aTeamSize[Team];
+		if(GameServer()->GetDDRaceTeam(NotThisId) == 0)
+			++m_aTeamSize[Team];
 		return Team;
 	}
 	return TEAM_SPECTATORS;
@@ -1955,6 +1956,13 @@ void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *
 	if(GameState() != IGS_END_ROUND)
 		SaveStatsOnDisconnect(pPlayer);
 
+	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
+	{
+		if(GameServer()->GetDDRaceTeam(pPlayer->GetCid()) == 0)
+			--m_aTeamSize[pPlayer->GetTeam()];
+		m_UnbalancedTick = TBALANCE_CHECK;
+	}
+
 	while(true)
 	{
 		if(!g_Config.m_SvPunishFreezeDisconnect)
@@ -1994,18 +2002,16 @@ void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
 	}
 
-	// ddnet-insta
-	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
-	{
-		--m_aTeamSize[pPlayer->GetTeam()];
-		m_UnbalancedTick = TBALANCE_CHECK;
-	}
-
 	CheckReadyStates(ClientId);
 }
 
 void CGameControllerPvp::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 {
+	// has to be saved for later
+	// because the set team operation kills the character
+	// and then we lose the team information
+	int DDRaceTeam = GameServer()->GetDDRaceTeam(pPlayer->GetCid());
+
 	Team = ClampTeam(Team);
 	if(Team == pPlayer->GetTeam())
 		return;
@@ -2037,12 +2043,14 @@ void CGameControllerPvp::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg
 	// update effected game settings
 	if(OldTeam != TEAM_SPECTATORS)
 	{
-		--m_aTeamSize[OldTeam];
+		if(DDRaceTeam == 0)
+			--m_aTeamSize[OldTeam];
 		m_UnbalancedTick = TBALANCE_CHECK;
 	}
 	if(Team != TEAM_SPECTATORS)
 	{
-		++m_aTeamSize[Team];
+		if(DDRaceTeam == 0)
+			++m_aTeamSize[Team];
 		m_UnbalancedTick = TBALANCE_CHECK;
 		// if(m_GameState == IGS_WARMUP_GAME && HasEnoughPlayers())
 		// 	SetGameState(IGS_WARMUP_GAME, 0);
