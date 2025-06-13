@@ -19,6 +19,7 @@
 #include <game/server/instagib/version.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
+#include <game/server/teams.h>
 #include <game/version.h>
 
 #include <game/server/instagib/antibob.h>
@@ -994,6 +995,17 @@ void CGameControllerPvp::ModifyWeapons(IConsole::IResult *pResult, void *pUserDa
 
 int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
+	// int DDRaceTeam = GameServer()->GetDDRaceTeam(pVictim->GetPlayer()->GetCid());
+	// TODO: handle team state as a switch so we can be sure all future team states
+	//       added in a merge will throw a compiler warning
+	// int TeamState = Teams().GetTeamState(DDRaceTeam);
+	// if(TeamState == CGameTeams::TEAMSTATE_OPEN)
+	// TODO: not sure which team state does what and what we want in ddnet-insta
+	//       but if death would respawn you to t0 you should be moved to spec instead
+	//       but that seems annoying as a default
+	//       not allowing in others into the team as a default also seems annoying
+	//       maybe the new t0 mode would be a nice default state for ddnet-insta
+
 	CGameControllerDDRace::OnCharacterDeath(pVictim, pKiller, Weapon);
 
 	if(pVictim->HasRainbow())
