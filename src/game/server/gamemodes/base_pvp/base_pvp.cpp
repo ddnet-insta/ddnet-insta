@@ -1863,6 +1863,11 @@ bool CGameControllerPvp::OnSkinChange7(protocol7::CNetMsg_Cl_SkinChange *pMsg, i
 
 bool CGameControllerPvp::OnTeamChatCmd(IConsole::IResult *pResult)
 {
+	if(!g_Config.m_SvTeam)
+	{
+		return false;
+	}
+
 	CPlayer *pPlayer = GameServer()->m_apPlayers[pResult->m_ClientId];
 	if(!pPlayer)
 		return false;
