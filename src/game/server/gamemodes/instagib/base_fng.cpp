@@ -301,9 +301,9 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 					str_format(
 						aBuf,
 						sizeof(aBuf),
-						"'%s' stole '%s's kill.",
-						Server()->ClientName(pKiller->GetCid()),
-						Server()->ClientName(pOriginalFreezer->GetCid()));
+						"'%s' kill was stolen by '%s'.",
+						Server()->ClientName(pOriginalFreezer->GetCid()),
+						Server()->ClientName(pKiller->GetCid()));
 					GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 				}
 
