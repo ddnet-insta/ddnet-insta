@@ -76,6 +76,14 @@ public:
 	// try to avoid using that method because it is hacky
 	void SetTeamRaw(int Team);
 
+	// avoid this method at all times
+	// it is a raw setter for m_Team
+	// you should use at least ``SetTeamRaw()`` instead
+	// which updates the correct team member counts
+	// this method should only be needed in hacky scenarios
+	// and will likely cause bugs
+	void SetTeamRawAndUnsafe(int Team) { m_Team = Team; }
+
 	// WARNING: only use this if you really know what you are doing
 	//
 	// in 99% of the cases you should use GetCharacter() instead!

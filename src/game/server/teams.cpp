@@ -410,6 +410,10 @@ const char *CGameTeams::SetCharacterTeam(int ClientId, int Team)
 
 void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
 {
+	// ddnet-insta
+	if(GameServer()->m_pController && GameServer()->m_pController->OnSetDDRaceTeam(ClientId, Team))
+		return;
+
 	m_aTeeStarted[ClientId] = false;
 	m_aTeeFinished[ClientId] = false;
 	int OldTeam = m_Core.Team(ClientId);

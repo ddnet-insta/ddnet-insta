@@ -464,6 +464,17 @@ public:
 	virtual bool OnTeamChatCmd(IConsole::IResult *pResult) { return false; }
 
 	/*
+		Function: OnSetDDRaceTeam
+			Called every time a player changes team
+			Either by explicitly using the /teams command sucessfully
+			or implicitly by dieing or similar
+
+		Returns:
+			return true to not run the ddnet code
+	*/
+	virtual bool OnSetDDRaceTeam(int ClientId, int Team) { return false; }
+
+	/*
 		Function: OnChangeInfoNetMessage
 			hooks into CGameContext::OnChangeInfoNetMessage()
 			after spam protection check

@@ -995,17 +995,6 @@ void CGameControllerPvp::ModifyWeapons(IConsole::IResult *pResult, void *pUserDa
 
 int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
-	// int DDRaceTeam = GameServer()->GetDDRaceTeam(pVictim->GetPlayer()->GetCid());
-	// TODO: handle team state as a switch so we can be sure all future team states
-	//       added in a merge will throw a compiler warning
-	// int TeamState = Teams().GetTeamState(DDRaceTeam);
-	// if(TeamState == CGameTeams::TEAMSTATE_OPEN)
-	// TODO: not sure which team state does what and what we want in ddnet-insta
-	//       but if death would respawn you to t0 you should be moved to spec instead
-	//       but that seems annoying as a default
-	//       not allowing in others into the team as a default also seems annoying
-	//       maybe the new t0 mode would be a nice default state for ddnet-insta
-
 	CGameControllerDDRace::OnCharacterDeath(pVictim, pKiller, Weapon);
 
 	if(pVictim->HasRainbow())
@@ -1881,6 +1870,67 @@ bool CGameControllerPvp::OnTeamChatCmd(IConsole::IResult *pResult)
 	pPlayer->SetTeam(TEAM_RED, false);
 	pPlayer->m_RespawnTick = 0;
 	pPlayer->TryRespawn();
+
+	return false;
+}
+
+bool CGameControllerPvp::OnSetDDRaceTeam(int ClientId, int Team)
+{
+	// only joining team 0
+	// forces players to spectators
+	// to avoid players interrrupting gameplay
+	if(Team != TEAM_FLOCK)
+		return false;
+
+	CPlayer *pPlayer = GetPlayerOrNullptr(ClientId);
+	if(!pPlayer)
+		return false;
+
+	// to avoid recursive loop
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+		return false;
+
+	// to avoid recursive loop
+	// because SetTeam kills and killing sets the team
+	int OldDDRaceTeam = GameServer()->GetDDRaceTeam(ClientId);
+	if(OldDDRaceTeam == TEAM_FLOCK)
+		return false;
+
+	// set m_Team directly to avoid recursive loop
+	// we do not update the team size because this is not t0
+	// and later we again call SetTeam which sends the team change
+	// net message so clients are aware of the correct team
+	//
+	// TODO: revist this and check if 0.7 works correctly
+	//       see https://github.com/ddnet-insta/ddnet-insta/issues/362
+	pPlayer->SetTeamRawAndUnsafe(TEAM_SPECTATORS);
+
+	CCharacter *pChr = GameServer()->GetPlayerChar(ClientId);
+	if(pChr && pChr->IsAlive())
+	{
+		// the /team chat command is block for in game players
+		// so only death should move you to team 0
+		// any other cases is unexpected and should be investigated.
+		//
+		// ideally this branch is never hit because then some assumption is wrong
+		// but we might be able to recover using SetTeam so this is not an assert
+		log_error(
+			"ddnet-insta",
+			"cid=%d changed from ddrace team %d to ddrace team 0 but is still alive",
+			ClientId,
+			OldDDRaceTeam);
+		pPlayer->SetTeam(TEAM_SPECTATORS);
+	}
+	else
+	{
+		// this is the expected branch
+		// the players death triggerd the team change
+		// so we have to use the NoKill version of set team
+		// otherwise the player is killed twice
+		// which causes nullptr issues
+		pPlayer->SetTeamNoKill(TEAM_SPECTATORS);
+		SendChatTarget(ClientId, "You were forced to spectators because you left the ddrace team. Use /lock to stay in game");
+	}
 
 	return false;
 }
