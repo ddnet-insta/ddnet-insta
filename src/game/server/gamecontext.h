@@ -361,6 +361,8 @@ public:
 	void OnClientPredictedInput(int ClientId, void *pInput) override;
 	void OnClientPredictedEarlyInput(int ClientId, void *pInput) override;
 
+	void PreInputClients(int ClientId, bool *pClients) override;
+
 	void TeehistorianRecordAntibot(const void *pData, int DataSize) override;
 	void TeehistorianRecordPlayerJoin(int ClientId, bool Sixup) override;
 	void TeehistorianRecordPlayerDrop(int ClientId, const char *pReason) override;
@@ -513,6 +515,7 @@ private:
 	static void ConSetTimerType(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescue(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescueMode(IConsole::IResult *pResult, void *pUserData);
+	static void ConBack(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleTo(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleXY(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleCursor(IConsole::IResult *pResult, void *pUserData);

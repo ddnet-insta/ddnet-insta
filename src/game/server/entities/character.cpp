@@ -978,6 +978,8 @@ void CCharacter::StopRecording()
 
 void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 {
+	if(Killer != WEAPON_GAME && m_SetSavePos[RESCUEMODE_AUTO])
+		GetPlayer()->m_LastDeath = m_RescueTee[RESCUEMODE_AUTO];
 	StopRecording();
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, (Killer < 0) ? nullptr : GameServer()->m_apPlayers[Killer], Weapon);
 
@@ -2511,7 +2513,7 @@ void CCharacter::Rescue()
 		}
 
 		m_LastRescue = Server()->Tick();
-		float StartTime = m_StartTime;
+		int StartTime = m_StartTime;
 		m_RescueTee[GetPlayer()->m_RescueMode].Load(this, Team());
 		// Don't load these from saved tee:
 		m_Core.m_Vel = vec2(0, 0);
