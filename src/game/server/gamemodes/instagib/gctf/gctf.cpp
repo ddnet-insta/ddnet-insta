@@ -1,3 +1,4 @@
+#include <engine/shared/config.h>
 #include <game/server/entities/character.h>
 
 #include "gctf.h"

@@ -1,4 +1,5 @@
 #include <base/log.h>
+#include <engine/shared/config.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 #include <game/server/gamecontext.h>
