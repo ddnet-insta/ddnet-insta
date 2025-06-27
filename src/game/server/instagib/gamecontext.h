@@ -82,6 +82,7 @@ public:
 	static void ConClearMapPool(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomMapFromPool(IConsole::IResult *pResult, void *pUserData);
 	static void ConGctfAntibot(IConsole::IResult *pResult, void *pUserData);
+	static void ConKnownAntibot(IConsole::IResult *pResult, void *pUserData);
 
 	// chat_commands.cpp
 	static void ConCreditsGctf(IConsole::IResult *pResult, void *pUserData);

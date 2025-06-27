@@ -379,6 +379,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `clear_map_pool` Clears pool used by random_map_from_pool command
 + `random_map_from_pool` Changes to random map from pool (see add_map_to_pool)
 + `gctf_antibot` runs the antibot command gctf (depends on closed source module)
++ `known_antibot` runs the antibot command known (depends on antibob antibot module)
 + `redirect` Redirect client to given port use victim \"all\" to redirect all but your self
 
 # Chat commands

@@ -181,3 +181,9 @@ void CGameContext::ConGctfAntibot(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->Antibot()->ConsoleCommand("gctf");
 }
+
+void CGameContext::ConKnownAntibot(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->Antibot()->ConsoleCommand("known");
+}

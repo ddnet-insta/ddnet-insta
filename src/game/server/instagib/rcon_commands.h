@@ -24,6 +24,7 @@ CONSOLE_COMMAND("clear_map_pool", "", CFGFLAG_SERVER, ConClearMapPool, this, "Cl
 CONSOLE_COMMAND("random_map_from_pool", "", CFGFLAG_SERVER, ConRandomMapFromPool, this, "Changes to random map from pool (see add_map_to_pool)")
 
 CONSOLE_COMMAND("gctf_antibot", "", CFGFLAG_SERVER, ConGctfAntibot, this, "runs the antibot command gctf (depends on closed source module)")
+CONSOLE_COMMAND("known_antibot", "", CFGFLAG_SERVER, ConKnownAntibot, this, "runs the antibot command known (depends on antibob antibot module)")
 
 CONSOLE_COMMAND("redirect", "v[victim] i[port]", CFGFLAG_SERVER, CServer::ConRedirect, Server(), "Redirect client to given port use victim \"all\" to redirect all but your self")
 
