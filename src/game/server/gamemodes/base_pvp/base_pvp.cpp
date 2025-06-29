@@ -1914,6 +1914,8 @@ bool CGameControllerPvp::OnSetDDRaceTeam(int ClientId, int Team)
 		//
 		// ideally this branch is never hit because then some assumption is wrong
 		// but we might be able to recover using SetTeam so this is not an assert
+		//
+		// UPDATE: I saw this log in production. Can not reproduce yet.
 		log_error(
 			"ddnet-insta",
 			"cid=%d changed from ddrace team %d to ddrace team 0 but is still alive",
