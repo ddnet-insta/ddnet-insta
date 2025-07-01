@@ -23,7 +23,7 @@ MACRO_CONFIG_INT(SvPlayerReadyMode, sv_player_ready_mode, 0, 0, 1, CFGFLAG_SAVE 
 MACRO_CONFIG_INT(SvForceReadyAll, sv_force_ready_all, 0, 0, 60, CFGFLAG_SAVE | CFGFLAG_SERVER, "minutes after which a game will be force unpaused (0=off) related to sv_player_ready_mode")
 MACRO_CONFIG_INT(SvStopAndGoChat, sv_stop_and_go_chat, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "pause then game when someone writes 'pause' or 'stop' and start with 'go' or 'start'")
 MACRO_CONFIG_INT(SvPowerups, sv_powerups, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Allow powerups like ninja")
-MACRO_CONFIG_INT(SvTeambalanceTime, sv_teambalance_time, 0, 0, 1000, CFGFLAG_SAVE | CFGFLAG_SERVER, "How many minutes to wait before autobalancing teams")
+MACRO_CONFIG_INT(SvTeambalanceTime, sv_teambalance_time, 0, 0, 1000, CFGFLAG_SAVE | CFGFLAG_SERVER, "How many minutes to wait before autobalancing teams (0=off)")
 MACRO_CONFIG_INT(SvTeamdamage, sv_teamdamage, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Team damage")
 
 MACRO_CONFIG_INT(SvTeamScoreSpikeNormal, sv_team_score_normal, 5, 0, 100, CFGFLAG_SERVER, "Points a team receives for grabbing into normal spikes")
