@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/hash_ctxt.h>
+#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 
@@ -630,6 +631,10 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 					pChunk->m_Flags |= NETSENDFLAG_EXTENDED;
 					mem_copy(pChunk->m_aExtraData, m_RecvUnpacker.m_Data.m_aExtraData, sizeof(pChunk->m_aExtraData));
 				}
+
+				if(pChunk->m_DataSize < 0)
+					log_error("network", "%s:%d pChunk->m_DataSize = %d", __FILE__, __LINE__, pChunk->m_DataSize);
+
 				return 1;
 			}
 			else

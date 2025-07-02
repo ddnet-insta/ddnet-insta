@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "config.h"
 #include "network.h"
+#include <base/log.h>
 #include <base/system.h>
 
 void CNetConnection::SetPeerAddr(const NETADDR *pAddr)
@@ -323,6 +324,10 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 		if(pPacket->m_DataSize < (int)sizeof(m_SecurityToken))
 			return 0;
 		pPacket->m_DataSize -= sizeof(m_SecurityToken);
+
+		if(pPacket->m_DataSize < 0)
+			log_error("network", "%s:%d pPacket->m_DataSize = %d", __FILE__, __LINE__, pPacket->m_DataSize);
+
 		if(m_SecurityToken != ToSecurityToken(&pPacket->m_aChunkData[pPacket->m_DataSize]))
 		{
 			if(g_Config.m_Debug)

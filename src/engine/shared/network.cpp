@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/log.h>
 #include <base/system.h>
 #include <base/types.h>
 
@@ -37,6 +38,8 @@ void CNetRecvUnpacker::Start(const NETADDR *pAddr, CNetConnection *pConnection, 
 int CNetRecvUnpacker::FetchChunk(CNetChunk *pChunk)
 {
 	CNetChunkHeader Header;
+	if(m_Data.m_DataSize < 0)
+		log_error("network", "%s:%d m_Data.m_DataSize = %d", __FILE__, __LINE__, m_Data.m_DataSize);
 	unsigned char *pEnd = m_Data.m_aChunkData + m_Data.m_DataSize;
 
 	while(true)
@@ -98,6 +101,10 @@ int CNetRecvUnpacker::FetchChunk(CNetChunk *pChunk)
 		pChunk->m_Flags = Header.m_Flags;
 		pChunk->m_DataSize = Header.m_Size;
 		pChunk->m_pData = pData;
+
+		if(pChunk->m_DataSize < 0)
+			log_error("network", "%s:%d pChunk->m_DataSize = %d", __FILE__, __LINE__, pChunk->m_DataSize);
+
 		return 1;
 	}
 }
@@ -255,6 +262,10 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		pPacket->m_Ack = 0;
 		pPacket->m_NumChunks = 0;
 		pPacket->m_DataSize = Size - Offset;
+
+		if(pPacket->m_DataSize < 0)
+			log_error("network", "%s:%d connless pPacket->m_DataSize = %d", __FILE__, __LINE__, pPacket->m_DataSize);
+
 		mem_copy(pPacket->m_aChunkData, pBuffer + Offset, pPacket->m_DataSize);
 
 		if(!Sixup && mem_comp(pBuffer, NET_HEADER_EXTENDED, sizeof(NET_HEADER_EXTENDED)) == 0)
@@ -276,6 +287,9 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		pPacket->m_Ack = ((pBuffer[0] & 0x3) << 8) | pBuffer[1];
 		pPacket->m_NumChunks = pBuffer[2];
 		pPacket->m_DataSize = Size - DataStart;
+
+		if(pPacket->m_DataSize < 0)
+			log_error("network", "%s:%d connection oriented sixup=%d pPacket->m_DataSize = %d", __FILE__, __LINE__, Sixup, pPacket->m_DataSize);
 
 		if(Sixup)
 		{
@@ -299,6 +313,9 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 				return -1;
 			}
 			pPacket->m_DataSize = ms_Huffman.Decompress(&pBuffer[DataStart], pPacket->m_DataSize, pPacket->m_aChunkData, sizeof(pPacket->m_aChunkData));
+
+			if(pPacket->m_DataSize < 0)
+				log_error("network", "%s:%d after huffman decompress pPacket->m_DataSize = %d", __FILE__, __LINE__, pPacket->m_DataSize);
 		}
 		else
 			mem_copy(pPacket->m_aChunkData, &pBuffer[DataStart], pPacket->m_DataSize);
@@ -311,6 +328,10 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 			dbg_msg("network", "error during packet decoding");
 		return -1;
 	}
+
+	// check for errors loud
+	if(pPacket->m_DataSize < 0)
+		log_error("network", "%s:%d pPacket->m_DataSize = %d", __FILE__, __LINE__, pPacket->m_DataSize);
 
 	// set the response token (a bit hacky because this function shouldn't know about control packets)
 	if(pPacket->m_Flags & NET_PACKETFLAG_CONTROL)
