@@ -39,7 +39,11 @@ int CNetRecvUnpacker::FetchChunk(CNetChunk *pChunk)
 {
 	CNetChunkHeader Header;
 	if(m_Data.m_DataSize < 0)
-		log_error("network", "%s:%d m_Data.m_DataSize = %d", __FILE__, __LINE__, m_Data.m_DataSize);
+	{
+		char aAddr[512];
+		net_addr_str(&m_Addr, aAddr, sizeof(aAddr), true);
+		log_error("network", "%s:%d m_Data.m_DataSize=%d ClientId=%d Addr=%s", __FILE__, __LINE__, m_Data.m_DataSize, m_ClientId, aAddr);
+	}
 	unsigned char *pEnd = m_Data.m_aChunkData + m_Data.m_DataSize;
 
 	while(true)
@@ -312,10 +316,16 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 			{
 				return -1;
 			}
+			int DataSize = pPacket->m_DataSize;
 			pPacket->m_DataSize = ms_Huffman.Decompress(&pBuffer[DataStart], pPacket->m_DataSize, pPacket->m_aChunkData, sizeof(pPacket->m_aChunkData));
 
 			if(pPacket->m_DataSize < 0)
+			{
 				log_error("network", "%s:%d after huffman decompress pPacket->m_DataSize = %d", __FILE__, __LINE__, pPacket->m_DataSize);
+				char aHex[2048];
+				str_hex(aHex, sizeof(aHex), &pBuffer[DataStart], DataSize);
+				log_error("network", "%s", aHex);
+			}
 		}
 		else
 			mem_copy(pPacket->m_aChunkData, &pBuffer[DataStart], pPacket->m_DataSize);

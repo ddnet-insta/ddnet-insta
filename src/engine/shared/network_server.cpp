@@ -644,6 +644,9 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 					m_RecvUnpacker.m_Data.m_DataSize == 0)
 					continue;
 
+				if(m_RecvUnpacker.m_Data.m_DataSize < 0)
+					log_error("network", "%s:%d m_RecvUnpacker.m_Data.m_DataSize = %d", __FILE__, __LINE__, m_RecvUnpacker.m_Data.m_DataSize);
+
 				// normal packet, find matching slot
 				int Slot = GetClientSlot(Addr);
 
@@ -666,6 +669,9 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 					{
 						if(m_RecvUnpacker.m_Data.m_DataSize)
 							m_RecvUnpacker.Start(&Addr, &m_aSlots[Slot].m_Connection, Slot);
+
+						if(m_RecvUnpacker.m_Data.m_DataSize < 0)
+							log_error("network", "%s:%d found slot m_RecvUnpacker.m_Data.m_DataSize = %d", __FILE__, __LINE__, m_RecvUnpacker.m_Data.m_DataSize);
 					}
 				}
 				else

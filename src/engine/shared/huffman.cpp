@@ -264,7 +264,7 @@ int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int O
 
 				// no more bits, decoding error
 				if(Bitcount == 0)
-					return -1;
+					return -2;
 			}
 		}
 
@@ -274,7 +274,7 @@ int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int O
 
 		// output character
 		if(pDst == pDstEnd)
-			return -1;
+			return -3;
 		*pDst++ = pNode->m_Symbol;
 	}
 
