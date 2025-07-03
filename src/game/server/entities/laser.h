@@ -8,6 +8,8 @@
 class CLaser : public CEntity
 {
 public:
+	CLaser(CGameWorld *pGameWorld) :
+		CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER) {} // ddnet-insta, to use different DoBounce function without overriding it
 	CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type);
 
 	virtual void Reset() override;
@@ -22,7 +24,7 @@ protected:
 	bool HitCharacter(vec2 From, vec2 To);
 	void DoBounce();
 
-private:
+protected: // ddnet-insta protected instead of private for pvp laser inheritance
 	vec2 m_From;
 	vec2 m_Dir;
 	vec2 m_TelePos;

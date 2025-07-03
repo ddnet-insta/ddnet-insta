@@ -7,9 +7,11 @@
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
+#include <game/generated/server_data.h>
 #include <game/race_state.h>
 #include <game/server/entities/character.h>
-#include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
+#include <game/server/entities/ddnet_pvp/pvp_laser.h>
+#include <game/server/entities/ddnet_pvp/pvp_projectile.h>
 #include <game/server/entities/flag.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/instagib/enums.h>
@@ -2261,13 +2263,72 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 	if(Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_Ammo > 0) // -1 == unlimited
 		Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_Ammo--;
 
-	if(Weapon == WEAPON_GUN)
+	if(Weapon == WEAPON_HAMMER)
+	{
+		// reset objects Hit
+		Character.m_NumObjectsHit = 0;
+		GameServer()->CreateSound(Character.m_Pos, SOUND_HAMMER_FIRE, Character.TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+
+		Character.Antibot()->OnHammerFire(Character.m_pPlayer->GetCid());
+
+		if(!Character.m_Core.m_HammerHitDisabled)
+		{
+			CEntity *apEnts[MAX_CLIENTS];
+			int Hits = 0;
+			int Num = GameServer()->m_Rollback.FindCharactersOnTick(ProjStartPos, Character.GetProximityRadius() * 0.5f, apEnts,
+				MAX_CLIENTS, Character.m_pPlayer->m_LastAckedSnapshot);
+
+			for(int i = 0; i < Num; ++i)
+			{
+				auto *pTarget = static_cast<CCharacter *>(apEnts[i]);
+
+				//if ((pTarget == this) || Collision()->IntersectLine(ProjStartPos, pTarget->m_Pos, NULL, NULL))
+				if((pTarget == Character.m_pPlayer->GetCharacter() || (pTarget->IsAlive() && !Character.CanCollide(pTarget->GetPlayer()->GetCid()))))
+					continue;
+
+				// set his velocity to fast upward (for now)
+				if(length(pTarget->m_Pos - ProjStartPos) > 0.0f)
+					GameServer()->CreateHammerHit(pTarget->m_Pos - normalize(pTarget->m_Pos - ProjStartPos) * Character.GetProximityRadius() * 0.5f, Character.TeamMask());
+				else
+					GameServer()->CreateHammerHit(ProjStartPos, Character.TeamMask());
+
+				vec2 Dir;
+				if(length(pTarget->m_Pos - Character.m_Pos) > 0.0f)
+					Dir = normalize(pTarget->m_Pos - Character.m_Pos);
+				else
+					Dir = vec2(0.f, -1.f);
+
+				float Strength = Character.GetTuning(Character.m_TuneZone)->m_HammerStrength;
+
+				vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+				Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
+				Temp -= pTarget->m_Core.m_Vel;
+				pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
+					Character.m_pPlayer->GetCid(), Character.m_Core.m_ActiveWeapon);
+
+				if(!GameServer()->m_pController->IsFngGameType())
+					pTarget->UnFreeze();
+
+				Character.Antibot()->OnHammerHit(Character.m_pPlayer->GetCid(), pTarget->GetPlayer()->GetCid());
+
+				Hits++;
+			}
+
+			// if we Hit anything, we have to wait for the reload
+			if(Hits)
+			{
+				float FireDelay = Character.GetTuning(Character.m_TuneZone)->m_HammerHitFireDelay;
+				Character.m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+			}
+		}
+	}
+	else if(Weapon == WEAPON_GUN)
 	{
 		if(!Character.m_Core.m_Jetpack || !Character.m_pPlayer->m_NinjaJetpack || Character.m_Core.m_HasTelegunGun)
 		{
 			int Lifetime = (int)(Server()->TickSpeed() * Character.GetTuning(Character.m_TuneZone)->m_GunLifetime);
 
-			new CVanillaProjectile(
+			new CPvpProjectile(
 				Character.GameWorld(),
 				WEAPON_GUN, //Type
 				Character.m_pPlayer->GetCid(), //Owner
@@ -2297,7 +2358,7 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 
 			// TODO: not sure about Dir and InitDir and prediction
 
-			new CVanillaProjectile(
+			new CPvpProjectile(
 				Character.GameWorld(),
 				WEAPON_SHOTGUN, // Type
 				Character.GetPlayer()->GetCid(), // Owner
@@ -2311,6 +2372,32 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 		}
 
 		GameServer()->CreateSound(Character.m_Pos, SOUND_SHOTGUN_FIRE); // NOLINT(clang-analyzer-unix.Malloc)
+	}
+	else if(Weapon == WEAPON_GRENADE)
+	{
+		int Lifetime = (int)(Server()->TickSpeed() * Character.GetTuning(Character.m_TuneZone)->m_GrenadeLifetime);
+
+		new CPvpProjectile(
+			Character.GameWorld(),
+			WEAPON_GRENADE, //Type
+			Character.m_pPlayer->GetCid(), //Owner
+			ProjStartPos, //Pos
+			Direction, //Dir
+			Lifetime, //Span
+			false, //Freeze
+			true, //Explosive
+			SOUND_GRENADE_EXPLODE, //SoundImpact
+			MouseTarget // MouseTarget
+		);
+
+		GameServer()->CreateSound(Character.m_Pos, SOUND_GRENADE_FIRE, Character.TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+	}
+	else if(Weapon == WEAPON_LASER)
+	{
+		float LaserReach = Character.GetTuning(Character.m_TuneZone)->m_LaserReach;
+
+		new CPvpLaser(Character.GameWorld(), Character.m_Pos, Direction, LaserReach, Character.m_pPlayer->GetCid(), WEAPON_LASER);
+		GameServer()->CreateSound(Character.m_Pos, SOUND_LASER_FIRE, Character.TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	else
 	{

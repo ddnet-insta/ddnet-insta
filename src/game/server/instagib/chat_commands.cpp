@@ -1,4 +1,5 @@
 #include <base/system.h>
+#include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
@@ -481,6 +482,51 @@ void CGameContext::ConRankFlagCaptures(IConsole::IResult *pResult, void *pUserDa
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
 	pSelf->m_pController->m_pSqlStats->ShowRank(pResult->m_ClientId, pName, "Flag captures", "flag_captures", pSelf->m_pController->StatsTable(), "DESC");
+}
+
+void CGameContext::ConRollback(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	if(!pSelf->m_pController)
+		return;
+
+	if(pSelf->m_pController->IsDDRaceGameType())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "This command is not available in ddrace gametypes.");
+		return;
+	}
+
+	if(!g_Config.m_SvRollback)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Rollback is not allowed on this server.");
+		return;
+	}
+
+	if(!pSelf->m_apPlayers[pResult->m_ClientId])
+		return;
+
+	if(!pSelf->m_apPlayers[pResult->m_ClientId]->m_RollbackEnabled)
+	{
+		pSelf->m_apPlayers[pResult->m_ClientId]->m_RollbackEnabled = true;
+		pSelf->SendChatTarget(pResult->m_ClientId, "Rollback enabled.");
+
+		if(pSelf->GetClientVersion(pResult->m_ClientId) >= VERSION_DDNET_ANTIPING_PROJECTILE)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientId, "DDNet Client detected, for correct rollback experience please set the following Antiping settings:");
+			pSelf->SendChatTarget(pResult->m_ClientId, "* Antiping: ON");
+			pSelf->SendChatTarget(pResult->m_ClientId, "* Antiping: predict other players: OFF");
+			pSelf->SendChatTarget(pResult->m_ClientId, "* Antiping: predict weapons: ON");
+			pSelf->SendChatTarget(pResult->m_ClientId, "* Antiping: predict grenade paths: ON");
+		}
+	}
+	else
+	{
+		pSelf->m_apPlayers[pResult->m_ClientId]->m_RollbackEnabled = false;
+		pSelf->SendChatTarget(pResult->m_ClientId, "Rollback disabled.");
+	}
 }
 
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;

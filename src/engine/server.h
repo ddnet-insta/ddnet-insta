@@ -317,6 +317,7 @@ class IGameServer : public IInterface
 public:
 	virtual const char *ServerInfoPlayerScoreKind() = 0;
 	virtual bool OnClientPacket(int ClientId, bool Sys, int MsgId, struct CNetChunk *pPacket, class CUnpacker *pUnpacker) = 0;
+	virtual void SetPlayerLastAckedSnapshot(int ClientId, int Tick){}; //ddnet-insta rollback
 
 protected:
 public:

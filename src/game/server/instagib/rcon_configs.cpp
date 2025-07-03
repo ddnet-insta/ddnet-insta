@@ -24,6 +24,7 @@ void CGameContext::RegisterInstagibCommands()
 	Console()->Chain("sv_display_score", ConchainDisplayScore, this);
 	Console()->Chain("sv_only_wallshot_kills", ConchainOnlyWallshotKills, this);
 	Console()->Chain("sv_allow_zoom", ConchainAllowZoom, this);
+	Console()->Chain("sv_rollback", ConchainRollback, this);
 
 	// generated undocumented chat commands
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;
@@ -214,4 +215,23 @@ void CGameContext::ConchainAllowZoom(IConsole::IResult *pResult, void *pUserData
 	str_format(aBuf, sizeof(aBuf), "antibot sv_allow_zoom %d", g_Config.m_SvAllowZoom);
 	pSelf->Console()->ExecuteLine(aBuf);
 #endif
+}
+
+void CGameContext::ConchainRollback(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+
+	//Dont keep rollback enabled if server does not allow it
+
+	if(!g_Config.m_SvRollback)
+	{
+		for(CPlayer *pPlayer : pSelf->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+
+			pPlayer->m_RollbackEnabled = false;
+		}
+	}
 }

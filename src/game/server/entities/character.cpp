@@ -844,6 +844,8 @@ void CCharacter::TickDeferred()
 	m_Core.Quantize();
 	bool StuckAfterQuant = Collision()->TestBox(m_Core.m_Pos, CCharacterCore::PhysicalSizeVec2());
 	m_Pos = m_Core.m_Pos;
+	m_Positions[Server()->Tick() % ROLLBACK_POSITION_HISTORY].m_Position = m_Pos; //ddnet-insta rollback
+	m_Positions[Server()->Tick() % ROLLBACK_POSITION_HISTORY].m_Valid = true; //ddnet-insta rollback
 
 	if(!StuckBefore && (StuckAfterMove || StuckAfterQuant))
 	{
