@@ -321,10 +321,19 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 
 			if(pPacket->m_DataSize < 0)
 			{
-				log_error("network", "%s:%d after huffman decompress pPacket->m_DataSize = %d", __FILE__, __LINE__, pPacket->m_DataSize);
-				char aHex[2048];
+				log_error("network", "%s:%d after huffman decompress pPacket->m_DataSize=%d DataSize=%d", __FILE__, __LINE__, pPacket->m_DataSize, DataSize);
+				char aHex[8000];
 				str_hex(aHex, sizeof(aHex), &pBuffer[DataStart], DataSize);
-				log_error("network", "%s", aHex);
+
+				unsigned char aHeader[NET_PACKETHEADERSIZE];
+				aHeader[0] = ((pPacket->m_Flags << 2) & 0xfc) | ((pPacket->m_Ack >> 8) & 0x3);
+				aHeader[1] = pPacket->m_Ack & 0xff;
+				aHeader[2] = pPacket->m_NumChunks;
+
+				char aHexHeader[512];
+				str_hex(aHexHeader, sizeof(aHexHeader), aHeader, sizeof(aHeader));
+
+				log_error("network", "%s %s", aHexHeader, aHex);
 			}
 		}
 		else
