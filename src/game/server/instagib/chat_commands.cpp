@@ -483,6 +483,59 @@ void CGameContext::ConRankFlagCaptures(IConsole::IResult *pResult, void *pUserDa
 	pSelf->m_pController->m_pSqlStats->ShowRank(pResult->m_ClientId, pName, "Flag captures", "flag_captures", pSelf->m_pController->StatsTable(), "DESC");
 }
 
+void CGameContext::ConTopSpikeColors(IConsole::IResult *pResult, void *pUserData)
+{
+	const auto *pSelf = static_cast<CGameContext *>(pUserData);
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	if(!pSelf->m_pController)
+		return;
+
+	if(pSelf->m_pController->IsFngGameType())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "This command only available in fng gametypes.");
+		return;
+	}
+
+	const char *pName = pSelf->Server()->ClientName(pResult->m_ClientId);
+	const char *pSpikeColor = pResult->GetString(0);
+	const int Offset = pResult->NumArguments() > 1 ? pResult->GetInteger(1) : 1;
+	const char *apSpikeColors[] = {
+		"gold",
+		"green",
+		"purple"};
+
+	for(const char *pColor : apSpikeColors)
+	{
+		if(str_comp_nocase(pSpikeColor, pColor) == 0)
+		{
+			char aDisplayName[64];
+			str_format(aDisplayName, sizeof(aDisplayName), "%s spikes", pColor);
+
+			char aDbColumn[64];
+			str_format(aDbColumn, sizeof(aDbColumn), "%s_spikes", pColor);
+
+			pSelf->m_pController->m_pSqlStats->ShowTop(
+				pResult->m_ClientId, pName,
+				aDisplayName,
+				aDbColumn,
+				pSelf->m_pController->StatsTable(),
+				"DESC",
+				Offset);
+			return;
+		}
+	}
+
+	pSelf->SendChatTarget(pResult->m_ClientId, "~~~ Usage: /top5spikes <color> - Available colors:");
+	for(const char *pColor : apSpikeColors)
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "~ %s", pColor);
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+	}
+}
+
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;
 #define MACRO_RANK_COLUMN(name, sql_name, display_name, order_by) \
 	void CGameContext::ConInstaRank##name(IConsole::IResult *pResult, void *pUserData) \

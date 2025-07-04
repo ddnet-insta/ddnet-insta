@@ -415,6 +415,7 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `/top5flags` Shows the all time best ranks by flag time
 + `/top5caps` Shows the all time best ranks by amount of flag captures
 + `/rank_caps` Shows the all time flag capture rank of player name (your stats by default)
++ `/top5spikes` Shows the best ranks in terms of spike kills of all time
 
 # Publish round stats
 
