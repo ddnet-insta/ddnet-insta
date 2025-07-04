@@ -20,6 +20,7 @@
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/server/teams.h>
+#include <game/teamscore.h>
 #include <game/version.h>
 
 #include <game/server/instagib/antibob.h>
@@ -1894,6 +1895,9 @@ bool CGameControllerPvp::OnSetDDRaceTeam(int ClientId, int Team)
 	// because SetTeam kills and killing sets the team
 	int OldDDRaceTeam = GameServer()->GetDDRaceTeam(ClientId);
 	if(OldDDRaceTeam == TEAM_FLOCK)
+		return false;
+
+	if(OldDDRaceTeam == TEAM_SUPER)
 		return false;
 
 	// set m_Team directly to avoid recursive loop
