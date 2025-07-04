@@ -492,7 +492,7 @@ void CGameContext::ConTopSpikeColors(IConsole::IResult *pResult, void *pUserData
 	if(!pSelf->m_pController)
 		return;
 
-	if(pSelf->m_pController->IsFngGameType())
+	if(!pSelf->m_pController->IsFngGameType())
 	{
 		pSelf->SendChatTarget(pResult->m_ClientId, "This command only available in fng gametypes.");
 		return;
