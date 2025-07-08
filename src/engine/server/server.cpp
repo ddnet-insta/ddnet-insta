@@ -50,8 +50,6 @@
 
 using namespace std::chrono_literals;
 
-extern bool IsInterrupted();
-
 #if defined(CONF_PLATFORM_ANDROID)
 extern std::vector<std::string> FetchAndroidServerCommandQueue();
 #endif
@@ -2726,14 +2724,13 @@ void CServer::PumpNetwork(bool PacketWaiting)
 						CUnpacker Unpacker;
 						Unpacker.Reset((unsigned char *)Packet.m_pData + sizeof(SERVERBROWSE_GETINFO), Packet.m_DataSize - sizeof(SERVERBROWSE_GETINFO));
 						int SrvBrwsToken = Unpacker.GetInt();
-						if(Unpacker.Error())
+						if(Unpacker.Error() || SrvBrwsToken < 0)
 						{
 							continue;
 						}
 
 						CPacker Packer;
 						GetServerInfoSixup(&Packer, SrvBrwsToken, RateLimitServerInfoConnless());
-
 						CNetBase::SendPacketConnlessWithToken7(m_NetServer.Socket(), &Packet.m_Address, Packer.Data(), Packer.Size(), ResponseToken, m_NetServer.GetToken(Packet.m_Address));
 					}
 					else if(Type != -1)
@@ -3896,9 +3893,9 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 
 	CMysqlConfig Config;
 	bool Write;
-	if(str_comp_nocase(pResult->GetString(0), "w") == 0)
+	if(str_comp_nocase(pResult->GetString(0), "r") == 0)
 		Write = false;
-	else if(str_comp_nocase(pResult->GetString(0), "r") == 0)
+	else if(str_comp_nocase(pResult->GetString(0), "w") == 0)
 		Write = true;
 	else
 	{

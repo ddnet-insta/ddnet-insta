@@ -256,6 +256,7 @@ public:
 	char m_aaZoneLeaveMsg[NUM_TUNEZONES][256];
 
 	void CreateAllEntities(bool Initial);
+	CPlayer *CreatePlayer(int ClientId, int StartTeam, bool Afk, int LastWhisperTo);
 
 	char m_aDeleteTempfile[128];
 	void DeleteTempfile();
@@ -627,6 +628,9 @@ public:
 	inline bool IsOptionVote() const { return m_VoteType == VOTE_TYPE_OPTION; }
 	inline bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; }
 	inline bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; }
+
+	bool IsRunningVote(int ClientId) const;
+	bool IsRunningKickOrSpecVote(int ClientId) const;
 
 	void SendRecord(int ClientId);
 	void SendFinish(int ClientId, float Time, float PreviousBestTime);

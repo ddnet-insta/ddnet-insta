@@ -22,6 +22,7 @@
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/server/teams.h>
+#include <game/teamscore.h>
 #include <game/version.h>
 
 #include <game/server/instagib/antibob.h>
@@ -1898,6 +1899,9 @@ bool CGameControllerPvp::OnSetDDRaceTeam(int ClientId, int Team)
 	if(OldDDRaceTeam == TEAM_FLOCK)
 		return false;
 
+	if(OldDDRaceTeam == TEAM_SUPER)
+		return false;
+
 	// set m_Team directly to avoid recursive loop
 	// we do not update the team size because this is not t0
 	// and later we again call SetTeam which sends the team change
@@ -1916,6 +1920,8 @@ bool CGameControllerPvp::OnSetDDRaceTeam(int ClientId, int Team)
 		//
 		// ideally this branch is never hit because then some assumption is wrong
 		// but we might be able to recover using SetTeam so this is not an assert
+		//
+		// UPDATE: I saw this log in production. Can not reproduce yet.
 		log_error(
 			"ddnet-insta",
 			"cid=%d changed from ddrace team %d to ddrace team 0 but is still alive",
