@@ -15,7 +15,7 @@ class CGameContext : public IGameServer
 #endif // IN_CLASS_IGAMECONTEXT
 
 public:
-	const char *ServerInfoPlayerScoreKind() override { return "points"; }
+	const char *ServerInfoClientScoreKind() override { return "points"; }
 
 	// instagib/gamecontext.cpp
 	void OnInitInstagib();

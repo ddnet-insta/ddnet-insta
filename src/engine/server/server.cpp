@@ -2605,7 +2605,7 @@ void CServer::UpdateRegisterServerInfo()
 	JsonWriter.WriteStrValue(GameServer()->Version());
 
 	JsonWriter.WriteAttribute("client_score_kind");
-	JsonWriter.WriteStrValue(GameServer()->ServerInfoPlayerScoreKind()); // "points" or "time"
+	JsonWriter.WriteStrValue(GameServer()->ServerInfoClientScoreKind()); // "points" or "time"
 
 	JsonWriter.WriteAttribute("requires_login");
 	JsonWriter.WriteBoolValue(false);
