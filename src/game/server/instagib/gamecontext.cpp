@@ -19,6 +19,8 @@ void CGameContext::OnInitInstagib()
 
 	m_pHttp = Kernel()->RequestInterface<IHttp>();
 
+	m_Rollback.Init(this);
+
 	m_pController->OnInit();
 	m_pController->OnRoundStart();
 }
@@ -437,4 +439,15 @@ bool CGameContext::OnClientPacket(int ClientId, bool Sys, int MsgId, CNetChunk *
 		return false;
 
 	return m_pController->OnClientPacket(ClientId, Sys, MsgId, pPacket, pUnpacker);
+}
+
+void CGameContext::SetPlayerLastAckedSnapshot(int ClientId, int Tick)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return;
+
+	if(!m_apPlayers[ClientId])
+		return;
+
+	m_apPlayers[ClientId]->m_LastAckedSnapshot = Tick;
 }

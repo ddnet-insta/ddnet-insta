@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "laser.h"
-#include "character.h"
+#include "pvp_laser.h"
+#include <game/server/entities/character.h>
 
 #include <engine/shared/config.h>
 
@@ -10,9 +10,12 @@
 
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
 
-CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
+#include <game/server/instagib/rollback.h>
+
+CPvpLaser::CPvpLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
+	CLaser(pGameWorld)
 {
 	m_Pos = Pos;
 	m_Owner = Owner;
@@ -32,10 +35,10 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
 
 	GameWorld()->InsertEntity(this);
-	DoBounce();
+	DoBouncePvp();
 }
 
-bool CLaser::HitCharacter(vec2 From, vec2 To)
+bool CPvpLaser::HitCharacterPvp(vec2 From, vec2 To)
 {
 	static const vec2 StackedLaserShotgunBugSpeed = vec2(-2147483648.0f, -2147483648.0f);
 	vec2 At;
@@ -44,9 +47,9 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	bool pDontHitSelf = g_Config.m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
 
 	if(pOwnerChar ? (!pOwnerChar->LaserHitDisabled() && m_Type == WEAPON_LASER) || (!pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
-		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : nullptr, m_Owner);
+		pHit = GameServer()->m_Rollback.IntersectCharacterOnTick(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : nullptr, m_Owner, nullptr, m_FireAckedTick);
 	else
-		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : nullptr, m_Owner, pOwnerChar);
+		pHit = GameServer()->m_Rollback.IntersectCharacterOnTick(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : nullptr, m_Owner, pOwnerChar, m_FireAckedTick);
 
 	if(!pHit || (pHit == pOwnerChar && g_Config.m_SvOldLaser) || (pHit != pOwnerChar && pOwnerChar ? (pOwnerChar->LaserHitDisabled() && m_Type == WEAPON_LASER) || (pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : !g_Config.m_SvHit))
 		return false;
@@ -92,14 +95,28 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	}
 	else if(m_Type == WEAPON_LASER)
 	{
-		pHit->UnFreeze();
+		// ddnet-insta fng
+		// pHit->UnFreeze();
 	}
-	pHit->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
+	if(GameServer()->m_pController->OnLaserHit(m_Bounces, m_Owner, m_Type, pHit))
+		pHit->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
 	return true;
 }
 
-void CLaser::DoBounce()
+void CPvpLaser::DoBouncePvp()
 {
+	if(GameServer()->m_apPlayers[m_Owner] && GameServer()->m_apPlayers[m_Owner]->m_RollbackEnabled)
+	{
+		if(m_FireAckedTick == -1)
+		{
+			m_FireAckedTick = GameServer()->m_apPlayers[m_Owner]->m_LastAckedSnapshot;
+		}
+		else
+		{
+			m_FireAckedTick += Server()->Tick() - m_EvalTick; //rollback (ddnet-insta specific): increment acked tick each bounce
+		}
+	}
+
 	m_EvalTick = Server()->Tick();
 
 	if(m_Energy < 0)
@@ -126,7 +143,7 @@ void CLaser::DoBounce()
 
 	if(Res)
 	{
-		if(!HitCharacter(m_Pos, To))
+		if(!HitCharacterPvp(m_Pos, To))
 		{
 			// intersected
 			m_From = m_Pos;
@@ -189,7 +206,7 @@ void CLaser::DoBounce()
 	}
 	else
 	{
-		if(!HitCharacter(m_Pos, To))
+		if(!HitCharacterPvp(m_Pos, To))
 		{
 			m_From = m_Pos;
 			m_Pos = To;
@@ -259,12 +276,7 @@ void CLaser::DoBounce()
 	//m_Owner = -1;
 }
 
-void CLaser::Reset()
-{
-	m_MarkedForDestroy = true;
-}
-
-void CLaser::Tick()
+void CPvpLaser::Tick()
 {
 	if((g_Config.m_SvDestroyLasersOnDeath || m_BelongsToPracticeTeam) && m_Owner >= 0)
 	{
@@ -282,44 +294,5 @@ void CLaser::Tick()
 		Delay = Tuning()->m_LaserBounceDelay;
 
 	if((Server()->Tick() - m_EvalTick) > (Server()->TickSpeed() * Delay / 1000.0f))
-		DoBounce();
-}
-
-void CLaser::TickPaused()
-{
-	++m_EvalTick;
-}
-
-void CLaser::Snap(int SnappingClient)
-{
-	if(NetworkClipped(SnappingClient) && NetworkClipped(SnappingClient, m_From))
-		return;
-	CCharacter *pOwnerChar = nullptr;
-	if(m_Owner >= 0)
-		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	if(!pOwnerChar)
-		return;
-
-	pOwnerChar = nullptr;
-	CClientMask TeamMask = CClientMask().set();
-
-	if(m_Owner >= 0)
-		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-
-	if(pOwnerChar && pOwnerChar->IsAlive())
-		TeamMask = pOwnerChar->TeamMask();
-
-	if(SnappingClient != SERVER_DEMO_CLIENT && !TeamMask.test(SnappingClient))
-		return;
-
-	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
-	int LaserType = m_Type == WEAPON_LASER ? LASERTYPE_RIFLE : m_Type == WEAPON_SHOTGUN ? LASERTYPE_SHOTGUN : -1;
-
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
-		m_Pos, m_From, m_EvalTick, m_Owner, LaserType, 0, m_Number);
-}
-
-void CLaser::SwapClients(int Client1, int Client2)
-{
-	m_Owner = m_Owner == Client1 ? Client2 : m_Owner == Client2 ? Client1 : m_Owner;
+		DoBouncePvp();
 }
