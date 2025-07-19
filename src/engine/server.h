@@ -315,7 +315,7 @@ class IGameServer : public IInterface
 	MACRO_INTERFACE("gameserver")
 	// ddnet-insta
 public:
-	virtual const char *ServerInfoPlayerScoreKind() = 0;
+	virtual const char *ServerInfoClientScoreKind() = 0;
 	virtual bool OnClientPacket(int ClientId, bool Sys, int MsgId, struct CNetChunk *pPacket, class CUnpacker *pUnpacker) = 0;
 
 protected:

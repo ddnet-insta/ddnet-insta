@@ -2940,7 +2940,7 @@ void CGameContext::OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientId)
 	if(m_pController->OnSelfkill(ClientId)) // ddnet-insta
 		return;
 
-	if(m_VoteCloseTime && m_VoteCreator == ClientId && GetDDRaceTeam(ClientId) && (IsKickVote() || IsSpecVote()))
+	if(IsRunningKickOrSpecVote(ClientId) && GetDDRaceTeam(ClientId))
 	{
 		SendChatTarget(ClientId, "You are running a vote please try again after the vote is done!");
 		return;
@@ -3808,7 +3808,7 @@ void CGameContext::OnConsoleInit()
 
 void CGameContext::RegisterDDRaceCommands()
 {
-	Console()->Register("kill_pl", "v[id]", CFGFLAG_SERVER, ConKillPlayer, this, "Kills player v and announces the kill");
+	Console()->Register("kill_pl", "v[id] ?r[reason]", CFGFLAG_SERVER, ConKillPlayer, this, "Kills a player and announces the kill");
 	Console()->Register("totele", "i[number]", CFGFLAG_SERVER | CMDFLAG_TEST, ConToTeleporter, this, "Teleports you to teleporter i");
 	Console()->Register("totelecp", "i[number]", CFGFLAG_SERVER | CMDFLAG_TEST, ConToCheckTeleporter, this, "Teleports you to checkpoint teleporter i");
 	Console()->Register("tele", "?i[id] ?i[id]", CFGFLAG_SERVER | CMDFLAG_TEST, ConTeleport, this, "Teleports player i (or you) to player i (or you to where you look at)");
@@ -4680,6 +4680,16 @@ void CGameContext::OnSetAuthed(int ClientId, int Level)
 			m_TeeHistorian.RecordAuthLogout(ClientId);
 		}
 	}
+}
+
+bool CGameContext::IsRunningVote(int ClientId) const
+{
+	return m_VoteCloseTime && m_VoteCreator == ClientId;
+}
+
+bool CGameContext::IsRunningKickOrSpecVote(int ClientId) const
+{
+	return IsRunningVote(ClientId) && (IsKickVote() || IsSpecVote());
 }
 
 void CGameContext::SendRecord(int ClientId)

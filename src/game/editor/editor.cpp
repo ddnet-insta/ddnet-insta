@@ -47,12 +47,12 @@
 
 using namespace FontIcons;
 
-float fxt2f(int t)
+static float fxt2f(int t)
 {
 	return t / 1000.0f;
 }
 
-int f2fxt(float t)
+static int f2fxt(float t)
 {
 	return static_cast<int>(t * 1000.0f);
 }
@@ -6824,9 +6824,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			Ui()->ClipEnable(&View);
 			Graphics()->TextureClear();
 			IGraphics::CLineItemBatch LineItemBatch;
-			Graphics()->LinesBatchBegin(&LineItemBatch);
 			for(int c = 0; c < pEnvelope->GetChannels(); c++)
 			{
+				Graphics()->LinesBatchBegin(&LineItemBatch);
 				if(s_ActiveChannels & (1 << c))
 					Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 1);
 				else
@@ -6865,7 +6865,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				}
 				Graphics()->LinesBatchEnd(&LineItemBatch);
 			}
-			Graphics()->LinesEnd();
 			Ui()->ClipDisable();
 		}
 
@@ -8224,7 +8223,7 @@ void CEditor::Render()
 		}
 		if(!m_pBrush->IsEmpty())
 		{
-			const bool HasTeleTiles = std::any_of(m_pBrush->m_vpLayers.begin(), m_pBrush->m_vpLayers.end(), [](auto pLayer) {
+			const bool HasTeleTiles = std::any_of(m_pBrush->m_vpLayers.begin(), m_pBrush->m_vpLayers.end(), [](const auto &pLayer) {
 				return pLayer->m_Type == LAYERTYPE_TILES && std::static_pointer_cast<CLayerTiles>(pLayer)->m_HasTele;
 			});
 			if(HasTeleTiles)
@@ -9284,7 +9283,7 @@ bool CEditor::Append(const char *pFileName, int StorageType, bool IgnoreHistory)
 	s_ReplacedMap.clear();
 	for(auto NewMapIt = NewMap.m_vpImages.begin(); NewMapIt != NewMap.m_vpImages.end(); ++NewMapIt)
 	{
-		auto pNewImage = *NewMapIt;
+		const auto &pNewImage = *NewMapIt;
 		auto NameIsTaken = [pNewImage](const std::shared_ptr<CEditorImage> &OtherImage) { return str_comp(pNewImage->m_aName, OtherImage->m_aName) == 0; };
 		auto MatchInCurrentMap = std::find_if(m_Map.m_vpImages.begin(), m_Map.m_vpImages.end(), NameIsTaken);
 

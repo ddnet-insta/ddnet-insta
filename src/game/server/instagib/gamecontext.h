@@ -15,7 +15,7 @@ class CGameContext : public IGameServer
 #endif // IN_CLASS_IGAMECONTEXT
 
 public:
-	const char *ServerInfoPlayerScoreKind() override { return "points"; }
+	const char *ServerInfoClientScoreKind() override { return "points"; }
 
 	// instagib/gamecontext.cpp
 	void OnInitInstagib();
@@ -31,6 +31,12 @@ public:
 	void InstagibUnstackChatMessage(char *pUnstacked, const char *pMessage, int Size);
 	void SwapTeams();
 	bool OnClientPacket(int ClientId, bool Sys, int MsgId, struct CNetChunk *pPacket, class CUnpacker *pUnpacker) override;
+
+	// prints not allowed message in chat for ClientId and returns false
+	// if calling votes with chat commands such as !shuffle or /shuffle
+	// are not allowed
+	// returns true and prints nothing otherwise
+	bool IsChatCmdAllowed(int ClientId) const;
 
 	enum
 	{
@@ -105,6 +111,7 @@ public:
 	static void ConTopFastcaps(IConsole::IResult *pResult, void *pUserData);
 	static void ConTopNumCaps(IConsole::IResult *pResult, void *pUserData);
 	static void ConRankFlagCaptures(IConsole::IResult *pResult, void *pUserData);
+	static void ConTopSpikeColors(IConsole::IResult *pResult, void *pUserData);
 
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;
 #define MACRO_RANK_COLUMN(name, sql_name, display_name, order_by) \
