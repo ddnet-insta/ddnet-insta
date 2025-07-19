@@ -32,6 +32,12 @@ public:
 	void SwapTeams();
 	bool OnClientPacket(int ClientId, bool Sys, int MsgId, struct CNetChunk *pPacket, class CUnpacker *pUnpacker) override;
 
+	// prints not allowed message in chat for ClientId and returns false
+	// if calling votes with chat commands such as !shuffle or /shuffle
+	// are not allowed
+	// returns true and prints nothing otherwise
+	bool IsChatCmdAllowed(int ClientId) const;
+
 	enum
 	{
 		MAX_LINES = 25,

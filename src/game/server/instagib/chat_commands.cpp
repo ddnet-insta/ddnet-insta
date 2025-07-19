@@ -1,4 +1,5 @@
 #include <base/system.h>
+#include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
@@ -53,6 +54,9 @@ void CGameContext::ConInstaSwap(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
+	if(!pSelf->IsChatCmdAllowed(pResult->m_ClientId))
+		return;
+
 	pSelf->ComCallSwapTeamsVote(pResult->m_ClientId);
 }
 
@@ -69,6 +73,9 @@ void CGameContext::ConInstaSwapRandom(IConsole::IResult *pResult, void *pUserDat
 	if(!pPlayer)
 		return;
 
+	if(!pSelf->IsChatCmdAllowed(pResult->m_ClientId))
+		return;
+
 	pSelf->ComCallSwapTeamsRandomVote(pResult->m_ClientId);
 }
 
@@ -83,6 +90,9 @@ void CGameContext::ConInstaShuffle(IConsole::IResult *pResult, void *pUserData)
 
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
 	if(!pPlayer)
+		return;
+
+	if(!pSelf->IsChatCmdAllowed(pResult->m_ClientId))
 		return;
 
 	pSelf->ComCallShuffleVote(pResult->m_ClientId);

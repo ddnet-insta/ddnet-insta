@@ -438,3 +438,13 @@ bool CGameContext::OnClientPacket(int ClientId, bool Sys, int MsgId, CNetChunk *
 
 	return m_pController->OnClientPacket(ClientId, Sys, MsgId, pPacket, pUnpacker);
 }
+
+bool CGameContext::IsChatCmdAllowed(int ClientId) const
+{
+	if(g_Config.m_SvBangCommands < 2)
+	{
+		SendChatTarget(ClientId, "Chat votes are disabled please use the vote menu.");
+		return false;
+	}
+	return true;
+}
