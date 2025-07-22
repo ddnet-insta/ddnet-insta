@@ -24,6 +24,7 @@
 #include <game/editor/mapitems/layer_tele.h>
 #include <game/editor/mapitems/layer_tiles.h>
 #include <game/editor/mapitems/layer_tune.h>
+#include <game/editor/mapitems/map.h>
 
 #include <engine/console.h>
 #include <engine/editor.h>
@@ -36,6 +37,7 @@
 #include "editor_server_settings.h"
 #include "editor_trackers.h"
 #include "editor_ui.h"
+#include "font_typer.h"
 #include "layer_selector.h"
 #include "map_view.h"
 #include "quadart.h"
@@ -50,7 +52,6 @@
 #include <string>
 #include <vector>
 
-typedef std::function<void(int *pIndex)> FIndexModifyFunction;
 template<typename T>
 using FDropdownRenderCallback = std::function<void(const T &, char (&aOutput)[128], std::vector<STextColorSplit> &)>;
 
@@ -66,158 +67,11 @@ enum
 	DIALOG_FILE,
 	DIALOG_MAPSETTINGS_ERROR,
 	DIALOG_QUICK_PROMPT,
-};
 
-class CEditorImage;
-class CEditorSound;
-
-class CEditorMap
-{
-	void MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup);
-	void MakeGameLayer(const std::shared_ptr<CLayer> &pLayer);
-
-public:
-	CEditor *m_pEditor;
-
-	CEditorMap()
-	{
-		Clean();
-	}
-
-	~CEditorMap()
-	{
-		Clean();
-	}
-
-	bool m_Modified; // unsaved changes in manual save
-	bool m_ModifiedAuto; // unsaved changes in autosave
-	float m_LastModifiedTime;
-	float m_LastSaveTime;
-	float m_LastAutosaveUpdateTime;
-	void OnModify();
-
-	std::vector<std::shared_ptr<CLayerGroup>> m_vpGroups;
-	std::vector<std::shared_ptr<CEditorImage>> m_vpImages;
-	std::vector<std::shared_ptr<CEnvelope>> m_vpEnvelopes;
-	std::vector<std::shared_ptr<CEditorSound>> m_vpSounds;
-
-	class CMapInfo
-	{
-	public:
-		char m_aAuthor[32];
-		char m_aVersion[16];
-		char m_aCredits[128];
-		char m_aLicense[32];
-
-		void Reset()
-		{
-			m_aAuthor[0] = '\0';
-			m_aVersion[0] = '\0';
-			m_aCredits[0] = '\0';
-			m_aLicense[0] = '\0';
-		}
-
-		void Copy(const CMapInfo &Source)
-		{
-			str_copy(m_aAuthor, Source.m_aAuthor);
-			str_copy(m_aVersion, Source.m_aVersion);
-			str_copy(m_aCredits, Source.m_aCredits);
-			str_copy(m_aLicense, Source.m_aLicense);
-		}
-	};
-	CMapInfo m_MapInfo;
-	CMapInfo m_MapInfoTmp;
-
-	std::vector<CEditorMapSetting> m_vSettings;
-
-	std::shared_ptr<class CLayerGame> m_pGameLayer;
-	std::shared_ptr<CLayerGroup> m_pGameGroup;
-
-	std::shared_ptr<CEnvelope> NewEnvelope(CEnvelope::EType Type)
-	{
-		OnModify();
-		std::shared_ptr<CEnvelope> pEnv = std::make_shared<CEnvelope>(Type);
-		m_vpEnvelopes.push_back(pEnv);
-		return pEnv;
-	}
-
-	void DeleteEnvelope(int Index);
-	void SwapEnvelopes(int Index0, int Index1);
-	template<typename F>
-	void VisitEnvelopeReferences(F &&Visitor);
-
-	std::shared_ptr<CLayerGroup> NewGroup()
-	{
-		OnModify();
-		std::shared_ptr<CLayerGroup> pGroup = std::make_shared<CLayerGroup>();
-		pGroup->m_pMap = this;
-		m_vpGroups.push_back(pGroup);
-		return pGroup;
-	}
-
-	int SwapGroups(int Index0, int Index1)
-	{
-		if(Index0 < 0 || Index0 >= (int)m_vpGroups.size())
-			return Index0;
-		if(Index1 < 0 || Index1 >= (int)m_vpGroups.size())
-			return Index0;
-		if(Index0 == Index1)
-			return Index0;
-		OnModify();
-		std::swap(m_vpGroups[Index0], m_vpGroups[Index1]);
-		return Index1;
-	}
-
-	void DeleteGroup(int Index)
-	{
-		if(Index < 0 || Index >= (int)m_vpGroups.size())
-			return;
-		OnModify();
-		m_vpGroups.erase(m_vpGroups.begin() + Index);
-	}
-
-	void ModifyImageIndex(FIndexModifyFunction pfnFunc)
-	{
-		OnModify();
-		for(auto &pGroup : m_vpGroups)
-			pGroup->ModifyImageIndex(pfnFunc);
-	}
-
-	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc)
-	{
-		OnModify();
-		for(auto &pGroup : m_vpGroups)
-			pGroup->ModifyEnvelopeIndex(pfnFunc);
-	}
-
-	void ModifySoundIndex(FIndexModifyFunction pfnFunc)
-	{
-		OnModify();
-		for(auto &pGroup : m_vpGroups)
-			pGroup->ModifySoundIndex(pfnFunc);
-	}
-
-	void Clean();
-	void CreateDefault(IGraphics::CTextureHandle EntitiesTexture);
-
-	// io
-	bool Save(const char *pFilename, const std::function<void(const char *pErrorMessage)> &ErrorHandler);
-	bool PerformPreSaveSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler);
-	bool Load(const char *pFilename, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler);
-	void PerformSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler);
-
-	// DDRace
-
-	std::shared_ptr<class CLayerTele> m_pTeleLayer;
-	std::shared_ptr<class CLayerSpeedup> m_pSpeedupLayer;
-	std::shared_ptr<class CLayerFront> m_pFrontLayer;
-	std::shared_ptr<class CLayerSwitch> m_pSwitchLayer;
-	std::shared_ptr<class CLayerTune> m_pTuneLayer;
-	void MakeTeleLayer(const std::shared_ptr<CLayer> &pLayer);
-	void MakeSpeedupLayer(const std::shared_ptr<CLayer> &pLayer);
-	void MakeFrontLayer(const std::shared_ptr<CLayer> &pLayer);
-	void MakeSwitchLayer(const std::shared_ptr<CLayer> &pLayer);
-	void MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer);
+	// The font typer component sets m_Dialog
+	// while it is active to make sure no other component
+	// interprets the key presses
+	DIALOG_PSEUDO_FONT_TYPER,
 };
 
 class CProperty
@@ -251,29 +105,6 @@ enum
 	PROPTYPE_AUTOMAPPER_REFERENCE,
 };
 
-class CDataFileWriterFinishJob : public IJob
-{
-	char m_aRealFileName[IO_MAX_PATH_LENGTH];
-	char m_aTempFileName[IO_MAX_PATH_LENGTH];
-	CDataFileWriter m_Writer;
-
-	void Run() override
-	{
-		m_Writer.Finish();
-	}
-
-public:
-	CDataFileWriterFinishJob(const char *pRealFileName, const char *pTempFileName, CDataFileWriter &&Writer) :
-		m_Writer(std::move(Writer))
-	{
-		str_copy(m_aRealFileName, pRealFileName);
-		str_copy(m_aTempFileName, pTempFileName);
-	}
-
-	const char *GetRealFileName() const { return m_aRealFileName; }
-	const char *GetTempFileName() const { return m_aTempFileName; }
-};
-
 class CEditor : public IEditor
 {
 	class IInput *m_pInput = nullptr;
@@ -293,6 +124,7 @@ class CEditor : public IEditor
 	CMapView m_MapView;
 	CLayerSelector m_LayerSelector;
 	CPrompt m_Prompt;
+	CFontTyper m_FontTyper;
 
 	bool m_EditorWasUsedBefore = false;
 
@@ -364,6 +196,7 @@ public:
 #undef REGISTER_QUICK_ACTION
 		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f),
 		m_ZoomEnvelopeY(640.0f, 0.1f, 32000.0f),
+		m_Map(this),
 		m_MapSettingsCommandContext(m_MapSettingsBackend.NewContext(&m_SettingsCommandInput))
 	{
 		m_EntitiesTexture.Invalidate();
@@ -1087,86 +920,6 @@ public:
 	std::vector<int> SortImages();
 
 	void DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const void *pStopButtonId, const void *pSeekBarId, int SampleId);
-
-	// Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
-	enum
-	{
-		TILE_PUB_AIR,
-		TILE_PUB_HOOKABLE,
-		TILE_PUB_DEATH,
-		TILE_PUB_UNHOOKABLE,
-
-		TILE_PUB_CREDITS1 = 140,
-		TILE_PUB_CREDITS2,
-		TILE_PUB_CREDITS3,
-		TILE_PUB_CREDITS4,
-		TILE_PUB_CREDITS5 = 156,
-		TILE_PUB_CREDITS6,
-		TILE_PUB_CREDITS7,
-		TILE_PUB_CREDITS8,
-
-		TILE_PUB_ENTITIES_OFF1 = 190,
-		TILE_PUB_ENTITIES_OFF2,
-	};
-
-	enum
-	{
-		TILE_FNG_SPIKE_GOLD = 7,
-		TILE_FNG_SPIKE_NORMAL,
-		TILE_FNG_SPIKE_RED,
-		TILE_FNG_SPIKE_BLUE,
-		TILE_FNG_SCORE_RED,
-		TILE_FNG_SCORE_BLUE,
-
-		TILE_FNG_SPIKE_GREEN = 14,
-		TILE_FNG_SPIKE_PURPLE,
-
-		TILE_FNG_SPAWN = 192,
-		TILE_FNG_SPAWN_RED,
-		TILE_FNG_SPAWN_BLUE,
-		TILE_FNG_FLAG_RED,
-		TILE_FNG_FLAG_BLUE,
-		TILE_FNG_SHIELD,
-		TILE_FNG_HEART,
-		TILE_FNG_SHOTGUN,
-		TILE_FNG_GRENADE,
-		TILE_FNG_NINJA,
-		TILE_FNG_LASER,
-
-		TILE_FNG_SPIKE_OLD1 = 208,
-		TILE_FNG_SPIKE_OLD2,
-		TILE_FNG_SPIKE_OLD3
-	};
-
-	enum
-	{
-		TILE_VANILLA_SPAWN = 192,
-		TILE_VANILLA_SPAWN_RED,
-		TILE_VANILLA_SPAWN_BLUE,
-		TILE_VANILLA_FLAG_RED,
-		TILE_VANILLA_FLAG_BLUE,
-		TILE_VANILLA_SHIELD,
-		TILE_VANILLA_HEART,
-		TILE_VANILLA_SHOTGUN,
-		TILE_VANILLA_GRENADE,
-		TILE_VANILLA_NINJA,
-		TILE_VANILLA_LASER,
-	};
-
-	// Explanations
-	enum class EExplanation
-	{
-		NONE,
-		DDNET,
-		FNG,
-		RACE,
-		VANILLA,
-		BLOCKWORLDS
-	};
-	static const char *ExplainDDNet(int Tile, int Layer);
-	static const char *ExplainFNG(int Tile, int Layer);
-	static const char *ExplainVanilla(int Tile, int Layer);
-	static const char *Explain(EExplanation Explanation, int Tile, int Layer);
 
 	// Zooming
 	void ZoomAdaptOffsetX(float ZoomFactor, const CUIRect &View);
