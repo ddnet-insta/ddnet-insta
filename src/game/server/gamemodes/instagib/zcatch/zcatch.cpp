@@ -419,7 +419,7 @@ void CGameControllerZcatch::KillPlayer(class CPlayer *pVictim, class CPlayer *pK
 	pVictim->m_KillerId = pKiller->GetCid();
 	if(pVictim->GetTeam() != TEAM_SPECTATORS)
 		pVictim->SetTeamNoKill(TEAM_SPECTATORS);
-	pVictim->m_SpectatorId = pKiller->GetCid();
+	pVictim->SetSpectatorId(pKiller->GetCid());
 
 	int Found = count(pKiller->m_vVictimIds.begin(), pKiller->m_vVictimIds.end(), pVictim->GetCid());
 	if(!Found)

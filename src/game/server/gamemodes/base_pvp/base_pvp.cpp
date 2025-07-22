@@ -2350,7 +2350,7 @@ void CGameControllerPvp::DoDamageHitSound(int KillerId)
 		if(!GameServer()->m_apPlayers[i])
 			continue;
 
-		if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorId == KillerId)
+		if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->SpectatorId() == KillerId)
 			Mask.set(i);
 	}
 	GameServer()->CreateSound(pKiller->m_ViewPos, SOUND_HIT, Mask);
