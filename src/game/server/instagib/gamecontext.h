@@ -9,6 +9,7 @@
 #include <engine/server.h>
 
 #include <game/server/instagib/enums.h>
+#include <game/server/instagib/ip_storage.h>
 
 class CGameContext : public IGameServer
 {
@@ -31,6 +32,10 @@ public:
 	void InstagibUnstackChatMessage(char *pUnstacked, const char *pMessage, int Size);
 	void SwapTeams();
 	bool OnClientPacket(int ClientId, bool Sys, int MsgId, struct CNetChunk *pPacket, class CUnpacker *pUnpacker) override;
+	void DeepJailId(int AdminId, int ClientId, int Minutes);
+	void DeepJailIp(int AdminId, const char *pAddrStr, int Minutes);
+	void UndeepJail(CIpStorage *pEntry);
+	void ListDeepJails() const;
 
 	// prints not allowed message in chat for ClientId and returns false
 	// if calling votes with chat commands such as !shuffle or /shuffle
@@ -46,6 +51,15 @@ public:
 	char m_aaLastChatMessages[MAX_LINES][MAX_LINE_LENGTH];
 	int m_UnstackHackCharacterOffset;
 	IHttp *m_pHttp;
+	CIpStorageController m_IpStorageController;
+
+	// returns mutable pointer into either the offline ip storage
+	// vector or into the still connected player
+	// or nullptr if entry id is not found
+	//
+	// see also m_IpStorageController.FindEntry() to search only
+	// in offline entries
+	CIpStorage *FindIpStorageEntryOfflineAndOnline(int EntryId);
 
 	// set by the config sv_display_score
 	EDisplayScore m_DisplayScore = EDisplayScore::ROUND_POINTS;
@@ -89,6 +103,10 @@ public:
 	static void ConRandomMapFromPool(IConsole::IResult *pResult, void *pUserData);
 	static void ConGctfAntibot(IConsole::IResult *pResult, void *pUserData);
 	static void ConKnownAntibot(IConsole::IResult *pResult, void *pUserData);
+	static void ConDeepJailId(IConsole::IResult *pResult, void *pUserData);
+	static void ConDeepJailIp(IConsole::IResult *pResult, void *pUserData);
+	static void ConDeepJails(IConsole::IResult *pResult, void *pUserData);
+	static void ConUndeepJail(IConsole::IResult *pResult, void *pUserData);
 
 	// chat_commands.cpp
 	static void ConCreditsGctf(IConsole::IResult *pResult, void *pUserData);

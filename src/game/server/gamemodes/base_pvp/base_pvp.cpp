@@ -13,6 +13,7 @@
 #include <game/server/entities/flag.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/instagib/enums.h>
+#include <game/server/instagib/ip_storage.h>
 #include <game/server/instagib/laser_text.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/structs.h>
@@ -216,6 +217,14 @@ void CGameControllerPvp::InitPlayer(CPlayer *pPlayer)
 	pPlayer->m_Score = 0; // ddnet-insta
 	pPlayer->m_DisplayScore = GameServer()->m_DisplayScore;
 	pPlayer->m_JoinTime = time_get();
+
+	pPlayer->m_IpStorage.OnInit(
+		Server()->ClientAddr(0),
+		GameServer()->m_IpStorageController.GetNextEntryId(),
+		pPlayer->GetUniqueCid());
+	CIpStorage *pIpStorage = GameServer()->m_IpStorageController.FindEntry(Server()->ClientAddr(0));
+	if(pIpStorage)
+		pPlayer->m_IpStorage = *pIpStorage;
 
 	RoundInitPlayer(pPlayer);
 }
@@ -1122,6 +1131,7 @@ void CGameControllerPvp::CheckForceUnpauseGame()
 void CGameControllerPvp::Tick()
 {
 	CGameControllerDDRace::Tick();
+	GameServer()->m_IpStorageController.OnTick(Server()->Tick());
 
 	if(m_TicksUntilShutdown)
 	{
@@ -1702,27 +1712,32 @@ bool CGameControllerPvp::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 
 void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)
 {
+	CPlayer *pPlayer = pChr->GetPlayer();
 	OnCharacterConstruct(pChr);
 
 	pChr->SetTeams(&Teams());
-	Teams().OnCharacterSpawn(pChr->GetPlayer()->GetCid());
+	Teams().OnCharacterSpawn(pPlayer->GetCid());
 
 	// default health
 	pChr->IncreaseHealth(10);
 
-	pChr->GetPlayer()->UpdateLastToucher(-1);
+	pPlayer->UpdateLastToucher(-1);
 
-	if(pChr->GetPlayer()->m_FreezeOnSpawn)
+	if(pPlayer->m_IpStorage.DeepUntilTick() > Server()->Tick())
 	{
-		pChr->Freeze(pChr->GetPlayer()->m_FreezeOnSpawn);
-		pChr->GetPlayer()->m_FreezeOnSpawn = 0;
+		pChr->SetDeepFrozen(true);
+	}
+	else if(pPlayer->m_FreezeOnSpawn)
+	{
+		pChr->Freeze(pPlayer->m_FreezeOnSpawn);
+		pPlayer->m_FreezeOnSpawn = 0;
 
 		char aBuf[512];
 		str_format(
 			aBuf,
 			sizeof(aBuf),
 			"'%s' spawned frozen because he quit while being frozen",
-			Server()->ClientName(pChr->GetPlayer()->GetCid()));
+			Server()->ClientName(pPlayer->GetCid()));
 		SendChat(-1, TEAM_ALL, aBuf);
 	}
 }
@@ -2054,6 +2069,13 @@ void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *
 		// to avoid memory leaks
 		m_ReleaseAllFrozenQuittersTick = Server()->Tick() + Server()->TickSpeed() * 300;
 		break;
+	}
+
+	if(!pPlayer->m_IpStorage.IsEmpty(Server()->Tick()))
+	{
+		const NETADDR *pAddr = Server()->ClientAddr(pPlayer->GetCid());
+		CIpStorage *pStorage = GameServer()->m_IpStorageController.FindOrCreateEntry(pAddr);
+		pStorage->OnPlayerDisconnect(&pPlayer->m_IpStorage, Server()->Tick());
 	}
 
 	m_InvalidateConnectedIpsCache = true;

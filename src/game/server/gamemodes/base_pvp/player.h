@@ -7,6 +7,7 @@
 #include <base/vmath.h>
 #include <cstdint>
 #include <game/server/instagib/enums.h>
+#include <game/server/instagib/ip_storage.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
 #include <game/server/teeinfo.h>
@@ -25,6 +26,8 @@ public:
 	void RainbowTick();
 
 	int m_RainbowColor = 0;
+
+	CIpStorage m_IpStorage;
 
 	// backup of the players skin
 	// for when cosmetics like rainbow are turned off

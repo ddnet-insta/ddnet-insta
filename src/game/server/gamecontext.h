@@ -5,6 +5,7 @@
 
 #include <engine/http.h> // ddnet-insta m_pHttp
 #include <game/server/instagib/enums.h> // ddnet-insta
+#include <game/server/instagib/ip_storage.h> // ddnet-insta
 #include <string> // ddnet-insta map pool
 #include <vector> // ddnet-insta map pool
 

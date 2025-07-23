@@ -381,6 +381,10 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `gctf_antibot` runs the antibot command gctf (depends on closed source module)
 + `known_antibot` runs the antibot command known (depends on antibob antibot module)
 + `redirect` Redirect client to given port use victim \"all\" to redirect all but your self
++ `deep_jailid` deep freeze (undeep tile works) will be restored on respawn and reconnect
++ `deep_jailip` deep freeze (undeep tile works) will be restored on respawn and reconnect
++ `deep_jails` list all perma deeped players deeped by deep_jailid and deep_jailip commands
++ `undeep_jail` list all perma deeped players deeped by deep_jailid and deep_jailip commands
 
 # Chat commands
 
