@@ -470,7 +470,10 @@ void CGameContext::DeepJailId(int AdminId, int ClientId, int Minutes)
 	}
 
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "you were deep frozen by '%s'", Server()->ClientName(AdminId));
+	if(AdminId < 0 || AdminId >= MAX_CLIENTS)
+		str_copy(aBuf, "you were deep frozen by the server", sizeof(aBuf));
+	else
+		str_format(aBuf, sizeof(aBuf), "you were deep frozen by '%s'", Server()->ClientName(AdminId));
 	SendChatTarget(pPlayer->GetCid(), aBuf);
 	log_info("deep_jail", "deep froze player '%s' for %d minutes", Server()->ClientName(ClientId), Minutes);
 }
