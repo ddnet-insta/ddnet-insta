@@ -62,7 +62,6 @@ class CIpStorageController
 public:
 	int GetNextEntryId() { return m_EntryIdCounter++; }
 	const std::vector<CIpStorage> &Entries() const { return m_vEntries; }
-	ssize_t CountEntries() const { return m_vEntries.size(); }
 	CIpStorage *FindEntry(const NETADDR *pAddr);
 	CIpStorage *FindEntry(int EntryId);
 	CIpStorage *FindOrCreateEntry(const NETADDR *pAddr);
