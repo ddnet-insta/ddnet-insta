@@ -11,8 +11,9 @@
 #include <game/server/instagib/ip_storage.h>
 #include <game/server/instagib/protocol.h>
 #include <game/server/player.h>
+#include <game/server/score.h>
 
-void CGameContext::OnInitInstagib()
+void CGameContext::OnInitInstagib(bool ServerStart)
 {
 	UpdateVoteCheckboxes(); // ddnet-insta
 	AlertOnSpecialInstagibConfigs(); // ddnet-insta
@@ -24,7 +25,7 @@ void CGameContext::OnInitInstagib()
 
 	m_pHttp = Kernel()->RequestInterface<IHttp>();
 
-	m_pController->OnInit();
+	m_pController->OnInit(ServerStart);
 	m_pController->OnRoundStart();
 }
 
@@ -613,4 +614,71 @@ bool CGameContext::IsChatCmdAllowed(int ClientId) const
 		return false;
 	}
 	return true;
+}
+
+void CGameContext::ChangeName(int ClientId, const char *pName, bool Silent)
+{
+	// WARNING: the code below has to be kept in sync with CGameContext::OnChangeInfoNetMessage()
+
+	CPlayer *pPlayer = m_apPlayers[ClientId];
+	char aOldName[MAX_NAME_LENGTH];
+	str_copy(aOldName, Server()->ClientName(ClientId), sizeof(aOldName));
+
+	Server()->SetClientName(ClientId, pName);
+	const char *pNewName = Server()->ClientName(ClientId);
+
+	if(!Silent)
+	{
+		char aChatText[256];
+		str_format(
+			aChatText,
+			sizeof(aChatText),
+			"'%s' changed name to '%s'",
+			pPlayer->m_DisplayName.LastBroadcastedName(),
+			pNewName);
+		SendChat(-1, TEAM_ALL, aChatText);
+		pPlayer->m_DisplayName.SetLastBroadcastedName(pNewName);
+	}
+
+	// reload scores
+	if(!m_pController->LoadNewPlayerNameData(ClientId)) // ddnet-insta
+	{
+		Score()->PlayerData(ClientId)->Reset();
+		m_apPlayers[ClientId]->m_Score.reset();
+		Score()->LoadPlayerData(ClientId);
+	}
+
+	LogEvent("Name change", ClientId);
+
+	protocol7::CNetMsg_Sv_ClientDrop Drop;
+	Drop.m_ClientId = ClientId;
+	Drop.m_pReason = "";
+	Drop.m_Silent = true;
+
+	protocol7::CNetMsg_Sv_ClientInfo Info;
+	Info.m_ClientId = ClientId;
+	Info.m_pName = Server()->ClientName(ClientId);
+	Info.m_Country = Server()->ClientCountry(ClientId);
+	Info.m_pClan = Server()->ClientClan(ClientId);
+	Info.m_Local = 0;
+	Info.m_Silent = true;
+	Info.m_Team = m_pController->GetPlayerTeam(pPlayer, true); // ddnet-insta
+
+	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+	{
+		Info.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
+		Info.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
+		Info.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
+	}
+
+	for(int i = 0; i < Server()->MaxClients(); i++)
+	{
+		if(i != ClientId)
+		{
+			Server()->SendPackMsg(&Drop, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
+			Server()->SendPackMsg(&Info, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
+		}
+	}
+
+	Server()->ExpireServerInfo();
 }

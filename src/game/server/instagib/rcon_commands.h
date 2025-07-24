@@ -32,4 +32,14 @@ CONSOLE_COMMAND("deep_jailip", "s[ip] i[minutes]", CFGFLAG_SERVER, ConDeepJailIp
 CONSOLE_COMMAND("deep_jails", "", CFGFLAG_SERVER, ConDeepJails, this, "list all perma deeped players deeped by deep_jailid and deep_jailip commands")
 CONSOLE_COMMAND("undeep_jail", "s[ip|entry]", CFGFLAG_SERVER, ConUndeepJail, this, "list all perma deeped players deeped by deep_jailid and deep_jailip commands")
 
+CONSOLE_COMMAND("acc_list", "?s[search]", CFGFLAG_SERVER, ConAccountList, this, "List account info of online players")
+CONSOLE_COMMAND("acc_set_password", "s[account username] s[new password]", CFGFLAG_SERVER, ConAccountForceSetPassword, this, "Set new password for given account. Useful if players forget theirs. Keeps player logged in.")
+CONSOLE_COMMAND("acc_logout", "s[account username]", CFGFLAG_SERVER, ConAccountForceLogout, this, "Force logout player on current server")
+CONSOLE_COMMAND("acc_lock", "s[account username]", CFGFLAG_SERVER, ConLockAccount, this, "Lock account and logout players logged in to it")
+CONSOLE_COMMAND("acc_unlock", "s[account username]", CFGFLAG_SERVER, ConUnlockAccount, this, "Unlock account")
+CONSOLE_COMMAND("acc_info", "s[account username]", CFGFLAG_SERVER, ConAccountInfo, this, "Get information about an account")
+
+CONSOLE_COMMAND("add_unclaimable_name", "s[name]", CFGFLAG_SERVER, ConAddUnclaimableName, this, "Exclude given name from /claimname chat command")
+CONSOLE_COMMAND("remove_unclaimable_name", "s[name]", CFGFLAG_SERVER, ConRemoveUnclaimableName, this, "Make given name available to /claimname chat command")
+
 #undef CONSOLE_COMMAND

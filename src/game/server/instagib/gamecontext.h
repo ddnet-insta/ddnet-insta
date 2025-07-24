@@ -4,9 +4,15 @@
 
 #ifndef IN_CLASS_IGAMECONTEXT
 
+#include <string>
+#include <unordered_set>
+#include <vector>
+
 #include <engine/console.h>
 #include <engine/http.h>
 #include <engine/server.h>
+#include <engine/shared/protocol.h>
+#include <game/server/instagib/sql_accounts.h>
 
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/ip_storage.h>
@@ -19,7 +25,7 @@ public:
 	const char *ServerInfoClientScoreKind() override { return "points"; }
 
 	// instagib/gamecontext.cpp
-	void OnInitInstagib();
+	void OnInitInstagib(bool ServerStart);
 	void AlertOnSpecialInstagibConfigs(int ClientId = -1) const;
 	void ShowCurrentInstagibConfigsMotd(int ClientId = -1, bool Force = false) const;
 	void UpdateVoteCheckboxes() const;
@@ -42,6 +48,57 @@ public:
 	// are not allowed
 	// returns true and prints nothing otherwise
 	bool IsChatCmdAllowed(int ClientId) const;
+
+	/*
+		Function: ChangeName
+			Perform a full name change for the given player
+			Sets the new name on the server side
+			sends the new name to all clients in a name change message
+			loads new stats for that player based on the name
+
+			does not do ratelimiting or name claim checks
+
+			this function is not called for ALL name changes
+			do not use this as a change name event
+			but as a change name action
+
+		Arguments:
+			ClientId - the client who will receive the new name
+			pName - the new name that will be set
+			Silent - if false it sends a chat message that the name was changed
+	*/
+	void ChangeName(int ClientId, const char *pName, bool Silent);
+
+	// list of names that can not be claimed
+	// with the /claimname chat command
+	// this is used to block names such as "nameless tee"
+	std::unordered_set<std::string> m_UnclaimableNames;
+
+	// results of the sql worker thread
+	// for rcon commands operating on accounts
+	std::vector<std::shared_ptr<CAccountRconCmdResult>> m_vAccountRconCmdQueryResults;
+
+	// is set to time_get() when sv_accounts was attempted to be set to 1
+	// but it failed because sv_hostname or sv_port were not set yet
+	// if sv_hostname or sv_port are set later with a few seconds delay
+	// we will then activate sv_accounts
+	//
+	// this allows any kind of ordering in semicolon separated rcon commands
+	// and especially any kind of order in autoexec config files
+	//
+	// but it will not turn on sv_accounts if some admin manually
+	// sets sv_hostname or sv_port minutes after the sv_accounts attempt
+	// because that would be weird
+	int64_t m_LastAccountTurnOnAttempt = 0;
+
+	// stores the initial sv_port value
+	// unless it is 0 it should be the real port
+	// the server is currently using
+	// because changing sv_port does not have any effects
+	//
+	// can probably be removed if this gets merged
+	// https://github.com/ddnet/ddnet/pull/9667
+	int m_ServerPortOnLaunch = 0;
 
 	enum
 	{
@@ -84,6 +141,8 @@ public:
 	static void ConchainDisplayScore(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainOnlyWallshotKills(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainAllowZoom(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainAccounts(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainClaimableNames(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	// rcon_commands.cpp
 	static void ConHammer(IConsole::IResult *pResult, void *pUserData);
@@ -107,6 +166,14 @@ public:
 	static void ConDeepJailIp(IConsole::IResult *pResult, void *pUserData);
 	static void ConDeepJails(IConsole::IResult *pResult, void *pUserData);
 	static void ConUndeepJail(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccountList(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccountForceSetPassword(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccountForceLogout(IConsole::IResult *pResult, void *pUserData);
+	static void ConLockAccount(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnlockAccount(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccountInfo(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddUnclaimableName(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveUnclaimableName(IConsole::IResult *pResult, void *pUserData);
 
 	// chat_commands.cpp
 	static void ConCreditsGctf(IConsole::IResult *pResult, void *pUserData);
@@ -121,6 +188,12 @@ public:
 	static void ConStatsAllTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConMultis(IConsole::IResult *pResult, void *pUserData);
 	static void ConSteals(IConsole::IResult *pResult, void *pUserData);
+	static void ConRegister(IConsole::IResult *pResult, void *pUserData);
+	static void ConLogin(IConsole::IResult *pResult, void *pUserData);
+	static void ConLogoutAccount(IConsole::IResult *pResult, void *pUserData);
+	static void ConChangePassword(IConsole::IResult *pResult, void *pUserData);
+	static void ConClaimName(IConsole::IResult *pResult, void *pUserData);
+	static void ConSlowAccountOperation(IConsole::IResult *pResult, void *pUserData);
 	static void ConScore(IConsole::IResult *pResult, void *pUserData);
 	static void ConRankKills(IConsole::IResult *pResult, void *pUserData);
 	static void ConInstaRankPoints(IConsole::IResult *pResult, void *pUserData);

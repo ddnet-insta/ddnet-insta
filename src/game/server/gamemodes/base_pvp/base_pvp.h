@@ -1,9 +1,14 @@
 #ifndef GAME_SERVER_GAMEMODES_BASE_PVP_BASE_PVP_H
 #define GAME_SERVER_GAMEMODES_BASE_PVP_BASE_PVP_H
 
-#include <cstdint>
+#include <base/types.h>
+#include <game/server/instagib/account.h>
 #include <game/server/instagib/extra_columns.h>
+#include <game/server/instagib/ratelimits.h>
 #include <game/server/instagib/sql_stats.h>
+
+#include <cstdint>
+#include <vector>
 
 #include "../DDRace.h"
 
@@ -29,8 +34,9 @@ public:
 	bool CanSpawn(int Team, vec2 *pOutPos, int DDTeam) override;
 	bool BlockFirstShotOnSpawn(class CCharacter *pChr, int Weapon) const;
 	void SendChatSpectators(const char *pMessage, int Flags);
+	void CheckAccountsConfig();
 	void OnReset() override;
-	void OnInit() override;
+	void OnInit(bool ServerStart) override;
 	void OnPlayerConnect(CPlayer *pPlayer) override;
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;
 	void DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg) override;
@@ -70,6 +76,30 @@ public:
 	void SmartChatTick();
 	bool DetectedCasualRound();
 	void DoWarmup(int Seconds) override;
+
+	// accounts.cpp
+	void OnLogin(const CAccount *pAccount, class CPlayer *pPlayer) override;
+	void OnRegister(class CPlayer *pPlayer) override;
+	void LogoutAccount(class CPlayer *pPlayer, const char *pSuccessMessage) override;
+	void LogoutAllAccounts() override;
+	void OnLogout(class CPlayer *pPlayer, const char *pMessage) override;
+	void OnShutdown() override;
+	void RequestChangePassword(class CPlayer *pPlayer, const char *pOldPassword, const char *pNewPassword) override;
+	void OnChangePassword(class CPlayer *pPlayer) override;
+	void OnFailedAccountLogin(class CPlayer *pPlayer, const char *pErrorMsg) override;
+	void RequestClaimName(class CPlayer *pPlayer, const char *pName) override;
+	void OnNameClaimed(class CPlayer *pPlayer, const char *pDisplayName, const char *pUsername) override;
+	bool IsAccountRatelimited(int ClientId, char *pReason, int ReasonSize) override;
+	void OnAccountInfo(int AdminUniqueClientId, const char *pUsername, CAccount *pAccount);
+	// rcon commands
+	bool IsAccountRconCmdRatelimited(int ClientId, char *pReason, int ReasonSize) override;
+	void AccountList(const char *pSearch) override;
+	void RconForceSetPassword(class CPlayer *pPlayer, const char *pUsername, const char *pPassword) override;
+	void RconForceLogout(class CPlayer *pPlayer, const char *pUsername) override;
+	void RconLockAccount(class CPlayer *pPlayer, const char *pUsername) override;
+	void RconUnlockAccount(class CPlayer *pPlayer, const char *pUsername) override;
+	void RconAccountInfo(class CPlayer *pPlayer, const char *pUsername) override;
+	void ProcessAccountRconCmdResult(CAccountRconCmdResult &Result);
 
 	void AddSpree(CPlayer *pPlayer);
 	void EndSpree(CPlayer *pPlayer, CPlayer *pKiller);
@@ -121,6 +151,7 @@ public:
 	bool ForceNetworkClipping(const CEntity *pEntity, int SnappingClient, vec2 CheckPos) override;
 	bool ForceNetworkClippingLine(const CEntity *pEntity, int SnappingClient, vec2 StartPos, vec2 EndPos) override;
 	bool OnClientPacket(int ClientId, bool Sys, int MsgId, struct CNetChunk *pPacket, class CUnpacker *pUnpacker) override;
+	bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) override;
 
 	// pPlayer is the player that just hit
 	// an enemy with the grenade
@@ -192,6 +223,11 @@ public:
 	// they start at one and get incremented for every new player that gets created
 	CPlayer *GetPlayerByUniqueId(uint32_t UniqueId);
 
+	// returns player pointer or nullptr if none is found
+	// of the player that is connected to the server and is
+	// logged into the account with the matching username
+	CPlayer *GetPlayerByAccountUsername(const char *pUsername);
+
 	/*
 		m_pExtraColums
 
@@ -210,5 +246,7 @@ public:
 	std::vector<NETADDR> m_vFrozenQuitters;
 	int64_t m_ReleaseAllFrozenQuittersTick = 0;
 	void RestoreFreezeStateOnRejoin(CPlayer *pPlayer);
+
+	std::vector<CIpRatelimit> m_vIpRatelimits;
 };
 #endif // GAME_SERVER_GAMEMODES_BASE_PVP_BASE_PVP_H

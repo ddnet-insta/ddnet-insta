@@ -46,7 +46,7 @@ Adding your own stats columns and rank/top commands can be done in a few lines o
 ## Stats tracked in sql database
 
 Every players kills, deaths, wins and more statistics are persisted in a database.
-There are no accounts. The stats are tacked on the players names. What exactly is tracked
+The stats are tacked on the players names and work without accounts. What exactly is tracked
 depends on the ``sv_gametype``. But here are some chat commands that work in any gamemode:
 
 - ``/stats`` Shows the current round stats. Takes a player name as optional argument.
@@ -55,6 +55,43 @@ depends on the ``sv_gametype``. But here are some chat commands that work in any
 - ``/rank_kills`` Show the all time rank of a players kills compared to others. Takes a player name as optional argument.
 - ``/rank`` to list all rank commands for the current gametype
 - ``/top`` to list all top commands for the current gametype
+
+## Accounts
+
+You need ``sv_port`` to be set so ddnet-insta knows the current port.
+You also need ``sv_hostname`` to be set. Ideally this would be your domain or public ip.
+But it can be any unique identifer for your current server.
+The combination of ``sv_port`` and ``sv_hostname`` is used to track on which
+server accounts are logged in and is essential for the accounts to operate correctly.
+Make sure to set these two values before you turn on accounts. The order matters here.
+
+
+Example autoexec turning on accounts:
+
+```
+# can not be zero
+sv_port 8303
+
+# change hostname to your public ip!
+sv_hostname 127.0.0.1
+
+# keep this last
+sv_accounts 1
+```
+
+Now users can register an account using the chat command ``/register`` and then login using ``/login``.
+The accounts are stored in your sql database together with the stats. This will be sqlite3 by default
+and can be mysql/mariadb if you activated it.
+
+### Accounts with gdb
+
+If you run your server with gdb and stop it with ctrl+c the server will not shutdown cleanly.
+Which means accounts will not be logged out correctly. So if you need that make sure to let
+gdb pass on SIGINT to the server like this:
+
+```
+gdb -ex='handle SIGINT noprint nostop pass' ./DDNet-Server
+```
 
 ## Checkbox votes
 
@@ -338,6 +375,9 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_chat_ratelimit_debug` Logs which of the ratelimits kicked in
 + `sv_require_chat_flag_to_chat` clients have to send playerflag chat to use public chat (commands are unrelated)
 + `sv_always_track_stats` Track stats no matter how many players are online
++ `sv_accounts` See /register and /login chat commands
++ `sv_points_needed_to_register` Amount of round points needed to be able to /register an account (anti spam)
++ `sv_join_register_delay` Delay in seconds after join before one can /register an account (anti spam)
 + `sv_debug_catch` Debug zCatch ticks caught and in game
 + `sv_debug_stats` Verbose logging for the SQL player stats
 + `sv_vote_checkboxes` Fill [ ] checkbox in vote name if the config is already set
@@ -381,10 +421,6 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `gctf_antibot` runs the antibot command gctf (depends on closed source module)
 + `known_antibot` runs the antibot command known (depends on antibob antibot module)
 + `redirect` Redirect client to given port use victim \"all\" to redirect all but your self
-+ `deep_jailid` deep freeze (undeep tile works) will be restored on respawn and reconnect
-+ `deep_jailip` deep freeze (undeep tile works) will be restored on respawn and reconnect
-+ `deep_jails` list all perma deeped players deeped by deep_jailid and deep_jailip commands
-+ `undeep_jail` list all perma deeped players deeped by deep_jailid and deep_jailip commands
 
 # Chat commands
 
@@ -410,6 +446,11 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `/stats_all` Shows the all time stats of player name (your stats by default)
 + `/multis` Shows the all time fng multi kill stats
 + `/steals` Shows all time and round fng kill steal stats
++ `/register` register account
++ `/login` login to account
++ `/logout` logout account
++ `/changepassword` change the password of your account
++ `/slow_account_operation` used to simulate high load for debugging account system stability
 + `/score` change which type of score is displayed in scoreboard
 + `/points` Shows the all time points rank of player name (your stats by default)
 + `/rank_points` Shows the all time points rank of player name (your stats by default)

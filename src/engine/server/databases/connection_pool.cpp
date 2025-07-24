@@ -2,6 +2,7 @@
 #include "connection.h"
 #include <engine/shared/config.h>
 
+#include <base/log.h>
 #include <base/system.h>
 #include <cstring>
 #include <engine/console.h>
@@ -334,15 +335,36 @@ void CWorker::ProcessQueries()
 		break;
 		case CSqlExecData::WRITE_ACCESS:
 		{
+			// ddnet-insta this is a good git conflict surface :D
+			// ddnet-insta never skips to backup database
+			//             backups make little sense for operations like
+			//             merging stats and saving account state such as logged in
+			//             we always have to properly finish these on the main db
+			//             otherwise things end up in bad state
+			//             if the server would shutdown during round end when all stats are saved
+			//             some stats would not be saved because pure ddnet goes into fail mode after the first one finished
+			//
+			// if there is a git conflict here please revisit this
+			// and properly test that if there is a queue of slow jobs pending already
+			// that the server can shutdown and properly logout all accounts
+			//
+			// See https://github.com/ddnet-insta/ddnet-insta/pull/264
+			// to reproduce the potential bug fixed by these comments:
+			// - login some accounts using /login
+			// - use the chat command /slow_account_operation and then instantly shut down the server
+			// - check the mysql dabase and run the query: SELECT username, logged_in FROM accounts;
+			// - verify all accounts got correctly logged out
 			if(m_pShared->m_Shutdown && m_pWriteBackup != nullptr)
 			{
-				dbg_msg("sql", "[%i] %s skipped to backup database during shutdown", JobNum, pThreadData->m_pName);
+				log_warn("sql", "[%i] '%s' pure ddnet would skip during shutdown. But ddnet-insta will finish the query!", JobNum, pThreadData->m_pName);
+				// dbg_msg("sql", "[%i] %s skipped to backup database during shutdown", JobNum, pThreadData->m_pName);
 			}
 			else if(FailMode && m_pWriteBackup != nullptr)
 			{
-				dbg_msg("sql", "[%i] %s skipped to backup database during FailMode", JobNum, pThreadData->m_pName);
+				log_warn("sql", "[%i] '%s' pure ddnet would skip to backup database during FailMode. But ddnet-insta will finish the query!", JobNum, pThreadData->m_pName);
+				// dbg_msg("sql", "[%i] %s skipped to backup database during FailMode", JobNum, pThreadData->m_pName);
 			}
-			else if(CDbConnectionPool::ExecSqlFunc(m_pWriteConnection.get(), pThreadData.get(), Write::NORMAL))
+			if(CDbConnectionPool::ExecSqlFunc(m_pWriteConnection.get(), pThreadData.get(), Write::NORMAL))
 			{
 				if(m_DebugSql)
 					dbg_msg("sql", "[%i] %s done on write database", JobNum, pThreadData->m_pName);

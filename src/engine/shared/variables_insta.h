@@ -114,6 +114,10 @@ MACRO_CONFIG_INT(SvRequireChatFlagToChat, sv_require_chat_flag_to_chat, 0, 0, 1,
 
 // is sv_always_track_stats for debugging only or is this a useful feature?
 MACRO_CONFIG_INT(SvAlwaysTrackStats, sv_always_track_stats, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Track stats no matter how many players are online")
+MACRO_CONFIG_INT(SvAccounts, sv_accounts, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "See /register and /login chat commands")
+MACRO_CONFIG_INT(SvClaimableNames, sv_claimable_names, 0, 0, 2, CFGFLAG_SAVE | CFGFLAG_SERVER, "0=off 1=lock claimed names but no /claimname cmd 2=fully on")
+MACRO_CONFIG_INT(SvPointsNeededToRegister, sv_points_needed_to_register, 0, 0, 5000, CFGFLAG_SAVE | CFGFLAG_SERVER, "Amount of round points needed to be able to /register an account (anti spam)")
+MACRO_CONFIG_INT(SvJoinRegisterDelay, sv_join_register_delay, 5, 0, 5000, CFGFLAG_SAVE | CFGFLAG_SERVER, "Delay in seconds after join before one can /register an account (anti spam)")
 MACRO_CONFIG_INT(SvDebugCatch, sv_debug_catch, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Debug zCatch ticks caught and in game")
 MACRO_CONFIG_INT(SvDebugStats, sv_debug_stats, 0, 0, 2, CFGFLAG_SAVE | CFGFLAG_SERVER, "Verbose logging for the SQL player stats")
 MACRO_CONFIG_INT(SvVoteCheckboxes, sv_vote_checkboxes, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Fill [ ] checkbox in vote name if the config is already set")

@@ -6,8 +6,11 @@
 
 #include <base/vmath.h>
 #include <cstdint>
+#include <game/server/instagib/account.h>
+#include <game/server/instagib/display_name.h>
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/ip_storage.h>
+#include <game/server/instagib/sql_accounts.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
 #include <game/server/teeinfo.h>
@@ -34,6 +37,7 @@ public:
 	CTeeInfo m_TeeInfosNoCosmetics;
 
 	void ProcessStatsResult(CInstaSqlResult &Result);
+	void ProcessAccountResult(CAccountPlayerResult &Result);
 
 	int m_SentWarmupAlerts = 0;
 	void WarmupAlert();
@@ -192,6 +196,10 @@ public:
 	// if you need the correct up to date stats of a players name you have to do a new db request
 	CSqlStatsPlayer m_SavedStats;
 
+	// you should probably check m_Account.IsLoggedIn()
+	// before accessing values
+	CAccount m_Account;
+
 	// currently active unterminated killing spree
 	int Spree() const { return m_Spree; }
 
@@ -215,6 +223,11 @@ public:
 
 	std::shared_ptr<CInstaSqlResult> m_StatsQueryResult;
 	std::shared_ptr<CInstaSqlResult> m_FastcapQueryResult;
+	std::shared_ptr<CAccountPlayerResult> m_AccountQueryResult;
+	std::shared_ptr<CAccountManagementResult> m_AccountLogoutQueryResult;
+	std::shared_ptr<CCheckNameClaimResult> m_CheckClaimNameQueryResult;
+
+	CDisplayName m_DisplayName;
 
 	/*
 		m_HasGhostCharInGame
@@ -283,7 +296,20 @@ public:
 	// similar to ddnets m_JoinTick
 	// but uses time instead of tick
 	// so it also works when the world is paused
+	//
+	// gets reset on reload and map chnages
+	// if you need original very first join time see m_FirstJoinTime
 	int64_t m_JoinTime = 0;
+
+	// similar to ddnets m_JoinTick
+	// but uses time instead of tick
+	// so it also works when the world is paused
+	//
+	// it also gets persisted across map changes
+	// and reloads
+	//
+	// if you need the last creation of the player see m_JoinTime
+	int64_t m_FirstJoinTime = 0;
 
 	// used for balacing
 	// to figure out which players score the least

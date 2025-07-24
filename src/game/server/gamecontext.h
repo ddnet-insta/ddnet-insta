@@ -4,9 +4,12 @@
 #define GAME_SERVER_GAMECONTEXT_H
 
 #include <engine/http.h> // ddnet-insta m_pHttp
+#include <game/server/instagib/account.h> // ddnet-insta
+#include <game/server/instagib/display_name.h> // persistent client data
 #include <game/server/instagib/enums.h> // ddnet-insta
 #include <game/server/instagib/ip_storage.h> // ddnet-insta
-#include <string> // ddnet-insta map pool
+#include <game/server/instagib/sql_accounts.h> // ddnet-insta rcon cmd query results
+#include <unordered_set> // ddnet-insta unclaimable names
 #include <vector> // ddnet-insta map pool
 
 #include <engine/console.h>
