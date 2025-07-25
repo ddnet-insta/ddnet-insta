@@ -1131,6 +1131,7 @@ public:
 	void PublishRoundEndStatsStrDiscord(const char *pStr);
 	void PublishRoundEndStatsStrHttp(const char *pStr);
 	void PublishRoundEndStats();
+	void SendRoundTopMessage(int ClientId);
 
 public:
 	enum

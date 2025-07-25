@@ -245,11 +245,8 @@ bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumAr
 		return false;
 	}
 
-	if(g_Config.m_SvBangCommands < 2)
-	{
-		SendChatTarget(ClientId, "Chat votes are disabled please use the vote menu.");
+	if(!GameServer()->IsChatCmdAllowed(ClientId))
 		return false;
-	}
 
 	int SetSlots = -1;
 	const int aSlotCommandValues[] = {1, 2, 3, 4, 5, 6, 7, 8, 32};

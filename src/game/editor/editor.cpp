@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include <base/color.h>
+#include <base/log.h>
 #include <base/system.h>
 
 #if defined(CONF_FAMILY_UNIX)
@@ -29,6 +30,7 @@
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
+#include <game/editor/explanations.h>
 #include <game/generated/client_data.h>
 #include <game/localization.h>
 
@@ -47,12 +49,12 @@
 
 using namespace FontIcons;
 
-float fxt2f(int t)
+static float fxt2f(int t)
 {
 	return t / 1000.0f;
 }
 
-int f2fxt(float t)
+static int f2fxt(float t)
 {
 	return static_cast<int>(t * 1000.0f);
 }
@@ -471,9 +473,13 @@ std::vector<CQuad *> CEditor::GetSelectedQuads()
 	std::vector<CQuad *> vpQuads;
 	if(!pQuadLayer)
 		return vpQuads;
-	vpQuads.resize(m_vSelectedQuads.size());
-	for(int i = 0; i < (int)m_vSelectedQuads.size(); ++i)
-		vpQuads[i] = &pQuadLayer->m_vQuads[m_vSelectedQuads[i]];
+	vpQuads.reserve(m_vSelectedQuads.size());
+	for(const auto &SelectedQuad : m_vSelectedQuads)
+	{
+		if(SelectedQuad >= (int)pQuadLayer->m_vQuads.size())
+			continue;
+		vpQuads.push_back(&pQuadLayer->m_vQuads[SelectedQuad]);
+	}
 	return vpQuads;
 }
 
@@ -564,7 +570,7 @@ void CEditor::DeleteSelectedQuads()
 
 	std::vector<int> vSelectedQuads(m_vSelectedQuads);
 	std::vector<CQuad> vDeletedQuads;
-
+	vDeletedQuads.reserve(m_vSelectedQuads.size());
 	for(int i = 0; i < (int)m_vSelectedQuads.size(); ++i)
 	{
 		auto const &Quad = pLayer->m_vQuads[m_vSelectedQuads[i]];
@@ -3262,23 +3268,23 @@ void CEditor::DoMapEditor(CUIRect View)
 				else
 					Layer = NUM_LAYERS;
 
-				EExplanation Explanation;
+				CExplanations::EGametype ExplanationGametype;
 				if(m_SelectEntitiesImage == "DDNet")
-					Explanation = EExplanation::DDNET;
+					ExplanationGametype = CExplanations::EGametype::DDNET;
 				else if(m_SelectEntitiesImage == "FNG")
-					Explanation = EExplanation::FNG;
+					ExplanationGametype = CExplanations::EGametype::FNG;
 				else if(m_SelectEntitiesImage == "Race")
-					Explanation = EExplanation::RACE;
+					ExplanationGametype = CExplanations::EGametype::RACE;
 				else if(m_SelectEntitiesImage == "Vanilla")
-					Explanation = EExplanation::VANILLA;
+					ExplanationGametype = CExplanations::EGametype::VANILLA;
 				else if(m_SelectEntitiesImage == "blockworlds")
-					Explanation = EExplanation::BLOCKWORLDS;
+					ExplanationGametype = CExplanations::EGametype::BLOCKWORLDS;
 				else
-					Explanation = EExplanation::NONE;
+					ExplanationGametype = CExplanations::EGametype::NONE;
 
 				if(Layer != NUM_LAYERS)
 				{
-					const char *pExplanation = Explain(Explanation, (int)wx / 32 + (int)wy / 32 * 16, Layer);
+					const char *pExplanation = CExplanations::Explain(ExplanationGametype, (int)wx / 32 + (int)wy / 32 * 16, Layer);
 					if(pExplanation)
 						str_copy(m_aTooltip, pExplanation);
 				}
@@ -3761,9 +3767,8 @@ void CEditor::DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRG
 		m_pColorPickerPopupActiveId = nullptr;
 		if(m_ColorPickerPopupContext.m_State == EEditState::EDITING)
 		{
-			ColorRGBA c = color_cast<ColorRGBA>(m_ColorPickerPopupContext.m_HsvaColor);
 			m_ColorPickerPopupContext.m_State = EEditState::END;
-			SetColor(c);
+			SetColor(m_ColorPickerPopupContext.m_RgbaColor);
 			m_ColorPickerPopupContext.m_State = EEditState::NONE;
 		}
 	}
@@ -6824,9 +6829,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			Ui()->ClipEnable(&View);
 			Graphics()->TextureClear();
 			IGraphics::CLineItemBatch LineItemBatch;
-			Graphics()->LinesBatchBegin(&LineItemBatch);
 			for(int c = 0; c < pEnvelope->GetChannels(); c++)
 			{
+				Graphics()->LinesBatchBegin(&LineItemBatch);
 				if(s_ActiveChannels & (1 << c))
 					Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 1);
 				else
@@ -6865,7 +6870,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				}
 				Graphics()->LinesBatchEnd(&LineItemBatch);
 			}
-			Graphics()->LinesEnd();
 			Ui()->ClipDisable();
 		}
 
@@ -8224,7 +8228,7 @@ void CEditor::Render()
 		}
 		if(!m_pBrush->IsEmpty())
 		{
-			const bool HasTeleTiles = std::any_of(m_pBrush->m_vpLayers.begin(), m_pBrush->m_vpLayers.end(), [](auto pLayer) {
+			const bool HasTeleTiles = std::any_of(m_pBrush->m_vpLayers.begin(), m_pBrush->m_vpLayers.end(), [](const auto &pLayer) {
 				return pLayer->m_Type == LAYERTYPE_TILES && std::static_pointer_cast<CLayerTiles>(pLayer)->m_HasTele;
 			});
 			if(HasTeleTiles)
@@ -8760,12 +8764,12 @@ void CEditor::Init()
 	m_RenderTools.Init(m_pGraphics, m_pTextRender);
 	m_ZoomEnvelopeX.OnInit(this);
 	m_ZoomEnvelopeY.OnInit(this);
-	m_Map.m_pEditor = this;
 
 	m_vComponents.emplace_back(m_MapView);
 	m_vComponents.emplace_back(m_MapSettingsBackend);
 	m_vComponents.emplace_back(m_LayerSelector);
 	m_vComponents.emplace_back(m_Prompt);
+	m_vComponents.emplace_back(m_FontTyper);
 	for(CEditorComponent &Component : m_vComponents)
 		Component.OnInit(this);
 
@@ -9232,6 +9236,8 @@ bool CEditor::Load(const char *pFileName, int StorageType)
 
 		for(CEditorComponent &Component : m_vComponents)
 			Component.OnMapLoad();
+
+		log_info("editor/load", "Loaded map '%s'", m_aFileName);
 	}
 	else
 	{
@@ -9242,8 +9248,7 @@ bool CEditor::Load(const char *pFileName, int StorageType)
 
 bool CEditor::Append(const char *pFileName, int StorageType, bool IgnoreHistory)
 {
-	CEditorMap NewMap;
-	NewMap.m_pEditor = this;
+	CEditorMap NewMap(this);
 
 	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
 		ShowFileDialogError("%s", pErrorMessage);
@@ -9284,7 +9289,7 @@ bool CEditor::Append(const char *pFileName, int StorageType, bool IgnoreHistory)
 	s_ReplacedMap.clear();
 	for(auto NewMapIt = NewMap.m_vpImages.begin(); NewMapIt != NewMap.m_vpImages.end(); ++NewMapIt)
 	{
-		auto pNewImage = *NewMapIt;
+		const auto &pNewImage = *NewMapIt;
 		auto NameIsTaken = [pNewImage](const std::shared_ptr<CEditorImage> &OtherImage) { return str_comp(pNewImage->m_aName, OtherImage->m_aName) == 0; };
 		auto MatchInCurrentMap = std::find_if(m_Map.m_vpImages.begin(), m_Map.m_vpImages.end(), NameIsTaken);
 

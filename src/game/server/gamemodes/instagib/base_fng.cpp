@@ -324,7 +324,7 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 				if(!GameServer()->m_apPlayers[i])
 					continue;
 
-				if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorId == pKiller->GetCid())
+				if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->SpectatorId() == pKiller->GetCid())
 					Mask.set(i);
 			}
 			GameServer()->CreateSound(pKiller->m_ViewPos, SOUND_CTF_CAPTURE, Mask);

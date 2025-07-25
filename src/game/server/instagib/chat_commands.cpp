@@ -1,4 +1,5 @@
 #include <base/system.h>
+#include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
@@ -53,6 +54,9 @@ void CGameContext::ConInstaSwap(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
+	if(!pSelf->IsChatCmdAllowed(pResult->m_ClientId))
+		return;
+
 	pSelf->ComCallSwapTeamsVote(pResult->m_ClientId);
 }
 
@@ -69,6 +73,9 @@ void CGameContext::ConInstaSwapRandom(IConsole::IResult *pResult, void *pUserDat
 	if(!pPlayer)
 		return;
 
+	if(!pSelf->IsChatCmdAllowed(pResult->m_ClientId))
+		return;
+
 	pSelf->ComCallSwapTeamsRandomVote(pResult->m_ClientId);
 }
 
@@ -83,6 +90,9 @@ void CGameContext::ConInstaShuffle(IConsole::IResult *pResult, void *pUserData)
 
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
 	if(!pPlayer)
+		return;
+
+	if(!pSelf->IsChatCmdAllowed(pResult->m_ClientId))
 		return;
 
 	pSelf->ComCallShuffleVote(pResult->m_ClientId);
@@ -127,13 +137,19 @@ void CGameContext::ConRankCmdlist(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pSelf->SendChatTarget(pResult->m_ClientId, "~~~ ddnet-insta rank commands");
-	pSelf->SendChatTarget(pResult->m_ClientId, "~ /rank_kills - highest amount of kills");
-
+	pSelf->SendChatTarget(pResult->m_ClientId, "~ /rank_kills, /rank_spree");
+	pSelf->SendChatTarget(pResult->m_ClientId, "~ /rank_wins, /rank_win_points");
+	pSelf->SendChatTarget(pResult->m_ClientId, "~ /points");
+	pSelf->SendChatTarget(pResult->m_ClientId, "~ /stats, /statsall");
 	if(pSelf->m_pController->GameFlags() & GAMEFLAG_FLAGS)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientId, "~ /rank_caps - highest amount of flag captures");
-		pSelf->SendChatTarget(pResult->m_ClientId, "~ /rank_flags - best (shortest) flag capture time");
+		pSelf->SendChatTarget(pResult->m_ClientId, "~ /rank_caps, /rank_flags");
 	}
+	if(pSelf->m_pController->IsFngGameType())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "~ /multis");
+	}
+	pSelf->SendChatTarget(pResult->m_ClientId, "~ see also /top5 for a list of top commands");
 }
 
 void CGameContext::ConTopCmdlist(IConsole::IResult *pResult, void *pUserData)
@@ -152,15 +168,18 @@ void CGameContext::ConTopCmdlist(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pSelf->SendChatTarget(pResult->m_ClientId, "~~~ ddnet-insta top commands");
-	pSelf->SendChatTarget(pResult->m_ClientId, "~ /top5kills - top killers");
-	pSelf->SendChatTarget(pResult->m_ClientId, "~ /top5wins - highest amounts of round wins");
-	pSelf->SendChatTarget(pResult->m_ClientId, "~ /top5spree - highest killing sprees");
-
+	pSelf->SendChatTarget(pResult->m_ClientId, "~ /top5kills, /top5spree");
+	pSelf->SendChatTarget(pResult->m_ClientId, "~ /top5wins, /top5win_points");
+	pSelf->SendChatTarget(pResult->m_ClientId, "~ /top5points");
 	if(pSelf->m_pController->GameFlags() & GAMEFLAG_FLAGS)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientId, "~ /top5caps - best flag captures by amount");
-		pSelf->SendChatTarget(pResult->m_ClientId, "~ /top5flags - fastest flag capturers");
+		pSelf->SendChatTarget(pResult->m_ClientId, "~ /top5caps, /top5flags");
 	}
+	if(pSelf->m_pController->IsFngGameType())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "~ /top5spikes");
+	}
+	pSelf->SendChatTarget(pResult->m_ClientId, "~ see also /rank for a list of rank commands");
 }
 
 void CGameContext::ConStatsRound(IConsole::IResult *pResult, void *pUserData)
@@ -286,6 +305,12 @@ void CGameContext::ConSteals(IConsole::IResult *pResult, void *pUserData)
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
 	pSelf->m_pController->m_pSqlStats->ShowStats(pResult->m_ClientId, pName, pSelf->m_pController->StatsTable(), EInstaSqlRequestType::CHAT_CMD_STEALS);
+}
+
+void CGameContext::ConRoundTop(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_pController->SendRoundTopMessage(pResult->m_ClientId);
 }
 
 void CGameContext::ConScore(IConsole::IResult *pResult, void *pUserData)
@@ -481,6 +506,59 @@ void CGameContext::ConRankFlagCaptures(IConsole::IResult *pResult, void *pUserDa
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
 	pSelf->m_pController->m_pSqlStats->ShowRank(pResult->m_ClientId, pName, "Flag captures", "flag_captures", pSelf->m_pController->StatsTable(), "DESC");
+}
+
+void CGameContext::ConTopSpikeColors(IConsole::IResult *pResult, void *pUserData)
+{
+	const auto *pSelf = static_cast<CGameContext *>(pUserData);
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	if(!pSelf->m_pController)
+		return;
+
+	if(!pSelf->m_pController->IsFngGameType())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "This command only available in fng gametypes.");
+		return;
+	}
+
+	const char *pName = pSelf->Server()->ClientName(pResult->m_ClientId);
+	const char *pSpikeColor = pResult->GetString(0);
+	const int Offset = pResult->NumArguments() > 1 ? pResult->GetInteger(1) : 1;
+	const char *apSpikeColors[] = {
+		"gold",
+		"green",
+		"purple"};
+
+	for(const char *pColor : apSpikeColors)
+	{
+		if(str_comp_nocase(pSpikeColor, pColor) == 0)
+		{
+			char aDisplayName[64];
+			str_format(aDisplayName, sizeof(aDisplayName), "%s spikes", pColor);
+
+			char aDbColumn[64];
+			str_format(aDbColumn, sizeof(aDbColumn), "%s_spikes", pColor);
+
+			pSelf->m_pController->m_pSqlStats->ShowTop(
+				pResult->m_ClientId, pName,
+				aDisplayName,
+				aDbColumn,
+				pSelf->m_pController->StatsTable(),
+				"DESC",
+				Offset);
+			return;
+		}
+	}
+
+	pSelf->SendChatTarget(pResult->m_ClientId, "~~~ Usage: /top5spikes <color> - Available colors:");
+	for(const char *pColor : apSpikeColors)
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "~ %s", pColor);
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+	}
 }
 
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;

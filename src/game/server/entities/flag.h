@@ -16,7 +16,7 @@ public:
 	bool m_IsGrounded;
 
 	int m_Team;
-	int m_AtStand;
+	bool m_AtStand = true;
 	int m_DropTick;
 	int m_GrabTick;
 

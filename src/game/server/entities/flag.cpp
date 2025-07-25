@@ -24,7 +24,7 @@ void CFlag::Reset()
 	m_IsGrounded = true;
 	m_pLastCarrier = nullptr;
 	m_pCarrier = nullptr;
-	m_AtStand = 1;
+	m_AtStand = true;
 	m_Pos = m_StandPos;
 	m_Vel = vec2(0, 0);
 	m_GrabTick = 0;
@@ -46,7 +46,7 @@ void CFlag::Grab(CCharacter *pChar)
 		if(!pPlayer)
 			continue;
 
-		if(pPlayer->GetTeam() == TEAM_SPECTATORS && pPlayer->m_SpectatorId != SPEC_FREEVIEW && GameServer()->m_apPlayers[pPlayer->m_SpectatorId] && GameServer()->m_apPlayers[pPlayer->m_SpectatorId]->GetTeam() == m_Team)
+		if(pPlayer->GetTeam() == TEAM_SPECTATORS && pPlayer->SpectatorId() != SPEC_FREEVIEW && GameServer()->m_apPlayers[pPlayer->SpectatorId()] && GameServer()->m_apPlayers[pPlayer->SpectatorId()]->GetTeam() == m_Team)
 			GameServer()->CreateSoundGlobal(SOUND_CTF_GRAB_EN, c);
 		else if(pPlayer->GetTeam() == m_Team)
 			GameServer()->CreateSoundGlobal(SOUND_CTF_GRAB_EN, c);

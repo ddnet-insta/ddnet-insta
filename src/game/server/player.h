@@ -14,6 +14,7 @@
 #include <optional>
 
 #include <game/server/instagib/enums.h>
+#include <game/server/instagib/ip_storage.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
 #include <game/server/teeinfo.h>
@@ -80,8 +81,8 @@ public:
 
 	int m_SentSnaps = 0;
 
-	// used for spectator mode
-	int m_SpectatorId;
+	int SpectatorId() const { return m_SpectatorId; }
+	void SetSpectatorId(int Id);
 
 	bool m_IsReady;
 
@@ -140,6 +141,9 @@ private:
 	int m_ClientId;
 	int m_Team;
 
+	// used for spectator mode
+	int m_SpectatorId;
+
 	int m_Paused;
 	int64_t m_ForcePauseTime;
 	int64_t m_LastPause;
@@ -181,7 +185,7 @@ public:
 
 	bool IsPlaying() const;
 	int64_t m_Last_KickVote;
-	int64_t m_Last_Team;
+	int64_t m_LastDDRaceTeamChange;
 	int m_ShowOthers;
 	bool m_ShowAll;
 	vec2 m_ShowDistance;

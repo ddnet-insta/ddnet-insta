@@ -26,6 +26,9 @@ while read -r commit; do
 		line="${line%@*}"
 	fi
 	[[ "$line" = '* Merge branch '* ]] && continue
+	[[ "$line" = '* Merge pull request #'* ]] && continue
+	[[ "$line" = "* Merge remote-tracking branch '"* ]] && continue
+	[[ "$line" = "* merge: "* ]] && continue
 
 	printf '%s\n' "$line"
 done < <(git --no-pager log "${previous_tag}...$current_tag" --pretty=format:'%H')
