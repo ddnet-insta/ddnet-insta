@@ -224,7 +224,15 @@ void CGameControllerPvp::InitPlayer(CPlayer *pPlayer)
 		pPlayer->GetUniqueCid());
 	CIpStorage *pIpStorage = GameServer()->m_IpStorageController.FindEntry(Server()->ClientAddr(0));
 	if(pIpStorage)
+	{
+		log_info(
+			"ddnet-insta",
+			"player cid=%d name='%s' loaded ip storage (in total there are %ld entries)",
+			pPlayer->GetCid(),
+			Server()->ClientName(pPlayer->GetCid()),
+			GameServer()->m_IpStorageController.Entries().size());
 		pPlayer->m_IpStorage = *pIpStorage;
+	}
 
 	RoundInitPlayer(pPlayer);
 }

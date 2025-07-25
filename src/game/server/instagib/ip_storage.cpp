@@ -1,3 +1,4 @@
+#include <base/log.h>
 #include <base/system.h>
 
 #include "ip_storage.h"
@@ -69,12 +70,25 @@ CIpStorage *CIpStorageController::FindOrCreateEntry(const NETADDR *pAddr)
 
 void CIpStorageController::OnTick(int ServerTick)
 {
+	bool Deleted = false;
 	// clear out all empty entries to free the memory
 	// empty entries contain only expired storage data or no data at all
 	m_vEntries.erase(std::remove_if(
 				 m_vEntries.begin(), m_vEntries.end(),
-				 [ServerTick](const CIpStorage &Entry) {
-					 return Entry.IsEmpty(ServerTick);
+				 [ServerTick, &Deleted](const CIpStorage &Entry) {
+					 if(!Entry.IsEmpty(ServerTick))
+						 return false;
+
+					 Deleted = true;
+					 char aAddr[512];
+					 net_addr_str(Entry.Addr(), aAddr, sizeof(aAddr), false);
+					 log_info("ddnet-insta", "ip storage entry expired. ip=%s entryid=%d", aAddr, Entry.EntryId());
+					 return true;
 				 }),
 		m_vEntries.end());
+
+	if(Deleted)
+	{
+		log_info("ddnet-insta", "ip storage entries after cleanup: %ld", m_vEntries.size());
+	}
 }
