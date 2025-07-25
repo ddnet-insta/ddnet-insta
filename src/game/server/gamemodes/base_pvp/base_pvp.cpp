@@ -1610,6 +1610,16 @@ void CGameControllerPvp::OnAppliedDamage(int &Dmg, int &From, int &Weapon, CChar
 	{
 		pKiller->GetCharacter()->m_ReloadTimer = g_Config.m_SvReloadTimeOnHit;
 	}
+
+	CCharacter *pKillerChar = pKiller->GetCharacter();
+	if(g_Config.m_SvReloadTimeOnHit > 0 && Weapon == WEAPON_LASER && pKillerChar)
+	{
+		float FireDelay;
+		int ActiveWeaponTuneIndex = offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + pKillerChar->m_Core.m_ActiveWeapon;
+		pKillerChar->GetTuning(pKillerChar->m_TuneZone)->Get(ActiveWeaponTuneIndex, &FireDelay);
+		pKillerChar->m_BlockFullAutoUntilReleaseOrTick = Server()->Tick() + (FireDelay * Server()->TickSpeed() / 1000);
+		pKillerChar->m_ReloadTimer = g_Config.m_SvReloadTimeOnHit;
+	}
 }
 
 void CGameControllerPvp::RefillGrenadesOnHit(CPlayer *pPlayer)
@@ -2260,7 +2270,7 @@ bool CGameControllerPvp::BlockFirstShotOnSpawn(class CCharacter *pChr, int Weapo
 		return false;
 
 	// all the ddrace edge cases still apply
-	// except the ones that activate full auto for certain weapons
+	// except the ones that activate full auto for certain weapons (UPDATE: why not those???)
 	bool FullAuto = false;
 	if(pChr->m_Core.m_Jetpack && pChr->m_Core.m_ActiveWeapon == WEAPON_GUN)
 		FullAuto = true;
@@ -2277,6 +2287,44 @@ bool CGameControllerPvp::BlockFirstShotOnSpawn(class CCharacter *pChr, int Weapo
 	return true;
 }
 
+bool CGameControllerPvp::BlockFullAutoUntilRepress(class CCharacter *pChr, int Weapon) const
+{
+	// TODO: this might also apply to other auto weapons
+	//       but i dont want to fully test all of them now
+	//       so this will be laser only for now making sure no new bugs are introduced
+	//       https://github.com/ddnet-insta/ddnet-insta/issues/383
+	if(Weapon != WEAPON_LASER)
+		return false;
+	if(Server()->Tick() > pChr->m_BlockFullAutoUntilReleaseOrTick)
+		pChr->m_BlockFullAutoUntilReleaseOrTick = 0;
+	if(pChr->m_BlockFullAutoUntilReleaseOrTick == 0)
+		return false;
+
+	bool FullAuto = false;
+	if(pChr->m_Core.m_ActiveWeapon == WEAPON_GRENADE || pChr->m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || pChr->m_Core.m_ActiveWeapon == WEAPON_LASER)
+		FullAuto = true;
+	if(pChr->m_Core.m_Jetpack && pChr->m_Core.m_ActiveWeapon == WEAPON_GUN)
+		FullAuto = true;
+	// allow firing directly after coming out of freeze or being unfrozen
+	// by something
+	if(pChr->m_FrozenLastTick)
+		FullAuto = true;
+
+	// check if we gonna fire
+	if(CountInput(pChr->m_LatestPrevInput.m_Fire, pChr->m_LatestInput.m_Fire).m_Presses)
+	{
+		// fresh press unlocks full auto if it was locked
+		pChr->m_BlockFullAutoUntilReleaseOrTick = 0;
+		return false;
+	}
+	if(FullAuto && (pChr->m_LatestInput.m_Fire & 1) && pChr->m_Core.m_aWeapons[pChr->m_Core.m_ActiveWeapon].m_Ammo)
+	{
+		if(pChr->m_BlockFullAutoUntilReleaseOrTick != 0)
+			return true; // block! this is what the entire method is really about
+	}
+	return false;
+}
+
 bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos)
 {
 	// https://github.com/ddnet-insta/ddnet-insta/issues/289
@@ -2289,6 +2337,15 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 	// and also fix players doing potentially unwanted kills
 	// by just trying to respawn
 	if(BlockFirstShotOnSpawn(&Character, Weapon))
+		return true;
+	// https://github.com/ddnet-insta/ddnet-insta/issues/375
+	// sv_reload_time_on_hit can make weapons shoot faster on hit
+	// this was made for laser fng to be able to fight multiple enemies
+	// but because the laser is a auto weapon (meaning holding fire keeps shooting)
+	// it can cause accidental shots.
+	// So in that case the laser will be turned into a non auto weapon until
+	// the player repressed the fire button.
+	if(BlockFullAutoUntilRepress(&Character, Weapon))
 		return true;
 
 	if(IsStatTrack() && Weapon != WEAPON_HAMMER)
