@@ -462,8 +462,10 @@ void CGameContext::DeepJailId(int AdminId, int ClientId, int Minutes)
 		log_info("deep_jail", "minute amount has to be at least 1");
 		return;
 	}
+
 	int MinutesInTicks = Minutes * Server()->TickSpeed() * 60;
-	pPlayer->m_IpStorage.SetDeepUntilTick(Server()->Tick() + MinutesInTicks);
+	pPlayer->InitIpStorage();
+	pPlayer->m_IpStorage.value().SetDeepUntilTick(Server()->Tick() + MinutesInTicks);
 	if(pPlayer->GetCharacter())
 	{
 		pPlayer->GetCharacter()->SetDeepFrozen(true);
@@ -499,7 +501,8 @@ void CGameContext::DeepJailIp(int AdminId, const char *pAddrStr, int Minutes)
 		if(net_addr_comp_noport(Server()->ClientAddr(pPlayer->GetCid()), &Addr))
 			continue;
 
-		pPlayer->m_IpStorage.SetDeepUntilTick(UndeepTick);
+		pPlayer->InitIpStorage();
+		pPlayer->m_IpStorage.value().SetDeepUntilTick(UndeepTick);
 		if(pPlayer->GetCharacter())
 		{
 			pPlayer->GetCharacter()->SetDeepFrozen(true);
@@ -524,7 +527,8 @@ void CGameContext::UndeepJail(CIpStorage *pEntry)
 			continue;
 
 		log_info("deep_jail", "undeeped player cid=%d name='%s'", pPlayer->GetCid(), Server()->ClientName(pPlayer->GetCid()));
-		pPlayer->m_IpStorage.SetDeepUntilTick(0);
+		if(pPlayer->m_IpStorage.has_value())
+			pPlayer->m_IpStorage.value().SetDeepUntilTick(0);
 
 		// This could be used to cheat in ddrace.
 		// Does not seem safe. If a admin really wants instant unfreeze they
@@ -569,16 +573,19 @@ void CGameContext::ListDeepJails() const
 	{
 		if(!pPlayer)
 			continue;
-		if(pPlayer->m_IpStorage.DeepUntilTick() < Server()->Tick())
+		if(!pPlayer->m_IpStorage.has_value())
+			continue;
+		CIpStorage *pEntry = &pPlayer->m_IpStorage.value();
+		if(pEntry->DeepUntilTick() < Server()->Tick())
 			continue;
 
-		int TicksLeft = pPlayer->m_IpStorage.DeepUntilTick() - Server()->Tick();
+		int TicksLeft = pEntry->DeepUntilTick() - Server()->Tick();
 		int MinutesLeft = (TicksLeft / Server()->TickSpeed()) / 60;
 
 		log_info(
 			"deep_jail",
 			"#%d name='%s' cid=%d minutes=%d",
-			pPlayer->m_IpStorage.EntryId(),
+			pEntry->EntryId(),
 			Server()->ClientName(pPlayer->GetCid()),
 			pPlayer->GetCid(),
 			MinutesLeft);
@@ -597,10 +604,12 @@ CIpStorage *CGameContext::FindIpStorageEntryOfflineAndOnline(int EntryId)
 	{
 		if(!pPlayer)
 			continue;
-		if(pPlayer->m_IpStorage.EntryId() != EntryId)
+		if(!pPlayer->m_IpStorage.has_value())
+			continue;
+		if(pPlayer->m_IpStorage.value().EntryId() != EntryId)
 			continue;
 
-		return &pPlayer->m_IpStorage;
+		return pEntry;
 	}
 	return nullptr;
 }

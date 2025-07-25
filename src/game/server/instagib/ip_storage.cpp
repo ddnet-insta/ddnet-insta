@@ -1,18 +1,13 @@
 #include <base/log.h>
 #include <base/system.h>
 
+#include <cstdint>
+
 #include "ip_storage.h"
 
-void CIpStorage::OnInit(const NETADDR *pAddr, int EntryId, uint32_t UniqueClientId)
+CIpStorage::CIpStorage(const NETADDR *pAddr, int EntryId, uint32_t UniqueClientId) :
+	m_Addr(*pAddr), m_EntryId(EntryId), m_UniqueClientId(UniqueClientId)
 {
-	m_Addr = *pAddr;
-	m_EntryId = EntryId;
-	m_UniqueClientId = UniqueClientId;
-}
-
-CIpStorage::CIpStorage(const NETADDR *pAddr, int EntryId)
-{
-	OnInit(pAddr, EntryId, -1);
 }
 
 bool CIpStorage::IsEmpty(int ServerTick) const
@@ -62,7 +57,7 @@ CIpStorage *CIpStorageController::FindOrCreateEntry(const NETADDR *pAddr)
 	if(pEntry)
 		return pEntry;
 
-	m_vEntries.emplace_back(pAddr, GetNextEntryId());
+	m_vEntries.emplace_back(pAddr, GetNextEntryId(), -1);
 	pEntry = FindEntry(pAddr);
 	dbg_assert(pEntry != nullptr, "failed to find newly created entry");
 	return pEntry;

@@ -24,10 +24,11 @@ class CPlayer
 public:
 	void InstagibTick();
 	void RainbowTick();
+	void InitIpStorage();
 
 	int m_RainbowColor = 0;
 
-	CIpStorage m_IpStorage;
+	std::optional<CIpStorage> m_IpStorage;
 
 	// backup of the players skin
 	// for when cosmetics like rainbow are turned off

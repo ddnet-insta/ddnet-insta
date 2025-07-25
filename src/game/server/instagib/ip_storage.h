@@ -25,9 +25,7 @@ class CIpStorage
 	int64_t m_DeepUntilTick = 0;
 
 public:
-	void OnInit(const NETADDR *pAddr, int EntryId, uint32_t UniqueClientId);
-	CIpStorage(const NETADDR *pAddr, int EntryId);
-	CIpStorage() = default;
+	CIpStorage(const NETADDR *pAddr, int EntryId, uint32_t UniqueClientId);
 
 	const NETADDR *Addr() const { return &m_Addr; };
 	int EntryId() const { return m_EntryId; };

@@ -149,6 +149,17 @@ void CPlayer::RainbowTick()
 	}
 }
 
+void CPlayer::InitIpStorage()
+{
+	if(m_IpStorage.has_value())
+		return;
+
+	m_IpStorage = CIpStorage(
+		Server()->ClientAddr(GetCid()),
+		GameServer()->m_IpStorageController.GetNextEntryId(),
+		GetUniqueCid());
+}
+
 void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)
 {
 	if(Result.m_Success) // SQL request was successful

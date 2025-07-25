@@ -218,10 +218,6 @@ void CGameControllerPvp::InitPlayer(CPlayer *pPlayer)
 	pPlayer->m_DisplayScore = GameServer()->m_DisplayScore;
 	pPlayer->m_JoinTime = time_get();
 
-	pPlayer->m_IpStorage.OnInit(
-		Server()->ClientAddr(0),
-		GameServer()->m_IpStorageController.GetNextEntryId(),
-		pPlayer->GetUniqueCid());
 	CIpStorage *pIpStorage = GameServer()->m_IpStorageController.FindEntry(Server()->ClientAddr(0));
 	if(pIpStorage)
 	{
@@ -1731,7 +1727,7 @@ void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)
 
 	pPlayer->UpdateLastToucher(-1);
 
-	if(pPlayer->m_IpStorage.DeepUntilTick() > Server()->Tick())
+	if(pPlayer->m_IpStorage.has_value() && pPlayer->m_IpStorage.value().DeepUntilTick() > Server()->Tick())
 	{
 		pChr->SetDeepFrozen(true);
 	}
@@ -2079,11 +2075,11 @@ void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *
 		break;
 	}
 
-	if(!pPlayer->m_IpStorage.IsEmpty(Server()->Tick()))
+	if(pPlayer->m_IpStorage.has_value() && !pPlayer->m_IpStorage.value().IsEmpty(Server()->Tick()))
 	{
 		const NETADDR *pAddr = Server()->ClientAddr(pPlayer->GetCid());
 		CIpStorage *pStorage = GameServer()->m_IpStorageController.FindOrCreateEntry(pAddr);
-		pStorage->OnPlayerDisconnect(&pPlayer->m_IpStorage, Server()->Tick());
+		pStorage->OnPlayerDisconnect(&pPlayer->m_IpStorage.value(), Server()->Tick());
 	}
 
 	m_InvalidateConnectedIpsCache = true;
