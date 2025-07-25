@@ -504,3 +504,14 @@ void CGameControllerBaseFng::Snap(int SnappingClient)
 {
 	CGameControllerInstagib::Snap(SnappingClient);
 }
+
+bool CGameControllerBaseFng::CanClientDrop(int ClientId, const char *pReason)
+{
+	CCharacter *pChr = GameServer()->GetPlayerChar(ClientId);
+
+	if(pChr && pChr->m_FreezeTime && pChr->Team() != TEAM_SPECTATORS)
+	{
+		return false;
+	}
+	return true;
+}

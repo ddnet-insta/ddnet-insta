@@ -623,3 +623,8 @@ bool CGameContext::IsChatCmdAllowed(int ClientId) const
 	}
 	return true;
 }
+
+bool CGameContext::CanClientDrop(int ClientId, const char *pReason)
+{
+	return m_pController->CanClientDrop(ClientId, pReason);
+}

@@ -96,11 +96,17 @@ void CNetServer::Close()
 void CNetServer::Drop(int ClientId, const char *pReason)
 {
 	// TODO: insert lots of checks here
+	// ddnet-insta
+
+	int Error = 0;
 
 	if(m_pfnDelClient)
-		m_pfnDelClient(ClientId, pReason, m_pUser);
+		Error = m_pfnDelClient(ClientId, pReason, m_pUser);
 
-	m_aSlots[ClientId].m_Connection.Disconnect(pReason);
+	if(Error == 0)
+	{
+		m_aSlots[ClientId].m_Connection.Disconnect(pReason);
+	}
 }
 
 void CNetServer::Update()

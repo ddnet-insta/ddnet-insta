@@ -36,6 +36,7 @@ public:
 	void DeepJailIp(int AdminId, const char *pAddrStr, int Minutes);
 	void UndeepJail(CIpStorage *pEntry);
 	void ListDeepJails() const;
+	bool CanClientDrop(int ClientId, const char *pReason) override;
 
 	// prints not allowed message in chat for ClientId and returns false
 	// if calling votes with chat commands such as !shuffle or /shuffle

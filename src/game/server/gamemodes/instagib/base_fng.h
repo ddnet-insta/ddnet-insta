@@ -34,6 +34,8 @@ public:
 	void OnSpike(class CCharacter *pChr, int SpikeTile);
 	void OnWrongSpike(class CPlayer *pPlayer, int RemoveScore);
 
+	bool CanClientDrop(int ClientId, const char *pReason) override;
+
 	bool IsFngGameType() const override { return true; }
 };
 #endif // GAME_SERVER_GAMEMODES_INSTAGIB_BASE_FNG_H

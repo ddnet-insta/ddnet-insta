@@ -685,6 +685,21 @@ public:
 			pRequestingPlayer - player who initiated the stats request (might differ from the requested player)
 			pRequestedName - player name the stats belong to
 	*/
+
+	/*
+		Function: CanClientDrop
+			this function was added in ddnet-insta and is a non standard controller method.
+			neither ddnet nor teeworlds have this
+
+		Arguments:
+			ClientId - id of the player to load the stats for
+			pReason - Reason for shutdown
+
+		Returns:
+			bool - `true` to allow the client to disconnect, `false` to block the
+	*/
+	virtual bool CanClientDrop(int ClientId, const char *pReason) { return true; };
+
 	virtual void OnShowRoundStats(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName){};
 
 	/*

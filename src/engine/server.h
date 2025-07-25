@@ -317,6 +317,7 @@ class IGameServer : public IInterface
 public:
 	virtual const char *ServerInfoClientScoreKind() = 0;
 	virtual bool OnClientPacket(int ClientId, bool Sys, int MsgId, struct CNetChunk *pPacket, class CUnpacker *pUnpacker) = 0;
+	virtual bool CanClientDrop(int ClientId, const char *pReason) { return true; }
 
 protected:
 public:
