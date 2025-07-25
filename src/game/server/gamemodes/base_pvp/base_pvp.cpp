@@ -218,18 +218,6 @@ void CGameControllerPvp::InitPlayer(CPlayer *pPlayer)
 	pPlayer->m_DisplayScore = GameServer()->m_DisplayScore;
 	pPlayer->m_JoinTime = time_get();
 
-	CIpStorage *pIpStorage = GameServer()->m_IpStorageController.FindEntry(Server()->ClientAddr(0));
-	if(pIpStorage)
-	{
-		log_info(
-			"ddnet-insta",
-			"player cid=%d name='%s' loaded ip storage (in total there are %ld entries)",
-			pPlayer->GetCid(),
-			Server()->ClientName(pPlayer->GetCid()),
-			GameServer()->m_IpStorageController.Entries().size());
-		pPlayer->m_IpStorage = *pIpStorage;
-	}
-
 	RoundInitPlayer(pPlayer);
 }
 
@@ -1989,6 +1977,21 @@ void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 
 		GameServer()->AlertOnSpecialInstagibConfigs(ClientId);
 		GameServer()->ShowCurrentInstagibConfigsMotd(ClientId);
+	}
+
+	CIpStorage *pIpStorage = GameServer()->m_IpStorageController.FindEntry(Server()->ClientAddr(0));
+	if(pIpStorage)
+	{
+		char aAddr[512];
+		net_addr_str(Server()->ClientAddr(pPlayer->GetCid()), aAddr, sizeof(aAddr), false);
+		log_info(
+			"ddnet-insta",
+			"player cid=%d name='%s' ip=%s loaded ip storage (in total there are %ld entries)",
+			pPlayer->GetCid(),
+			Server()->ClientName(pPlayer->GetCid()),
+			aAddr,
+			GameServer()->m_IpStorageController.Entries().size());
+		pPlayer->m_IpStorage = *pIpStorage;
 	}
 
 	if((Server()->Tick() - GameServer()->m_NonEmptySince) / Server()->TickSpeed() < 20)
