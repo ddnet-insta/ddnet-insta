@@ -133,5 +133,6 @@ MACRO_CONFIG_STR(SvRoundStatsOutputFile, sv_round_stats_output_file, 512, "", CF
 MACRO_CONFIG_INT(SvRoundStatsFormatDiscord, sv_round_stats_format_discord, 1, 0, 4, CFGFLAG_SERVER, "0=csv 1=psv 2=ascii table 3=markdown table 4=json")
 MACRO_CONFIG_INT(SvRoundStatsFormatHttp, sv_round_stats_format_http, 4, 0, 4, CFGFLAG_SERVER, "0=csv 1=psv 2=ascii table 3=markdown table 4=json")
 MACRO_CONFIG_INT(SvRoundStatsFormatFile, sv_round_stats_format_file, 1, 0, 4, CFGFLAG_SERVER, "0=csv 1=psv 2=ascii table 3=markdown table 4=json")
+MACRO_CONFIG_INT(SvPrintRoundStats, sv_print_round_stats, 0, 0, 1, CFGFLAG_SERVER, "print top players in chat on round end")
 
 #endif

@@ -383,3 +383,73 @@ void IGameController::PublishRoundEndStats()
 		dbg_msg("ddnet-insta", "publishing round stats to file:\n%s", aStats);
 	}
 }
+
+void IGameController::SendRoundTopMessage(int ClientId)
+{
+	char aBuf[512];
+	CPlayer *apPlayers[MAX_CLIENTS];
+	memcpy(apPlayers, GameServer()->m_apPlayers, sizeof(apPlayers));
+
+	// kills
+	GameServer()->SendChatTarget(ClientId, "~~~ top killer ~~~");
+	std::stable_sort(apPlayers, apPlayers + MAX_CLIENTS,
+		[](const CPlayer *pPlayer1, const CPlayer *pPlayer2) -> bool {
+			if(!pPlayer1)
+				return false;
+			if(!pPlayer2)
+				return true;
+			return pPlayer1->Kills() > pPlayer2->Kills();
+		});
+	for(int i = 0; i < 5; i++)
+	{
+		CPlayer *pPlayer = apPlayers[i];
+		if(!pPlayer)
+			break;
+
+		str_format(aBuf, sizeof(aBuf), "%d. '%s' kills: %d", i + 1, Server()->ClientName(pPlayer->GetCid()), pPlayer->m_Stats.m_Kills);
+		GameServer()->SendChatTarget(ClientId, aBuf);
+	}
+
+	// kd
+	GameServer()->SendChatTarget(ClientId, "~~~ top ratios ~~~");
+	std::stable_sort(apPlayers, apPlayers + MAX_CLIENTS,
+		[this](const CPlayer *pPlayer1, const CPlayer *pPlayer2) -> bool {
+			if(!pPlayer1)
+				return false;
+			if(!pPlayer2)
+				return true;
+			float Kd1 = CalcKillDeathRatio(pPlayer1->Kills(), pPlayer1->Deaths());
+			float Kd2 = CalcKillDeathRatio(pPlayer1->Kills(), pPlayer1->Deaths());
+			return Kd1 > Kd2;
+		});
+	for(int i = 0; i < 5; i++)
+	{
+		CPlayer *pPlayer = apPlayers[i];
+		if(!pPlayer)
+			break;
+
+		float Ratio = CalcKillDeathRatio(pPlayer->Kills(), pPlayer->Deaths());
+		str_format(aBuf, sizeof(aBuf), "%d. '%s' k/d ratio: %.2f", i + 1, Server()->ClientName(pPlayer->GetCid()), Ratio);
+		GameServer()->SendChatTarget(ClientId, aBuf);
+	}
+
+	// deaths
+	GameServer()->SendChatTarget(ClientId, "~~~ top survivors ~~~");
+	std::stable_sort(apPlayers, apPlayers + MAX_CLIENTS,
+		[](const CPlayer *pPlayer1, const CPlayer *pPlayer2) -> bool {
+			if(!pPlayer1)
+				return false;
+			if(!pPlayer2)
+				return true;
+			return pPlayer1->Deaths() < pPlayer2->Deaths();
+		});
+	for(int i = 0; i < 5; i++)
+	{
+		CPlayer *pPlayer = apPlayers[i];
+		if(!pPlayer)
+			break;
+
+		str_format(aBuf, sizeof(aBuf), "%d. '%s' deaths: %d", i + 1, Server()->ClientName(pPlayer->GetCid()), pPlayer->Deaths());
+		GameServer()->SendChatTarget(ClientId, aBuf);
+	}
+}

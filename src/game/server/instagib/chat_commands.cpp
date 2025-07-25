@@ -307,6 +307,12 @@ void CGameContext::ConSteals(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_pController->m_pSqlStats->ShowStats(pResult->m_ClientId, pName, pSelf->m_pController->StatsTable(), EInstaSqlRequestType::CHAT_CMD_STEALS);
 }
 
+void CGameContext::ConRoundTop(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_pController->SendRoundTopMessage(pResult->m_ClientId);
+}
+
 void CGameContext::ConScore(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

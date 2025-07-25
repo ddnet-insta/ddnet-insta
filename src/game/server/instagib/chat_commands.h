@@ -34,6 +34,7 @@ CONSOLE_COMMAND("statsall", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, Co
 CONSOLE_COMMAND("stats_all", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConStatsAllTime, this, "Shows the all time stats of player name (your stats by default)")
 CONSOLE_COMMAND("multis", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConMultis, this, "Shows the all time fng multi kill stats")
 CONSOLE_COMMAND("steals", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSteals, this, "Shows all time and round fng kill steal stats")
+CONSOLE_COMMAND("round_top", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRoundTop, this, "Shows the top players of the current round")
 
 // which points to display in scoreboard
 // all time stats are implicit and round stats are specific

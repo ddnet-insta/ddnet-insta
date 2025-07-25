@@ -121,6 +121,7 @@ public:
 	static void ConStatsAllTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConMultis(IConsole::IResult *pResult, void *pUserData);
 	static void ConSteals(IConsole::IResult *pResult, void *pUserData);
+	static void ConRoundTop(IConsole::IResult *pResult, void *pUserData);
 	static void ConScore(IConsole::IResult *pResult, void *pUserData);
 	static void ConRankKills(IConsole::IResult *pResult, void *pUserData);
 	static void ConInstaRankPoints(IConsole::IResult *pResult, void *pUserData);

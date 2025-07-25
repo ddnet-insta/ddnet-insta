@@ -155,6 +155,8 @@ void CGameControllerPvp::OnRoundEnd()
 	}
 
 	PublishRoundEndStats();
+	if(g_Config.m_SvPrintRoundStats)
+		SendRoundTopMessage(-1);
 
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
