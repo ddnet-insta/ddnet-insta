@@ -609,7 +609,7 @@ CIpStorage *CGameContext::FindIpStorageEntryOfflineAndOnline(int EntryId)
 		if(pPlayer->m_IpStorage.value().EntryId() != EntryId)
 			continue;
 
-		return pEntry;
+		return &pPlayer->m_IpStorage.value();
 	}
 	return nullptr;
 }
