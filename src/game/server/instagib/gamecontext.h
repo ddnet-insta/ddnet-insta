@@ -31,6 +31,7 @@ public:
 	void InstagibUnstackChatMessage(char *pUnstacked, const char *pMessage, int Size);
 	void SwapTeams();
 	bool OnClientPacket(int ClientId, bool Sys, int MsgId, struct CNetChunk *pPacket, class CUnpacker *pUnpacker) override;
+	bool CanClientDrop(int ClientId, const char *pReason) override;
 
 	enum
 	{

@@ -438,3 +438,8 @@ bool CGameContext::OnClientPacket(int ClientId, bool Sys, int MsgId, CNetChunk *
 
 	return m_pController->OnClientPacket(ClientId, Sys, MsgId, pPacket, pUnpacker);
 }
+
+bool CGameContext::CanClientDrop(int ClientId, const char *pReason)
+{
+	return m_pController->CanClientDrop(ClientId, pReason);
+}

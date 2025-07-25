@@ -1212,7 +1212,14 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 
 	// notify the mod about the drop
 	if(pThis->m_aClients[ClientId].m_State >= CClient::STATE_READY)
+	{
+		// ddnet-insta
+		if(!pThis->GameServer()->CanClientDrop(ClientId, pReason))
+		{
+			return -1;
+		}
 		pThis->GameServer()->OnClientDrop(ClientId, pReason);
+	}
 
 	pThis->m_aClients[ClientId].m_State = CClient::STATE_EMPTY;
 	pThis->m_aClients[ClientId].m_aName[0] = 0;
