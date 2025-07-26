@@ -28,6 +28,14 @@ public:
 	// player can not be damaged with weapons
 	bool m_IsGodmode = false;
 
+	// if set to non 0 it requires the player to release the mouse once
+	// before full auto weapons actually are full auto
+	// and can be fired again by holding the mouse
+	//
+	// if Server()->Tick() is greated than this value it expires as well
+	// and holding will fire again
+	int m_BlockFullAutoUntilReleaseOrTick = 0;
+
 	int Health() { return m_Health; };
 	int Armor() { return m_Armor; };
 
