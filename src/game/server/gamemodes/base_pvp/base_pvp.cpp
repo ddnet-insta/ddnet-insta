@@ -2359,7 +2359,7 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 	if(!Character.m_ReloadTimer)
 	{
 		float FireDelay;
-		Character.GetTuning(Character.m_TuneZone)->Get(38 + Character.m_Core.m_ActiveWeapon, &FireDelay);
+		Character.GetTuning(Character.m_TuneZone)->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + Character.m_Core.m_ActiveWeapon, &FireDelay);
 		Character.m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 	}
 
