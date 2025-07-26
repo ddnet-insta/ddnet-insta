@@ -1981,7 +1981,7 @@ void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 		GameServer()->ShowCurrentInstagibConfigsMotd(ClientId);
 	}
 
-	CIpStorage *pIpStorage = GameServer()->m_IpStorageController.FindEntry(Server()->ClientAddr(0));
+	CIpStorage *pIpStorage = GameServer()->m_IpStorageController.FindEntry(Server()->ClientAddr(pPlayer->GetCid()));
 	if(pIpStorage)
 	{
 		char aAddr[512];
