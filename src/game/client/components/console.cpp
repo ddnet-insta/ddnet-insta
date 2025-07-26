@@ -212,6 +212,12 @@ CGameConsole::CInstance::CInstance(int Type)
 		if(pEntry->m_LineCount != -1)
 		{
 			m_NewLineCounter -= pEntry->m_LineCount;
+			for(auto &SearchMatch : m_vSearchMatches)
+			{
+				SearchMatch.m_StartLine += pEntry->m_LineCount;
+				SearchMatch.m_EndLine += pEntry->m_LineCount;
+				SearchMatch.m_EntryLine += pEntry->m_LineCount;
+			}
 		}
 	});
 
@@ -1376,7 +1382,7 @@ void CGameConsole::OnRender()
 
 				auto CurrentSelectedOccurrence = pConsole->m_vSearchMatches[pConsole->m_CurrentMatchIndex];
 
-				std::vector<STextColorSplit> vColorSplits;
+				Cursor.m_vColorSplits.reserve(vMatches.size());
 				for(const auto &Match : vMatches)
 				{
 					bool IsSelected = CurrentSelectedOccurrence.m_EntryLine == Match.m_EntryLine && CurrentSelectedOccurrence.m_Pos == Match.m_Pos;

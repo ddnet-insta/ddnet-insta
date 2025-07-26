@@ -46,7 +46,7 @@ void CFlag::Grab(CCharacter *pChar)
 		if(!pPlayer)
 			continue;
 
-		if(pPlayer->GetTeam() == TEAM_SPECTATORS && pPlayer->m_SpectatorId != SPEC_FREEVIEW && GameServer()->m_apPlayers[pPlayer->m_SpectatorId] && GameServer()->m_apPlayers[pPlayer->m_SpectatorId]->GetTeam() == m_Team)
+		if(pPlayer->GetTeam() == TEAM_SPECTATORS && pPlayer->SpectatorId() != SPEC_FREEVIEW && GameServer()->m_apPlayers[pPlayer->SpectatorId()] && GameServer()->m_apPlayers[pPlayer->SpectatorId()]->GetTeam() == m_Team)
 			GameServer()->CreateSoundGlobal(SOUND_CTF_GRAB_EN, c);
 		else if(pPlayer->GetTeam() == m_Team)
 			GameServer()->CreateSoundGlobal(SOUND_CTF_GRAB_EN, c);

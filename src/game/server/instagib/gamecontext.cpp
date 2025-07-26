@@ -1,9 +1,14 @@
 #include <base/log.h>
+#include <base/system.h>
+#include <base/types.h>
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
+#include <engine/shared/protocol.h>
+#include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
+#include <game/server/instagib/ip_storage.h>
 #include <game/server/instagib/protocol.h>
 #include <game/server/player.h>
 
@@ -437,6 +442,176 @@ bool CGameContext::OnClientPacket(int ClientId, bool Sys, int MsgId, CNetChunk *
 		return false;
 
 	return m_pController->OnClientPacket(ClientId, Sys, MsgId, pPacket, pUnpacker);
+}
+
+void CGameContext::DeepJailId(int AdminId, int ClientId, int Minutes)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+	{
+		log_info("deep_jail", "invalid id %d", ClientId);
+		return;
+	}
+	CPlayer *pPlayer = m_apPlayers[ClientId];
+	if(!pPlayer)
+	{
+		log_info("deep_jail", "no player with id %d found", ClientId);
+		return;
+	}
+	if(Minutes < 1)
+	{
+		log_info("deep_jail", "minute amount has to be at least 1");
+		return;
+	}
+
+	int MinutesInTicks = Minutes * Server()->TickSpeed() * 60;
+	pPlayer->InitIpStorage();
+	pPlayer->m_IpStorage.value().SetDeepUntilTick(Server()->Tick() + MinutesInTicks);
+	if(pPlayer->GetCharacter())
+	{
+		pPlayer->GetCharacter()->SetDeepFrozen(true);
+	}
+
+	char aBuf[512];
+	if(AdminId < 0 || AdminId >= MAX_CLIENTS)
+		str_copy(aBuf, "you were deep frozen by the server", sizeof(aBuf));
+	else
+		str_format(aBuf, sizeof(aBuf), "you were deep frozen by '%s'", Server()->ClientName(AdminId));
+	SendChatTarget(pPlayer->GetCid(), aBuf);
+	log_info("deep_jail", "deep froze player '%s' for %d minutes", Server()->ClientName(ClientId), Minutes);
+}
+
+void CGameContext::DeepJailIp(int AdminId, const char *pAddrStr, int Minutes)
+{
+	NETADDR Addr;
+	if(net_addr_from_str(&Addr, pAddrStr))
+	{
+		log_info("deep_jail", "invalid ip address '%s'", pAddrStr);
+		return;
+	}
+
+	int MinutesInTicks = Minutes * Server()->TickSpeed() * 60;
+	int UndeepTick = Server()->Tick() + MinutesInTicks;
+	CIpStorage *pEntry = m_IpStorageController.FindOrCreateEntry(&Addr);
+	pEntry->SetDeepUntilTick(UndeepTick);
+
+	for(CPlayer *pPlayer : m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(net_addr_comp_noport(Server()->ClientAddr(pPlayer->GetCid()), &Addr))
+			continue;
+
+		pPlayer->InitIpStorage();
+		pPlayer->m_IpStorage.value().SetDeepUntilTick(UndeepTick);
+		if(pPlayer->GetCharacter())
+		{
+			pPlayer->GetCharacter()->SetDeepFrozen(true);
+		}
+
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "you were deep frozen by '%s'", Server()->ClientName(AdminId));
+		SendChatTarget(pPlayer->GetCid(), aBuf);
+		log_info("deep_jail", "deep froze player '%s' for %d minutes", Server()->ClientName(pPlayer->GetCid()), Minutes);
+	}
+}
+
+void CGameContext::UndeepJail(CIpStorage *pEntry)
+{
+	pEntry->SetDeepUntilTick(0);
+	bool OnlinePlayers = false;
+	for(CPlayer *pPlayer : m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(net_addr_comp_noport(Server()->ClientAddr(pPlayer->GetCid()), pEntry->Addr()))
+			continue;
+
+		log_info("deep_jail", "undeeped player cid=%d name='%s'", pPlayer->GetCid(), Server()->ClientName(pPlayer->GetCid()));
+		if(pPlayer->m_IpStorage.has_value())
+			pPlayer->m_IpStorage.value().SetDeepUntilTick(0);
+
+		// This could be used to cheat in ddrace.
+		// Does not seem safe. If a admin really wants instant unfreeze they
+		// have to also kill the player (or we need some undeep id command).
+		if(!g_Config.m_SvTestingCommands)
+		{
+			log_info("deep_jail", "the player has to kill to be undeeped because sv_test_cmds is 0");
+		}
+		else if(pPlayer->GetCharacter())
+		{
+			pPlayer->GetCharacter()->SetDeepFrozen(false);
+			pPlayer->GetCharacter()->UnFreeze();
+		}
+		OnlinePlayers = true;
+	}
+	if(!OnlinePlayers)
+	{
+		char aAddr[512];
+		net_addr_str(pEntry->Addr(), aAddr, sizeof(aAddr), false);
+		log_info("deep_jail", "removed deep jail entry %s", aAddr);
+	}
+}
+
+void CGameContext::ListDeepJails() const
+{
+	bool GotEntries = false;
+	for(const CIpStorage &Entry : m_IpStorageController.Entries())
+	{
+		if(Entry.DeepUntilTick() < Server()->Tick())
+			continue;
+
+		char aAddr[512];
+		net_addr_str(Entry.Addr(), aAddr, sizeof(aAddr), false);
+
+		int TicksLeft = Entry.DeepUntilTick() - Server()->Tick();
+		int MinutesLeft = (TicksLeft / Server()->TickSpeed()) / 60;
+
+		log_info("deep_jail", "#%d ip=%s minutes=%d", Entry.EntryId(), aAddr, MinutesLeft);
+		GotEntries = true;
+	}
+	for(CPlayer *pPlayer : m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(!pPlayer->m_IpStorage.has_value())
+			continue;
+		CIpStorage *pEntry = &pPlayer->m_IpStorage.value();
+		if(pEntry->DeepUntilTick() < Server()->Tick())
+			continue;
+
+		int TicksLeft = pEntry->DeepUntilTick() - Server()->Tick();
+		int MinutesLeft = (TicksLeft / Server()->TickSpeed()) / 60;
+
+		log_info(
+			"deep_jail",
+			"#%d name='%s' cid=%d minutes=%d",
+			pEntry->EntryId(),
+			Server()->ClientName(pPlayer->GetCid()),
+			pPlayer->GetCid(),
+			MinutesLeft);
+		GotEntries = true;
+	}
+	if(!GotEntries)
+		log_info("deep_jail", "No entries");
+}
+
+CIpStorage *CGameContext::FindIpStorageEntryOfflineAndOnline(int EntryId)
+{
+	CIpStorage *pEntry = m_IpStorageController.FindEntry(EntryId);
+	if(pEntry)
+		return pEntry;
+	for(CPlayer *pPlayer : m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(!pPlayer->m_IpStorage.has_value())
+			continue;
+		if(pPlayer->m_IpStorage.value().EntryId() != EntryId)
+			continue;
+
+		return &pPlayer->m_IpStorage.value();
+	}
+	return nullptr;
 }
 
 bool CGameContext::IsChatCmdAllowed(int ClientId) const

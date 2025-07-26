@@ -149,6 +149,17 @@ void CPlayer::RainbowTick()
 	}
 }
 
+void CPlayer::InitIpStorage()
+{
+	if(m_IpStorage.has_value())
+		return;
+
+	m_IpStorage = CIpStorage(
+		Server()->ClientAddr(GetCid()),
+		GameServer()->m_IpStorageController.GetNextEntryId(),
+		GetUniqueCid());
+}
+
 void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)
 {
 	if(Result.m_Success) // SQL request was successful
@@ -233,7 +244,10 @@ void CPlayer::SetTeamSpoofed(int Team, bool DoChatMsg)
 	m_Team = Team;
 	m_LastSetTeam = Server()->Tick();
 	m_LastActionTick = Server()->Tick();
-	m_SpectatorId = SPEC_FREEVIEW;
+
+	// TODO: revist this when ddnet merged 128 player support
+	//       do we really want to rebuild and resend some 0.6 backcompat mappings here?
+	SetSpectatorId(SPEC_FREEVIEW);
 
 	protocol7::CNetMsg_Sv_Team Msg;
 	Msg.m_ClientId = m_ClientId;
@@ -250,8 +264,9 @@ void CPlayer::SetTeamSpoofed(int Team, bool DoChatMsg)
 		// update spectator modes
 		for(auto &pPlayer : GameServer()->m_apPlayers)
 		{
-			if(pPlayer && pPlayer->m_SpectatorId == m_ClientId)
-				pPlayer->m_SpectatorId = SPEC_FREEVIEW;
+			// TODO: revist this when ddnet merged 128 player support
+			if(pPlayer && pPlayer->SpectatorId() == m_ClientId)
+				pPlayer->SetSpectatorId(SPEC_FREEVIEW);
 		}
 	}
 
@@ -264,7 +279,8 @@ void CPlayer::SetTeamNoKill(int Team, bool DoChatMsg)
 	m_Team = Team;
 	m_LastSetTeam = Server()->Tick();
 	m_LastActionTick = Server()->Tick();
-	m_SpectatorId = SPEC_FREEVIEW;
+	// TODO: revist this when ddnet merged 128 player support
+	SetSpectatorId(SPEC_FREEVIEW);
 
 	// dead spec mode for 0.7
 	if(!m_IsDead)
@@ -285,8 +301,9 @@ void CPlayer::SetTeamNoKill(int Team, bool DoChatMsg)
 		// update spectator modes
 		for(auto &pPlayer : GameServer()->m_apPlayers)
 		{
-			if(pPlayer && pPlayer->m_SpectatorId == m_ClientId)
-				pPlayer->m_SpectatorId = SPEC_FREEVIEW;
+			// TODO: revist this when ddnet merged 128 player support
+			if(pPlayer && pPlayer->SpectatorId() == m_ClientId)
+				pPlayer->SetSpectatorId(SPEC_FREEVIEW);
 		}
 	}
 

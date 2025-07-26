@@ -13,6 +13,7 @@
 #include <game/server/entities/flag.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/instagib/enums.h>
+#include <game/server/instagib/ip_storage.h>
 #include <game/server/instagib/laser_text.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/structs.h>
@@ -154,6 +155,8 @@ void CGameControllerPvp::OnRoundEnd()
 	}
 
 	PublishRoundEndStats();
+	if(g_Config.m_SvPrintRoundStats)
+		SendRoundTopMessage(-1);
 
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
@@ -1065,10 +1068,6 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 		if(pKiller->GetCharacter() && pKiller != pVictim->GetPlayer())
 		{
 			AddSpree(pKiller);
-			if(g_Config.m_SvReloadTimeOnHit > 0 && Weapon == WEAPON_LASER && !IsFngGameType())
-			{
-				pKiller->GetCharacter()->m_ReloadTimer = g_Config.m_SvReloadTimeOnHit;
-			}
 		}
 
 		bool IsSpreeEnd = true;
@@ -1122,6 +1121,7 @@ void CGameControllerPvp::CheckForceUnpauseGame()
 void CGameControllerPvp::Tick()
 {
 	CGameControllerDDRace::Tick();
+	GameServer()->m_IpStorageController.OnTick(Server()->Tick());
 
 	if(m_TicksUntilShutdown)
 	{
@@ -1605,6 +1605,11 @@ void CGameControllerPvp::OnAppliedDamage(int &Dmg, int &From, int &Weapon, CChar
 
 	if(Weapon == WEAPON_GRENADE)
 		RefillGrenadesOnHit(pKiller);
+
+	if(g_Config.m_SvReloadTimeOnHit > 0 && Weapon == WEAPON_LASER)
+	{
+		pKiller->GetCharacter()->m_ReloadTimer = g_Config.m_SvReloadTimeOnHit;
+	}
 }
 
 void CGameControllerPvp::RefillGrenadesOnHit(CPlayer *pPlayer)
@@ -1702,27 +1707,32 @@ bool CGameControllerPvp::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 
 void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)
 {
+	CPlayer *pPlayer = pChr->GetPlayer();
 	OnCharacterConstruct(pChr);
 
 	pChr->SetTeams(&Teams());
-	Teams().OnCharacterSpawn(pChr->GetPlayer()->GetCid());
+	Teams().OnCharacterSpawn(pPlayer->GetCid());
 
 	// default health
 	pChr->IncreaseHealth(10);
 
-	pChr->GetPlayer()->UpdateLastToucher(-1);
+	pPlayer->UpdateLastToucher(-1);
 
-	if(pChr->GetPlayer()->m_FreezeOnSpawn)
+	if(pPlayer->m_IpStorage.has_value() && pPlayer->m_IpStorage.value().DeepUntilTick() > Server()->Tick())
 	{
-		pChr->Freeze(pChr->GetPlayer()->m_FreezeOnSpawn);
-		pChr->GetPlayer()->m_FreezeOnSpawn = 0;
+		pChr->SetDeepFrozen(true);
+	}
+	else if(pPlayer->m_FreezeOnSpawn)
+	{
+		pChr->Freeze(pPlayer->m_FreezeOnSpawn);
+		pPlayer->m_FreezeOnSpawn = 0;
 
 		char aBuf[512];
 		str_format(
 			aBuf,
 			sizeof(aBuf),
 			"'%s' spawned frozen because he quit while being frozen",
-			Server()->ClientName(pChr->GetPlayer()->GetCid()));
+			Server()->ClientName(pPlayer->GetCid()));
 		SendChat(-1, TEAM_ALL, aBuf);
 	}
 }
@@ -1972,6 +1982,21 @@ void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 		GameServer()->ShowCurrentInstagibConfigsMotd(ClientId);
 	}
 
+	CIpStorage *pIpStorage = GameServer()->m_IpStorageController.FindEntry(Server()->ClientAddr(pPlayer->GetCid()));
+	if(pIpStorage)
+	{
+		char aAddr[512];
+		net_addr_str(Server()->ClientAddr(pPlayer->GetCid()), aAddr, sizeof(aAddr), false);
+		log_info(
+			"ddnet-insta",
+			"player cid=%d name='%s' ip=%s loaded ip storage (in total there are %ld entries)",
+			pPlayer->GetCid(),
+			Server()->ClientName(pPlayer->GetCid()),
+			aAddr,
+			GameServer()->m_IpStorageController.Entries().size());
+		pPlayer->m_IpStorage = *pIpStorage;
+	}
+
 	if((Server()->Tick() - GameServer()->m_NonEmptySince) / Server()->TickSpeed() < 20)
 	{
 		pPlayer->m_VerifiedForChat = true;
@@ -2054,6 +2079,13 @@ void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *
 		// to avoid memory leaks
 		m_ReleaseAllFrozenQuittersTick = Server()->Tick() + Server()->TickSpeed() * 300;
 		break;
+	}
+
+	if(pPlayer->m_IpStorage.has_value() && !pPlayer->m_IpStorage.value().IsEmpty(Server()->Tick()))
+	{
+		const NETADDR *pAddr = Server()->ClientAddr(pPlayer->GetCid());
+		CIpStorage *pStorage = GameServer()->m_IpStorageController.FindOrCreateEntry(pAddr);
+		pStorage->OnPlayerDisconnect(&pPlayer->m_IpStorage.value(), Server()->Tick());
 	}
 
 	m_InvalidateConnectedIpsCache = true;
@@ -2328,7 +2360,7 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 	if(!Character.m_ReloadTimer)
 	{
 		float FireDelay;
-		Character.GetTuning(Character.m_TuneZone)->Get(38 + Character.m_Core.m_ActiveWeapon, &FireDelay);
+		Character.GetTuning(Character.m_TuneZone)->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + Character.m_Core.m_ActiveWeapon, &FireDelay);
 		Character.m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 	}
 
@@ -2350,7 +2382,7 @@ void CGameControllerPvp::DoDamageHitSound(int KillerId)
 		if(!GameServer()->m_apPlayers[i])
 			continue;
 
-		if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorId == KillerId)
+		if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->SpectatorId() == KillerId)
 			Mask.set(i);
 	}
 	GameServer()->CreateSound(pKiller->m_ViewPos, SOUND_HIT, Mask);

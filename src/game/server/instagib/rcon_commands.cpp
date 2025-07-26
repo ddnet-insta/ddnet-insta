@@ -1,8 +1,12 @@
+#include <base/log.h>
 #include <base/system.h>
+#include <base/types.h>
+#include <base/vmath.h>
 #include <engine/antibot.h>
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontroller.h>
+#include <game/server/instagib/ip_storage.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
@@ -186,4 +190,56 @@ void CGameContext::ConKnownAntibot(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->Antibot()->ConsoleCommand("known");
+}
+
+void CGameContext::ConDeepJailId(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->DeepJailId(pResult->m_ClientId, pResult->GetVictim(), pResult->GetInteger(1));
+}
+
+void CGameContext::ConDeepJailIp(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->DeepJailIp(pResult->m_ClientId, pResult->GetString(0), pResult->GetInteger(1));
+}
+
+void CGameContext::ConDeepJails(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->ListDeepJails();
+}
+
+void CGameContext::ConUndeepJail(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	const char *pStr = pResult->GetString(0);
+	if(str_isallnum(pStr))
+	{
+		int EntryId = atoi(pStr);
+		CIpStorage *pEntry = pSelf->FindIpStorageEntryOfflineAndOnline(EntryId);
+		if(!pEntry)
+		{
+			log_info("deep_jail", "entry id %d not found check undeep_jails for a list", EntryId);
+			return;
+		}
+		pSelf->UndeepJail(pEntry);
+		return;
+	}
+
+	NETADDR Addr;
+	if(net_addr_from_str(&Addr, pStr))
+	{
+		log_info("deep_jail", "undeep_jail error (invalid network address)");
+		return;
+	}
+
+	CIpStorage *pEntry = pSelf->m_IpStorageController.FindEntry(&Addr);
+	if(!pEntry)
+	{
+		log_info("deep_jail", "the ip '%s' is not deep jailed check undeep_jails for a full list", pStr);
+		return;
+	}
+	pSelf->UndeepJail(pEntry);
 }

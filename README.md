@@ -353,6 +353,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_round_stats_format_discord` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
 + `sv_round_stats_format_http` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
 + `sv_round_stats_format_file` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
++ `sv_print_round_stats` print top players in chat on round end
 + `sv_spawn_weapons` possible values: grenade, laser
 + `sv_zcatch_colors` Color scheme for zCatch options: teetime, savander
 + `sv_display_score` values: points, round_points, spree, current_spree, win_points, wins, kills, round_kills
@@ -381,6 +382,10 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `gctf_antibot` runs the antibot command gctf (depends on closed source module)
 + `known_antibot` runs the antibot command known (depends on antibob antibot module)
 + `redirect` Redirect client to given port use victim \"all\" to redirect all but your self
++ `deep_jailid` deep freeze (undeep tile works) will be restored on respawn and reconnect
++ `deep_jailip` deep freeze (undeep tile works) will be restored on respawn and reconnect
++ `deep_jails` list all perma deeped players deeped by deep_jailid and deep_jailip commands
++ `undeep_jail` list all perma deeped players deeped by deep_jailid and deep_jailip commands
 
 # Chat commands
 
@@ -406,6 +411,7 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `/stats_all` Shows the all time stats of player name (your stats by default)
 + `/multis` Shows the all time fng multi kill stats
 + `/steals` Shows all time and round fng kill steal stats
++ `/round_top` Shows the top players of the current round
 + `/score` change which type of score is displayed in scoreboard
 + `/points` Shows the all time points rank of player name (your stats by default)
 + `/rank_points` Shows the all time points rank of player name (your stats by default)

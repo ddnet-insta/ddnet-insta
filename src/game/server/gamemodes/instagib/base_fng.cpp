@@ -324,7 +324,7 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 				if(!GameServer()->m_apPlayers[i])
 					continue;
 
-				if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorId == pKiller->GetCid())
+				if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->SpectatorId() == pKiller->GetCid())
 					Mask.set(i);
 			}
 			GameServer()->CreateSound(pKiller->m_ViewPos, SOUND_CTF_CAPTURE, Mask);
@@ -480,9 +480,6 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 	{
 		Character.GetPlayer()->m_Stats.m_GotFrozen++;
 	}
-
-	if(g_Config.m_SvReloadTimeOnHit > 0 && Weapon == WEAPON_LASER && pKiller && pKiller->GetCharacter())
-		pKiller->GetCharacter()->m_ReloadTimer = g_Config.m_SvReloadTimeOnHit;
 
 	// kill message
 	CNetMsg_Sv_KillMsg Msg;
