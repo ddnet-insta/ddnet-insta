@@ -1068,10 +1068,6 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 		if(pKiller->GetCharacter() && pKiller != pVictim->GetPlayer())
 		{
 			AddSpree(pKiller);
-			if(g_Config.m_SvReloadTimeOnHit > 0 && Weapon == WEAPON_LASER && !IsFngGameType())
-			{
-				pKiller->GetCharacter()->m_ReloadTimer = g_Config.m_SvReloadTimeOnHit;
-			}
 		}
 
 		bool IsSpreeEnd = true;
@@ -1609,6 +1605,11 @@ void CGameControllerPvp::OnAppliedDamage(int &Dmg, int &From, int &Weapon, CChar
 
 	if(Weapon == WEAPON_GRENADE)
 		RefillGrenadesOnHit(pKiller);
+
+	if(g_Config.m_SvReloadTimeOnHit > 0 && Weapon == WEAPON_LASER)
+	{
+		pKiller->GetCharacter()->m_ReloadTimer = g_Config.m_SvReloadTimeOnHit;
+	}
 }
 
 void CGameControllerPvp::RefillGrenadesOnHit(CPlayer *pPlayer)

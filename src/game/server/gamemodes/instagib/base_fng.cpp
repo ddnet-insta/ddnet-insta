@@ -481,9 +481,6 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 		Character.GetPlayer()->m_Stats.m_GotFrozen++;
 	}
 
-	if(g_Config.m_SvReloadTimeOnHit > 0 && Weapon == WEAPON_LASER && pKiller && pKiller->GetCharacter())
-		pKiller->GetCharacter()->m_ReloadTimer = g_Config.m_SvReloadTimeOnHit;
-
 	// kill message
 	CNetMsg_Sv_KillMsg Msg;
 	Msg.m_Killer = From;
