@@ -323,7 +323,8 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_respawn_protection_ms` Delay in milliseconds a tee can not damage or get damaged after spawning
 + `sv_drop_flag_on_selfkill` drop flag on selfkill (activates chat cmd '/drop flag')
 + `sv_drop_flag_on_vote` drop flag on vote yes (activates chat cmd '/drop flag')
-+ `sv_reload_time_on_hit` 0=default/off ticks it takes to shoot again after a shot was hit
++ `sv_reload_time_on_hit` 0=default/off ticks it takes to shoot again after a shot was hit (see also sv_fast_hit_full_auto)
++ `sv_fast_hit_full_auto` require fire button repress when sv_reload_time_on_hit is set
 + `sv_punish_freeze_disconnect` freeze player for 20 seconds on rejoin when leaving server while being frozen
 + `sv_self_damage_respawn_delay_ms` time in miliseconds it takes to respawn after dieing by self damage
 + `sv_self_kill_respawn_delay_ms` time in miliseconds it takes to respawn after sending kill bind
