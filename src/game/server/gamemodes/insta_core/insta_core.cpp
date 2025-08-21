@@ -998,7 +998,7 @@ void CGameControllerInstaCore::DoSpikeKillSound(int VictimId, int KillerId)
 	auto *pVictim = GameServer()->m_apPlayers[VictimId];
 	if(!pVictim)
 		return;
-	if(g_Config.m_SvFngSpikeSound == 1)
+	if(g_Config.m_SvSpikeSound == 1)
 	{
 		CClientMask Mask = CClientMask().set(KillerId);
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1012,7 +1012,7 @@ void CGameControllerInstaCore::DoSpikeKillSound(int VictimId, int KillerId)
 		const auto *pKiller = GameServer()->m_apPlayers[KillerId];
 		GameServer()->CreateSound(pKiller ? pKiller->m_ViewPos : pVictim->m_ViewPos, SOUND_CTF_CAPTURE, Mask);
 	}
-	else if(g_Config.m_SvFngSpikeSound == 2)
+	else if(g_Config.m_SvSpikeSound == 2)
 	{
 		auto *pVictimChr = pVictim->GetCharacter();
 		if(pVictimChr)
