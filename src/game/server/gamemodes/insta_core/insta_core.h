@@ -133,6 +133,14 @@ public:
 	// and to the spectators of that player
 	void DoDamageHitSound(int KillerId);
 
+	// play the flag capture sound for spike kills
+	// call this on kill
+	//
+	// the sound name is SOUND_CTF_CAPTURE
+	// when sv_spike_sound is 1 play for the killer and victim
+	// when sv_spike_sound is 2 play for everyone nearby
+	void DoSpikeKillSound(int VictimId, int KillerId);
+
 	// cached amount of unique ips
 	int NumConnectedIps();
 

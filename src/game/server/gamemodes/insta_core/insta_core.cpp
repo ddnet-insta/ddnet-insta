@@ -991,6 +991,40 @@ void CGameControllerInstaCore::DoDamageHitSound(int KillerId)
 	GameServer()->CreateSound(pKiller->m_ViewPos, SOUND_HIT, Mask);
 }
 
+void CGameControllerInstaCore::DoSpikeKillSound(int VictimId, int KillerId)
+{
+	if(VictimId < 0 || VictimId >= MAX_CLIENTS || KillerId < 0 || KillerId >= MAX_CLIENTS)
+		return;
+	auto *pVictim = GameServer()->m_apPlayers[VictimId];
+	if(!pVictim)
+		return;
+	if(g_Config.m_SvFngSpikeSound == 1)
+	{
+		CClientMask Mask = CClientMask().set(KillerId);
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(!GameServer()->m_apPlayers[i])
+				continue;
+
+			if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->SpectatorId() == KillerId)
+				Mask.set(i);
+		}
+		const auto *pKiller = GameServer()->m_apPlayers[KillerId];
+		GameServer()->CreateSound(pKiller ? pKiller->m_ViewPos : pVictim->m_ViewPos, SOUND_CTF_CAPTURE, Mask);
+	}
+	else if(g_Config.m_SvFngSpikeSound == 2)
+	{
+		auto *pVictimChr = pVictim->GetCharacter();
+		if(pVictimChr)
+		{
+			CClientMask Mask = pVictimChr->TeamMask();
+			Mask.reset(KillerId);
+			GameServer()->CreateSound(pVictimChr->GetPos(), SOUND_CTF_GRAB_PL, Mask);
+			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE, KillerId);
+		}
+	}
+}
+
 int CGameControllerInstaCore::NumConnectedIps()
 {
 	if(!m_InvalidateConnectedIpsCache)

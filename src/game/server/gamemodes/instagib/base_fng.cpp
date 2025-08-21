@@ -315,27 +315,7 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 			}
 		}
 
-		// do sacrifice flag sound
-		if(g_Config.m_SvFngSpikeSound == 1)
-		{
-			CClientMask Mask = CClientMask().set(pKiller->GetCid());
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(!GameServer()->m_apPlayers[i])
-					continue;
-
-				if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->SpectatorId() == pKiller->GetCid())
-					Mask.set(i);
-			}
-			GameServer()->CreateSound(pKiller->m_ViewPos, SOUND_CTF_CAPTURE, Mask);
-		}
-		else if(g_Config.m_SvFngSpikeSound == 2)
-		{
-			CClientMask Mask = pChr->TeamMask();
-			Mask.reset(pKiller->GetCid());
-			GameServer()->CreateSound(pChr->GetPos(), SOUND_CTF_GRAB_PL, Mask);
-			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE, pKiller->GetCid());
-		}
+		DoSpikeKillSound(pChr->GetPlayer()->GetCid(), pKiller->GetCid());
 
 		OnKill(pChr->GetPlayer(), pKiller, WEAPON_WORLD);
 	}
