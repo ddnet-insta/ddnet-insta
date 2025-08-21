@@ -2855,6 +2855,8 @@ if(SERVER)
     gamemodes/vanilla/dm/sql_columns.h
     gamemodes/vanilla/fly/fly.cpp
     gamemodes/vanilla/fly/fly.h
+    gamemodes/vanilla/tsmash/tsmash.cpp
+    gamemodes/vanilla/tsmash/tsmash.h
     gameworld.cpp
     gameworld.h
     instagib/antibob.cpp

@@ -225,6 +225,20 @@ Like bolofng but with teams.
 
 Like boomfng but with laser.
 
+### TSmash
+
+``sv_gametype tsmash``
+
+A hammer deathmatch where you only die from spikes.
+Every time you are hit you loose health which increases the knockback you take.
+Pickup hearts and sheilds to reduce knockback.
+
+### TTSmash
+
+``sv_gametype ttsmash``
+
+Like TSmash but with teams.
+
 # Configs
 
 ddnet-insta inherited all configs from ddnet. So make sure to also check ddnet's documentation.
