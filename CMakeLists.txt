@@ -3125,6 +3125,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     datafile.cpp
     editor.cpp
     fs.cpp
+    gameworld.cpp
     git_revision.cpp
     hash.cpp
     huffman.cpp
