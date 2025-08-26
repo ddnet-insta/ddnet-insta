@@ -1,6 +1,4 @@
-#ifndef GAME_SERVER_INSTAGIB_GAMECONTROLLER_H
-// hack for headerguard linter
-#endif
+// This file can be included several times.
 
 #ifndef IN_CLASS_IGAMECONTROLLER
 

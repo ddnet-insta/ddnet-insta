@@ -1,6 +1,4 @@
-#ifndef GAME_SERVER_GAMEMODES_BASE_PVP_CHARACTER_H
-// hack for headerguard linter
-#endif
+// This file can be included several times.
 
 #ifndef IN_CLASS_CHARACTER
 
