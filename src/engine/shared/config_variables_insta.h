@@ -1,10 +1,8 @@
-// ddnet-insta config variables
-#ifndef ENGINE_SHARED_VARIABLES_INSTA_H
-#define ENGINE_SHARED_VARIABLES_INSTA_H
-#undef ENGINE_SHARED_VARIABLES_INSTA_H // this file will be included several times
+// This file can be included several times.
 
 #ifndef MACRO_CONFIG_INT
 #error "The config macros must be defined"
+// This helps IDEs properly syntax highlight the uses of the macro below.
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) ;
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) ;
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) ;
@@ -135,5 +133,3 @@ MACRO_CONFIG_INT(SvRoundStatsFormatDiscord, sv_round_stats_format_discord, 1, 0,
 MACRO_CONFIG_INT(SvRoundStatsFormatHttp, sv_round_stats_format_http, 4, 0, 4, CFGFLAG_SERVER, "0=csv 1=psv 2=ascii table 3=markdown table 4=json")
 MACRO_CONFIG_INT(SvRoundStatsFormatFile, sv_round_stats_format_file, 1, 0, 4, CFGFLAG_SERVER, "0=csv 1=psv 2=ascii table 3=markdown table 4=json")
 MACRO_CONFIG_INT(SvPrintRoundStats, sv_print_round_stats, 0, 0, 1, CFGFLAG_SERVER, "print top players in chat on round end")
-
-#endif

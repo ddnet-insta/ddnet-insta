@@ -2060,6 +2060,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   config.cpp
   config.h
   config_variables.h
+  config_variables_insta.h
   console.cpp
   console.h
   csv.cpp
@@ -2134,7 +2135,6 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   translation_context.h
   uuid_manager.cpp
   uuid_manager.h
-  variables_insta.h
   video.cpp
   video.h
   websockets.cpp
