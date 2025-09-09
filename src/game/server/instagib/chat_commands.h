@@ -46,6 +46,8 @@ CONSOLE_COMMAND("multis", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConM
 CONSOLE_COMMAND("steals", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSteals, this, "Shows all time and round fng kill steal stats")
 CONSOLE_COMMAND("round_top", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRoundTop, this, "Shows the top players of the current round")
 
+CONSOLE_COMMAND("rollback", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRollback, this, "Enable rollback")
+
 // which points to display in scoreboard
 // all time stats are implicit and round stats are specific
 // so "points" is all time stats of players points

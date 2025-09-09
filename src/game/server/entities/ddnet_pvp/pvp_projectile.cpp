@@ -9,10 +9,11 @@
 #include <game/server/entities/projectile.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
 
-#include "vanilla_projectile.h"
+#include "pvp_projectile.h"
 
-CVanillaProjectile::CVanillaProjectile(
+CPvpProjectile::CPvpProjectile(
 	CGameWorld *pGameWorld,
 	int Type,
 	int Owner,
@@ -39,32 +40,100 @@ CVanillaProjectile::CVanillaProjectile(
 		Layer,
 		Number)
 {
+	m_FirstTick = true;
+	m_OrigStartTick = m_StartTick;
+	m_FirstSnap = true;
+
+	for(int &ParticleId : m_aParticleIds)
+	{
+		ParticleId = Server()->SnapNewId();
+	}
 }
 
-void CVanillaProjectile::Tick()
+CPvpProjectile::~CPvpProjectile()
 {
-	float Pt = (Server()->Tick() - m_StartTick - 1) / (float)Server()->TickSpeed();
-	float Ct = (Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed();
-	vec2 PrevPos = GetPos(Pt);
-	vec2 CurPos = GetPos(Ct);
+	for(int ParticleId : m_aParticleIds)
+	{
+		Server()->SnapFreeId(ParticleId);
+	}
+}
+
+void CPvpProjectile::Tick()
+{
+	bool IsRollbackDamage = false; //ddnet-insta
+	int RollbackDamageTick = 0; //ddnet-insta
+
+	int Collide = 0;
+	CCharacter *pTargetChr = 0;
+	float Pt;
+	float Ct;
+	vec2 PrevPos;
+	vec2 CurPos;
 	vec2 ColPos;
 	vec2 NewPos;
-	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos);
+
 	CCharacter *pOwnerChar = 0;
+
+	bool IsWeaponCollide = false;
 
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-	CCharacter *pTargetChr = 0;
+	if(m_FirstTick && m_Owner >= 0 && m_Owner < MAX_CLIENTS && GameServer()->m_apPlayers[m_Owner] && GameServer()->m_apPlayers[m_Owner]->m_RollbackEnabled && GameServer()->m_apPlayers[m_Owner]->GetCharacter())
+	{
+		m_StartTick = GameServer()->m_apPlayers[m_Owner]->m_LastAckedSnapshot + 1;
 
-	if(pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit)
-		pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
+		//Collide with wall and tee
+		int CollideTick;
+		for(CollideTick = m_StartTick + 1; CollideTick <= m_OrigStartTick; CollideTick++)
+		{
+			Pt = (CollideTick - m_StartTick - 1) / (float)Server()->TickSpeed();
+			Ct = (CollideTick - m_StartTick) / (float)Server()->TickSpeed();
+			PrevPos = GetPos(Pt);
+			CurPos = GetPos(Ct);
+			Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos); //wall
+
+			if(m_LifeSpan > -1)
+				m_LifeSpan--;
+
+			if(Collide)
+				break;
+
+			pTargetChr = GameServer()->m_Rollback.IntersectCharacterOnTick(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner, nullptr, CollideTick); //tee
+
+			if(pTargetChr)
+			{
+				IsWeaponCollide = false; //just explode >:(
+				IsRollbackDamage = true;
+				RollbackDamageTick = CollideTick;
+				break;
+			}
+
+			if(Collide)
+				break;
+
+			if(m_LifeSpan == -1)
+				break;
+		}
+	}
+	else
+	{
+		Pt = (Server()->Tick() - m_StartTick - 1) / (float)Server()->TickSpeed();
+		Ct = (Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed();
+		PrevPos = GetPos(Pt);
+		CurPos = GetPos(Ct);
+		if(!Collide)
+			Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos);
+
+		if(!pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit))
+			pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
+	}
 
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
 	CClientMask TeamMask = CClientMask().set();
-	bool IsWeaponCollide = false;
+	//bool IsWeaponCollide = false;
 	if(
 		pOwnerChar &&
 		pTargetChr &&
@@ -95,8 +164,16 @@ void CVanillaProjectile::Tick()
 			}
 			for(int i = 0; i < Number; i++)
 			{
-				GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
-					(m_Owner != -1) ? TeamMask : CClientMask().set());
+				if(IsRollbackDamage)
+				{
+					GameServer()->m_Rollback.CreateExplosionOnTick(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
+						RollbackDamageTick, (m_Owner != -1) ? TeamMask : CClientMask().set());
+				}
+				else
+				{
+					GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
+						(m_Owner != -1) ? TeamMask : CClientMask().set());
+				}
 				GameServer()->CreateSound(ColPos, m_SoundImpact,
 					(m_Owner != -1) ? TeamMask : CClientMask().set());
 			}
@@ -220,14 +297,37 @@ void CVanillaProjectile::Tick()
 		m_Pos = GameServer()->Collision()->TeleOuts(z - 1)[TeleOut];
 		m_StartTick = Server()->Tick();
 	}
+
+	m_FirstTick = false;
 }
 
-void CVanillaProjectile::Snap(int SnappingClient)
+void CPvpProjectile::Snap(int SnappingClient)
 {
 	float Ct = (Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed();
 
 	if(NetworkClipped(SnappingClient, GetPos(Ct)))
 		return;
+
+	//Kaizo-Insta projectile rollback particles
+	if(m_FirstSnap && m_Owner >= 0 && m_Owner < MAX_CLIENTS && GameServer()->m_apPlayers[m_Owner] && GameServer()->m_apPlayers[m_Owner]->m_RollbackEnabled)
+	{
+		for(int i = 0; i < 3; i++)
+		{
+			{
+				CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(m_aParticleIds[i]);
+				if(!pProj)
+				{
+					continue;
+				}
+				pProj->m_X = GetPos((Server()->Tick() - (m_OrigStartTick - (i * 2 + 3))) / (float)Server()->TickSpeed()).x;
+				pProj->m_Y = GetPos((Server()->Tick() - (m_OrigStartTick - (i * 2 + 3))) / (float)Server()->TickSpeed()).y;
+				pProj->m_VelX = 0;
+				pProj->m_VelY = 0;
+				pProj->m_StartTick = Server()->Tick();
+				pProj->m_Type = WEAPON_HAMMER;
+			}
+		}
+	}
 
 	// ddnet-insta
 	if(m_Type == WEAPON_SHOTGUN)
@@ -269,6 +369,8 @@ void CVanillaProjectile::Snap(int SnappingClient)
 			return;
 		}
 		FillExtraInfo(pDDNetProjectile);
+		if(m_Owner == SnappingClient) //Kaizo-Insta rollback antiping workaround
+			pDDNetProjectile->m_StartTick = m_OrigStartTick;
 	}
 	else if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && FillExtraInfoLegacy(&DDRaceProjectile))
 	{
@@ -278,6 +380,8 @@ void CVanillaProjectile::Snap(int SnappingClient)
 		{
 			return;
 		}
+		if(m_Owner == SnappingClient) //Kaizo-Insta rollback antiping workaround
+			DDRaceProjectile.m_StartTick = m_OrigStartTick;
 		mem_copy(pProj, &DDRaceProjectile, sizeof(DDRaceProjectile));
 	}
 	else
@@ -289,4 +393,6 @@ void CVanillaProjectile::Snap(int SnappingClient)
 		}
 		FillInfo(pProj);
 	}
+
+	m_FirstSnap = false;
 }

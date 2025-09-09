@@ -19,6 +19,8 @@ class CGameContext : public IGameServer
 public:
 	const char *ServerInfoClientScoreKind() override { return "points"; }
 
+	CRollback m_Rollback; //ddnet-insta rollback;
+
 	// instagib/gamecontext.cpp
 	void OnInitInstagib();
 	void AlertOnSpecialInstagibConfigs(int ClientId = -1) const;
@@ -43,6 +45,8 @@ public:
 	// are not allowed
 	// returns true and prints nothing otherwise
 	bool IsChatCmdAllowed(int ClientId) const;
+
+	virtual void SetPlayerLastAckedSnapshot(int ClientId, int Tick) override; //ddnet-insta rollback
 
 	enum
 	{
@@ -85,6 +89,7 @@ public:
 	static void ConchainDisplayScore(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainOnlyWallshotKills(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainAllowZoom(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainRollback(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	// rcon_commands.cpp
 	static void ConHammer(IConsole::IResult *pResult, void *pUserData);
@@ -135,6 +140,7 @@ public:
 	static void ConTopFastcaps(IConsole::IResult *pResult, void *pUserData);
 	static void ConTopNumCaps(IConsole::IResult *pResult, void *pUserData);
 	static void ConRankFlagCaptures(IConsole::IResult *pResult, void *pUserData);
+	static void ConRollback(IConsole::IResult *pResult, void *pUserData);
 	static void ConTopSpikeColors(IConsole::IResult *pResult, void *pUserData);
 
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;

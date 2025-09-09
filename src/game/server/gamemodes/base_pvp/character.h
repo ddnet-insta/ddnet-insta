@@ -18,6 +18,8 @@ class CCharacter : public CEntity
 	friend class CGameControllerBaseFng;
 	friend class IGameController;
 
+#define ROLLBACK_POSITION_HISTORY SERVER_TICK_SPEED //ddnet-insta rollback
+
 public:
 	/*
 		Reset instagib tee without resetting ddnet or teeworlds tee
@@ -70,6 +72,14 @@ public:
 
 	const class CPlayer *GetPlayer() const { return m_pPlayer; }
 	int HookedPlayer() const { return m_Core.HookedPlayer(); }
+
+	//ddnet-insta rollback: character position history
+	class CRollbackPositionHistory
+	{
+	public:
+		vec2 m_Position = vec2(0, 0);
+		bool m_Valid = false;
+	} m_Positions[ROLLBACK_POSITION_HISTORY];
 
 private:
 	// players skin changes colors
