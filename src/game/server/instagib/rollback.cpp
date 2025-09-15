@@ -55,7 +55,7 @@ inline int CRollback::NormalizeTick(int Tick)
 	return Tick % ROLLBACK_POSITION_HISTORY;
 }
 
-CCharacter *CRollback::IntersectCharacterOnTick(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis, int CollideWith, const CCharacter *pThisOnly, int Tick)
+CCharacter *CRollback::IntersectCharacterOnTick(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis, int CollideWith, const CCharacter *pThisOnly, const CCharacter *pOwnerChar, int Tick)
 {
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
 	CCharacter *pClosest = nullptr;
@@ -74,7 +74,7 @@ CCharacter *CRollback::IntersectCharacterOnTick(vec2 Pos0, vec2 Pos1, float Radi
 			continue;
 
 		vec2 Charpos;
-		if(pChar->m_Positions[LocalTick].m_Valid)
+		if(pChar != pOwnerChar && pChar->m_Positions[LocalTick].m_Valid) // treat owner/invalid position as normal
 			Charpos = pChar->m_Positions[LocalTick].m_Position;
 		else
 			Charpos = pChar->m_Pos;
@@ -145,10 +145,10 @@ void CRollback::CreateExplosionOnTick(vec2 Pos, int Owner, int Weapon, bool NoDa
 	{
 		auto *pChr = static_cast<CCharacter *>(apEnts[i]);
 		vec2 Diff;
-		if(!pChr->m_Positions[LocalTick].m_Valid)
-			Diff = pChr->m_Pos - Pos;
-		else
+		if(pChr->m_Positions[LocalTick].m_Valid && pChr->GetPlayer() && pChr->GetPlayer()->GetCid() != Owner) // treat owner/invalid position as normal
 			Diff = pChr->m_Positions[LocalTick].m_Position - Pos;
+		else
+			Diff = pChr->m_Pos - Pos;
 		vec2 ForceDir(0, 1);
 		float l = length(Diff);
 		if(l)

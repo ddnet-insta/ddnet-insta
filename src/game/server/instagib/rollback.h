@@ -29,7 +29,7 @@ public:
 	inline int NormalizeTick(int Tick);
 
 	//GameWorld
-	CCharacter *IntersectCharacterOnTick(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis, int CollideWith, const CCharacter *pThisOnly, int Tick = -1);
+	CCharacter *IntersectCharacterOnTick(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis, int CollideWith, const CCharacter *pThisOnly, const CCharacter *pOwnerChar, int Tick = -1);
 	int FindCharactersOnTick(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Tick = -1);
 
 	//GameContext

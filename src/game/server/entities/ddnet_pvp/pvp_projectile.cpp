@@ -99,7 +99,7 @@ void CPvpProjectile::Tick()
 			if(Collide)
 				break;
 
-			pTargetChr = GameServer()->m_Rollback.IntersectCharacterOnTick(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner, nullptr, CollideTick); //tee
+			pTargetChr = GameServer()->m_Rollback.IntersectCharacterOnTick(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner, nullptr, pOwnerChar, CollideTick); //tee
 
 			if(pTargetChr)
 			{
