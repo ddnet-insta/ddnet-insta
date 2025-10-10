@@ -430,6 +430,7 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `/multis` Shows the all time fng multi kill stats
 + `/steals` Shows all time and round fng kill steal stats
 + `/round_top` Shows the top players of the current round
++ `/rollback` Enable rollback
 + `/score` change which type of score is displayed in scoreboard
 + `/points` Shows the all time points rank of player name (your stats by default)
 + `/rank_points` Shows the all time points rank of player name (your stats by default)
