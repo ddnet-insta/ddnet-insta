@@ -24,7 +24,7 @@ NOTE FOR DEVELOPERS:
 
 It also tries to be extendable and fork friendly. If you want to build a pvp gamemode with score points and rounds.
 This code base should get you started quite easily. Just create a new folder for your gamemode. After wiring it up in
-[your_mod.cpp](https://github.com/ddnet-insta/ddnet-insta/blob/insta/src/game/server/gamemodes/mod.cpp#L28)
+[your_mod.cpp](https://github.com/ddnet-insta/ddnet-insta/blob/ada1612bf585e836a6e72893c8f93011154affbc/src/game/server/gamemodes/mod.cpp#L28)
 and [cmakelist](https://github.com/ddnet-insta/ddnet-insta/blob/ba38c11ccf46e888786c90c7dc0f09503be19a49/CMakeLists.txt#L2751-L2752)
 you should be able to build almost any gametype without ever having to edit code outside
 of your gamemode directory. Just look at the existing gamemodes for examples. A simple mode to look at would be
