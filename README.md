@@ -437,7 +437,6 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `/rank` Lists available rank commands
 + `/top5` Lists available top commands
 + `/top` Lists available top commands
-+ `/specvoted` Toggles spec on the currently voted player"
 + `/stats` Shows the current round stats of player name (your stats by default)
 + `/statsall` Shows the all time stats of player name (your stats by default)
 + `/stats_all` Shows the all time stats of player name (your stats by default)

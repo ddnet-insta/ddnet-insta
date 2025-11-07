@@ -1,4 +1,5 @@
 // This file can be included several times.
+// doc gen ignore: ready, pause, shuffle, swap, drop, spec
 
 #ifndef CONSOLE_COMMAND
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help)

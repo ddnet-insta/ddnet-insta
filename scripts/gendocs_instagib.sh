@@ -1,8 +1,9 @@
 #!/bin/bash
 
-CONFIG_HEADER="src/engine/shared/config_variables_insta.h"
-RCON_COMMANDS_HEADER="src/game/server/instagib/rcon_commands.h"
-CHAT_COMMANDS_HEADER="src/game/server/instagib/chat_commands.h"
+INCLUDES_CONFIG="src/game/server/instagib/includes/config_variables.h"
+INCLUDES_RCON_COMMANDS="src/game/server/instagib/includes/rcon_commands.h"
+INCLUDES_CHAT_COMMANDS="src/game/server/instagib/includes/chat_commands.h"
+
 README_FILE="README.md"
 TEMP_DIR="scripts"
 TEMP_FILE="$TEMP_DIR/tmp.swp"
@@ -24,24 +25,58 @@ for arg in "$@"; do
 	esac
 done
 
+process_includes() {
+	local include_file="$1"
+	local includes=()
+
+	while IFS= read -r line; do
+		if [[ "$line" =~ ^[[:space:]]*#include[[:space:]]*[\"\<]([^\"\>]+)[\"\>] ]]; then
+			local include_path="${BASH_REMATCH[1]}"
+			includes+=("src/${include_path}")
+		fi
+	done < "$include_file"
+
+	printf '%s\n' "${includes[@]}"
+}
+
+get_ignore_list() {
+	local header_file="$1"
+	local ignore_list=()
+
+	while read -r line; do
+		if [[ "$line" =~ ^[[:space:]]*//[[:space:]]*doc[[:space:]]gen[[:space:]]ignore:[[:space:]]*(.+) ]]; then
+			local ignore_commands="${BASH_REMATCH[1]}"
+			IFS=',' read -ra commands <<< "$ignore_commands"
+			for command in "${commands[@]}"; do
+				ignore_list+=("$(echo "$command" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')")
+			done
+		fi
+	done < "$header_file"
+
+	printf '%s\n' "${ignore_list[@]}"
+}
+
 gen_configs() {
 	local cfg
 	local desc
 	local cmd
+
 	# shellcheck disable=SC2016
 	echo '+ `sv_gametype` Game type (gctf, ictf, gdm, idm, gtdm, itdm, ctf, dm, tdm, zcatch, bolofng, solofng, boomfng, fng)'
-	while read -r cfg; do
-		desc="$(echo "$cfg" | cut -d',' -f7- | cut -d'"' -f2-)"
-		desc="${desc::-2}"
-		cmd="$(echo "$cfg" | cut -d',' -f2 | xargs)"
-		echo "+ \`$cmd\` $desc"
-	done < <(grep '^MACRO_CONFIG_INT' "$CONFIG_HEADER")
-	while read -r cfg; do
-		desc="$(echo "$cfg" | cut -d',' -f6- | cut -d'"' -f2-)"
-		desc="${desc::-2}"
-		cmd="$(echo "$cfg" | cut -d',' -f2 | xargs)"
-		echo "+ \`$cmd\` $desc"
-	done < <(grep '^MACRO_CONFIG_STR' "$CONFIG_HEADER")
+	for file in $(process_includes "$INCLUDES_CONFIG"); do
+		while read -r cfg; do
+			desc="$(echo "$cfg" | cut -d',' -f7- | cut -d'"' -f2-)"
+			desc="${desc::-2}"
+			cmd="$(echo "$cfg" | cut -d',' -f2 | xargs)"
+			echo "+ \`$cmd\` $desc"
+		done < <(grep '^MACRO_CONFIG_INT' "$file")
+		while read -r cfg; do
+			desc="$(echo "$cfg" | cut -d',' -f6- | cut -d'"' -f2-)"
+			desc="${desc::-2}"
+			cmd="$(echo "$cfg" | cut -d',' -f2 | xargs)"
+			echo "+ \`$cmd\` $desc"
+		done < <(grep '^MACRO_CONFIG_STR' "$file")
+	done
 }
 
 gen_console_cmds() {
@@ -50,21 +85,40 @@ gen_console_cmds() {
 	local cfg
 	local desc
 	local cmd
+	local ignore_list=()
+	while IFS= read -r ignore_cmd; do
+		[[ -n "$ignore_cmd" ]] && ignore_list+=("$ignore_cmd")
+	done < <(get_ignore_list "$header_file")
+
+	local ignore_pattern=""
+	if [ ${#ignore_list[@]} -gt 0 ]; then
+		ignore_pattern="($(
+			IFS='|'
+			echo "${ignore_list[*]}"
+		))"
+	fi
+
 	while read -r cfg; do
 		desc="$(echo "$cfg" | cut -d',' -f3- | cut -d'"' -f2-)"
 		desc="${desc::-2}"
 		cmd="$(echo "$cfg" | cut -d',' -f1 | cut -d'"' -f2)"
-		echo "+ \`$prefix$cmd\` $desc"
+
+		if [[ -z "$ignore_pattern" ]] || ! [[ "$cmd" =~ $ignore_pattern ]]; then
+			echo "+ \`$prefix$cmd\` $desc"
+		fi
 	done < <(grep '^CONSOLE_COMMAND' "$header_file")
 }
 
 gen_rcon_cmds() {
-	gen_console_cmds "" "$RCON_COMMANDS_HEADER"
+	for file in $(process_includes "$INCLUDES_RCON_COMMANDS"); do
+		gen_console_cmds "" "$file"
+	done
 }
 
 gen_chat_cmds() {
-	gen_console_cmds "/" "$CHAT_COMMANDS_HEADER" |
-		grep -Ev '(ready|pause|shuffle|swap|drop)'
+	for file in $(process_includes "$INCLUDES_CHAT_COMMANDS"); do
+		gen_console_cmds "/" "$file"
+	done
 }
 
 insert_at() {
