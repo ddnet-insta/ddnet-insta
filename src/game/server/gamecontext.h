@@ -115,7 +115,7 @@ class CGameContext : public IGameServer
 {
 	// ddnet-insta
 #define IN_CLASS_IGAMECONTEXT
-#include <game/server/instagib/gamecontext.h>
+#include <game/server/instagib/includes/gamecontext.h>
 
 	IServer *m_pServer;
 	IConfigManager *m_pConfigManager;
@@ -196,7 +196,7 @@ class CGameContext : public IGameServer
 	struct CPersistentClientData
 	{
 #define IN_CLASS_PERSISTENTCLIENTDATA // ddnet-insta
-#include <game/server/instagib/persistent_client_data.h> // ddnet-insta
+#include <game/server/instagib/includes/persistent_client_data.h> // ddnet-insta
 		bool m_IsSpectator;
 		bool m_IsAfk;
 		int m_LastWhisperTo;

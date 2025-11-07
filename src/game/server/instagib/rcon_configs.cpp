@@ -39,12 +39,12 @@ void CGameContext::RegisterInstagibCommands()
 
 	// chat commands
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) Console()->Register(name, params, flags, callback, userdata, help);
-#include <game/server/instagib/chat_commands.h>
+#include <game/server/instagib/includes/chat_commands.h>
 #undef CONSOLE_COMMAND
 
 	// rcon commands
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) Console()->Register(name, params, flags, callback, userdata, help);
-#include <game/server/instagib/rcon_commands.h>
+#include <game/server/instagib/includes/rcon_commands.h>
 #undef CONSOLE_COMMAND
 
 	// generate callbacks to trigger insta settings update for all instagib configs
@@ -54,7 +54,7 @@ void CGameContext::RegisterInstagibCommands()
 	Console()->Chain(#ScriptName, ConchainInstaSettingsUpdate, this);
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) // only int checkboxes for now
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) // only int checkboxes for now
-#include <engine/shared/config_variables_insta.h>
+#include <game/server/instagib/includes/config_variables.h>
 #undef MACRO_CONFIG_INT
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR

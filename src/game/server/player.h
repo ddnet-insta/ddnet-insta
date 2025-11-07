@@ -32,7 +32,7 @@ class CPlayer
 {
 	MACRO_ALLOC_POOL_ID()
 #define IN_CLASS_PLAYER
-#include <game/server/gamemodes/base_pvp/player.h>
+#include <game/server/instagib/includes/player.h>
 
 public:
 	CPlayer(CGameContext *pGameServer, uint32_t UniqueClientId, int ClientId, int Team);

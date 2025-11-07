@@ -205,7 +205,7 @@ void CGameContext::UpdateVoteCheckboxes() const
 	}
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) // only int checkboxes for now
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) // only int checkboxes for now
-#include <engine/shared/config_variables_insta.h>
+#include <game/server/instagib/includes/config_variables.h>
 #undef MACRO_CONFIG_INT
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR

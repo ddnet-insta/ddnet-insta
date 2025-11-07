@@ -27,7 +27,7 @@ class CCharacter : public CEntity
 {
 	MACRO_ALLOC_POOL_ID()
 #define IN_CLASS_CHARACTER
-#include <game/server/gamemodes/base_pvp/character.h>
+#include <game/server/instagib/includes/character.h>
 
 	// need to use core
 	friend class CSaveTee;

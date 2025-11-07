@@ -28,7 +28,7 @@ struct CScoreLoadBestTimeResult;
 class IGameController
 {
 #define IN_CLASS_IGAMECONTROLLER
-#include <game/server/instagib/gamecontroller.h>
+#include <game/server/instagib/includes/gamecontroller.h>
 
 	friend class CSaveTeam; // need access to GameServer() and Server()
 
