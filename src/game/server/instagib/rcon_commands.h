@@ -1,7 +1,9 @@
 // This file can be included several times.
 
 #ifndef CONSOLE_COMMAND
-#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help)
+#error "The config macros must be defined"
+// This helps IDEs properly syntax highlight the uses of the macro below.
+#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) ;
 #endif
 
 CONSOLE_COMMAND("hammer", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConHammer, this, "Gives a hammer to you")
@@ -31,5 +33,3 @@ CONSOLE_COMMAND("deep_jailid", "v[victim] i[minutes]", CFGFLAG_SERVER, ConDeepJa
 CONSOLE_COMMAND("deep_jailip", "s[ip] i[minutes]", CFGFLAG_SERVER, ConDeepJailIp, this, "deep freeze (undeep tile works) will be restored on respawn and reconnect")
 CONSOLE_COMMAND("deep_jails", "", CFGFLAG_SERVER, ConDeepJails, this, "list all perma deeped players deeped by deep_jailid and deep_jailip commands")
 CONSOLE_COMMAND("undeep_jail", "s[ip|entry]", CFGFLAG_SERVER, ConUndeepJail, this, "list all perma deeped players deeped by deep_jailid and deep_jailip commands")
-
-#undef CONSOLE_COMMAND

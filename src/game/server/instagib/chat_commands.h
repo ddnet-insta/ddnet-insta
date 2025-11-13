@@ -2,7 +2,9 @@
 // doc gen ignore: ready, pause, shuffle, swap, drop, spec
 
 #ifndef CONSOLE_COMMAND
-#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help)
+#error "The config macros must be defined"
+// This helps IDEs properly syntax highlight the uses of the macro below.
+#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) ;
 #endif
 
 // some commands ddnet-insta defined already existed in ddnet
@@ -72,5 +74,3 @@ CONSOLE_COMMAND("top5flags", "?i[rank to start with]", CFGFLAG_CHAT | CFGFLAG_SE
 CONSOLE_COMMAND("top5caps", "?i[rank to start with]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTopNumCaps, this, "Shows the all time best ranks by amount of flag captures")
 CONSOLE_COMMAND("rank_caps", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRankFlagCaptures, this, "Shows the all time flag capture rank of player name (your stats by default)")
 CONSOLE_COMMAND("top5spikes", "?s['gold'|'green'|'purple'] ?i[rank to start with]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTopSpikeColors, this, "Shows the all time best ranks by spike kills")
-
-#undef CONSOLE_COMMAND
