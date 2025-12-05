@@ -1136,6 +1136,8 @@ public:
 	bool IsVanillaGameType() const { return m_IsVanillaGameType; }
 	virtual bool IsDDRaceGameType() const { return true; }
 	virtual bool IsFootGameType() const { return false; }
+	virtual bool IsBombGameType() const { return false; }
+	virtual bool UnFreezeOnHammerHit() const { return true; }
 	bool m_IsVanillaGameType = false;
 	// decides if own grenade explosions
 	// or laser wallshots should harm the own tee

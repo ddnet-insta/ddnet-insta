@@ -35,5 +35,6 @@ public:
 	void OnWrongSpike(class CPlayer *pPlayer, int RemoveScore);
 
 	bool IsFngGameType() const override { return true; }
+	bool UnFreezeOnHammerHit() const override { return false; }
 };
 #endif // GAME_SERVER_GAMEMODES_INSTAGIB_BASE_FNG_H

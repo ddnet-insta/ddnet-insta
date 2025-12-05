@@ -24,6 +24,7 @@
 #include <game/server/gamemodes/instagib/idm/sql_columns.h>
 #include <game/server/gamemodes/instagib/solofng/sql_columns.h>
 #include <game/server/gamemodes/instagib/zcatch/sql_columns.h>
+#include <game/server/gamemodes/vanilla/bomb/sql_columns.h>
 #include <game/server/gamemodes/vanilla/ctf/sql_columns.h>
 #include <game/server/gamemodes/vanilla/dm/sql_columns.h>
 

@@ -327,6 +327,25 @@ public:
 	// to figure out which players score the least
 	int m_ScoreStartTick = 0;
 
+	enum class EBombState
+	{
+		None,
+		Spectating,
+		Active,
+		Alive,
+	};
+
+	EBombState m_BombState = EBombState::None;
+	bool m_Bomb = false;
+	int m_ToBombTick = 0;
+
+	std::unique_ptr<CTeeInfo> m_FakeTeeInfos;
+	void SetFakeSkin(const char *pSkinName);
+	void SetFakeSkin(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
+	CTeeInfo *GetSkin() { return m_FakeTeeInfos ? m_FakeTeeInfos.get() : &m_TeeInfos; }
+	void DeleteFakeSkin();
+	bool HasFakeSkin();
+
 	// needed for clang to avoid redundant access specifier
 private:
 #ifndef IN_CLASS_PLAYER

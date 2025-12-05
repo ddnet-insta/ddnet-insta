@@ -416,3 +416,36 @@ void CPlayer::ResetOwnLastTouchOnAllOtherPlayers()
 		pPlayer->m_LastToucher = std::nullopt;
 	}
 }
+
+void CPlayer::SetFakeSkin(const char *pSkinName)
+{
+	SetFakeSkin(pSkinName, false, 0, 0);
+}
+
+void CPlayer::SetFakeSkin(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
+{
+	if(m_FakeTeeInfos)
+	{
+		str_copy(m_FakeTeeInfos->m_aSkinName, pSkinName);
+		m_FakeTeeInfos->m_UseCustomColor = UseCustomColor;
+		m_FakeTeeInfos->m_ColorBody = ColorBody;
+		m_FakeTeeInfos->m_ColorFeet = ColorFeet;
+
+		m_FakeTeeInfos->ToSixup();
+	}
+	else
+		m_FakeTeeInfos = std::make_unique<CTeeInfo>(pSkinName, UseCustomColor, ColorBody, ColorFeet);
+}
+
+void CPlayer::DeleteFakeSkin()
+{
+	if(!m_FakeTeeInfos)
+		return;
+
+	m_FakeTeeInfos.reset();
+}
+
+bool CPlayer::HasFakeSkin()
+{
+	return m_FakeTeeInfos != nullptr;
+}

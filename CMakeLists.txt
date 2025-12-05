@@ -2881,6 +2881,9 @@ if(SERVER)
     gamemodes/mod.h
     gamemodes/vanilla/base_vanilla.cpp
     gamemodes/vanilla/base_vanilla.h
+    gamemodes/vanilla/bomb/bomb.cpp
+    gamemodes/vanilla/bomb/bomb.h
+    gamemodes/vanilla/bomb/sql_columns.h
     gamemodes/vanilla/ctf/ctf.cpp
     gamemodes/vanilla/ctf/ctf.h
     gamemodes/vanilla/ctf/sql_columns.h

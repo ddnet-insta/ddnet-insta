@@ -543,7 +543,7 @@ void CCharacter::FireWeapon()
 			pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
 				m_pPlayer->GetCid(), m_Core.m_ActiveWeapon);
 
-			if(!GameServer()->m_pController->IsFngGameType())
+			if(GameServer()->m_pController->UnFreezeOnHammerHit())
 				pTarget->UnFreeze();
 
 			Antibot()->OnHammerHit(m_pPlayer->GetCid(), pTarget->GetPlayer()->GetCid());

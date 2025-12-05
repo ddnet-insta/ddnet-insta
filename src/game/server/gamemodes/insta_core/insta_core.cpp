@@ -309,6 +309,22 @@ void CGameControllerInstaCore::Tick()
 			continue;
 
 		OnCharacterTick(pPlayer->GetCharacter());
+
+		// ratelimit the 0.7 stuff because it requires net messages
+		if(Config()->m_SvSixup && Server()->Tick() % 4 == 0 && Server()->IsSixup(pPlayer->GetCid()))
+		{
+			CTeeInfo *pTeeInfo = pPlayer->GetSkin();
+			protocol7::CNetMsg_Sv_SkinChange Msg;
+			Msg.m_ClientId = pPlayer->GetCid();
+			for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+			{
+				Msg.m_apSkinPartNames[p] = pTeeInfo->m_aaSkinPartNames[p];
+				Msg.m_aSkinPartColors[p] = pTeeInfo->m_aSkinPartColors[p];
+				Msg.m_aUseCustomColors[p] = pTeeInfo->m_aUseCustomColors[p];
+			}
+
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
+		}
 	}
 
 	if(g_Config.m_SvAnticamper && !GameServer()->m_World.m_Paused)
@@ -690,6 +706,14 @@ void CGameControllerInstaCore::SnapPlayer6(int SnappingClient, CPlayer *pPlayer,
 		// we put it in the beginning because ddnet scoreboard cuts off long names
 		// such as WWWWWWWWWW... which would also hide the checkmark in the end
 		StrToInts(pClientInfo->m_aName, std::size(pClientInfo->m_aName), aReady);
+	}
+
+	if(pPlayer->HasFakeSkin())
+	{
+		StrToInts(pClientInfo->m_aSkin, std::size(pClientInfo->m_aSkin), pPlayer->m_FakeTeeInfos->m_aSkinName);
+		pClientInfo->m_UseCustomColor = pPlayer->m_FakeTeeInfos->m_UseCustomColor;
+		pClientInfo->m_ColorBody = pPlayer->m_FakeTeeInfos->m_ColorBody;
+		pClientInfo->m_ColorFeet = pPlayer->m_FakeTeeInfos->m_ColorFeet;
 	}
 }
 
