@@ -409,6 +409,9 @@ void IGameController::SendRoundTopMessage(int ClientId)
 		if(!pPlayer)
 			break;
 
+		if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+			continue;
+
 		str_format(aBuf, sizeof(aBuf), "%d. '%s' - Accuracy: %.2f%%", i + 1, Server()->ClientName(pPlayer->GetCid()), pPlayer->m_Stats.HitAccuracy());
 		GameServer()->SendChatTarget(ClientId, aBuf);
 	}
@@ -430,6 +433,9 @@ void IGameController::SendRoundTopMessage(int ClientId)
 		CPlayer *pPlayer = apPlayers[i];
 		if(!pPlayer)
 			break;
+
+		if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+			continue;
 
 		float Ratio = CalcKillDeathRatio(pPlayer->Kills(), pPlayer->Deaths());
 		str_format(aBuf, sizeof(aBuf), "%d. '%s' - Ratio: %.2f", i + 1, Server()->ClientName(pPlayer->GetCid()), Ratio);
