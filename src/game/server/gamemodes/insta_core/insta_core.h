@@ -3,6 +3,8 @@
 
 #include "../DDRace.h"
 
+#include <generated/protocol7.h>
+
 #include <game/server/instagib/extra_columns.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/player.h>
@@ -94,6 +96,11 @@ public:
 private:
 	bool m_InvalidateConnectedIpsCache = true;
 	int m_NumConnectedIpsCached = 0;
+
+	// pPlayer is the player whose skin changed
+	// not the receiver of the message
+	// the message is sent to all 0.7 players that are in clip region
+	void SendSkinChangeToAllSixup(protocol7::CNetMsg_Sv_SkinChange *pMsg, CPlayer *pPlayer, bool ApplyNetworkClipping);
 
 public:
 	/* UpdateSpawnWeapons

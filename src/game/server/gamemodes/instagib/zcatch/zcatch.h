@@ -115,7 +115,6 @@ public:
 	void OnRoundStart() override;
 	void OnRoundEnd() override;
 	bool OnSelfkill(int ClientId) override;
-	bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) override;
 	int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup) override;
 	bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) override;
 	bool IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage) override;
@@ -194,7 +193,6 @@ public:
 	int GetBodyColorSavander(int Kills);
 
 	void SetCatchColors(class CPlayer *pPlayer);
-	void SendSkinBodyColor7(int ClientId, int Color);
 	void OnUpdateZcatchColorConfig() override;
 
 	// returns nullptr if nobody made a kill yet that counts

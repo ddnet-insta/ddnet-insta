@@ -7,6 +7,7 @@
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
+#include <game/server/instagib/skin_info_manager.h>
 
 #include <random>
 
@@ -323,30 +324,25 @@ void CGameControllerBomb::SetSkin(CPlayer *pPlayer)
 {
 	if(pPlayer->m_IsBomb)
 	{
+		// TODO: dont copy this string on tick but only when the bomb changes
+		pPlayer->m_SkinInfoManager.SetSkinName(ESkinPrio::HIGH, "bomb");
 		if(pPlayer->m_ToBombTick <= 3 * Server()->TickSpeed())
 		{
 			ColorRGBA Color = ColorRGBA(255 - pPlayer->m_ToBombTick, 0, 0);
-			pPlayer->SetFakeSkin(
-				"bomb",
-				true,
-				color_cast<ColorHSLA>(Color).PackAlphaLast(false),
-				16777215 // white
-			);
+			pPlayer->m_SkinInfoManager.SetColorBody(ESkinPrio::HIGH, color_cast<ColorHSLA>(Color).PackAlphaLast(false));
+			pPlayer->m_SkinInfoManager.SetColorFeet(ESkinPrio::HIGH, 16777215); // white
+			pPlayer->m_SkinInfoManager.SetUseCustomColor(ESkinPrio::HIGH, true);
 		}
-		else
-			pPlayer->SetFakeSkin("bomb");
 		return;
 	}
 
 	// Ignores manual installation of the bomb skin
-	if(str_comp_nocase(pPlayer->m_TeeInfos.m_aSkinName, "bomb") == 0)
+	if(str_comp_nocase(pPlayer->m_SkinInfoManager.UserChoice().m_aSkinName, "bomb") == 0)
 	{
-		pPlayer->SetFakeSkin("default");
+		pPlayer->m_SkinInfoManager.SetSkinName(ESkinPrio::HIGH, "default");
 		return;
 	}
-
-	if(pPlayer->HasFakeSkin())
-		pPlayer->DeleteFakeSkin();
+	pPlayer->m_SkinInfoManager.UnsetAll(ESkinPrio::HIGH);
 }
 
 void CGameControllerBomb::EliminatePlayer(CPlayer *pPlayer, bool Collateral)

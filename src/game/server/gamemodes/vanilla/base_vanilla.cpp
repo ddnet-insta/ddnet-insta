@@ -20,7 +20,6 @@ CGameControllerVanilla::CGameControllerVanilla(class CGameContext *pGameServer) 
 {
 	m_GameFlags = 0;
 	m_IsVanillaGameType = true;
-	m_AllowSkinColorChange = true;
 	m_DefaultWeapon = WEAPON_GUN;
 }
 

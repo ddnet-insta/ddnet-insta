@@ -20,7 +20,6 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
 	m_IsVanillaGameType = false;
 	m_SelfDamage = false;
-	m_AllowSkinColorChange = true;
 }
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;

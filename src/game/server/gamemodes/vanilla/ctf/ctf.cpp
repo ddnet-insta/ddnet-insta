@@ -15,7 +15,6 @@ CGameControllerCTF::CGameControllerCTF(class CGameContext *pGameServer) :
 	m_pGameType = "CTF*";
 	m_IsVanillaGameType = true;
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
-	m_AllowSkinColorChange = true;
 	m_DefaultWeapon = WEAPON_GUN;
 
 	m_pStatsTable = "ctf";

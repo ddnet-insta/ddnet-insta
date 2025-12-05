@@ -2930,6 +2930,8 @@ if(SERVER)
     instagib/round_stats_ascii.cpp
     instagib/round_stats_csv.cpp
     instagib/round_stats_player.h
+    instagib/skin_info_manager.cpp
+    instagib/skin_info_manager.h
     instagib/sql_columns_all.h
     instagib/sql_stats.cpp
     instagib/sql_stats.h

@@ -24,13 +24,9 @@ CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)
 {
 	m_GameFlags = 0;
-	m_AllowSkinColorChange = false;
 	m_pGameType = "zCatch";
 	m_WinType = WIN_BY_SURVIVAL;
 	m_DefaultWeapon = GetDefaultWeaponBasedOnSpawnWeapons();
-
-	for(auto &Color : m_aBodyColors)
-		Color = 0;
 
 	m_pStatsTable = "";
 	if(m_SpawnWeapons == ESpawnWeapons::SPAWN_WEAPON_GRENADE)
@@ -281,23 +277,6 @@ CGameControllerZcatch::~CGameControllerZcatch() = default;
 void CGameControllerZcatch::Tick()
 {
 	CGameControllerInstagib::Tick();
-
-	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
-	{
-		if(!pPlayer)
-			continue;
-
-		// this is wasting a bit of clock cycles setting it every tick
-		// it should be set on kill and then not be overwritten by info changes
-		// but there is no git conflict free way of doing that
-		SetCatchColors(pPlayer);
-
-		if(m_aBodyColors[pPlayer->GetCid()] != pPlayer->m_TeeInfos.m_ColorBody)
-		{
-			m_aBodyColors[pPlayer->GetCid()] = pPlayer->m_TeeInfos.m_ColorBody;
-			SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
-		}
-	}
 }
 
 void CGameControllerZcatch::OnCharacterSpawn(class CCharacter *pChr)
@@ -417,6 +396,8 @@ void CGameControllerZcatch::KillPlayer(class CPlayer *pVictim, class CPlayer *pK
 	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
 	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
 
+	SetCatchColors(pKiller);
+	SetCatchColors(pVictim);
 	UpdateCatchTicks(pVictim, ECatchUpdate::CAUGHT);
 	pVictim->m_IsDead = true;
 	pVictim->m_KillerId = pKiller->GetCid();
@@ -657,6 +638,7 @@ void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 	CGameControllerInstagib::OnPlayerConnect(pPlayer);
 
 	UpdateCatchTicks(pPlayer, pPlayer->GetTeam() == TEAM_SPECTATORS ? ECatchUpdate::SPECTATE : ECatchUpdate::CONNECT);
+	pPlayer->m_SkinInfoManager.SetUseCustomColor(ESkinPrio::LOW, true);
 
 	// if a player joins as spectator that means
 	// either the in game slots are full
@@ -689,9 +671,7 @@ void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 			DoTeamChange(pPlayer, TEAM_RED, false);
 		}
 
-		m_aBodyColors[pPlayer->GetCid()] = GetBodyColor(0);
 		SetCatchColors(pPlayer);
-		SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
 
 		if(!CheckChangeGameState())
 		{

@@ -174,32 +174,9 @@ void CCharacter::Rainbow(bool Activate)
 	m_Rainbow = Activate;
 
 	if(Activate)
-	{
-		GetPlayer()->m_TeeInfosNoCosmetics = GetPlayer()->m_TeeInfos;
-		return;
-	}
-
-	GetPlayer()->m_TeeInfos = GetPlayer()->m_TeeInfosNoCosmetics;
-	GetPlayer()->m_TeeInfos.ToSixup();
-
-	protocol7::CNetMsg_Sv_SkinChange Msg;
-	Msg.m_ClientId = GetPlayer()->GetCid();
-	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
-	{
-		Msg.m_apSkinPartNames[p] = GetPlayer()->m_TeeInfos.m_aaSkinPartNames[p];
-		Msg.m_aSkinPartColors[p] = GetPlayer()->m_TeeInfos.m_aSkinPartColors[p];
-		Msg.m_aUseCustomColors[p] = GetPlayer()->m_TeeInfos.m_aUseCustomColors[p];
-	}
-
-	for(CPlayer *pRainbowReceiverPlayer : GameServer()->m_apPlayers)
-	{
-		if(!pRainbowReceiverPlayer)
-			continue;
-		if(!Server()->IsSixup(pRainbowReceiverPlayer->GetCid()))
-			continue;
-
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, pRainbowReceiverPlayer->GetCid());
-	}
+		GetPlayer()->m_SkinInfoManager.SetUseCustomColor(ESkinPrio::RAINBOW, true);
+	else
+		GetPlayer()->m_SkinInfoManager.UnsetAll(ESkinPrio::RAINBOW);
 }
 
 void CCharacter::PlayerGetBall()

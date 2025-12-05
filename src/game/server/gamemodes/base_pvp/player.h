@@ -8,6 +8,7 @@
 
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/ip_storage.h>
+#include <game/server/instagib/skin_info_manager.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
 #include <game/server/instagib/structs.h>
@@ -32,10 +33,6 @@ public:
 	int m_RainbowColor = 0;
 
 	std::optional<CIpStorage> m_IpStorage;
-
-	// backup of the players skin
-	// for when cosmetics like rainbow are turned off
-	CTeeInfo m_TeeInfosNoCosmetics;
 
 	void ProcessStatsResult(CInstaSqlResult &Result);
 
@@ -339,12 +336,7 @@ public:
 	bool m_IsBomb = false;
 	int m_ToBombTick = 0;
 
-	std::unique_ptr<CTeeInfo> m_FakeTeeInfos;
-	void SetFakeSkin(const char *pSkinName);
-	void SetFakeSkin(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
-	CTeeInfo *GetSkin() { return m_FakeTeeInfos ? m_FakeTeeInfos.get() : &m_TeeInfos; }
-	void DeleteFakeSkin();
-	bool HasFakeSkin();
+	CSkinInfoManager m_SkinInfoManager;
 
 	// needed for clang to avoid redundant access specifier
 private:

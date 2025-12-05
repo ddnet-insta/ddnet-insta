@@ -100,11 +100,6 @@ void CGameControllerTsmash::GiveSuperSmash(int ClientId, int Amount)
 	}
 }
 
-static int ColorToSixup(int Color6)
-{
-	return ColorHSLA(Color6).UnclampLighting(ColorHSLA::DARKEST_LGT).Pack(ColorHSLA::DARKEST_LGT7);
-}
-
 void CGameControllerTsmash::SetTeeColor(CPlayer *pPlayer)
 {
 	auto *pCharacter = pPlayer->GetCharacter();
@@ -132,17 +127,11 @@ void CGameControllerTsmash::SetTeeColor(CPlayer *pPlayer)
 	{
 		Color = ColorHSLA((float)(10 - pCharacter->Health()) / 10.0f * 0.75f + 0.25f, 1.0f, 0.5f);
 	}
-	// 0.6
-	auto Color6 = Color.Pack();
-	pPlayer->m_TeeInfos.m_UseCustomColor = true;
-	pPlayer->m_TeeInfos.m_ColorBody = Color6;
-	pPlayer->m_TeeInfos.m_ColorFeet = Color6;
-	// 0.7
-	for(bool &UseCustomColor : pPlayer->m_TeeInfos.m_aUseCustomColors)
-		UseCustomColor = true;
-	const int Color7 = ColorToSixup(Color6);
-	for(int &PartColor : pPlayer->m_TeeInfos.m_aSkinPartColors)
-		PartColor = Color7;
+
+	int ColorVal = Color.Pack();
+	pPlayer->m_SkinInfoManager.SetUseCustomColor(ESkinPrio::LOW, true);
+	pPlayer->m_SkinInfoManager.SetColorBody(ESkinPrio::LOW, ColorVal);
+	pPlayer->m_SkinInfoManager.SetColorFeet(ESkinPrio::LOW, ColorVal);
 }
 
 CGameControllerTsmash::CGameControllerTsmash(class CGameContext *pGameServer, bool Teams) :

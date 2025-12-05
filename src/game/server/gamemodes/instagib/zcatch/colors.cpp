@@ -2,14 +2,12 @@
 
 #include <engine/shared/config.h>
 
+#include <generated/protocol.h>
+
 #include <game/server/entities/character.h>
+#include <game/server/instagib/skin_info_manager.h>
 #include <game/server/player.h>
 #include <game/server/teeinfo.h>
-
-static int ColorToSixup(int Color6)
-{
-	return ColorHSLA(Color6).UnclampLighting(ColorHSLA::DARKEST_LGT).Pack(ColorHSLA::DARKEST_LGT7);
-}
 
 int CGameControllerZcatch::GetBodyColorTeetime(int Kills)
 {
@@ -85,77 +83,22 @@ void CGameControllerZcatch::OnUpdateZcatchColorConfig()
 			aBuf);
 		str_copy(Config()->m_SvZcatchColors, "teetime");
 	}
+
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+		if(pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS)
+			SetCatchColors(pPlayer);
 }
 
 void CGameControllerZcatch::SetCatchColors(CPlayer *pPlayer)
 {
-	if(pPlayer->GetCharacter() && pPlayer->GetCharacter()->HasRainbow())
-		return;
-
 	int Color = GetBodyColor(pPlayer->m_KillsThatCount);
 
 	// it would be cleaner if this only applied to the winner
 	// we could make sure m_KillsThatCount is not reset until the next round starts
 	// but for now it should work because players that connect during round end
-	// will reset m_aBodyColors
+	// will reset colors
 	if(GameState() == IGS_END_ROUND)
-		Color = m_aBodyColors[pPlayer->GetCid()];
-
-	// 0.6
-	pPlayer->m_TeeInfos.m_ColorBody = Color;
-	pPlayer->m_TeeInfos.m_UseCustomColor = true;
-
-	// 0.7
-	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
-	{
-		pPlayer->m_TeeInfos.m_aSkinPartColors[p] = ColorToSixup(Color);
-		pPlayer->m_TeeInfos.m_aUseCustomColors[p] = true;
-	}
-}
-
-bool CGameControllerZcatch::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId)
-{
-	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
-		return false;
-
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
-	if(!pPlayer)
-		return false;
-
-	SetCatchColors(pPlayer);
-	return false;
-}
-
-void CGameControllerZcatch::SendSkinBodyColor7(int ClientId, int Color)
-{
-	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
 		return;
 
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
-	if(!pPlayer)
-		return;
-	if(pPlayer->GetCharacter() && pPlayer->GetCharacter()->HasRainbow())
-		return;
-
-	// also update 0.6 just to be sure
-	pPlayer->m_TeeInfos.m_ColorBody = Color;
-	pPlayer->m_TeeInfos.m_UseCustomColor = true;
-
-	// 0.7
-	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
-	{
-		pPlayer->m_TeeInfos.m_aSkinPartColors[p] = ColorToSixup(Color);
-		pPlayer->m_TeeInfos.m_aUseCustomColors[p] = true;
-	}
-
-	protocol7::CNetMsg_Sv_SkinChange Msg;
-	Msg.m_ClientId = ClientId;
-	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
-	{
-		Msg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_aaSkinPartNames[p];
-		Msg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
-		Msg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
-	}
-
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
+	pPlayer->m_SkinInfoManager.SetColorBody(ESkinPrio::LOW, Color);
 }
