@@ -1,7 +1,7 @@
-#ifndef GAME_SERVER_GAMEMODES_BASE_PVP_CTF_H
-#define GAME_SERVER_GAMEMODES_BASE_PVP_CTF_H
+#ifndef GAME_SERVER_GAMEMODES_VANILLA_BASE_CTF_H
+#define GAME_SERVER_GAMEMODES_VANILLA_BASE_CTF_H
 
-#include "base_pvp.h"
+#include <game/server/gamemodes/base_pvp/base_pvp.h>
 
 class CGameControllerBaseCTF : public CGameControllerBasePvp
 {

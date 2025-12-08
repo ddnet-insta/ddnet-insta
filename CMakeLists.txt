@@ -2826,8 +2826,6 @@ if(SERVER)
     gamemodes/base_pvp/base_pvp.cpp
     gamemodes/base_pvp/base_pvp.h
     gamemodes/base_pvp/chat.cpp
-    gamemodes/base_pvp/ctf.cpp
-    gamemodes/base_pvp/ctf.h
     gamemodes/ddrace/block/block.cpp
     gamemodes/ddrace/block/block.h
     gamemodes/insta_core/insta_core.cpp
@@ -2878,6 +2876,8 @@ if(SERVER)
     gamemodes/instagib/zcatch/zcatch.h
     gamemodes/mod.cpp
     gamemodes/mod.h
+    gamemodes/vanilla/base_ctf.cpp
+    gamemodes/vanilla/base_ctf.h
     gamemodes/vanilla/base_vanilla.cpp
     gamemodes/vanilla/base_vanilla.h
     gamemodes/vanilla/bomb/bomb.cpp

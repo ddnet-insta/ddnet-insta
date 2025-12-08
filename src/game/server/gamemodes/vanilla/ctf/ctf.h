@@ -1,7 +1,8 @@
 #ifndef GAME_SERVER_GAMEMODES_VANILLA_CTF_CTF_H
 #define GAME_SERVER_GAMEMODES_VANILLA_CTF_CTF_H
 
-#include <game/server/gamemodes/base_pvp/ctf.h>
+#include "../base_ctf.h"
+
 #include <game/server/instagib/extra_columns.h>
 
 class CCtfColumns : public CExtraColumns
