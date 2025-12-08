@@ -6,7 +6,7 @@
 
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
-#include <game/server/entities/ddnet_pvp/vanilla_pickup.h>
+#include <game/server/instagib/entities/ddnet_pvp/vanilla_pickup.h>
 #include <game/server/player.h>
 
 CGameControllerCTF::CGameControllerCTF(class CGameContext *pGameServer) :

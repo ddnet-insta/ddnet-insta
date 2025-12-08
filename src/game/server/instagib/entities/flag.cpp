@@ -2,12 +2,12 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "flag.h"
 
-#include "character.h"
-
 #include <game/mapitems.h>
+#include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
+
 CFlag::CFlag(CGameWorld *pGameWorld, int Team) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_FLAG)
 {

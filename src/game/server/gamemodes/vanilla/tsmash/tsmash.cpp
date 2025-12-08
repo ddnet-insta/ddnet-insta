@@ -8,8 +8,8 @@
 
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
-#include <game/server/entities/ddnet_pvp/vanilla_pickup.h>
 #include <game/server/gamemodes/base_pvp/base_pvp.h>
+#include <game/server/instagib/entities/ddnet_pvp/vanilla_pickup.h>
 
 class CParticleCircle : public CEntity
 {

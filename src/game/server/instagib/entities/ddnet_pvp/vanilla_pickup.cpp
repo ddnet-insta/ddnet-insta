@@ -9,7 +9,6 @@
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
-#include <game/teamscore.h>
 
 static constexpr int gs_PickupPhysSize = 14;
 

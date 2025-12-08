@@ -11,10 +11,10 @@
 #include <game/mapitems.h>
 #include <game/mapitems_insta.h>
 #include <game/server/entities/character.h>
-#include <game/server/entities/foot/foot_pickup.h>
-#include <game/server/entities/foot/foot_projectile.h>
 #include <game/server/entities/projectile.h>
 #include <game/server/gamecontext.h>
+#include <game/server/instagib/entities/foot/foot_pickup.h>
+#include <game/server/instagib/entities/foot/foot_projectile.h>
 #include <game/server/instagib/sql_stats_player.h>
 #include <game/server/player.h>
 

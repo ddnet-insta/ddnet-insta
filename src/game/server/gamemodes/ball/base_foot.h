@@ -3,7 +3,7 @@
 
 #include "../instagib/base_instagib.h"
 
-#include <game/server/entities/foot/foot_projectile.h>
+#include <game/server/instagib/entities/foot/foot_projectile.h>
 
 #endif
 class CGameControllerBaseFoot : public CGameControllerBasePvp

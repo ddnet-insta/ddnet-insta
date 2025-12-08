@@ -10,7 +10,6 @@
 #include <game/server/entities/character.h>
 #include <game/server/entities/projectile.h>
 #include <game/server/gamecontext.h>
-#include <game/server/gamemodes/DDRace.h>
 
 CVanillaProjectile::CVanillaProjectile(
 	CGameWorld *pGameWorld,

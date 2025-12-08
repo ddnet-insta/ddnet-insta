@@ -2780,22 +2780,12 @@ if(SERVER)
     ddracecommands.cpp
     entities/character.cpp
     entities/character.h
-    entities/ddnet_pvp/vanilla_pickup.cpp
-    entities/ddnet_pvp/vanilla_pickup.h
-    entities/ddnet_pvp/vanilla_projectile.cpp
-    entities/ddnet_pvp/vanilla_projectile.h
     entities/door.cpp
     entities/door.h
     entities/dragger.cpp
     entities/dragger.h
     entities/dragger_beam.cpp
     entities/dragger_beam.h
-    entities/flag.cpp
-    entities/flag.h
-    entities/foot/foot_pickup.cpp
-    entities/foot/foot_pickup.h
-    entities/foot/foot_projectile.cpp
-    entities/foot/foot_projectile.h
     entities/gun.cpp
     entities/gun.h
     entities/laser.cpp
@@ -2901,6 +2891,16 @@ if(SERVER)
     instagib/chat_commands.h
     instagib/entities/character.cpp
     instagib/entities/character.h
+    instagib/entities/ddnet_pvp/vanilla_pickup.cpp
+    instagib/entities/ddnet_pvp/vanilla_pickup.h
+    instagib/entities/ddnet_pvp/vanilla_projectile.cpp
+    instagib/entities/ddnet_pvp/vanilla_projectile.h
+    instagib/entities/flag.cpp
+    instagib/entities/flag.h
+    instagib/entities/foot/foot_pickup.cpp
+    instagib/entities/foot/foot_pickup.h
+    instagib/entities/foot/foot_projectile.cpp
+    instagib/entities/foot/foot_projectile.h
     instagib/enums.cpp
     instagib/enums.h
     instagib/extra_columns.h
