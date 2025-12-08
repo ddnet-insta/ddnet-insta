@@ -2755,6 +2755,7 @@ if(SERVER)
     databases/mysql.cpp
     databases/sqlite.cpp
     instagib/server.cpp
+    instagib/server.h
     main.cpp
     name_ban.cpp
     name_ban.h
@@ -2913,6 +2914,9 @@ if(SERVER)
     instagib/includes/character.h
     instagib/includes/chat_commands.h
     instagib/includes/config_variables.h
+    instagib/includes/engine/gameserver.h
+    instagib/includes/engine/server.h
+    instagib/includes/engine/server/server.h
     instagib/includes/gamecontext.h
     instagib/includes/gamecontroller.h
     instagib/includes/player.h
