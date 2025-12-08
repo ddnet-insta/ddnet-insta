@@ -3347,7 +3347,7 @@ void CGameContext::ConPause(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	pSelf->m_pController->ToggleGamePause();
+	pSelf->m_World.m_Paused ^= 1;
 }
 
 void CGameContext::ConChangeMap(IConsole::IResult *pResult, void *pUserData)
@@ -3387,11 +3387,10 @@ void CGameContext::ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUse
 void CGameContext::ConRestart(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Seconds = pResult->NumArguments() ? std::clamp(pResult->GetInteger(0), -1, 1000) : 0;
-	if(Seconds < 0)
-		pSelf->m_pController->AbortWarmup();
+	if(pResult->NumArguments())
+		pSelf->m_pController->DoWarmup(pResult->GetInteger(0));
 	else
-		pSelf->m_pController->DoWarmup(Seconds);
+		pSelf->m_pController->StartRound();
 }
 
 static void UnescapeNewlines(char *pBuf)
@@ -3959,7 +3958,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("change_map", "r[map]", CFGFLAG_SERVER | CFGFLAG_STORE, ConChangeMap, this, "Change map");
 	Console()->Register("random_map", "?i[stars] ?i[max stars]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRandomMap, this, "Random map");
 	Console()->Register("random_unfinished_map", "?i[stars] ?i[max stars]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRandomUnfinishedMap, this, "Random unfinished map");
-	Console()->Register("restart", "?i[seconds]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRestart, this, "Restart in x seconds (-1 = abort)"); // ddnet-insta changed description to match teeworlds 0.7 restart command
+	Console()->Register("restart", "?i[seconds]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRestart, this, "Restart in x seconds (0 = abort)");
 	Console()->Register("server_alert", "r[message]", CFGFLAG_SERVER, ConServerAlert, this, "Send a server alert message to all players");
 	Console()->Register("mod_alert", "v[id] r[message]", CFGFLAG_SERVER, ConModAlert, this, "Send a moderator alert message to player");
 	Console()->Register("broadcast", "r[message]", CFGFLAG_SERVER, ConBroadcast, this, "Broadcast message");

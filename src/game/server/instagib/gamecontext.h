@@ -111,6 +111,8 @@ public:
 	static void ConDeepJailIp(IConsole::IResult *pResult, void *pUserData);
 	static void ConDeepJails(IConsole::IResult *pResult, void *pUserData);
 	static void ConUndeepJail(IConsole::IResult *pResult, void *pUserData);
+	static void ConInstaPause(IConsole::IResult *pResult, void *pUserData);
+	static void ConInstaRestart(IConsole::IResult *pResult, void *pUserData);
 
 	// chat_commands.cpp
 	static void ConInstaModeCredits(IConsole::IResult *pResult, void *pUserData);

@@ -1,10 +1,16 @@
 // This file can be included several times.
+// doc gen ignore: pause_game, restart
 
 #ifndef CONSOLE_COMMAND
 #error "The config macros must be defined"
 // This helps IDEs properly syntax highlight the uses of the macro below.
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) ;
 #endif
+
+// "pause_game" shadows a ddnet command
+CONSOLE_COMMAND("pause_game", "", CFGFLAG_SERVER, ConInstaPause, this, "Pause/unpause game");
+// "restart" shadows a ddnet command
+CONSOLE_COMMAND("restart", "?i[seconds]", CFGFLAG_SERVER | CFGFLAG_STORE, ConInstaRestart, this, "Restart in x seconds (-1 = abort)");
 
 CONSOLE_COMMAND("hammer", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConHammer, this, "Gives a hammer to you")
 CONSOLE_COMMAND("gun", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConGun, this, "Gives a gun to you")

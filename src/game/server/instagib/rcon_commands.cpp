@@ -246,3 +246,38 @@ void CGameContext::ConUndeepJail(IConsole::IResult *pResult, void *pUserData)
 	}
 	pSelf->UndeepJail(pEntry);
 }
+
+void CGameContext::ConInstaPause(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	if(!pSelf->m_pController)
+		return;
+
+	if(pSelf->m_pController->IsDDRaceGameType())
+	{
+		ConPause(pResult, pUserData);
+		return;
+	}
+
+	pSelf->m_pController->ToggleGamePause();
+}
+
+void CGameContext::ConInstaRestart(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!pSelf->m_pController)
+		return;
+
+	if(pSelf->m_pController->IsDDRaceGameType())
+	{
+		ConRestart(pResult, pUserData);
+		return;
+	}
+
+	const int Seconds = pResult->NumArguments() ? std::clamp(pResult->GetInteger(0), -1, 1000) : 0;
+	if(Seconds < 0)
+		pSelf->m_pController->AbortWarmup();
+	else
+		pSelf->m_pController->DoWarmup(Seconds);
+}
