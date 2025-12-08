@@ -24,6 +24,7 @@
 #include <engine/shared/json.h>
 #include <engine/shared/linereader.h>
 #include <engine/shared/memheap.h>
+#include <engine/shared/protocol.h>
 #include <engine/shared/protocolglue.h>
 #include <engine/storage.h>
 
@@ -38,7 +39,7 @@
 
 #include <vector>
 
-// ddnet-insta
+// ddnet-insta start
 #include <game/server/gamecontroller.h>
 #include <game/server/instagib/structs.h>
 
@@ -47,6 +48,7 @@ GamemodesType &Gamemodes()
 	static GamemodesType s_Gamemodes;
 	return s_Gamemodes;
 }
+// ddnet-insta end
 
 // Not thread-safe!
 class CClientChatLogger : public ILogger
@@ -136,8 +138,8 @@ CGameContext::CGameContext(bool Resetting) :
 	m_aDeleteTempfile[0] = 0;
 	m_TeeHistorianActive = false;
 
-	m_UnstackHackCharacterOffset = 0;
-	mem_zero(m_aaLastChatMessages, sizeof(m_aaLastChatMessages));
+	m_UnstackHackCharacterOffset = 0; // ddnet-insta
+	mem_zero(m_aaLastChatMessages, sizeof(m_aaLastChatMessages)); // ddnet-insta
 }
 
 CGameContext::~CGameContext()
@@ -301,6 +303,8 @@ void CGameContext::CreateHammerHit(vec2 Pos, CClientMask Mask)
 	}
 }
 
+// ddnet-insta
+// void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask)
 void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask, CClientMask SprayMask)
 {
 	// ddnet-insta
@@ -368,7 +372,8 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		}
 	}
 
-	m_pController->OnExplosionHits(Owner, aTargets, NumTargets); // ddnet-insta
+	// ddnet-insta
+	m_pController->OnExplosionHits(Owner, aTargets, NumTargets);
 }
 
 void CGameContext::CreatePlayerSpawn(vec2 Pos, CClientMask Mask)
@@ -695,7 +700,8 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 	}
 	else
 	{
-		// CTeamsCore *pTeams = &m_pController->Teams().m_Core; // ddnet-insta
+		// ddnet-insta
+		// CTeamsCore *pTeams = &m_pController->Teams().m_Core;
 		CNetMsg_Sv_Chat Msg;
 		Msg.m_Team = 1;
 		Msg.m_ClientId = ChatterClientId;
@@ -719,8 +725,9 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 				}
 				else
 				{
+					// ddnet-insta
 					// if(pTeams->Team(i) == Team && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
-					if(m_apPlayers[i]->GetTeam() == Team && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS) // ddnet-insta
+					if(m_apPlayers[i]->GetTeam() == Team && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
 					{
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
 					}
@@ -2083,7 +2090,8 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 
 			pPlayer->m_LastChangeInfo = Server()->Tick();
 
-			if(m_pController->OnSkinChange7(pMsg, ClientId)) // ddnet-insta
+			// ddnet-insta
+			if(m_pController->OnSkinChange7(pMsg, ClientId))
 				return nullptr;
 
 			CTeeInfo Info(pMsg->m_apSkinPartNames, pMsg->m_aUseCustomColors, pMsg->m_aSkinPartColors);
@@ -2323,6 +2331,7 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 	else
 		Team = TEAM_ALL;
 
+	// ddnet-insta
 	if(m_pController->OnChatMessage(pMsg, Length, Team, pPlayer))
 		return;
 
@@ -2374,10 +2383,12 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 		pPlayer->UpdatePlaytime();
 		char aCensoredMessage[256];
 		CensorMessage(aCensoredMessage, pMsg->m_pMessage, sizeof(aCensoredMessage));
+		// ddnet-insta start
 		char aChatMessage[256];
 		str_copy(aChatMessage, aCensoredMessage);
 		if(g_Config.m_SvUnstackChat)
 			InstagibUnstackChatMessage(aChatMessage, aCensoredMessage, sizeof(aChatMessage));
+		// ddnet-insta end
 		SendChat(ClientId, Team, aChatMessage, ClientId);
 	}
 }
@@ -2388,6 +2399,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 		return;
 	if(RateLimitPlayerVote(ClientId) || m_VoteCloseTime)
 		return;
+	// ddnet-insta
 	if(m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
 	{
 		SendChatTarget(ClientId, "Spectators aren't allowed to vote.");
@@ -2853,7 +2865,8 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 		SendChat(-1, TEAM_ALL, aChatText);
 
 		// reload scores
-		if(!m_pController->LoadNewPlayerNameData(ClientId)) // ddnet-insta
+		// ddnet-insta
+		if(!m_pController->LoadNewPlayerNameData(ClientId))
 		{
 			Score()->PlayerData(ClientId)->Reset();
 			m_apPlayers[ClientId]->m_Score.reset();
@@ -3091,6 +3104,7 @@ void CGameContext::OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int C
 
 	// TODO: can this be moved to a controller method we hook at the method start?
 	pPlayer->m_SkinInfoManager.SetUserChoice(pPlayer->m_TeeInfos); // ddnet-insta
+
 	// setting tee infos is not needed because we do not send it here
 	// this is also why the code could move to the top or bottomg of this method
 	pPlayer->m_TeeInfos = pPlayer->m_SkinInfoManager.TeeInfo(); // ddnet-insta
@@ -4281,6 +4295,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 		}
 	}
 
+	// ddnet-insta start
 	m_pController = nullptr;
 	for(const auto &[String, Constructor] : Gamemodes())
 	{
@@ -4295,6 +4310,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 		log_warn("gametype", "unknown gametype '%s' falling back to ddnet", Config()->m_SvGametype);
 		m_pController = (Gamemodes()["ddnet"])(this);
 	}
+	// ddnet-insta end
 
 	ReadCensorList();
 

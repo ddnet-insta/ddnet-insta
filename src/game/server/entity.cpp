@@ -1,13 +1,12 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-// ddnet-insta
 #include "entity.h"
 
 #include "gamecontext.h"
 #include "player.h"
 
-#include <game/server/gamecontroller.h>
+#include <game/server/gamecontroller.h> // ddnet-insta
 
 //////////////////////////////////////////////////
 // Entity
@@ -36,6 +35,7 @@ CEntity::~CEntity()
 
 bool CEntity::NetworkClipped(int SnappingClient)
 {
+	// ddnet-insta
 	if(GameServer()->m_pController->ForceNetworkClipping(this, SnappingClient, m_Pos))
 		return true;
 
@@ -44,6 +44,7 @@ bool CEntity::NetworkClipped(int SnappingClient)
 
 bool CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos)
 {
+	// ddnet-insta
 	if(GameServer()->m_pController->ForceNetworkClipping(this, SnappingClient, CheckPos))
 		return true;
 
@@ -52,6 +53,7 @@ bool CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos)
 
 bool CEntity::NetworkClippedLine(int SnappingClient, vec2 StartPos, vec2 EndPos)
 {
+	// ddnet-insta
 	if(GameServer()->m_pController->ForceNetworkClippingLine(this, SnappingClient, StartPos, EndPos))
 		return true;
 

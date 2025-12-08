@@ -1,7 +1,6 @@
 #include "dm.h"
 
 #include <game/server/entities/character.h>
-#include <game/server/player.h>
 
 CGameControllerInstaBaseDM::CGameControllerInstaBaseDM(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)

@@ -7,7 +7,6 @@
 #include <game/server/entities/character.h>
 #include <game/server/instagib/skin_info_manager.h>
 #include <game/server/player.h>
-#include <game/server/teeinfo.h>
 
 int CGameControllerZcatch::GetBodyColorTeetime(int Kills)
 {

@@ -11,7 +11,6 @@
 
 #include <generated/protocol.h>
 
-#include <game/race_state.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/instagib/antibob.h>
@@ -19,13 +18,9 @@
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/ip_storage.h>
 #include <game/server/instagib/laser_text.h>
-#include <game/server/instagib/sql_stats.h>
-#include <game/server/instagib/structs.h>
 #include <game/server/instagib/version.h>
 #include <game/server/player.h>
-#include <game/server/score.h>
 #include <game/server/teams.h>
-#include <game/teamscore.h>
 #include <game/version.h>
 
 CGameControllerInstaCore::CGameControllerInstaCore(class CGameContext *pGameServer) :

@@ -12,10 +12,6 @@
 #include <game/server/gamecontroller.h>
 #include <game/server/instagib/ip_storage.h>
 #include <game/server/player.h>
-#include <game/server/score.h>
-#include <game/version.h>
-
-#include <string>
 
 void CGameContext::ConHammer(IConsole::IResult *pResult, void *pUserData)
 {

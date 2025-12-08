@@ -11,7 +11,7 @@
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamemodes/DDRace.h>
-#include <game/server/instagib/version.h>
+#include <game/server/instagib/version.h> // ddnet-insta
 #include <game/server/teams.h>
 #include <game/team_state.h>
 #include <game/teamscore.h>
@@ -51,6 +51,7 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	// ddnet-insta start
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"DDNet-insta " DDNET_INSTA_VERSIONSTR " by ChillerDragon");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
@@ -59,6 +60,7 @@ void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
 		"built on: " DDNET_INSTA_BUILD_DATE);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"based on:");
+	// ddnet-insta end
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"DDraceNetwork Mod. Version: " GAME_VERSION);
 	if(GIT_SHORTREV_HASH)

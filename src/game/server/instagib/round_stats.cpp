@@ -1,9 +1,3 @@
-#include "../entities/character.h"
-#include "../gamecontext.h"
-#include "../gamecontroller.h"
-#include "../player.h"
-
-#include <base/logger.h>
 #include <base/system.h>
 
 #include <engine/shared/config.h>
@@ -14,7 +8,10 @@
 
 #include <generated/protocol.h>
 
+#include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/instagib/strhelpers.h>
+#include <game/server/player.h>
 
 float IGameController::CalcKillDeathRatio(int Kills, int Deaths) const
 {

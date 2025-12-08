@@ -11,8 +11,6 @@
 #include <game/server/gamecontroller.h>
 #include <game/server/instagib/strhelpers.h>
 #include <game/server/player.h>
-#include <game/server/score.h>
-#include <game/version.h>
 
 void CGameControllerBasePvp::DoWarmup(int Seconds)
 {

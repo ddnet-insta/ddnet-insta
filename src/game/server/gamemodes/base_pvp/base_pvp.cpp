@@ -6,7 +6,6 @@
 #include <engine/server/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
-#include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 
 #include <generated/protocol.h>
@@ -15,20 +14,15 @@
 #include <game/server/entities/character.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/gamemodes/insta_core/insta_core.h>
-#include <game/server/instagib/antibob.h>
 #include <game/server/instagib/entities/ddnet_pvp/vanilla_projectile.h>
 #include <game/server/instagib/entities/flag.h>
 #include <game/server/instagib/enums.h>
-#include <game/server/instagib/ip_storage.h>
-#include <game/server/instagib/laser_text.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/structs.h>
-#include <game/server/instagib/version.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/server/teams.h>
 #include <game/teamscore.h>
-#include <game/version.h>
 
 #include <cstdint>
 

@@ -5,13 +5,11 @@
 
 #include <generated/protocol.h>
 
-#include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/instagib/enums.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
-#include <game/version.h>
 
 // "/credits"
 void CGameContext::ConInstaModeCredits(IConsole::IResult *pResult, void *pUserData)

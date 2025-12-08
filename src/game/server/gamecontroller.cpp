@@ -30,6 +30,7 @@ IGameController::IGameController(class CGameContext *pGameServer) :
 	m_pGameType = "unknown";
 
 	//
+	// DoWarmup(g_Config.m_SvWarmup); // ddnet-insta
 	m_GameOverTick = -1;
 	m_SuddenDeath = 0;
 	m_RoundStartTick = Server()->Tick();
@@ -39,7 +40,7 @@ IGameController::IGameController(class CGameContext *pGameServer) :
 
 	m_CurrentRecord.reset();
 
-	// ddnet-insta
+	// ddnet-insta start
 	m_apFlags[0] = nullptr;
 	m_apFlags[1] = nullptr;
 	m_Warmup = 0;
@@ -83,6 +84,7 @@ IGameController::IGameController(class CGameContext *pGameServer) :
 	m_GameInfo.m_MatchNum = 0;
 	m_GameInfo.m_ScoreLimit = Config()->m_SvScorelimit;
 	m_GameInfo.m_TimeLimit = Config()->m_SvTimelimit;
+	// ddnet-insta end
 }
 
 IGameController::~IGameController() = default;
@@ -496,6 +498,7 @@ void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pRe
 
 void IGameController::ResetGame()
 {
+	// ddnet-insta
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer)
@@ -547,6 +550,13 @@ void IGameController::ChangeMap(const char *pToMap)
 
 void IGameController::OnReset()
 {
+	/*
+	for(auto &pPlayer : GameServer()->m_apPlayers)
+		if(pPlayer)
+			pPlayer->Respawn();
+	*/
+
+	// ddnet-insta
 	for(auto &pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer)
@@ -582,6 +592,7 @@ void IGameController::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 
 void IGameController::DoWarmup(int Seconds)
 {
+	// ddnet-insta
 	// gets overwritten by SetGameState
 	// but SetGameState might not set it
 	// and then it is uninitialized
@@ -591,6 +602,7 @@ void IGameController::DoWarmup(int Seconds)
 
 void IGameController::Tick()
 {
+	// ddnet-insta
 	// handle game states
 	if(m_GameState != IGS_GAME_RUNNING)
 	{
@@ -725,11 +737,11 @@ void IGameController::Snap(int SnappingClient)
 		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_SUDDENDEATH;
 	if(GameServer()->m_World.m_Paused)
 		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_PAUSED;
-	pGameInfoObj->m_RoundStartTick = SnapRoundStartTick(SnappingClient);
+	pGameInfoObj->m_RoundStartTick = SnapRoundStartTick(SnappingClient); // ddnet-insta
 	pGameInfoObj->m_WarmupTimer = m_Warmup;
 
-	pGameInfoObj->m_ScoreLimit = g_Config.m_SvScorelimit;
-	pGameInfoObj->m_TimeLimit = SnapTimeLimit(SnappingClient);
+	pGameInfoObj->m_ScoreLimit = g_Config.m_SvScorelimit; // ddnet-insta
+	pGameInfoObj->m_TimeLimit = SnapTimeLimit(SnappingClient); // ddnet-insta
 
 	pGameInfoObj->m_RoundNum = 0;
 	pGameInfoObj->m_RoundCurrent = m_RoundCount + 1;

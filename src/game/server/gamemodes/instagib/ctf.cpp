@@ -10,8 +10,6 @@
 #include <game/server/gamecontext.h>
 #include <game/server/instagib/entities/flag.h>
 #include <game/server/player.h>
-#include <game/server/score.h>
-#include <game/version.h>
 
 CGameControllerInstaBaseCTF::CGameControllerInstaBaseCTF(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)

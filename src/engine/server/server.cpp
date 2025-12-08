@@ -2652,7 +2652,9 @@ void CServer::UpdateRegisterServerInfo()
 	JsonWriter.WriteStrValue(GameServer()->Version());
 
 	JsonWriter.WriteAttribute("client_score_kind");
-	JsonWriter.WriteStrValue(GameServer()->ServerInfoClientScoreKind()); // "points" or "time"
+	// JsonWriter.WriteStrValue("time"); // "points" or "time"
+	// ddnet-insta
+	JsonWriter.WriteStrValue(GameServer()->ServerInfoClientScoreKind());
 
 	JsonWriter.WriteAttribute("requires_login");
 	JsonWriter.WriteBoolValue(false);

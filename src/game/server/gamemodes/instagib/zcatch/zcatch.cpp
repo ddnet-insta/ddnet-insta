@@ -16,8 +16,6 @@
 #include <game/server/gamecontroller.h>
 #include <game/server/gamemodes/instagib/base_instagib.h>
 #include <game/server/player.h>
-#include <game/server/score.h>
-#include <game/version.h>
 
 CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)

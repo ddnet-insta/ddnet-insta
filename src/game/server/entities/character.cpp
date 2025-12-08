@@ -61,6 +61,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_EmoteStop = -1;
 	m_LastAction = -1;
 	m_LastNoAmmoSound = -1;
+
+	// ddnet-insta
 	m_LastWeapon = GameServer()->m_pController->GetDefaultWeapon(pPlayer);
 	m_QueuedWeapon = -1;
 	m_LastRefillJumps = false;
@@ -82,6 +84,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_Core.Reset();
 	m_Core.Init(&GameServer()->m_World.m_Core, Collision());
+
+	// ddnet-insta
 	m_Core.m_ActiveWeapon = GameServer()->m_pController->GetDefaultWeapon(pPlayer);
 	m_Core.m_Pos = m_Pos;
 	m_Core.m_Id = m_pPlayer->GetCid();
@@ -543,6 +547,7 @@ void CCharacter::FireWeapon()
 			pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
 				m_pPlayer->GetCid(), m_Core.m_ActiveWeapon);
 
+			// ddnet-insta
 			if(GameServer()->m_pController->UnfreezeOnHammerHit())
 				pTarget->UnFreeze();
 
@@ -843,6 +848,7 @@ void CCharacter::Tick()
 		{
 			Antibot()->OnHookAttach(m_pPlayer->GetCid(), true);
 		}
+		// ddnet-insta
 		if(g_Config.m_SvKillHook)
 		{
 			CCharacter *pChr = GameServer()->m_apPlayers[HookedPlayer]->GetCharacter();
@@ -1025,6 +1031,7 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 {
+	// ddnet-insta
 	if(GameServer()->m_pController->OnCharacterTakeDamage(Force, Dmg, From, Weapon, *this))
 		return false;
 
@@ -2331,7 +2338,8 @@ bool CCharacter::Freeze(int Seconds)
 		return false;
 	if(m_FreezeTime == 0 || m_Core.m_FreezeStart < Server()->Tick() - Server()->TickSpeed())
 	{
-		// m_Armor = 0; // ddnet-insta do not set m_Armor use SetArmorProgress instead
+		// ddnet-insta do not set m_Armor use SetArmorProgress instead
+		// m_Armor = 0;
 		GameServer()->m_pController->SetArmorProgressEmpty(this); // ddnet-insta
 		m_FreezeTime = Seconds * Server()->TickSpeed();
 		m_Core.m_FreezeStart = Server()->Tick();
@@ -2349,7 +2357,8 @@ bool CCharacter::UnFreeze()
 {
 	if(m_FreezeTime > 0)
 	{
-		// m_Armor = 10; // ddnet-insta do not set m_Armor use SetArmorProgress instead
+		// ddnet-insta do not set m_Armor use SetArmorProgress instead
+		// m_Armor = 10;
 		GameServer()->m_pController->SetArmorProgressFull(this); // ddnet-insta
 		if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Got)
 			m_Core.m_ActiveWeapon = WEAPON_GUN;

@@ -11,7 +11,7 @@
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
-#include <game/server/player.h>
+#include <game/server/player.h> // ddnet-insta
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -49,6 +49,7 @@ CProjectile::CProjectile(
 	m_DDRaceTeam = m_Owner == -1 ? 0 : GameServer()->GetDDRaceTeam(m_Owner);
 	m_IsSolo = pOwnerChar && pOwnerChar->GetCore().m_Solo;
 
+	// ddnet-insta start
 	m_AffectedCharacters = CClientMask().set();
 
 	if(m_Type == WEAPON_GRENADE)
@@ -73,6 +74,7 @@ CProjectile::CProjectile(
 			}
 		}
 	}
+	// ddnet-insta end
 
 	GameWorld()->InsertEntity(this);
 }
@@ -163,6 +165,7 @@ void CProjectile::Tick()
 			}
 			for(int i = 0; i < Number; i++)
 			{
+				// ddnet-insta added m_AffectedCharacters
 				GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
 					(m_Owner != -1) ? TeamMask : CClientMask().set(), m_AffectedCharacters);
 				GameServer()->CreateSound(ColPos, m_SoundImpact,
@@ -266,6 +269,7 @@ void CProjectile::Tick()
 				TeamMask = pOwnerChar->TeamMask();
 			}
 
+			// ddnet-insta added m_AffectedCharacters
 			GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
 				(m_Owner != -1) ? TeamMask : CClientMask().set(), m_AffectedCharacters);
 			GameServer()->CreateSound(ColPos, m_SoundImpact,

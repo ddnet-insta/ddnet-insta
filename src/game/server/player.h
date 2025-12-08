@@ -9,15 +9,14 @@
 
 #include <engine/shared/protocol.h>
 
-#include <game/alloc.h>
-#include <game/server/instagib/enums.h>
-#include <game/server/instagib/ip_storage.h>
-#include <game/server/instagib/skin_info_manager.h>
-#include <game/server/instagib/sql_stats.h>
-#include <game/server/instagib/sql_stats_player.h>
-#include <game/server/instagib/structs.h>
-#include <game/server/save.h>
-#include <game/server/teeinfo.h>
+#include <game/alloc.h> // ddnet-insta
+#include <game/server/instagib/enums.h> // ddnet-insta
+#include <game/server/instagib/ip_storage.h> // ddnet-insta
+#include <game/server/instagib/skin_info_manager.h> // ddnet-insta
+#include <game/server/instagib/sql_stats.h> // ddnet-insta
+#include <game/server/instagib/sql_stats_player.h> // ddnet-insta
+#include <game/server/instagib/structs.h> // ddnet-insta
+#include <game/server/save.h> // ddnet-insta
 
 #include <memory>
 #include <optional>
@@ -245,7 +244,6 @@ public:
 	int64_t m_EligibleForFinishCheck;
 	bool m_VotedForPractice;
 	int m_SwapTargetsClientId; //Client ID of the swap target for the given player
-
 	bool m_BirthdayAnnounced;
 
 	int m_RescueMode;

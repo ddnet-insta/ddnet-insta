@@ -202,7 +202,7 @@ class CGameContext : public IGameServer
 		int m_LastWhisperTo;
 	};
 
-	// public:
+	// public: // ddnet-insta
 	IServer *Server() const { return m_pServer; }
 	IConfigManager *ConfigManager() const { return m_pConfigManager; }
 	CConfig *Config() { return m_pConfig; }

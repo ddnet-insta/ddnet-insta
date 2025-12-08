@@ -5,8 +5,6 @@
 
 #include <generated/protocol7.h>
 
-#include <game/server/instagib/extra_columns.h>
-#include <game/server/instagib/sql_stats.h>
 #include <game/server/player.h>
 
 // base functionality of the ddnet-insta server

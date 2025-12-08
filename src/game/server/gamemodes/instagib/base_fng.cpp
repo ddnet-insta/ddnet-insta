@@ -1,7 +1,6 @@
 #include "base_fng.h"
 
 #include <base/system.h>
-#include <base/types.h>
 
 #include <engine/server.h>
 #include <engine/shared/config.h>

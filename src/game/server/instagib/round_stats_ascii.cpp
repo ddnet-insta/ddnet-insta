@@ -2,10 +2,8 @@
 
 #include <engine/shared/config.h>
 
-#include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
-#include <game/server/instagib/strhelpers.h>
 #include <game/server/player.h>
 
 static bool AddSepPlayer(char *pBuf, int Size, IGameController *pSelf)

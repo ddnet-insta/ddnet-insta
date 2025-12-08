@@ -9,8 +9,8 @@
 #include <engine/shared/http.h> // ddnet-insta
 #include <engine/shared/protocol.h>
 
-#include <generated/protocol.h>
-#include <generated/protocol7.h>
+#include <generated/protocol.h> // ddnet-insta
+#include <generated/protocol7.h> // ddnet-insta
 
 #include <game/server/gamecontext.h> // ddnet-insta
 #include <game/server/instagib/enums.h> // ddnet-insta

@@ -3,7 +3,6 @@
 #include <base/log.h>
 
 #include <engine/console.h>
-#include <engine/server.h>
 
 CAntibobContext g_AntibobContext;
 
