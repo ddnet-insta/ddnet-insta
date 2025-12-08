@@ -2824,13 +2824,9 @@ if(SERVER)
     gamemodes/ball/foot/sql_columns.h
     gamemodes/base_pvp/base_pvp.cpp
     gamemodes/base_pvp/base_pvp.h
-    gamemodes/base_pvp/character.cpp
-    gamemodes/base_pvp/character.h
     gamemodes/base_pvp/chat.cpp
     gamemodes/base_pvp/ctf.cpp
     gamemodes/base_pvp/ctf.h
-    gamemodes/base_pvp/player.cpp
-    gamemodes/base_pvp/player.h
     gamemodes/ddrace/block/block.cpp
     gamemodes/ddrace/block/block.h
     gamemodes/insta_core/insta_core.cpp
@@ -2902,6 +2898,8 @@ if(SERVER)
     instagib/antibob.h
     instagib/chat_commands.cpp
     instagib/chat_commands.h
+    instagib/entities/character.cpp
+    instagib/entities/character.h
     instagib/enums.cpp
     instagib/enums.h
     instagib/extra_columns.h
@@ -2922,6 +2920,8 @@ if(SERVER)
     instagib/laser_text.cpp
     instagib/laser_text.h
     instagib/persistent_client_data.h
+    instagib/player.cpp
+    instagib/player.h
     instagib/protocol.h
     instagib/rcon_commands.cpp
     instagib/rcon_commands.h

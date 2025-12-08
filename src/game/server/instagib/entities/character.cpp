@@ -1,17 +1,11 @@
-#include "base_pvp.h"
-
-#include <base/log.h>
-
-#include <engine/antibot.h>
 #include <engine/shared/config.h>
 
 #include <generated/protocol.h>
 #include <generated/server_data.h>
 
 #include <game/server/entities/character.h>
+#include <game/server/gamemodes/base_pvp/base_pvp.h>
 #include <game/server/player.h>
-#include <game/server/score.h>
-#include <game/version.h>
 
 bool CCharacter::IsTouchingTile(int Tile)
 {
@@ -194,4 +188,13 @@ void CCharacter::LoseBall()
 	GiveWeapon(WEAPON_GRENADE, true);
 	SetWeapon(WEAPON_HAMMER);
 	m_LoseBallTick = 0;
+}
+
+void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
+{
+	GiveWeapon(Weapon, Remove);
+	if(!Remove)
+		m_Core.m_aWeapons[Weapon].m_Ammo = Ammo;
+
+	m_Core.m_aWeapons[Weapon].m_Got = !Remove;
 }

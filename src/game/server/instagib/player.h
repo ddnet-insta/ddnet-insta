@@ -1,4 +1,4 @@
-#ifndef GAME_SERVER_GAMEMODES_BASE_PVP_PLAYER_H
+#ifndef GAME_SERVER_INSTAGIB_PLAYER_H
 // hack for headerguard linter
 #endif
 
@@ -12,9 +12,7 @@
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
 #include <game/server/instagib/structs.h>
-#include <game/server/teeinfo.h>
 
-#include <cstdint>
 #include <optional>
 #include <vector>
 

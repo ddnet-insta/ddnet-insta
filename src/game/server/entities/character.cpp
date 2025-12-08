@@ -2367,7 +2367,7 @@ void CCharacter::ResetJumps()
 	m_Core.m_Jumped = 0;
 }
 
-void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
+void CCharacter::GiveWeapon(int Weapon, bool Remove)
 {
 	if(Weapon == WEAPON_NINJA)
 	{
@@ -2385,7 +2385,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 	}
 	else
 	{
-		m_Core.m_aWeapons[Weapon].m_Ammo = Ammo;
+		m_Core.m_aWeapons[Weapon].m_Ammo = -1;
 	}
 
 	m_Core.m_aWeapons[Weapon].m_Got = !Remove;

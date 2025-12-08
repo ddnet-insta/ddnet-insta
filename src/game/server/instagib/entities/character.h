@@ -1,4 +1,4 @@
-#ifndef GAME_SERVER_GAMEMODES_BASE_PVP_CHARACTER_H
+#ifndef GAME_SERVER_INSTAGIB_ENTITIES_CHARACTER_H
 // hack for headerguard linter
 #endif
 
@@ -47,6 +47,7 @@ public:
 	void AddHealth(int Amount) { m_Health += Amount; }
 	void AddArmor(int Amount) { m_Armor += Amount; }
 	int GetAimDir() const { return m_Input.m_TargetX < 0 ? -1 : 1; }
+	void GiveWeapon(int Weapon, bool Remove, int Ammo);
 
 	void AmmoRegen();
 	/*
