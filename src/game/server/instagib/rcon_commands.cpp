@@ -197,11 +197,11 @@ void CGameContext::ConKnownAntibot(IConsole::IResult *pResult, void *pUserData)
 
 void CGameContext::ConMallocInfo(IConsole::IResult *pResult, void *pUserData)
 {
-#ifdef CONF_PLATFORM_LINUX
+#if defined(CONF_PLATFORM_LINUX) && defined(__GLIBC__)
 	log_info("debug", "check stdout for malloc info");
 	malloc_info(0, stdout);
 #else
-	log_info("debug", "operating system not supported");
+	log_info("debug", "operating system not supported or not using glibc");
 #endif
 }
 
