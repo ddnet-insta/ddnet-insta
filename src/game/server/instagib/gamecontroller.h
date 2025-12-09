@@ -1337,6 +1337,9 @@ public:
 	const char *m_pStatsTable = "";
 	const char *StatsTable() const { return m_pStatsTable; }
 
+	bool m_WasMysteryRound = false;
+	std::vector<std::string> m_vMysteryRounds;
+
 private:
 #ifndef IN_CLASS_IGAMECONTROLLER
 };

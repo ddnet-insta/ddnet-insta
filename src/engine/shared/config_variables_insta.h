@@ -149,3 +149,6 @@ MACRO_CONFIG_INT(SvBombtagMinSecondsToExplosion, sv_bombtag_minimum_seconds_to_e
 MACRO_CONFIG_INT(SvBombtagBombDamage, sv_bombtag_bomb_damage, 1, 0, 100, CFGFLAG_SERVER, "The amount of seconds removed from a bombs timer when hit by someone.")
 MACRO_CONFIG_INT(SvBombtagBombWeapon, sv_bombtag_bomb_weapon, 3, 0, 5, CFGFLAG_SERVER, "Which weapon should the bomb be given? 0 - Hammer, 1 - Gun, 2 - Shotgun, 3 - Grenade, 4 - Laser, 5 - Ninja")
 MACRO_CONFIG_INT(SvBombtagCollateralDamage, sv_bombtag_collateral_damage, 0, 0, 1, CFGFLAG_SERVER, "Enable collateral damage, exploding bombs will eliminate any tees in a 3 tile radius.")
+MACRO_CONFIG_INT(SvMysteryRoundsChance, sv_mystery_rounds_chance, 0, 0, 100, CFGFLAG_SERVER, "The percentage of a mystery round happening! A random line from sv_mysteryrounds_filename will be executed.")
+MACRO_CONFIG_STR(SvMysteryRoundsFileName, sv_mystery_rounds_filename, IO_MAX_PATH_LENGTH, "", CFGFLAG_SERVER, "File which contains mystery round commands, one round per line.")
+MACRO_CONFIG_STR(SvMysteryRoundsResetFileName, sv_mystery_rounds_reset_filename, IO_MAX_PATH_LENGTH, "", CFGFLAG_SERVER, "File which contains the commands to execute after a mystery round.")

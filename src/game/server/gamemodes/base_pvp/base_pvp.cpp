@@ -143,7 +143,7 @@ void CGameControllerBasePvp::OnRoundStart()
 
 void CGameControllerBasePvp::OnRoundEnd()
 {
-	dbg_msg("ddnet-insta", "match end");
+	CGameControllerInstaCore::OnRoundEnd();
 
 	if(g_Config.m_SvTournamentChatSmart)
 	{

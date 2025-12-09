@@ -87,6 +87,7 @@ public:
 	void SnapDDNetPlayer(int SnappingClient, CPlayer *pPlayer, CNetObj_DDNetPlayer *pDDNetPlayer) override;
 	bool OnClientPacket(int ClientId, bool Sys, int MsgId, struct CNetChunk *pPacket, class CUnpacker *pUnpacker) override;
 	bool UnfreezeOnHammerHit() const override;
+	void OnRoundEnd() override;
 
 	void OnPlayerTick(class CPlayer *pPlayer);
 	void OnCharacterTick(class CCharacter *pChr);
@@ -175,5 +176,8 @@ public:
 	// UniqueId unlike regular ClientIds are not reused
 	// they start at one and get incremented for every new player that gets created
 	CPlayer *GetPlayerByUniqueId(uint32_t UniqueId);
+
+	size_t m_LastMysteryLine = -1;
+	const char *GetMysteryRoundLine();
 };
 #endif // GAME_SERVER_GAMEMODES_INSTA_CORE_INSTA_CORE_H

@@ -399,6 +399,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_bombtag_bomb_damage` The amount of seconds removed from a bombs timer when hit by someone.
 + `sv_bombtag_bomb_weapon` Which weapon should the bomb be given? 0 - Hammer, 1 - Gun, 2 - Shotgun, 3 - Grenade, 4 - Laser, 5 - Ninja
 + `sv_bombtag_collateral_damage` Enable collateral damage, exploding bombs will eliminate any tees in a 3 tile radius.
++ `sv_mystery_rounds_chance` The percentage of a mystery round happening! A random line from sv_mysteryrounds_filename will be executed.
 + `sv_spawn_weapons` possible values: grenade, laser
 + `sv_zcatch_colors` Color scheme for zCatch options: teetime, savander
 + `sv_display_score` values: points, round_points, spree, current_spree, win_points, wins, kills, round_kills
@@ -406,6 +407,8 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_round_stats_discord_webhooks` If set will post score stats there on round end. Can be a comma separated list.
 + `sv_round_stats_http_endpoints` If set will post score stats there on round end. Can be a comma separated list.
 + `sv_round_stats_output_file` If set will write score stats there on round end
++ `sv_mystery_rounds_filename` File which contains mystery round commands, one round per line.
++ `sv_mystery_rounds_reset_filename` File which contains the commands to execute after a mystery round.
 
 # Rcon commands
 

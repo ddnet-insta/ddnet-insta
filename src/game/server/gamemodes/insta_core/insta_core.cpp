@@ -5,6 +5,7 @@
 
 #include <engine/server/server.h>
 #include <engine/shared/config.h>
+#include <engine/shared/linereader.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
@@ -31,6 +32,22 @@ CGameControllerInstaCore::CGameControllerInstaCore(class CGameContext *pGameServ
 	UpdateSpawnWeapons(true, true);
 	m_vFrozenQuitters.clear();
 	g_AntibobContext.m_pConsole = Console();
+
+	m_vMysteryRounds.clear();
+	if(Config()->m_SvMysteryRoundsFileName[0] != '\0')
+	{
+		CLineReader LineReader;
+		if(!LineReader.OpenFile(GameServer()->m_pStorage->OpenFile(Config()->m_SvMysteryRoundsFileName, IOFLAG_READ, IStorage::TYPE_ALL)))
+		{
+			log_error("server", "failed to open mystery rounds file  '%s'", Config()->m_SvMysteryRoundsFileName);
+			return;
+		}
+		while(const char *pLine = LineReader.Get())
+		{
+			if(str_length(pLine) && pLine[0] != '#')
+				m_vMysteryRounds.emplace_back(pLine);
+		}
+	}
 }
 
 CGameControllerInstaCore::~CGameControllerInstaCore()
@@ -750,6 +767,41 @@ bool CGameControllerInstaCore::UnfreezeOnHammerHit() const
 	return g_Config.m_SvFreezeHammer == 0;
 }
 
+void CGameControllerInstaCore::OnRoundEnd()
+{
+	dbg_msg("ddnet-insta", "match end");
+
+	if(m_WasMysteryRound)
+	{
+		GameServer()->Console()->ExecuteFile(g_Config.m_SvMysteryRoundsResetFileName);
+		m_WasMysteryRound = false;
+	}
+
+	std::vector<std::string> vTemp;
+	while(Config()->m_SvMysteryRoundsChance && rand() % 101 <= Config()->m_SvMysteryRoundsChance)
+	{
+		if(vTemp.size() == m_vMysteryRounds.size())
+			break;
+
+		if(!m_WasMysteryRound)
+		{
+			GameServer()->Console()->ExecuteFile(Config()->m_SvMysteryRoundsResetFileName);
+			GameServer()->SendChat(-1, TEAM_ALL, "MYSTERY ROUND!");
+		}
+
+		const char *pLine = GetMysteryRoundLine();
+		if(!pLine)
+			break;
+
+		if(std::ranges::find(vTemp, pLine) != vTemp.end())
+			continue;
+
+		GameServer()->Console()->ExecuteLine(pLine);
+		m_WasMysteryRound = true;
+		vTemp.emplace_back(pLine);
+	}
+}
+
 void CGameControllerInstaCore::OnPlayerTick(class CPlayer *pPlayer)
 {
 	pPlayer->InstagibTick();
@@ -1238,4 +1290,22 @@ CPlayer *CGameControllerInstaCore::GetPlayerByUniqueId(uint32_t UniqueId)
 		if(pPlayer && pPlayer->GetUniqueCid() == UniqueId)
 			return pPlayer;
 	return nullptr;
+}
+
+const char *CGameControllerInstaCore::GetMysteryRoundLine()
+{
+	if(m_vMysteryRounds.empty())
+		return nullptr;
+
+	if(m_vMysteryRounds.size() == 1)
+		return m_vMysteryRounds[0].c_str();
+
+	size_t SelectedIndex;
+	do
+	{
+		SelectedIndex = GameServer()->m_Prng.RandomBits() % m_vMysteryRounds.size();
+	} while(m_vMysteryRounds.size() > 1 && SelectedIndex == m_LastMysteryLine);
+
+	m_LastMysteryLine = SelectedIndex;
+	return m_vMysteryRounds[m_LastMysteryLine].c_str();
 }
