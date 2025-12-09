@@ -318,6 +318,8 @@ void CGameControllerBomb::SetSkin(CPlayer *pPlayer)
 	{
 		// TODO: dont copy this string on tick but only when the bomb changes
 		pPlayer->m_SkinInfoManager.SetSkinName(ESkinPrio::HIGH, "bomb");
+		pPlayer->m_SkinInfoManager.SetUseCustomColor(ESkinPrio::HIGH, false);
+
 		if(pPlayer->m_ToBombTick <= 3 * Server()->TickSpeed())
 		{
 			ColorRGBA Color = ColorRGBA(255 - pPlayer->m_ToBombTick, 0, 0);
