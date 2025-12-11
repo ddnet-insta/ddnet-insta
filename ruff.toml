@@ -1,0 +1,47 @@
+include = [
+    "scripts/languages/*.py",
+]
+
+line-length = 130
+indent-width = 4
+
+target-version = "py312"
+
+[lint]
+select = ["ALL"]
+ignore = [
+    "D", # docsstring
+    "ANN001", # Missing type annotation for function argument
+    "ANN002", # Missing type annotation for `*args`
+    "ANN003", # Missing type annotation for `**kwargs`
+    "TD002", # Missing author in TODO; try: `# TODO(<author_name>): ...` or `# TODO @<author_name>: ...`
+    "TD003", # Missing issue link for this TODO
+    "TD004", # Missing colon in TODO
+    "TD005", # Missing issue description after `TODO`
+    "N801", # Class name `CLASS_NAME` should use CapWords convention
+    "INP001", # File `{file.py}` is part of an implicit namespace package. Add an `__init__.py
+    "ERA001", # Commented-out code
+    "COM812", # Trailing comma missing
+    "EM101", # Exception must not use a string literal, assign to variable first
+    "TRY003", # Avoid specifying long messages outside the exception class
+    "PLR2004", # Magic value used in comparison, consider replacing `{number}` with a constant variable
+    "FIX002", # Line contains TODO, consider resolving the issue
+    "T201", # `print` found
+    "EXE001", # Shebang is present but file is not executable
+]
+
+fixable = ["ALL"]
+unfixable = []
+
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[lint.pydocstyle]
+convention = "numpy"
+
+[format]
+indent-style = "space"
+quote-style = "double"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = false
+docstring-code-line-length = "dynamic"
