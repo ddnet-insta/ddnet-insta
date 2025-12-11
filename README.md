@@ -397,6 +397,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_bombtag_seconds_to_explosion` The amount of seconds till the bomb explodes.
 + `sv_bombtag_minimum_seconds_to_explosion` The minimum amount of seconds a tee's bomb timer will have after getting bomb.
 + `sv_bombtag_bomb_damage` The amount of seconds removed from a bombs timer when hit by someone.
++ `sv_bombtag_explosion_radius` The radius in tiles of the bomb explosion
 + `sv_bombtag_bomb_weapon` Which weapon should the bomb be given? 0 - Hammer, 1 - Gun, 2 - Shotgun, 3 - Grenade, 4 - Laser, 5 - Ninja
 + `sv_bombtag_collateral_damage` Enable collateral damage, exploding bombs will eliminate any tees in a 3 tile radius.
 + `sv_mystery_rounds_chance` The percentage of a mystery round happening! A random line from sv_mysteryrounds_filename will be executed.
