@@ -13,7 +13,6 @@
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/instagib/base_instagib.h>
-#include <game/server/instagib/laser_text.h>
 #include <game/server/instagib/sql_stats_player.h>
 #include <game/server/player.h>
 
@@ -337,7 +336,7 @@ inline void CGameControllerBaseFng::UpdateScoresAndDisplayPoints(CPlayer *pKille
 	pKiller->AddScore(PlayerScore - 1);
 	AddTeamscore(pKiller->GetTeam(), TeamScore);
 	if(pKiller->IsPlaying()) // NOLINT(clang-analyzer-unix.Malloc)
-		MakeLaserTextPoints(pKiller->GetCharacter()->GetPos(), PlayerScore, 3, pKiller->GetCharacter()->TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+		MakeTextPoints(pKiller->GetCharacter()->GetPos(), PlayerScore, Config()->m_SvTextPointsDelay, pKiller->GetCharacter()->TeamMask(), Config()->m_SvTextPoints); // NOLINT(clang-analyzer-unix.Malloc)
 }
 
 void CGameControllerBaseFng::SnapDDNetCharacter(int SnappingClient, CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter)

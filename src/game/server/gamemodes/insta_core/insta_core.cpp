@@ -17,9 +17,10 @@
 #include <game/server/gamecontroller.h>
 #include <game/server/instagib/antibob.h>
 #include <game/server/instagib/entities/flag.h>
+#include <game/server/instagib/entities/text/laser.h>
+#include <game/server/instagib/entities/text/projectile.h>
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/ip_storage.h>
-#include <game/server/instagib/laser_text.h>
 #include <game/server/instagib/version.h>
 #include <game/server/player.h>
 #include <game/server/teams.h>
@@ -1187,9 +1188,9 @@ void CGameControllerInstaCore::ApplyVanillaDamage(int &Dmg, int From, int Weapon
 		GameServer()->CreateSound(pCharacter->m_Pos, SOUND_PLAYER_PAIN_SHORT);
 }
 
-void CGameControllerInstaCore::MakeLaserTextPoints(vec2 Pos, int Points, int Seconds, CClientMask Mask)
+void CGameControllerInstaCore::MakeTextPoints(vec2 Pos, int Points, int Seconds, CClientMask Mask, int TextType) const
 {
-	if(!g_Config.m_SvLaserTextPoints)
+	if(!g_Config.m_SvTextPoints)
 		return;
 
 	char aText[16];
@@ -1198,7 +1199,10 @@ void CGameControllerInstaCore::MakeLaserTextPoints(vec2 Pos, int Points, int Sec
 	else
 		str_format(aText, sizeof(aText), "%d", Points);
 	Pos.y -= 60.0f;
-	new CLaserText(&GameServer()->m_World, Pos, Server()->TickSpeed() * Seconds, aText, Mask);
+	if(TextType == 1)
+		new CLaserText(&GameServer()->m_World, Mask, Pos, Server()->TickSpeed() * Seconds, aText);
+	else
+		new CProjectileText(&GameServer()->m_World, Mask, Pos, Server()->TickSpeed() * Seconds, aText);
 } // NOLINT(clang-analyzer-unix.Malloc)
 
 void CGameControllerInstaCore::DoDamageHitSound(int KillerId)

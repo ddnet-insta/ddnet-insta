@@ -2909,6 +2909,12 @@ if(SERVER)
     instagib/entities/foot/foot_pickup.h
     instagib/entities/foot/foot_projectile.cpp
     instagib/entities/foot/foot_projectile.h
+    instagib/entities/text/laser.cpp
+    instagib/entities/text/laser.h
+    instagib/entities/text/projectile.cpp
+    instagib/entities/text/projectile.h
+    instagib/entities/text/text.cpp
+    instagib/entities/text/text.h
     instagib/enums.cpp
     instagib/enums.h
     instagib/extra_columns.h
@@ -2929,8 +2935,6 @@ if(SERVER)
     instagib/includes/rcon_commands.h
     instagib/ip_storage.cpp
     instagib/ip_storage.h
-    instagib/laser_text.cpp
-    instagib/laser_text.h
     instagib/persistent_client_data.h
     instagib/player.cpp
     instagib/player.h

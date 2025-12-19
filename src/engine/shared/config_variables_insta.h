@@ -46,7 +46,8 @@ MACRO_CONFIG_INT(SvMeltHammerScaleX, sv_melt_hammer_scale_x, 50, 1, 1000, CFGFLA
 MACRO_CONFIG_INT(SvMeltHammerScaleY, sv_melt_hammer_scale_y, 50, 1, 1000, CFGFLAG_SERVER, "linearly scale up hammer y power, percentage, for hammering frozen teammates (needs sv_fng_hammer)")
 MACRO_CONFIG_INT(SvFngHammer, sv_fng_hammer, 0, 0, 1, CFGFLAG_SERVER, "use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer")
 MACRO_CONFIG_INT(SvSpikeSound, sv_spike_sound, 2, 0, 2, CFGFLAG_SERVER, "Play flag capture sound when sacrificing an enemy into the spikes !0.6 only! (0=off/1=only the killer and the victim/2=everyone near the victim)")
-MACRO_CONFIG_INT(SvLaserTextPoints, sv_laser_text_points, 1, 0, 1, CFGFLAG_SERVER, "display laser text in the world on scoring (only fng for now)")
+MACRO_CONFIG_INT(SvTextPoints, sv_text_points, 1, 0, 2, CFGFLAG_SERVER, "display text in the world on scoring (only fng for now. 1: laser, 2: projectile)")
+MACRO_CONFIG_INT(SvTextPointsDelay, sv_text_points_delay, 3, 1, 60, CFGFLAG_SERVER, "Timer until text disappears in seconds (only fng for now)")
 MACRO_CONFIG_INT(SvAnnounceSteals, sv_announce_steals, 1, 0, 1, CFGFLAG_SERVER, "show in chat when someone stole a kill (only fng for now)")
 
 MACRO_CONFIG_INT(SvGrenadeAmmoRegen, sv_grenade_ammo_regen, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Activate or deactivate grenade ammo regeneration in general")

@@ -326,7 +326,8 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_melt_hammer_scale_y` linearly scale up hammer y power, percentage, for hammering frozen teammates (needs sv_fng_hammer)
 + `sv_fng_hammer` use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer
 + `sv_spike_sound` Play flag capture sound when sacrificing an enemy into the spikes !0.6 only! (0=off/1=only the killer and the victim/2=everyone near the victim)
-+ `sv_laser_text_points` display laser text in the world on scoring (only fng for now)
++ `sv_text_points` display text in the world on scoring (only fng for now. 1: laser, 2: projectile)
++ `sv_text_points_delay` Timer until text disappears in seconds (only fng for now)
 + `sv_announce_steals` show in chat when someone stole a kill (only fng for now)
 + `sv_grenade_ammo_regen` Activate or deactivate grenade ammo regeneration in general
 + `sv_grenade_ammo_regen_time` Grenade ammo regeneration time in milliseconds
