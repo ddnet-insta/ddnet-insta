@@ -347,8 +347,33 @@ void CGameControllerBomb::EliminatePlayer(CPlayer *pPlayer, bool Collateral)
 
 void CGameControllerBomb::ExplodeBomb(CPlayer *pPlayer)
 {
-	GameServer()->CreateExplosion(pPlayer->m_ViewPos, pPlayer->GetCid(), WEAPON_GAME, true, 0);
-	GameServer()->CreateSound(pPlayer->m_ViewPos, SOUND_GRENADE_EXPLODE);
+	int AmountOfRings = g_Config.m_SvBombtagExplosionRadius;
+	// TODO: get of magic number 32
+	//       that should be some TILE_SIZE constant
+	//       im sure ddnet code has one
+	int BombRadius = 32 * AmountOfRings;
+	vec2 Center = pPlayer->m_ViewPos;
+
+	// TODO: this looks kinda good but it does not seem to scale right
+	//       i think something got vibed wrong here
+
+	for (int Ring = 1; Ring <= AmountOfRings; ++Ring) {
+		double Radius = Ring * 32;
+		int Points = Ring * 3;
+		for (int i = 0; i < Points; ++i) {
+			double Angle = (2 * M_PI / Points) * i;
+			// TODO: duck.ai vibed me this shits
+			//       should not cast to int its a float
+			//       should also use the vmath overloads instead of
+			//       these helper variables
+			int PosX = static_cast<int>(Center.x + Radius * cos(Angle));
+			int PosY = static_cast<int>(Center.y + Radius * sin(Angle));
+			vec2 Pos = vec2(PosX, PosY);
+			GameServer()->CreateExplosion(Pos, pPlayer->GetCid(), WEAPON_GAME, true, 0);
+			GameServer()->CreateSound(Pos, SOUND_GRENADE_EXPLODE);
+		}
+	}
+
 	pPlayer->m_BombState = CPlayer::EBombState::ACTIVE;
 
 	// Collateral damage
@@ -367,7 +392,7 @@ void CGameControllerBomb::ExplodeBomb(CPlayer *pPlayer)
 		if(pPlayer->GetCid() == pTempPlayer->GetCid())
 			continue;
 
-		if(distance(pTempPlayer->m_ViewPos, pPlayer->m_ViewPos) <= 96)
+		if(distance(pTempPlayer->m_ViewPos, pPlayer->m_ViewPos) <= BombRadius)
 		{
 			pPlayer->KillCharacter();
 			EliminatePlayer(pTempPlayer, true);
