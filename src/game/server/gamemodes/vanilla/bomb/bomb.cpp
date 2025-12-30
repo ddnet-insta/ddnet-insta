@@ -113,6 +113,13 @@ void CGameControllerBomb::OnReset()
 	m_RoundActive = false;
 }
 
+int CGameControllerBomb::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
+{
+	ExplodeBomb(pVictim->GetPlayer());
+
+	return CGameControllerBasePvp::OnCharacterDeath(pVictim, pKiller, Weapon);
+}
+
 bool CGameControllerBomb::DoWincheckRound()
 {
 	if(!m_RoundActive || m_Warmup > 0)
@@ -177,6 +184,9 @@ void CGameControllerBomb::OnCharacterSpawn(class CCharacter *pChr)
 
 void CGameControllerBomb::OnAppliedDamage(int &Dmg, int &From, int &Weapon, CCharacter *pCharacter)
 {
+	if(!pCharacter)
+		return;
+
 	CGameControllerBasePvp::OnAppliedDamage(Dmg, From, Weapon, pCharacter);
 
 	CPlayer *pPlayer = pCharacter->GetPlayer();
@@ -220,7 +230,10 @@ void CGameControllerBomb::OnAppliedDamage(int &Dmg, int &From, int &Weapon, CCha
 
 		// Increase stats if they killed the player
 		if(pPlayer->m_ToBombTick <= 0)
+		{
 			pKiller->AddKill();
+			ExplodeBomb(pPlayer, pKiller);
+		}
 	}
 }
 
@@ -341,45 +354,52 @@ void CGameControllerBomb::EliminatePlayer(CPlayer *pPlayer, bool Collateral)
 	str_format(aBuf, sizeof(aBuf), "'%s' eliminated%s!", Server()->ClientName(pPlayer->GetCid()), Collateral ? " by collateral damage" : "");
 	GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 
-	pPlayer->m_IsBomb = false;
-	pPlayer->m_BombState = CPlayer::EBombState::ACTIVE;
+	if(pPlayer->m_IsBomb)
+	{
+		pPlayer->m_IsBomb = false;
+		pPlayer->m_BombState = CPlayer::EBombState::ACTIVE;
+	}
 }
 
-void CGameControllerBomb::ExplodeBomb(CPlayer *pPlayer)
+void CGameControllerBomb::ExplodeBomb(CPlayer *pPlayer, CPlayer *pKiller)
 {
-	GameServer()->CreateExplosion(pPlayer->m_ViewPos, pPlayer->GetCid(), WEAPON_GAME, true, 0);
-	GameServer()->CreateSound(pPlayer->m_ViewPos, SOUND_GRENADE_EXPLODE);
-	pPlayer->m_BombState = CPlayer::EBombState::ACTIVE;
+	if(!pPlayer->m_IsBomb)
+		return;
 
 	// Collateral damage
-	for(auto *pTempPlayer : GameServer()->m_apPlayers)
+	bool Collateral = false;
+	if(!pKiller && Config()->m_SvBombtagCollateralDamage)
 	{
-		if(!Config()->m_SvBombtagCollateralDamage)
-			break;
-
-		if(!pTempPlayer)
-			continue;
-
-		CCharacter *pChr = pTempPlayer->GetCharacter();
-		if(!pChr)
-			continue;
-
-		if(pPlayer->GetCid() == pTempPlayer->GetCid())
-			continue;
-
-		if(distance(pTempPlayer->m_ViewPos, pPlayer->m_ViewPos) <= 96)
+		for(auto *pTempPlayer : GameServer()->m_apPlayers)
 		{
-			pPlayer->KillCharacter();
-			EliminatePlayer(pTempPlayer, true);
+			if(!pTempPlayer || pTempPlayer->GetTeam() == TEAM_SPECTATORS)
+				continue;
 
-			pPlayer->m_Stats.m_CollateralKills++;
+			if(!pTempPlayer->GetCharacter() || !pTempPlayer->GetCharacter()->IsAlive())
+				continue;
+
+			if(pPlayer->GetCid() == pTempPlayer->GetCid())
+				continue;
+
+			if(distance(pTempPlayer->m_ViewPos, pPlayer->m_ViewPos) <= 96)
+			{
+				Collateral = true;
+				pKiller = pTempPlayer;
+				pTempPlayer->m_Stats.m_CollateralKills++;
+				break;
+			}
 		}
 	}
 
 	// We remove the projectiles of a player who has already exploded.
 	GameServer()->m_World.RemoveEntitiesFromPlayer(pPlayer->GetCid());
-	pPlayer->KillCharacter();
-	EliminatePlayer(pPlayer);
+	EliminatePlayer(pPlayer, Collateral);
+	if(pPlayer->GetCharacter())
+		pPlayer->GetCharacter()->Die(pKiller ? pKiller->GetCid() : pPlayer->GetCid(), Config()->m_SvBombtagBombWeapon);
+
+	GameServer()->CreateExplosion(pPlayer->m_ViewPos, pPlayer->GetCid(), WEAPON_GAME, true, 0);
+	GameServer()->CreateSound(pPlayer->m_ViewPos, SOUND_GRENADE_EXPLODE);
+	pPlayer->m_BombState = CPlayer::EBombState::ACTIVE;
 }
 
 void CGameControllerBomb::UpdateTimer()
