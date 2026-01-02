@@ -113,6 +113,23 @@ void CGameControllerInstaCore::OnInit()
 {
 }
 
+void CGameControllerInstaCore::OnGameTypeChange(const char *pOldGameType, const char *pNewGameType)
+{
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) ;
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) ;
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) ;
+#undef TRACK_CONFIG_USER_SET
+#define TRACK_CONFIG_USER_SET(Name, ScriptName) \
+	GameServer()->m_UserSet##Name = false;
+
+#include <engine/shared/config_variables_insta.h>
+
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
+#undef TRACK_CONFIG_USER_SET
+}
+
 void CGameControllerInstaCore::OnPlayerConnect(CPlayer *pPlayer)
 {
 	IGameController::OnPlayerConnect(pPlayer);

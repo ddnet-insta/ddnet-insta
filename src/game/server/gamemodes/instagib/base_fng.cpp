@@ -1,5 +1,6 @@
 #include "base_fng.h"
 
+#include <base/log.h>
 #include <base/system.h>
 
 #include <engine/server.h>
@@ -19,6 +20,15 @@
 CGameControllerBaseFng::CGameControllerBaseFng(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)
 {
+	if(!GameServer()->m_UserSetSvFngHammer)
+	{
+		log_info("base_fng", "user did not set fng hammer so defaulting to on in fng");
+		g_Config.m_SvFngHammer = 1;
+	}
+	else
+	{
+		log_info("base_fng", "user set explicitly ._. so we cant override");
+	}
 }
 
 CGameControllerBaseFng::~CGameControllerBaseFng() = default;

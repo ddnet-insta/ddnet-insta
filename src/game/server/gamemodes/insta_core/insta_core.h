@@ -41,6 +41,7 @@ public:
 
 	void OnReset() override;
 	void OnInit() override;
+	void OnGameTypeChange(const char *pOldGameType, const char *pNewGameType) override;
 	void OnPlayerConnect(CPlayer *pPlayer) override;
 	void OnPlayerDisconnect(CPlayer *pPlayer, const char *pReason) override;
 
