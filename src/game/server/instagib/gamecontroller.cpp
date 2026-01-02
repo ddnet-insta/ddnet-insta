@@ -325,6 +325,26 @@ void IGameController::DoTeamBalance()
 	GameServer()->SendGameMsg(protocol7::GAMEMSG_TEAM_BALANCE, -1);
 }
 
+bool IGameController::CanChangeTeamOrSelfkill(class CPlayer *pPlayer, std::optional<int> Team, char *pErrorReason, int ErrorReasonSize)
+{
+	if(pErrorReason && ErrorReasonSize)
+		pErrorReason[0] = '\0';
+
+	bool AllowedSelfkill = true;
+	if(!Team.has_value())
+		AllowedSelfkill = CanSelfkill(pPlayer, pErrorReason, ErrorReasonSize);
+
+	// Check if changing teams has a error message
+	// if killing is silently blocked.
+	if(!AllowedSelfkill && pErrorReason && pErrorReason[0])
+		return false;
+
+	if(Team.has_value())
+		if(!CanChangeTeam(pPlayer, Team.value(), pErrorReason, ErrorReasonSize))
+			return false;
+	return AllowedSelfkill;
+}
+
 bool IGameController::OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim)
 {
 	if(UnfreezeOnLaserHit())

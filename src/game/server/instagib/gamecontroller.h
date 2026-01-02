@@ -1096,6 +1096,40 @@ public:
 	*/
 	virtual void RoundInitPlayer(class CPlayer *pPlayer) {}
 
+	// TODO: document
+	virtual bool CanChangeTeam(class CPlayer *pPlayer, int Team, char *pErrorReason, int ErrorReasonSize) { return true; }
+	virtual bool CanSelfkill(class CPlayer *pPlayer, char *pErrorReason, int ErrorReasonSize) { return true; }
+
+	/*
+		Function: CanChangeTeamOrSelfkill
+			This is called when the user initiates a team change or selfkill.
+			Not when the server initiated a team change or kill.
+			So things like team balance, joining the game or round end are not affected by this.
+			For those cases see `CanJoinTeam()`.
+
+			This is also called on tick when there is a pending team change.
+
+			This implements ddnet-insta and mode specific team change and kill limitations.
+			So core blocks like slot limit are handled else where.
+
+			This by default does not allow changing teams or selfkilling while a player is frozen.
+
+			If you need to only block selfkill or team changes and not both.
+			You can override `CanChangeTeam()` and `CanSelfkill()`.
+
+		Arguments:
+			pPlayer - the player that attempted a manual team change or suicide
+			Team - TEAM_RED, TEAM_BLUE or TEAM_SPECTATORS if it is a team change request or nullopt if its a selfkill request
+			pErrorReason - the buffer the error will be written to, only happens on return false
+			               but it can also be empty if it should silently block it
+			ErrorReasonSize - the size of the error buffer in bytes
+
+		Returns:
+			true - if the user action is allowed
+			false - if the user action should be blocked (might write reason to pErrorReason)
+	*/
+	virtual bool CanChangeTeamOrSelfkill(class CPlayer *pPlayer, std::optional<int> Team, char *pErrorReason, int ErrorReasonSize);
+
 	/*
 		Function: DoTeamBalance
 			Makes sure players are evenly distributed

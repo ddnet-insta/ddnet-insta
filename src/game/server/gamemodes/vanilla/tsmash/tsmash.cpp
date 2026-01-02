@@ -264,5 +264,20 @@ bool CGameControllerTsmash::OnSelfkill(int ClientId)
 	return true;
 }
 
+bool CGameControllerTsmash::CanSelfkill(CPlayer *pPlayer, char *pErrorReason, int ErrorReasonSize)
+{
+	// FIXME: currently team changes are allowed but selfkill is blocked
+	//        do we really want to mix that?
+
+
+	// FIXME: in general what about modes that allow selfkill but not team change
+
+
+	if(pErrorReason)
+		str_copy(pErrorReason, "Self kill is disabled", ErrorReasonSize);
+	return false;
+}
+
+
 REGISTER_GAMEMODE(tsmash, CGameControllerTsmash(pGameServer, false));
 REGISTER_GAMEMODE(ttsmash, CGameControllerTsmash(pGameServer, true));

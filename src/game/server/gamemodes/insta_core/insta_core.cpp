@@ -491,6 +491,22 @@ bool CGameControllerInstaCore::CanJoinTeam(int Team, int NotThisId, char *pError
 	return false;
 }
 
+bool CGameControllerInstaCore::CanChangeTeamOrSelfkill(CPlayer *pPlayer, std::optional<int> Team, char *pErrorReason, int ErrorReasonSize)
+{
+	const CCharacter *pChr = pPlayer->GetCharacter();
+	// TODO: think about block gametype here, do we allow team switches while frozen?
+	if(pChr && pChr->m_FreezeTime && !IsDDRaceGameType())
+	{
+		if(Team.has_value())
+			str_format(pErrorReason, ErrorReasonSize, "You can't join %s while being frozen", GetTeamName(Team.value()));
+		else
+			str_copy(pErrorReason, "You can't kill while being frozen", ErrorReasonSize);
+		return false;
+	}
+
+	return IGameController::CanChangeTeamOrSelfkill(pPlayer, Team, pErrorReason, ErrorReasonSize);
+}
+
 bool CGameControllerInstaCore::IsValidTeam(int Team)
 {
 	if(IsTeamPlay())

@@ -70,6 +70,7 @@ public:
 	int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup) override;
 	int GetAutoTeam(int NotThisId) override;
 	bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize) override;
+	bool CanChangeTeamOrSelfkill(CPlayer *pPlayer, std::optional<int> Team, char *pErrorReason, int ErrorReasonSize) override;
 	bool IsValidTeam(int Team) override;
 	const char *GetTeamName(int Team) override;
 	bool CanSpawn(int Team, vec2 *pOutPos, int DDTeam) override;
