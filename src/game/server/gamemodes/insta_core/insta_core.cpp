@@ -115,12 +115,24 @@ void CGameControllerInstaCore::OnInit()
 
 void CGameControllerInstaCore::OnGameTypeChange(const char *pOldGameType, const char *pNewGameType)
 {
+	log_info("insta", "gametype changed!!!!!!!!!!");
+	log_info("insta", "gametype changed!!!!!!!!!!");
+	log_info("insta", "gametype changed!!!!!!!!!!");
+	log_info("insta", "gametype changed!!!!!!!!!!");
+	log_info("insta", "gametype changed!!!!!!!!!!");
+	log_info("insta", "gametype changed!!!!!!!!!! from %s to %s", pOldGameType, pNewGameType);
+
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) ;
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) ;
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) ;
 #undef TRACK_CONFIG_USER_SET
 #define TRACK_CONFIG_USER_SET(Name, ScriptName) \
-	GameServer()->m_UserSet##Name = false;
+	GameServer()->m_UserSet##Name = false; \
+	if(GameServer()->m_ModeSet##Name) \
+	{ \
+		log_info("core", "the mode set a custom default for %s restoring global default ..", #Name); \
+		g_Config.m_##Name = DefaultConfig::Name; \
+	}
 
 #include <engine/shared/config_variables_insta.h>
 
@@ -717,11 +729,41 @@ void CGameControllerInstaCore::OnClientDataRestore(CPlayer *pPlayer, const CGame
 void CGameControllerInstaCore::OnDataPersist(CGameContext::CPersistentData *pData)
 {
 	str_copy(pData->m_Insta.m_aGameType, GameServer()->m_aGameType);
+
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) ;
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) ;
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) ;
+#undef TRACK_CONFIG_USER_SET
+#define TRACK_CONFIG_USER_SET(Name, ScriptName) \
+	pData->m_Insta.m_UserSet##Name = GameServer()->m_UserSet##Name; \
+	pData->m_Insta.m_ModeSet##Name = GameServer()->m_ModeSet##Name;
+
+#include <engine/shared/config_variables_insta.h>
+
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
+#undef TRACK_CONFIG_USER_SET
 }
 
 void CGameControllerInstaCore::OnDataRestore(const CGameContext::CPersistentData *pData)
 {
 	str_copy(GameServer()->m_aGameType, pData->m_Insta.m_aGameType);
+
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) ;
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) ;
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) ;
+#undef TRACK_CONFIG_USER_SET
+#define TRACK_CONFIG_USER_SET(Name, ScriptName) \
+	GameServer()->m_UserSet##Name = pData->m_Insta.m_UserSet##Name; \
+	GameServer()->m_ModeSet##Name = pData->m_Insta.m_ModeSet##Name;
+
+#include <engine/shared/config_variables_insta.h>
+
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
+#undef TRACK_CONFIG_USER_SET
 }
 
 // called on round init and on join

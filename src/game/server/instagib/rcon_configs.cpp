@@ -278,6 +278,7 @@ void CGameContext::ConchainGrenadeAmmoRegenSetting(IConsole::IResult *pResult, v
 		pfnCallback(pResult, pCallbackUserData); \
 		CGameContext *pSelf = (CGameContext *)pUserData; \
 		pSelf->m_UserSet##Name = true; \
+		pSelf->m_ModeSet##Name = false; \
 	}
 
 #include <engine/shared/config_variables_insta.h>

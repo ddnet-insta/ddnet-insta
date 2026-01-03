@@ -98,6 +98,7 @@ public:
 #undef TRACK_CONFIG_USER_SET
 #define TRACK_CONFIG_USER_SET(Name, ScriptName) \
 	bool m_UserSet##Name = false; \
+	bool m_ModeSet##Name = false; \
 	static void ConchainTrackSet##Name(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 #include <engine/shared/config_variables_insta.h>

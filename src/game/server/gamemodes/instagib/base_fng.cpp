@@ -20,8 +20,15 @@
 CGameControllerBaseFng::CGameControllerBaseFng(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)
 {
+}
+
+CGameControllerBaseFng::~CGameControllerBaseFng() = default;
+
+void CGameControllerBaseFng::OnGameTypeChange(const char *pOldGameType, const char *pNewGameType)
+{
 	if(!GameServer()->m_UserSetSvFngHammer)
 	{
+		GameServer()->m_ModeSetSvFngHammer = true;
 		log_info("base_fng", "user did not set fng hammer so defaulting to on in fng");
 		g_Config.m_SvFngHammer = 1;
 	}
@@ -30,8 +37,6 @@ CGameControllerBaseFng::CGameControllerBaseFng(class CGameContext *pGameServer) 
 		log_info("base_fng", "user set explicitly ._. so we cant override");
 	}
 }
-
-CGameControllerBaseFng::~CGameControllerBaseFng() = default;
 
 int CGameControllerBaseFng::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
 {

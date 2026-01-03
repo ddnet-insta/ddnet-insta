@@ -11,6 +11,7 @@ public:
 	CGameControllerBaseFng(class CGameContext *pGameServer);
 	~CGameControllerBaseFng() override;
 
+	void OnGameTypeChange(const char *pOldGameType, const char *pNewGameType) override;
 	void Tick() override;
 	void Snap(int SnappingClient) override;
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;
