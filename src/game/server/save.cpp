@@ -131,7 +131,8 @@ void CSaveTee::Save(CCharacter *pChr, bool AddPenalty)
 	m_InputFire = pChr->m_SavedInput.m_Fire;
 	m_InputHook = pChr->m_SavedInput.m_Hook;
 
-	m_ReloadTimer = pChr->m_ReloadTimer;
+	// ddnet-insta uses ReloadTimer() instead of m_ReloadTimer
+	m_ReloadTimer = pChr->ReloadTimer();
 
 	FormatUuid(pChr->GameServer()->GameUuid(), m_aGameUuid, sizeof(m_aGameUuid));
 }
@@ -245,7 +246,8 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 	pChr->m_SavedInput.m_Fire = m_InputFire;
 	pChr->m_SavedInput.m_Hook = m_InputHook;
 
-	pChr->m_ReloadTimer = m_ReloadTimer;
+	// ddnet-insta uses SetReloadTimer instead of m_ReloadTimer =
+	pChr->SetReloadTimer(m_ReloadTimer);
 
 	pChr->SetSolo(m_IsSolo);
 

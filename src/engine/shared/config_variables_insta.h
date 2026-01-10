@@ -50,6 +50,7 @@ MACRO_CONFIG_INT(SvTextPoints, sv_text_points, 1, 0, 2, CFGFLAG_SERVER, "display
 MACRO_CONFIG_INT(SvTextPointsDelay, sv_text_points_delay, 3, 1, 60, CFGFLAG_SERVER, "Timer until text disappears in seconds (only fng for now)")
 MACRO_CONFIG_INT(SvAnnounceSteals, sv_announce_steals, 1, 0, 1, CFGFLAG_SERVER, "show in chat when someone stole a kill (only fng for now)")
 
+MACRO_CONFIG_INT(SvPerWeaponReload, sv_per_weapon_reload, 0, 0, 1, CFGFLAG_SERVER, "Reload every weapon individually (no delay for switching weapons)")
 MACRO_CONFIG_INT(SvGrenadeAmmoRegen, sv_grenade_ammo_regen, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Activate or deactivate grenade ammo regeneration in general")
 MACRO_CONFIG_INT(SvGrenadeAmmoRegenTime, sv_grenade_ammo_regen_time, 128, 1, 9000, CFGFLAG_SAVE | CFGFLAG_SERVER, "Grenade ammo regeneration time in milliseconds")
 MACRO_CONFIG_INT(SvGrenadeAmmoRegenNum, sv_grenade_ammo_regen_num, 6, 1, 10, CFGFLAG_SAVE | CFGFLAG_SERVER, "Maximum number of grenades if ammo regeneration on")

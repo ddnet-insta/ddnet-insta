@@ -102,6 +102,23 @@ float CCharacter::DistToTouchingTile(int Tile)
 	return ClosestDistance;
 }
 
+int CCharacter::GetActiveWeaponForReload() const
+{
+	if(g_Config.m_SvPerWeaponReload)
+		return m_Core.m_ActiveWeapon;
+	return 0;
+}
+
+void CCharacter::SetReloadTimer(int Delay)
+{
+	m_aReloadTimers[GetActiveWeaponForReload()] = Delay;
+}
+
+int CCharacter::ReloadTimer() const
+{
+	return m_aReloadTimers[GetActiveWeaponForReload()];
+}
+
 void CCharacter::AmmoRegen()
 {
 	// ammo regen on Grenade
@@ -121,7 +138,7 @@ void CCharacter::AmmoRegen()
 	if(AmmoRegenTime && m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo >= 0)
 	{
 		// If equipped and not active, regen ammo?
-		if(m_ReloadTimer <= 0)
+		if(ReloadTimer() <= 0)
 		{
 			if(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart < 0)
 				m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = Server()->Tick();

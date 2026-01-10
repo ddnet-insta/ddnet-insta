@@ -49,6 +49,12 @@ public:
 	int GetAimDir() const { return m_Input.m_TargetX < 0 ? -1 : 1; }
 	void GiveWeapon(int Weapon, bool Remove, int Ammo);
 
+	// for sv_per_weapon_reload when every weapon has their own timer
+	// and weapon switching is faster
+	int GetActiveWeaponForReload() const;
+	void SetReloadTimer(int Delay);
+	int ReloadTimer() const;
+
 	void AmmoRegen();
 	/*
 		Function: IsTouchingTile
