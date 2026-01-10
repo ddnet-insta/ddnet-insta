@@ -193,6 +193,13 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) cons
 		str_append(aMotd, "! WARNING: kills only count after starting the race\n");
 	}
 
+	// in pure vanilla and ddrace with map record times
+	// the faster reload is an intense change
+	if(m_pController->IsVanillaGameType() || m_pController->IsDDRaceGameType())
+	{
+		if(g_Config.m_SvPerWeaponReload)
+			str_append(aMotd, "! WARNING: fast weapon switch: on\n");
+	}
 	if(g_Config.m_SvSwapFlags)
 		str_append(aMotd, "! WARNING: flag spawns are swapped\n");
 	if(g_Config.m_SvAllowZoom && !m_pController->IsDDRaceGameType())

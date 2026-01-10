@@ -132,7 +132,7 @@ private:
 	int m_LastWeapon;
 	int m_QueuedWeapon;
 
-	int m_ReloadTimer;
+	int m_aReloadTimers[NUM_WEAPONS];
 	int m_AttackTick;
 
 	int m_MoveRestrictions;
