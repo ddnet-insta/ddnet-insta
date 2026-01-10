@@ -3,6 +3,8 @@
 #ifndef GAME_SERVER_ENTITIES_CHARACTER_H
 #define GAME_SERVER_ENTITIES_CHARACTER_H
 
+#include <generated/protocol.h> // ddnet-insta NUM_WEAPONS
+
 #include <game/race_state.h>
 #include <game/server/entity.h>
 #include <game/server/save.h>
@@ -129,7 +131,7 @@ private:
 	int m_LastWeapon;
 	int m_QueuedWeapon;
 
-	int m_ReloadTimer;
+	int m_aReloadTimers[NUM_WEAPONS];
 	int m_AttackTick;
 
 	int m_MoveRestrictions;

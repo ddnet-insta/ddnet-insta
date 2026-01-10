@@ -1090,7 +1090,7 @@ void CGameControllerBasePvp::OnAppliedDamage(int &Dmg, int &From, int &Weapon, C
 		pKillerChar->GetTuning(pKillerChar->m_TuneZone)->Get(ActiveWeaponTuneIndex, &FireDelay);
 		if(!g_Config.m_SvFastHitFullAuto)
 			pKillerChar->m_BlockFullAutoUntilReleaseOrTick = Server()->Tick() + (FireDelay * Server()->TickSpeed() / 1000);
-		pKillerChar->m_ReloadTimer = g_Config.m_SvReloadTimeOnHit;
+		pKillerChar->SetReloadTimer(g_Config.m_SvReloadTimeOnHit);
 	}
 
 	if(Config()->m_SvFreezeHammer && Weapon == WEAPON_HAMMER)
@@ -1629,11 +1629,11 @@ bool CGameControllerBasePvp::OnFireWeapon(CCharacter &Character, int &Weapon, ve
 
 	Character.m_AttackTick = Server()->Tick();
 
-	if(!Character.m_ReloadTimer)
+	if(!Character.ReloadTimer())
 	{
 		float FireDelay;
 		Character.GetTuning(Character.m_TuneZone)->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + Character.m_Core.m_ActiveWeapon, &FireDelay);
-		Character.m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+		Character.SetReloadTimer(FireDelay * Server()->TickSpeed() / 1000);
 	}
 
 	return true;

@@ -329,6 +329,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_text_points` display text in the world on scoring (only fng for now. 1: laser, 2: projectile)
 + `sv_text_points_delay` Timer until text disappears in seconds (only fng for now)
 + `sv_announce_steals` show in chat when someone stole a kill (only fng for now)
++ `sv_per_weapon_reload` Reload every weapon individually (no delay for switching weapons)
 + `sv_grenade_ammo_regen` Activate or deactivate grenade ammo regeneration in general
 + `sv_grenade_ammo_regen_time` Grenade ammo regeneration time in milliseconds
 + `sv_grenade_ammo_regen_num` Maximum number of grenades if ammo regeneration on
