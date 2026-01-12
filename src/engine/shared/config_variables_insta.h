@@ -155,3 +155,4 @@ MACRO_CONFIG_INT(SvBombtagCollateralDamage, sv_bombtag_collateral_damage, 0, 0, 
 MACRO_CONFIG_INT(SvMysteryRoundsChance, sv_mystery_rounds_chance, 0, 0, 100, CFGFLAG_SERVER, "The percentage of a mystery round happening! A random line from sv_mysteryrounds_filename will be executed.")
 MACRO_CONFIG_STR(SvMysteryRoundsFileName, sv_mystery_rounds_filename, IO_MAX_PATH_LENGTH, "", CFGFLAG_SERVER, "File which contains mystery round commands, one round per line.")
 MACRO_CONFIG_STR(SvMysteryRoundsResetFileName, sv_mystery_rounds_reset_filename, IO_MAX_PATH_LENGTH, "", CFGFLAG_SERVER, "File which contains the commands to execute after a mystery round.")
+MACRO_CONFIG_INT(SvShuffleOnRoundStart, sv_shuffle_on_round_start, 0, 0, 1, CFGFLAG_SERVER, "Should teams of players be re-assigned each round")

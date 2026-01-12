@@ -139,6 +139,9 @@ void CGameControllerBasePvp::OnRoundStart()
 
 		RoundInitPlayer(pPlayer);
 	}
+
+	if(Config()->m_SvShuffleOnRoundStart)
+		GameServer()->ShuffleTeams();
 }
 
 void CGameControllerBasePvp::OnRoundEnd()

@@ -625,6 +625,39 @@ bool CGameContext::IsChatCmdAllowed(int ClientId) const
 	return true;
 }
 
+void CGameContext::ShuffleTeams() const
+{
+	if(!m_pController || !m_pController->IsTeamPlay())
+		return;
+
+	int Rnd = 0;
+	int PlayerTeam = 0;
+	int aPlayer[MAX_CLIENTS];
+
+	for(const CPlayer *pPlayer : m_apPlayers)
+	{
+		if(pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS)
+			aPlayer[PlayerTeam++] = pPlayer->GetCid();
+	}
+
+	// pSelf->SendGameMsg(GAMEMSG_TEAM_SHUFFLE, -1);
+
+	// creating random permutation
+	for(int i = PlayerTeam; i > 1; i--)
+	{
+		Rnd = rand() % i;
+		int Tmp = aPlayer[Rnd];
+		aPlayer[Rnd] = aPlayer[i - 1];
+		aPlayer[i - 1] = Tmp;
+	}
+
+	// uneven Number of Players?
+	Rnd = PlayerTeam % 2 ? rand() % 2 : 0;
+
+	for(int i = 0; i < PlayerTeam; i++)
+		m_pController->DoTeamChange(m_apPlayers[aPlayer[i]], i < (PlayerTeam + Rnd) / 2 ? TEAM_RED : TEAM_BLUE, false);
+}
+
 void CGameContext::UpdateVoteCheckboxes() const
 {
 	if(!g_Config.m_SvVoteCheckboxes)
