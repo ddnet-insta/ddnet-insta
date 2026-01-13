@@ -115,6 +115,7 @@ void CGameControllerBomb::OnReset()
 
 int CGameControllerBomb::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
+	pVictim->GetPlayer()->m_BombState = CPlayer::EBombState::ACTIVE;
 	ExplodeBomb(pVictim->GetPlayer());
 
 	return CGameControllerBasePvp::OnCharacterDeath(pVictim, pKiller, Weapon);
@@ -131,7 +132,7 @@ bool CGameControllerBomb::DoWincheckRound()
 		return true;
 	}
 
-	if(AmountOfBombs() == 0)
+	if(AmountOfBombs() == 0 || AmountOfPlayers(CPlayer::EBombState::ALIVE) <= 1)
 	{
 		if(AmountOfPlayers(CPlayer::EBombState::ALIVE) >= 2)
 		{
