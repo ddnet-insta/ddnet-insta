@@ -53,12 +53,12 @@ void CGameControllerBomb::Tick()
 
 		// In the source code it was done via GetAutoTeam, but it crashes...
 		if(pPlayer->m_BombState == CPlayer::EBombState::NONE)
-			pPlayer->m_BombState = pPlayer->GetTeam() == TEAM_SPECTATORS ? CPlayer::EBombState::SPECTATING : CPlayer::EBombState::ACTIVE;
+			pPlayer->m_BombState = pPlayer->GetTeam() == TEAM_SPECTATORS ? CPlayer::EBombState::SPECTATING : CPlayer::EBombState::DEAD;
 
 		if(!m_RoundActive)
 			continue;
 
-		if(pPlayer->m_BombState == CPlayer::EBombState::ACTIVE && !m_Warmup && pPlayer->GetTeam() != TEAM_SPECTATORS)
+		if(pPlayer->m_BombState == CPlayer::EBombState::DEAD && !m_Warmup && pPlayer->GetTeam() != TEAM_SPECTATORS)
 			pPlayer->SetTeam(TEAM_SPECTATORS, true);
 	}
 
@@ -72,7 +72,7 @@ void CGameControllerBomb::Tick()
 	}
 	else
 	{
-		if(AmountOfPlayers(CPlayer::EBombState::ACTIVE) == 1)
+		if(AmountOfPlayers(CPlayer::EBombState::DEAD) == 1)
 		{
 			switch(Server()->Tick() % (Server()->TickSpeed() * 3))
 			{
@@ -87,7 +87,7 @@ void CGameControllerBomb::Tick()
 				break;
 			}
 		}
-		if(AmountOfPlayers(CPlayer::EBombState::ACTIVE) + AmountOfPlayers(CPlayer::EBombState::ALIVE) > 1 && !m_Warmup)
+		if(AmountOfPlayers(CPlayer::EBombState::DEAD) + AmountOfPlayers(CPlayer::EBombState::ALIVE) > 1 && !m_Warmup)
 		{
 			GameServer()->SendBroadcast("Game started", -1);
 			StartBombRound();
@@ -104,9 +104,9 @@ void CGameControllerBomb::OnReset()
 		if(!pPlayer)
 			continue;
 
-		if(pPlayer->m_BombState >= CPlayer::EBombState::ACTIVE)
+		if(pPlayer->m_BombState >= CPlayer::EBombState::DEAD)
 		{
-			pPlayer->m_BombState = CPlayer::EBombState::ACTIVE;
+			pPlayer->m_BombState = CPlayer::EBombState::DEAD;
 			pPlayer->m_IsBomb = false;
 		}
 	}
@@ -115,7 +115,7 @@ void CGameControllerBomb::OnReset()
 
 int CGameControllerBomb::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
-	pVictim->GetPlayer()->m_BombState = CPlayer::EBombState::ACTIVE;
+	pVictim->GetPlayer()->m_BombState = CPlayer::EBombState::DEAD;
 	ExplodeBomb(pVictim->GetPlayer());
 
 	return CGameControllerBasePvp::OnCharacterDeath(pVictim, pKiller, Weapon);
@@ -256,7 +256,7 @@ bool CGameControllerBomb::CanJoinTeam(int Team, int NotThisId, char *pErrorReaso
 	{
 		if(pErrorReason)
 			str_copy(pErrorReason, "", ErrorReasonSize);
-		pPlayer->m_BombState = CPlayer::EBombState::ACTIVE;
+		pPlayer->m_BombState = CPlayer::EBombState::DEAD;
 		return true;
 	}
 
@@ -271,7 +271,7 @@ bool CGameControllerBomb::CanJoinTeam(int Team, int NotThisId, char *pErrorReaso
 
 	if(pErrorReason)
 		str_copy(pErrorReason, "You will join the game when the round is over", ErrorReasonSize);
-	pPlayer->m_BombState = CPlayer::EBombState::ACTIVE;
+	pPlayer->m_BombState = CPlayer::EBombState::DEAD;
 	return false;
 }
 
@@ -358,7 +358,7 @@ void CGameControllerBomb::EliminatePlayer(CPlayer *pPlayer, bool Collateral)
 	if(pPlayer->m_IsBomb)
 	{
 		pPlayer->m_IsBomb = false;
-		pPlayer->m_BombState = CPlayer::EBombState::ACTIVE;
+		pPlayer->m_BombState = CPlayer::EBombState::DEAD;
 	}
 }
 
@@ -400,7 +400,7 @@ void CGameControllerBomb::ExplodeBomb(CPlayer *pPlayer, CPlayer *pKiller)
 
 	GameServer()->CreateExplosion(pPlayer->m_ViewPos, pPlayer->GetCid(), WEAPON_GAME, true, 0);
 	GameServer()->CreateSound(pPlayer->m_ViewPos, SOUND_GRENADE_EXPLODE);
-	pPlayer->m_BombState = CPlayer::EBombState::ACTIVE;
+	pPlayer->m_BombState = CPlayer::EBombState::DEAD;
 }
 
 void CGameControllerBomb::UpdateTimer()
@@ -429,7 +429,7 @@ void CGameControllerBomb::StartBombRound()
 		if(!pPlayer)
 			continue;
 
-		if(pPlayer->m_BombState != CPlayer::EBombState::ACTIVE)
+		if(pPlayer->m_BombState != CPlayer::EBombState::DEAD)
 			continue;
 
 		pPlayer->SetTeam(TEAM_FLOCK, true);

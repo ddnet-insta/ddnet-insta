@@ -349,7 +349,7 @@ public:
 	{
 		NONE,
 		SPECTATING,
-		ACTIVE,
+		DEAD,
 		ALIVE,
 	};
 
