@@ -59,7 +59,7 @@ void CGameControllerBomb::Tick()
 			continue;
 
 		if(pPlayer->m_BombState == CPlayer::EBombState::DEAD && !m_Warmup && pPlayer->GetTeam() != TEAM_SPECTATORS)
-			pPlayer->SetTeam(TEAM_SPECTATORS, true);
+			pPlayer->SetTeamRaw(TEAM_SPECTATORS);
 	}
 
 	if(m_RoundActive)
@@ -248,9 +248,12 @@ bool CGameControllerBomb::OnEntity(int Index, int x, int y, int Layer, int Flags
 
 bool CGameControllerBomb::CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize)
 {
+	if(!CGameControllerBasePvp::CanJoinTeam(Team, NotThisId, pErrorReason, ErrorReasonSize))
+		return false;
+
 	CPlayer *pPlayer = GameServer()->m_apPlayers[NotThisId];
 	if(!pPlayer)
-		return true;
+		return false;
 
 	if(!m_RoundActive && Team != TEAM_SPECTATORS)
 	{
@@ -432,7 +435,7 @@ void CGameControllerBomb::StartBombRound()
 		if(pPlayer->m_BombState != CPlayer::EBombState::DEAD)
 			continue;
 
-		pPlayer->SetTeam(TEAM_FLOCK, true);
+		pPlayer->SetTeamRaw(TEAM_FLOCK);
 		pPlayer->m_BombState = CPlayer::EBombState::ALIVE;
 		Players++;
 
