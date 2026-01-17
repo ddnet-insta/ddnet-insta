@@ -49,6 +49,9 @@ void CGameControllerBaseFng::Tick()
 		if(!pChr || !pChr->IsAlive())
 			continue;
 
+		if(Config()->m_SvKillIndicator && pChr->GetPlayer()->m_OriginalFreezerId != -1 && pChr->m_FreezeTime > 0 && pChr->m_FreezeTime % Server()->TickSpeed() == 0)
+			GameServer()->CreateDamageInd(pChr->GetPos(), 0, 1, CClientMask().set(pChr->GetPlayer()->m_OriginalFreezerId));
+
 		int aSpikeTiles[] = {
 			TILE_FNG_SPIKE_RED,
 			TILE_FNG_SPIKE_BLUE,

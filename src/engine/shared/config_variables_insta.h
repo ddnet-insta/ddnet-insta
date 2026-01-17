@@ -156,3 +156,4 @@ MACRO_CONFIG_INT(SvMysteryRoundsChance, sv_mystery_rounds_chance, 0, 0, 100, CFG
 MACRO_CONFIG_STR(SvMysteryRoundsFileName, sv_mystery_rounds_filename, IO_MAX_PATH_LENGTH, "", CFGFLAG_SERVER, "File which contains mystery round commands, one round per line.")
 MACRO_CONFIG_STR(SvMysteryRoundsResetFileName, sv_mystery_rounds_reset_filename, IO_MAX_PATH_LENGTH, "", CFGFLAG_SERVER, "File which contains the commands to execute after a mystery round.")
 MACRO_CONFIG_INT(SvShuffleOnRoundStart, sv_shuffle_on_round_start, 0, 0, 1, CFGFLAG_SERVER, "Should teams of players be re-assigned each round")
+MACRO_CONFIG_INT(SvKillIndicator, sv_kill_indicator, 0, 0, 1, CFGFLAG_SERVER, "Shows the killer that he froze the player(only fng for now)")
