@@ -8,6 +8,13 @@
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) ;
 #endif
 
+// This is used by ddnet-insta only to track a few configs
+// that have different default values in specific game modes.
+// So we track if the user manually set them or if we can change the default.
+#ifndef TRACK_CONFIG_USER_SET
+#define TRACK_CONFIG_USER_SET(Name, ScriptName)
+#endif
+
 MACRO_CONFIG_INT(SvSpectatorVotes, sv_spectator_votes, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Allow spectators to vote")
 MACRO_CONFIG_INT(SvSpectatorVotesSixup, sv_spectator_votes_sixup, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Allow 0.7 players to vote as spec if sv_spectator_vote is 1 (hacky dead spec)")
 MACRO_CONFIG_INT(SvBangCommands, sv_bang_commands, 2, -1, 2, CFGFLAG_SAVE | CFGFLAG_SERVER, "chat cmds like !1vs1 -1=fully gone 0=off with error 1=read only no votes 2=all commands")
@@ -45,6 +52,7 @@ MACRO_CONFIG_INT(SvHitFreezeDelay, sv_hit_freeze_delay, 10, 1, 30, CFGFLAG_SERVE
 MACRO_CONFIG_INT(SvMeltHammerScaleX, sv_melt_hammer_scale_x, 50, 1, 1000, CFGFLAG_SERVER, "linearly scale up hammer x power, percentage, for hammering frozen teammates (needs sv_fng_hammer)")
 MACRO_CONFIG_INT(SvMeltHammerScaleY, sv_melt_hammer_scale_y, 50, 1, 1000, CFGFLAG_SERVER, "linearly scale up hammer y power, percentage, for hammering frozen teammates (needs sv_fng_hammer)")
 MACRO_CONFIG_INT(SvFngHammer, sv_fng_hammer, 0, 0, 1, CFGFLAG_SERVER, "use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer")
+TRACK_CONFIG_USER_SET(SvFngHammer, sv_fng_hammer)
 MACRO_CONFIG_INT(SvSpikeSound, sv_spike_sound, 2, 0, 2, CFGFLAG_SERVER, "Play flag capture sound when sacrificing an enemy into the spikes !0.6 only! (0=off/1=only the killer and the victim/2=everyone near the victim)")
 MACRO_CONFIG_INT(SvTextPoints, sv_text_points, 1, 0, 2, CFGFLAG_SERVER, "display text in the world on scoring (only fng for now. 1: laser, 2: projectile)")
 MACRO_CONFIG_INT(SvTextPointsDelay, sv_text_points_delay, 3, 1, 60, CFGFLAG_SERVER, "Timer until text disappears in seconds (only fng for now)")

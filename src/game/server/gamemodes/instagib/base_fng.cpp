@@ -1,5 +1,6 @@
 #include "base_fng.h"
 
+#include <base/log.h>
 #include <base/system.h>
 
 #include <engine/server.h>
@@ -22,6 +23,20 @@ CGameControllerBaseFng::CGameControllerBaseFng(class CGameContext *pGameServer) 
 }
 
 CGameControllerBaseFng::~CGameControllerBaseFng() = default;
+
+void CGameControllerBaseFng::OnGameTypeChange(const char *pOldGameType, const char *pNewGameType)
+{
+	if(!GameServer()->m_UserSetSvFngHammer)
+	{
+		GameServer()->m_ModeSetSvFngHammer = true;
+		log_info("base_fng", "user did not set fng hammer so defaulting to on in fng");
+		g_Config.m_SvFngHammer = 1;
+	}
+	else
+	{
+		log_info("base_fng", "user set explicitly ._. so we cant override");
+	}
+}
 
 int CGameControllerBaseFng::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
 {

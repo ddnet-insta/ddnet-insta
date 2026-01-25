@@ -93,6 +93,22 @@ public:
 	static void ConchainFngHammerScale(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainGrenadeAmmoRegenSetting(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) ;
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) ;
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) ;
+#undef TRACK_CONFIG_USER_SET
+#define TRACK_CONFIG_USER_SET(Name, ScriptName) \
+	bool m_UserSet##Name = false; \
+	bool m_ModeSet##Name = false; \
+	static void ConchainTrackSet##Name(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
+#include <engine/shared/config_variables_insta.h>
+
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
+#undef TRACK_CONFIG_USER_SET
+
 	// rcon_commands.cpp
 	static void ConHammer(IConsole::IResult *pResult, void *pUserData);
 	static void ConGun(IConsole::IResult *pResult, void *pUserData);

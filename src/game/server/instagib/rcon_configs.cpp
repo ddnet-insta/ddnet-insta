@@ -36,6 +36,21 @@ void CGameContext::RegisterInstagibCommands()
 	Console()->Chain("sv_grenade_ammo_regen_on_kill", ConchainGrenadeAmmoRegenSetting, this);
 	Console()->Chain("sv_grenade_ammo_regen_reset_on_fire", ConchainGrenadeAmmoRegenSetting, this);
 
+	// generate chains for configs that have different defaults in specific modes
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) ;
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) ;
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) ;
+#undef TRACK_CONFIG_USER_SET
+#define TRACK_CONFIG_USER_SET(Name, ScriptName) \
+	Console()->Chain(#ScriptName, ConchainTrackSet##Name, this);
+
+#include <engine/shared/config_variables_insta.h>
+
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
+#undef TRACK_CONFIG_USER_SET
+
 	// generated undocumented chat commands
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;
 #define MACRO_RANK_COLUMN(name, sql_name, display_name, order_by) \
@@ -252,3 +267,23 @@ void CGameContext::ConchainGrenadeAmmoRegenSetting(IConsole::IResult *pResult, v
 			log_warn("server", "WARNING: that config has no effect as long as sv_grenade_ammo_regen is off");
 	}
 }
+
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) ;
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) ;
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) ;
+#undef TRACK_CONFIG_USER_SET
+#define TRACK_CONFIG_USER_SET(Name, ScriptName) \
+	void CGameContext::ConchainTrackSet##Name(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData) \
+	{ \
+		pfnCallback(pResult, pCallbackUserData); \
+		CGameContext *pSelf = (CGameContext *)pUserData; \
+		pSelf->m_UserSet##Name = true; \
+		pSelf->m_ModeSet##Name = false; \
+	}
+
+#include <engine/shared/config_variables_insta.h>
+
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
+#undef TRACK_CONFIG_USER_SET
