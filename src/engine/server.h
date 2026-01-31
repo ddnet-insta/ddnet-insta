@@ -33,7 +33,7 @@ enum
 class IServer : public IInterface
 {
 #define IN_CLASS_ENGINE_SERVER
-#include <game/server/instagib/includes/engine/server.h>
+#include <insta/includes/engine/server.h>
 	MACRO_INTERFACE("server")
 protected:
 	int m_CurrentGameTick;
@@ -303,7 +303,7 @@ public:
 class IGameServer : public IInterface
 {
 #define IN_CLASS_ENGINE_GAMESERVER
-#include <game/server/instagib/includes/engine/gameserver.h>
+#include <insta/includes/engine/gameserver.h>
 	MACRO_INTERFACE("gameserver")
 protected:
 public:

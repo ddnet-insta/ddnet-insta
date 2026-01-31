@@ -11,11 +11,12 @@
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamemodes/ddnet.h>
-#include <game/server/instagib/version.h> // ddnet-insta
 #include <game/server/teams.h>
 #include <game/team_state.h>
 #include <game/teamscore.h>
 #include <game/version.h>
+
+#include <insta/server/version.h> // ddnet-insta
 
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 {

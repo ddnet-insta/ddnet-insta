@@ -1,8 +1,8 @@
 #!/bin/bash
 
-INCLUDES_CONFIG="src/game/server/instagib/includes/config_variables.h"
-INCLUDES_RCON_COMMANDS="src/game/server/instagib/includes/rcon_commands.h"
-INCLUDES_CHAT_COMMANDS="src/game/server/instagib/includes/chat_commands.h"
+INCLUDES_CONFIG="src/insta/includes/engine/shared/config_variables.h"
+INCLUDES_RCON_COMMANDS="src/insta/includes/rcon_commands.h"
+INCLUDES_CHAT_COMMANDS="src/insta/includes/chat_commands.h"
 
 README_FILE="README.md"
 TEMP_DIR="scripts"

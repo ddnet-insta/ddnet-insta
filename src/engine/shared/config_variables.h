@@ -786,4 +786,4 @@ MACRO_CONFIG_INT(ClVideoRecorderFPS, cl_video_recorder_fps, 60, 1, 1000, CFGFLAG
  */
 
 // ddnet-insta
-#include <game/server/instagib/includes/config_variables.h>
+#include <insta/includes/engine/shared/config_variables.h>

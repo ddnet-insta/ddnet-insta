@@ -62,7 +62,7 @@ public:
 class CServer : public IServer
 {
 #define IN_CLASS_ENGINE_SERVER_SERVER
-#include <game/server/instagib/includes/engine/server/server.h>
+#include <insta/includes/engine/server/server.h>
 	friend class CServerLogger;
 
 	class IGameServer *m_pGameServer;

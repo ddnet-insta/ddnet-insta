@@ -41,7 +41,8 @@
 
 // ddnet-insta start
 #include <game/server/gamecontroller.h>
-#include <game/server/instagib/structs.h>
+
+#include <insta/server/structs.h>
 
 GamemodesType &Gamemodes()
 {

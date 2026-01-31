@@ -3,8 +3,8 @@
 errors=0
 check_all_file() {
 	while read -r header; do
-		if ! grep -q "$header" src/game/server/instagib/sql_columns_all.h; then
-			echo "Error: header $header is missing in src/game/server/instagib/sql_columns_all.h"
+		if ! grep -q "$header" src/insta/server/sql_columns_all.h; then
+			echo "Error: header $header is missing in src/insta/server/sql_columns_all.h"
 			errors=$((errors + 1))
 		fi
 	done < <(find . -name "sql_columns.h" | cut -c 7-)
@@ -41,7 +41,7 @@ check_include_path() {
 			echo "Invalid file: $arg_file"
 			exit 1
 		}
-		[ "$fs_file" = "src/game/server/instagib/column_template.h" ] && continue
+		[ "$fs_file" = "src/insta/server/column_template.h" ] && continue
 
 		from_dir="$(dirname "$fs_file")"
 		to_dir="$(dirname "$arg_file")"

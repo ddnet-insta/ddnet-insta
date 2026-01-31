@@ -1,0 +1,7 @@
+#ifndef INSTA_SERVER_VERSION_H
+#define INSTA_SERVER_VERSION_H
+
+#define DDNET_INSTA_VERSIONSTR "v1.7+dev"
+#define DDNET_INSTA_BUILD_DATE __DATE__ ", " __TIME__
+
+#endif

@@ -5,6 +5,6 @@
 [submodule "scripts/ddnet-insta-cli"]
 	path = scripts/ddnet-insta-cli
 	url = https://github.com/ddnet-insta/cli.git
-[submodule "src/game/server/instagib/ddnet_db_utils"]
-	path = src/game/server/instagib/ddnet_db_utils
+[submodule "src/insta/server/ddnet_db_utils"]
+	path = src/insta/server/ddnet_db_utils
 	url = https://github.com/ddnet-insta/ddnet_db_utils.git

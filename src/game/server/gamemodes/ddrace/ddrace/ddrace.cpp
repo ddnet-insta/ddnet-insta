@@ -6,8 +6,9 @@
 
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
-#include <game/server/gamemodes/insta_core/insta_core.h>
 #include <game/server/player.h>
+
+#include <insta/server/gamemodes/insta_core/insta_core.h>
 
 CGameControllerDDRace::CGameControllerDDRace(CGameContext *pGameServer) :
 	CGameControllerInstaCore(pGameServer)

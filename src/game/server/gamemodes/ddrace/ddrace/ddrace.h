@@ -1,7 +1,7 @@
 #ifndef GAME_SERVER_GAMEMODES_DDRACE_DDRACE_DDRACE_H
 #define GAME_SERVER_GAMEMODES_DDRACE_DDRACE_DDRACE_H
 
-#include <game/server/gamemodes/insta_core/insta_core.h>
+#include <insta/server/gamemodes/insta_core/insta_core.h>
 
 class CPlayer;
 

@@ -8,17 +8,17 @@ SKIP_FILES=(
 	# TODO: not sure what to do here
 	#       i like the clean filename ddrace.h
 	#       needs some thinking
-	src/game/server/gamemodes/ddrace/ddrace.h
+	src/insta/server/gamemodes/ddrace/ddrace.h
 
 	# eh .. probably fine idk
-	src/game/server/gamemodes/instagib/gctf/gctf.h
-	src/game/server/gamemodes/instagib/gdm/gdm.h
-	src/game/server/gamemodes/instagib/gtdm/gtdm.h
-	src/game/server/gamemodes/instagib/ictf/ictf.h
-	src/game/server/gamemodes/instagib/idm/idm.h
-	src/game/server/gamemodes/instagib/itdm/itdm.h
-	src/game/server/gamemodes/vanilla/ctf/ctf.h
-	src/game/server/gamemodes/vanilla/dm/dm.h
+	src/insta/server/gamemodes/instagib/gctf/gctf.h
+	src/insta/server/gamemodes/instagib/gdm/gdm.h
+	src/insta/server/gamemodes/instagib/gtdm/gtdm.h
+	src/insta/server/gamemodes/instagib/ictf/ictf.h
+	src/insta/server/gamemodes/instagib/idm/idm.h
+	src/insta/server/gamemodes/instagib/itdm/itdm.h
+	src/insta/server/gamemodes/vanilla/ctf/ctf.h
+	src/insta/server/gamemodes/vanilla/dm/dm.h
 	src/game/server/gamemodes/ddnet.h
 )
 

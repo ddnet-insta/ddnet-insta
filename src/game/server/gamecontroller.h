@@ -14,10 +14,11 @@
 #include <generated/protocol7.h> // ddnet-insta
 
 #include <game/server/gamecontext.h> // ddnet-insta
-#include <game/server/instagib/enums.h> // ddnet-insta
-#include <game/server/instagib/sql_stats.h> // ddnet-insta
-#include <game/server/instagib/structs.h> // ddnet-insta
 #include <game/server/teams.h>
+
+#include <insta/server/enums.h> // ddnet-insta
+#include <insta/server/sql_stats.h> // ddnet-insta
+#include <insta/server/structs.h> // ddnet-insta
 
 struct CScoreLoadBestTimeResult;
 
@@ -29,7 +30,7 @@ struct CScoreLoadBestTimeResult;
 class IGameController
 {
 #define IN_CLASS_IGAMECONTROLLER
-#include <game/server/instagib/includes/gamecontroller.h>
+#include <insta/includes/gamecontroller.h>
 
 	friend class CSaveTeam; // need access to GameServer() and Server()
 

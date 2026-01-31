@@ -16,11 +16,12 @@
 #include <game/collision.h>
 #include <game/layers.h>
 #include <game/mapbugs.h>
-#include <game/server/instagib/enums.h> // ddnet-insta
-#include <game/server/instagib/ip_storage.h> // ddnet-insta
-#include <game/server/instagib/persistent_client_data.h> // ddnet-insta
-#include <game/server/instagib/persistent_data.h> // ddnet-insta
 #include <game/voting.h>
+
+#include <insta/server/enums.h> // ddnet-insta
+#include <insta/server/ip_storage.h> // ddnet-insta
+#include <insta/server/persistent_client_data.h> // ddnet-insta
+#include <insta/server/persistent_data.h> // ddnet-insta
 
 #include <map>
 #include <memory>
@@ -120,7 +121,7 @@ class CGameContext : public IGameServer
 {
 	// ddnet-insta
 #define IN_CLASS_IGAMECONTEXT
-#include <game/server/instagib/includes/gamecontext.h>
+#include <insta/includes/gamecontext.h>
 
 	IServer *m_pServer;
 	IConfigManager *m_pConfigManager;

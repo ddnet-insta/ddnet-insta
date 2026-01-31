@@ -10,14 +10,15 @@
 #include <engine/shared/protocol.h>
 
 #include <game/alloc.h> // ddnet-insta
-#include <game/server/instagib/enums.h> // ddnet-insta
-#include <game/server/instagib/ip_storage.h> // ddnet-insta
-#include <game/server/instagib/round_stats_player.h> // ddnet-insta
-#include <game/server/instagib/skin_info_manager.h> // ddnet-insta
-#include <game/server/instagib/sql_stats.h> // ddnet-insta
-#include <game/server/instagib/sql_stats_player.h> // ddnet-insta
-#include <game/server/instagib/structs.h> // ddnet-insta
 #include <game/server/save.h> // ddnet-insta
+
+#include <insta/server/enums.h> // ddnet-insta
+#include <insta/server/ip_storage.h> // ddnet-insta
+#include <insta/server/round_stats_player.h> // ddnet-insta
+#include <insta/server/skin_info_manager.h> // ddnet-insta
+#include <insta/server/sql_stats.h> // ddnet-insta
+#include <insta/server/sql_stats_player.h> // ddnet-insta
+#include <insta/server/structs.h> // ddnet-insta
 
 #include <memory>
 #include <optional>
@@ -33,7 +34,7 @@ class CPlayer
 {
 	MACRO_ALLOC_POOL_ID()
 #define IN_CLASS_PLAYER
-#include <game/server/instagib/includes/player.h>
+#include <insta/includes/player.h>
 
 public:
 	CPlayer(CGameContext *pGameServer, uint32_t UniqueClientId, int ClientId, int Team);
