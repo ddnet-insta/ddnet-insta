@@ -1209,6 +1209,9 @@ bool CGameControllerBasePvp::OnTeamChatCmd(IConsole::IResult *pResult)
 		return false;
 	}
 
+	if(pResult->NumArguments() == 0 || pResult->GetInteger(0) == TEAM_FLOCK)
+		return false;
+
 	CPlayer *pPlayer = GameServer()->m_apPlayers[pResult->m_ClientId];
 	if(!pPlayer)
 		return false;
