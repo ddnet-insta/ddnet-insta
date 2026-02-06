@@ -49,9 +49,9 @@ void CGameContext::RegisterInstagibCommands()
 #undef MACRO_TOP_COLUMN
 
 	// chat commands
-#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) Console()->Register(name, params, flags, callback, userdata, help);
+#define CHAT_COMMAND(name, params, flags, callback, userdata, help) Console()->Register(name, params, flags, callback, userdata, help);
 #include <insta/includes/chat_commands.h>
-#undef CONSOLE_COMMAND
+#undef CHAT_COMMAND
 
 	// rcon commands
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) Console()->Register(name, params, flags, callback, userdata, help);
