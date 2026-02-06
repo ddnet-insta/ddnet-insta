@@ -561,14 +561,13 @@ void CGameContext::ListDeepJails(int RequesterId) const
 		if(Entry.DeepUntilTick() < Server()->Tick())
 			continue;
 
-		char aAddr[512] = "XXX";
-		if(Server()->HasShowIpsOn(RequesterId))
-			net_addr_str(Entry.Addr(), aAddr, sizeof(aAddr), false);
+		char aAddr[512];
+		net_addr_str(Entry.Addr(), aAddr, sizeof(aAddr), false);
 
 		int TicksLeft = Entry.DeepUntilTick() - Server()->Tick();
 		int MinutesLeft = (TicksLeft / Server()->TickSpeed()) / 60;
 
-		log_info("deep_jail", "#%d name='%s' ip=%s minutes=%d", Entry.EntryId(), Entry.Name(), aAddr, MinutesLeft);
+		log_info("deep_jail", "#%d name='%s' ip=<{%s}> minutes=%d", Entry.EntryId(), Entry.Name(), aAddr, MinutesLeft);
 		GotEntries = true;
 	}
 	for(CPlayer *pPlayer : m_apPlayers)

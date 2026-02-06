@@ -16,7 +16,6 @@ public:
 	CAuthManager *AuthManager() override { return &m_AuthManager; }
 	static void ConRedirect(IConsole::IResult *pResult, void *pUser);
 	bool SixupUsernameAuth(int ClientId, const char *pCredentials) override;
-	bool HasShowIpsOn(int ClientId) const override;
 
 private:
 #ifndef IN_CLASS_ENGINE_SERVER_SERVER
