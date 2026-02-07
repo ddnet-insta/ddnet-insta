@@ -1067,14 +1067,14 @@ void CGameControllerBasePvp::OnAppliedDamage(int &Dmg, int &From, int &Weapon, C
 		RefillGrenadesOnHit(pKiller);
 
 	CCharacter *pKillerChar = pKiller->GetCharacter();
-	if(g_Config.m_SvReloadTimeOnHit > 0 && Weapon == WEAPON_LASER && pKillerChar)
+	if(g_Config.m_SvLaserReloadTimeOnHit > 0 && Weapon == WEAPON_LASER && pKillerChar)
 	{
 		float FireDelay;
 		int ActiveWeaponTuneIndex = offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + pKillerChar->m_Core.m_ActiveWeapon;
 		pKillerChar->GetTuning(pKillerChar->m_TuneZone)->Get(ActiveWeaponTuneIndex, &FireDelay);
 		if(!g_Config.m_SvFastHitFullAuto)
 			pKillerChar->m_BlockFullAutoUntilReleaseOrTick = Server()->Tick() + (FireDelay * Server()->TickSpeed() / 1000);
-		pKillerChar->m_ReloadTimer = g_Config.m_SvReloadTimeOnHit;
+		pKillerChar->m_ReloadTimer = g_Config.m_SvLaserReloadTimeOnHit;
 	}
 
 	if(Config()->m_SvFreezeHammer && Weapon == WEAPON_HAMMER)

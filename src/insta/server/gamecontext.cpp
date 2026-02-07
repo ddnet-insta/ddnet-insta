@@ -118,7 +118,7 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) cons
 		str_append(aMotd, "* ready mode: off\n");
 
 	// TODO: check if the spawn weapons include laser and only then print this
-	if(g_Config.m_SvReloadTimeOnHit > 0)
+	if(g_Config.m_SvLaserReloadTimeOnHit > 0)
 	{
 		str_append(aMotd, "* laser kill refills ammo (on fire mode)\n");
 	}
