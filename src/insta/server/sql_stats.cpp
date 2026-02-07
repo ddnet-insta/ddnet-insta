@@ -475,29 +475,26 @@ bool CSqlStats::ShowTopWorker(IDbConnection *pSqlServer, const ISqlData *pGameDa
 
 	auto *paMessages = pResult->m_aaMessages;
 
-	int LimitStart = maximum(pData->m_Offset - 1, 0);
+	int LimitStart = maximum(absolute(pData->m_Offset) - 1, 0);
+	const char *pOrder = pData->m_Offset >= 0 ? "DESC" : "ASC";
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT RANK() OVER (ORDER BY a.%s DESC) as ranking, %s, name "
-		"FROM ("
-		"  SELECT %s, name "
-		"  FROM %s "
-		"  ORDER BY %s DESC LIMIT ?"
-		") as a "
-		"ORDER BY ranking ASC, name ASC LIMIT ?, 5",
-		pData->m_aRankColumnSql,
+		"SELECT RANK() OVER (ORDER BY %s DESC) as ranking, %s, name "
+		"FROM %s "
+		"ORDER BY %s %s "
+		"LIMIT ?, 5",
 		pData->m_aRankColumnSql,
 		pData->m_aRankColumnSql,
 		pData->m_aTable,
-		pData->m_aRankColumnSql);
+		pData->m_aRankColumnSql,
+		pOrder);
 	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		dbg_msg("sql-thread", "prepare top failed query: %s", aBuf);
 		return false;
 	}
-	pSqlServer->BindInt(1, LimitStart + 5);
-	pSqlServer->BindInt(2, LimitStart);
+	pSqlServer->BindInt(1, LimitStart);
 
 	// show top points
 	str_format(paMessages[0], sizeof(paMessages[0]), "-------- Top %s --------", pData->m_aRankColumnDisplay);
