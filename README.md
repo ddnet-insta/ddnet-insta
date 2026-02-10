@@ -50,6 +50,10 @@ More information about the cli tool can be found [here](https://github.com/ddnet
   Downstream projects should have an easy time to add new gametypes that can be updated to new ddnet-insta versions
   without a lot of effort.
 
+# Docker
+
+There are official builds and docker files. For more information see [./ddnet-insta/README.md](./ddnet-insta/README.md).
+
 # Features
 
 ## Stats tracked in sql database

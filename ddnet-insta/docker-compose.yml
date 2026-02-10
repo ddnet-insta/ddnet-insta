@@ -1,0 +1,15 @@
+services:
+  ddnet-server:
+    image: ghcr.io/ddnet-insta/insta:latest
+    container_name: ddnet-server
+    restart: unless-stopped
+    volumes:
+      - ./autoexec.cfg:/tw/data/autoexec.cfg:ro
+      - ./reset.cfg:/tw/data/reset.cfg:ro
+
+      # You can get maps for the launch from this repository:
+      # git clone https://github.com/ddnet-insta/maps
+      # - ./maps/maps:/tw/data/maps
+      # - ./maps/maps7:/tw/data/maps7
+    ports:
+      - "8303:8303/udp"
