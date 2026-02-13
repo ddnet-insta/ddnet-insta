@@ -61,6 +61,8 @@ CGameControllerInstaCore::CGameControllerInstaCore(class CGameContext *pGameServ
 CGameControllerInstaCore::~CGameControllerInstaCore()
 {
 	log_info("ddnet-insta", "shutting down insta core ...");
+	delete m_pDeadSpecController;
+	m_pDeadSpecController = nullptr;
 }
 
 void CGameControllerInstaCore::SendChatTarget(int To, const char *pText, int Flags) const
@@ -134,6 +136,7 @@ void CGameControllerInstaCore::OnInit()
 
 void CGameControllerInstaCore::OnPlayerConnect(CPlayer *pPlayer)
 {
+	m_pDeadSpecController->OnPlayerConnect(pPlayer);
 	IGameController::OnPlayerConnect(pPlayer);
 	m_InvalidateConnectedIpsCache = true;
 
@@ -201,6 +204,7 @@ void CGameControllerInstaCore::OnPlayerDisconnect(class CPlayer *pPlayer, const 
 // extra methods such as PrintDisconnect
 void CGameControllerInstaCore::InstaCoreDisconnect(CPlayer *pPlayer, const char *pReason)
 {
+	m_pDeadSpecController->OnPlayerDisconnect(pPlayer);
 	m_InvalidateConnectedIpsCache = true;
 
 	while(true)
@@ -667,6 +671,10 @@ bool CGameControllerInstaCore::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMs
 		}
 		return true;
 	}
+
+	if(IsDeadSpecGameType())
+		if(m_pDeadSpecController && m_pDeadSpecController->OnSetTeamNetMessage(pMsg, ClientId))
+			return true;
 
 	// user joins the spectators while allow spec is on
 	// we have to mark him as fake dead spec
@@ -1398,6 +1406,16 @@ void CGameControllerInstaCore::OnCharacterTick(CCharacter *pChr)
 	}
 
 	pChr->m_LastHookState = pChr->m_Core.m_HookState;
+}
+
+void CGameControllerInstaCore::YouWillJoinSpecMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen)
+{
+	str_copy(pMsg, "You will join the spectators automatically once it is possible", MsgLen);
+}
+
+void CGameControllerInstaCore::YouWillJoinGameMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen)
+{
+	str_copy(pMsg, "You will join the game automatically once it is possible", MsgLen);
 }
 
 void CGameControllerInstaCore::SendSkinChangeToAllSixup(protocol7::CNetMsg_Sv_SkinChange *pMsg, CPlayer *pPlayer, bool ApplyNetworkClipping)

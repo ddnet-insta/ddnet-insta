@@ -27,9 +27,8 @@ CGameControllerBomb::CGameControllerBomb(class CGameContext *pGameServer) :
 	m_pGameType = "BOMB";
 	m_WinType = WIN_BY_SURVIVAL;
 	m_GameFlags = 0;
-
 	m_DefaultWeapon = WEAPON_HAMMER;
-
+	m_pDeadSpecController = new CDeadSpecController(this, pGameServer);
 	m_pStatsTable = "bomb";
 	m_pExtraColumns = new CBombColumns();
 	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
@@ -239,8 +238,7 @@ void CGameControllerBomb::OnPlayerConnect(CPlayer *pPlayer)
 		int RoundSeconds = (Server()->Tick() - m_RoundStartTick) / Server()->TickSpeed();
 		if(RoundSeconds > 2)
 		{
-			pPlayer->m_IsDead = true;
-			pPlayer->SetTeamRaw(TEAM_SPECTATORS);
+			m_pDeadSpecController->KillPlayer(pPlayer, -1);
 			GameServer()->SendChatTarget(pPlayer->GetCid(), "You have to wait for the round to end before you can join");
 		}
 	}
@@ -358,34 +356,14 @@ void CGameControllerBomb::OnRoundEnd()
 	CGameControllerBasePvp::OnRoundEnd();
 }
 
-// called before spam protection on client team join request
-bool CGameControllerBomb::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId)
+void CGameControllerBomb::YouWillJoinSpecMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen)
 {
-	if(GameServer()->m_World.m_Paused)
-		return false;
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
-	if(!pPlayer)
-		return false;
+	str_copy(pMsg, "You will join the spectators once the round ends", MsgLen);
+}
 
-	if(pPlayer->m_IsDead && m_RoundActive && pMsg->m_Team == TEAM_GAME)
-	{
-		pPlayer->m_WantsToJoinSpectators = !pPlayer->m_WantsToJoinSpectators;
-		char aBuf[512];
-		if(pPlayer->m_WantsToJoinSpectators)
-			str_copy(aBuf, "You will join the spectators once the round ends");
-		else
-			str_copy(aBuf, "You will join the game once the round ends");
-
-		GameServer()->SendBroadcast(aBuf, ClientId);
-		return true;
-	}
-
-	if(pMsg->m_Team == TEAM_SPECTATORS)
-		pPlayer->m_WantsToStaySpectator = true;
-	else
-		pPlayer->m_WantsToStaySpectator = false;
-
-	return CGameControllerBasePvp::OnSetTeamNetMessage(pMsg, ClientId);
+void CGameControllerBomb::YouWillJoinGameMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen)
+{
+	str_copy(pMsg, "You will join the game once the round ends", MsgLen);
 }
 
 bool CGameControllerBomb::IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage)
@@ -525,9 +503,7 @@ void CGameControllerBomb::EliminatePlayer(CPlayer *pPlayer, int Weapon)
 	GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 
 	pPlayer->m_IsBomb = false;
-	pPlayer->m_IsDead = true;
-	dbg_assert(pPlayer->GetTeam() != TEAM_SPECTATORS, "spectator got eliminated");
-	pPlayer->SetTeamRaw(TEAM_SPECTATORS);
+	m_pDeadSpecController->KillPlayer(pPlayer, -1);
 }
 
 void CGameControllerBomb::ExplodeBomb(CPlayer *pPlayer, CPlayer *pKiller)
@@ -593,11 +569,9 @@ void CGameControllerBomb::StartBombRound()
 	{
 		if(!pPlayer)
 			continue;
-		if(pPlayer->m_WantsToStaySpectator)
+		if(pPlayer->GetTeam() == TEAM_SPECTATORS)
 			continue;
 
-		pPlayer->SetTeamRaw(TEAM_GAME);
-		pPlayer->m_IsDead = false;
 		Players++;
 
 		// Instant appearance after the start of the game
@@ -667,25 +641,11 @@ int CGameControllerBomb::AmountOfBombs() const
 
 void CGameControllerBomb::JoinAllPlayers()
 {
-	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
-	{
-		if(!pPlayer)
-			continue;
-		if(pPlayer->m_WantsToJoinSpectators)
-		{
-			DoTeamChange(pPlayer, TEAM_SPECTATORS, true);
-			pPlayer->m_WantsToJoinSpectators = false;
-			pPlayer->m_WantsToStaySpectator = true;
-			pPlayer->m_IsDead = false;
-			continue;
-		}
-		// do not auto join players that are
-		// intentionally spectator on round start
-		if(pPlayer->m_WantsToStaySpectator)
-			continue;
+	m_pDeadSpecController->RespawnAllPlayers();
 
-		pPlayer->SetTeamRaw(TEAM_GAME);
-	}
+	// TODO: zCatch clears victims here
+	//       we clear m_IsBomb in OnReset
+	//       use the same approach for both gametypes
 }
 
 REGISTER_GAMEMODE(bomb, CGameControllerBomb(pGameServer));

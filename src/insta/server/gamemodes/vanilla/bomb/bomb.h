@@ -30,7 +30,8 @@ public:
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 	bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize) override;
 	void OnRoundEnd() override;
-	bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) override;
+	void YouWillJoinSpecMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen) override;
+	void YouWillJoinGameMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen) override;
 	bool IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage) override;
 	bool IsLoser(const CPlayer *pPlayer) override;
 	int WinPointsForWin(const CPlayer *pPlayer) override;
@@ -49,6 +50,7 @@ public:
 	void JoinAllPlayers();
 
 	bool IsBombGameType() const override { return true; }
+	bool IsDeadSpecGameType() override { return true; }
 
 	bool m_RoundActive = false;
 

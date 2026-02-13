@@ -6,6 +6,7 @@
 #include <game/server/gamemodes/ddnet.h>
 #include <game/server/player.h>
 
+#include <insta/server/dead_spec_controller.h>
 #include <insta/server/enums.h>
 
 // base functionality of the ddnet-insta server
@@ -119,6 +120,10 @@ public:
 
 	void OnPlayerTick(class CPlayer *pPlayer);
 	void OnCharacterTick(class CCharacter *pChr);
+
+	CDeadSpecController *m_pDeadSpecController = nullptr;
+	void YouWillJoinSpecMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen) override;
+	void YouWillJoinGameMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen) override;
 
 private:
 	bool m_InvalidateConnectedIpsCache = true;

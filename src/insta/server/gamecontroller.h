@@ -1375,6 +1375,49 @@ public:
 	virtual bool IsBombGameType() const { return false; }
 	virtual bool UnfreezeOnHammerHit() const { return true; }
 	virtual bool UnfreezeOnLaserHit() const { return IsDDRaceGameType(); }
+
+	// returning true here means the current mode moves dead players to
+	// spectators. Modes that use this are for example zCatch and bomb.
+	virtual bool IsDeadSpecGameType() { return false; }
+
+	/*
+		Function: YouWillJoinSpecMessage
+			Override this in your dead spec mode
+			to have a custom message instead of
+
+			FIXME: put message here
+			"xxx"
+
+			this is called when a dead player clicks the
+			join game button and will be moved to regular spectators
+			as soon as he would respawn
+
+		Arguments:
+			pPlayer - player that attempted a team switch
+			pMsg - buffer you can write a custom broadcast string to
+			MsgLen - maximum length in bytes of the pMsg buffer
+	*/
+	virtual void YouWillJoinSpecMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen) {};
+
+	/*
+		Function: YouWillJoinGameMessage
+			Override this in your dead spec mode
+			to have a custom message instead of
+
+			FIXME: put message here
+			"xxx"
+
+			this is called when a dead player clicks the
+			join game button and will be moved to the game
+			as soon as he would respawn
+
+		Arguments:
+			pPlayer - player that attempted a team switch
+			pMsg - buffer you can write a custom broadcast string to
+			MsgLen - maximum length in bytes of the pMsg buffer
+	*/
+	virtual void YouWillJoinGameMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen) {};
+
 	bool m_IsVanillaGameType = false;
 	// decides if own grenade explosions
 	// or laser wallshots should harm the own tee

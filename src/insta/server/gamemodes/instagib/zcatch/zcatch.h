@@ -25,6 +25,7 @@ public:
 	void ReleasePlayer(class CPlayer *pPlayer, const char *pMsg);
 
 	bool IsZcatchGameType() const override { return true; }
+	bool IsDeadSpecGameType() override { return true; }
 	void Tick() override;
 	void Snap(int SnappingClient) override;
 	void OnPlayerConnect(CPlayer *pPlayer) override;
@@ -41,7 +42,8 @@ public:
 	void OnRoundEnd() override;
 	void OnSelfkill(CPlayer *pPlayer) override;
 	int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup) override;
-	bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) override;
+	void YouWillJoinSpecMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen) override;
+	void YouWillJoinGameMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen) override;
 	bool IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage) override;
 	bool IsLoser(const CPlayer *pPlayer) override;
 	int WinPointsForWin(const CPlayer *pPlayer) override;

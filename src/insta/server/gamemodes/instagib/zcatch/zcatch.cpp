@@ -16,6 +16,7 @@
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
 
+#include <insta/server/dead_spec_controller.h>
 #include <insta/server/gamemodes/instagib/base_instagib.h>
 
 CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
@@ -25,7 +26,7 @@ CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
 	m_pGameType = "zCatch";
 	m_WinType = WIN_BY_SURVIVAL;
 	m_DefaultWeapon = GetDefaultWeaponBasedOnSpawnWeapons();
-
+	m_pDeadSpecController = new CDeadSpecController(this, pGameServer);
 	m_pStatsTable = "";
 	if(m_SpawnWeapons == ESpawnWeapons::SPAWN_WEAPON_GRENADE)
 		m_pStatsTable = "zcatch_grenade";
@@ -279,6 +280,8 @@ void CGameControllerZcatch::OnCharacterSpawn(class CCharacter *pChr)
 
 int CGameControllerZcatch::GetPlayerTeam(class CPlayer *pPlayer, bool Sixup)
 {
+	// TODO: this should be covered by the dead spec controller
+
 	// spoof fake in game team
 	// to get dead spec tees for 0.7 connections
 	if(Sixup && pPlayer->m_IsDead)
@@ -292,24 +295,7 @@ void CGameControllerZcatch::ReleasePlayer(class CPlayer *pPlayer, const char *pM
 	GameServer()->SendChatTarget(pPlayer->GetCid(), pMsg);
 	UpdateCatchTicks(pPlayer, ECatchUpdate::RELEASE);
 
-	pPlayer->m_IsDead = false;
-	pPlayer->m_KillerId = -1;
-
-	if(pPlayer->m_WantsToJoinSpectators)
-	{
-		DoTeamChange(pPlayer, TEAM_SPECTATORS, true);
-		pPlayer->m_WantsToJoinSpectators = false;
-	}
-	else
-	{
-		// release player back into the world
-		// if the kill is old
-		pPlayer->SetTeamNoKill(TEAM_RED);
-
-		// abort move to team spectators
-		// if the kill is recent
-		pPlayer->m_ForceTeam.m_Tick = 0;
-	}
+	m_pDeadSpecController->RespawnPlayer(pPlayer);
 }
 
 void CGameControllerZcatch::OnSelfkill(CPlayer *pPlayer)
@@ -390,18 +376,8 @@ void CGameControllerZcatch::KillPlayer(class CPlayer *pVictim, class CPlayer *pK
 	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
 
 	UpdateCatchTicks(pVictim, ECatchUpdate::CAUGHT);
-	pVictim->m_IsDead = true;
 	pVictim->m_KillerId = pKiller->GetCid();
-
-	// force death screen open as long as sv_enemy_kill_respawn_delay_ms specifies
-	// then move to spectators after that. Instead of moving to spectators instantly.
-	// helps with ddnet client losing spectator focus because
-	// of clicking directly after death
-	// https://github.com/ddnet-insta/ddnet-insta/issues/447
-	pVictim->m_ForceTeam = {
-		.m_Tick = pVictim->m_RespawnTick,
-		.m_Team = TEAM_SPECTATORS,
-		.m_SpectatorId = pKiller->GetCid()};
+	m_pDeadSpecController->KillPlayer(pVictim, pKiller->GetCid());
 
 	int Found = count(pKiller->m_vVictimIds.begin(), pKiller->m_vVictimIds.end(), pVictim->GetCid());
 	if(!Found)
@@ -490,42 +466,14 @@ int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPl
 	return 0;
 }
 
-// called before spam protection on client team join request
-bool CGameControllerZcatch::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId)
+void CGameControllerZcatch::YouWillJoinSpecMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen)
 {
-	if(GameServer()->m_World.m_Paused)
-		return false;
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
-	if(!pPlayer)
-		return false;
+	str_format(pMsg, MsgLen, "You will join the spectators once '%s' dies", Server()->ClientName(pPlayer->m_KillerId));
+}
 
-	int Team = pMsg->m_Team;
-	if(Server()->IsSixup(ClientId) && g_Config.m_SvSpectatorVotes && g_Config.m_SvSpectatorVotesSixup && pPlayer->m_IsFakeDeadSpec)
-	{
-		if(Team == TEAM_SPECTATORS)
-		{
-			// when a sixup fake spec tries to join spectators
-			// he actually tries to join team red
-			Team = TEAM_RED;
-		}
-	}
-
-	if(
-		(Server()->IsSixup(ClientId) && pPlayer->m_IsDead && Team == TEAM_SPECTATORS) ||
-		(!Server()->IsSixup(ClientId) && pPlayer->m_IsDead && Team == TEAM_RED))
-	{
-		pPlayer->m_WantsToJoinSpectators = !pPlayer->m_WantsToJoinSpectators;
-		char aBuf[512];
-		if(pPlayer->m_WantsToJoinSpectators)
-			str_format(aBuf, sizeof(aBuf), "You will join the spectators once '%s' dies", Server()->ClientName(pPlayer->m_KillerId));
-		else
-			str_format(aBuf, sizeof(aBuf), "You will join the game once '%s' dies", Server()->ClientName(pPlayer->m_KillerId));
-
-		GameServer()->SendBroadcast(aBuf, ClientId);
-		return true;
-	}
-
-	return CGameControllerBasePvp::OnSetTeamNetMessage(pMsg, ClientId);
+void CGameControllerZcatch::YouWillJoinGameMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen)
+{
+	str_format(pMsg, MsgLen, "You will join the game once '%s' dies", Server()->ClientName(pPlayer->m_KillerId));
 }
 
 // called after spam protection on client team join request
@@ -550,6 +498,7 @@ int CGameControllerZcatch::GetAutoTeam(int NotThisId)
 	return CGameControllerInstagib::GetAutoTeam(NotThisId);
 }
 
+// TODO: this should be moved to the dead spec controller
 int CGameControllerZcatch::FreeInGameSlots()
 {
 	int Players = 0;
@@ -747,18 +696,13 @@ bool CGameControllerZcatch::DoWincheckRound()
 
 void CGameControllerZcatch::ReleaseAllPlayers()
 {
+	m_pDeadSpecController->RespawnAllPlayers();
+
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer)
 			continue;
 
-		// only release players that actually died
-		// not all spectators
-		if(pPlayer->m_IsDead)
-		{
-			pPlayer->m_IsDead = false;
-			pPlayer->SetTeamNoKill(TEAM_RED);
-		}
 		pPlayer->m_KillerId = -1;
 		pPlayer->m_vVictimIds.clear();
 	}

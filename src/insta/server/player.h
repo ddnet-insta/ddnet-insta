@@ -73,6 +73,7 @@ public:
 	std::optional<int> m_DeadSinceTick = std::nullopt;
 
 	// Will be -1 when the player is alive
+	// or killed by the world or other things
 	int m_KillerId = -1;
 
 	// never call this method use DoTeamChange() instead
@@ -116,12 +117,7 @@ public:
 	// will be used like m_RespawnDisabled in 0.7
 	bool m_IsDead = false;
 	bool m_GotRespawnInfo = false;
-	bool m_WantsToJoinSpectators = false;
-	// for last man standing modes where dead players get moved to spectators
-	// to differentitate between players that want to stay spec and the ones
-	// that wait for the next round to play
-	// TODO: clean this mess up
-	bool m_WantsToStaySpectator = false;
+
 	std::vector<int> m_vVictimIds;
 
 	// kills made in zCatch that give reward points
