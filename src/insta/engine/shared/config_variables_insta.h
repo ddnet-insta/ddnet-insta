@@ -116,7 +116,11 @@ MACRO_CONFIG_INT(SvRequireChatFlagToChat, sv_require_chat_flag_to_chat, 0, 0, 1,
 
 // is sv_always_track_stats for debugging only or is this a useful feature?
 MACRO_CONFIG_INT(SvAlwaysTrackStats, sv_always_track_stats, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Track stats no matter how many players are online")
+
+// TODO: remove both these or use CFGFLAG_DEBUG_SERVER and exlucde from documentation and releases
 MACRO_CONFIG_INT(SvDebugCatch, sv_debug_catch, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Debug zCatch ticks caught and in game")
+MACRO_CONFIG_INT(SvDebugDeadTracker, sv_debug_dead_tracker, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Debug stats counter for dead and alive time")
+
 MACRO_CONFIG_INT(SvDebugStats, sv_debug_stats, 0, 0, 2, CFGFLAG_SAVE | CFGFLAG_SERVER, "Verbose logging for the SQL player stats")
 MACRO_CONFIG_INT(SvVoteCheckboxes, sv_vote_checkboxes, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Fill [ ] checkbox in vote name if the config is already set")
 MACRO_CONFIG_INT(SvHideAdmins, sv_hide_admins, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Only send admin status to other authed players")

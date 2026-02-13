@@ -206,5 +206,27 @@ public:
 
 	size_t m_LastMysteryLine = -1;
 	const char *GetMysteryRoundLine();
+
+	enum class EDeadUpdate
+	{
+		// called when a player joins the game
+		// either on server join
+		// or on join from spectators
+		CONNECT,
+		DISCONNECT,
+
+		// called when a player joins spectators
+		SPECTATE,
+
+		FREEZE,
+		UNFREEZE,
+
+		DEATH,
+		SPAWN,
+
+		ROUND_END,
+	};
+
+	void UpdateDeadTicks(class CPlayer *pPlayer, EDeadUpdate Update);
 };
 #endif
