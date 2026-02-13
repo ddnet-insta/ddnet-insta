@@ -62,6 +62,19 @@ void CGameContext::ConRainbow(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
 
+	for(CPlayer *pPlayer : pSelf->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		log_info(
+			"debug",
+			"cid=%d dead=%d team=%d",
+			pPlayer->GetCid(),
+			pPlayer->m_IsDead,
+			pPlayer->GetTeam());
+	}
+
 	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
 
 	if(!pChr)

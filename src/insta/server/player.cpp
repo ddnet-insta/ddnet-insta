@@ -247,6 +247,11 @@ void CPlayer::SetTeamSpoofed(int Team, bool DoChatMsg)
 
 void CPlayer::SetTeamNoKill(int Team, bool DoChatMsg)
 {
+	if(Team == TEAM_SPECTATORS)
+	{
+		log_info("player", "cid=%d joined spectators SetTeamNoKill", GetCid());
+	}
+
 	int OldTeam = m_Team;
 	m_Team = Team;
 	m_LastSetTeam = Server()->Tick();
@@ -295,6 +300,11 @@ void CPlayer::SetTeamNoKill(int Team, bool DoChatMsg)
 
 void CPlayer::SetTeamRaw(int Team)
 {
+	if(Team == TEAM_SPECTATORS)
+	{
+		log_info("player", "cid=%d joined spectators SetTeamRaw", GetCid());
+	}
+
 	int OldTeam = m_Team;
 	if(OldTeam != TEAM_SPECTATORS)
 	{

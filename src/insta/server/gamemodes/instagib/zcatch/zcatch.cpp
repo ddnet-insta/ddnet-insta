@@ -132,25 +132,43 @@ bool CGameControllerZcatch::IsWinner(const CPlayer *pPlayer, char *pMessage, int
 	// you can only win as last alive player
 	// used for disconnect IsWinner check
 	if(NumNonDeadActivePlayers() > 1)
+	{
+		log_info("winner", "cid=%d not a winner because active players", pPlayer->GetCid());
 		return false;
+	}
 	if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+	{
+		log_info("winner", "cid=%d not a winner because spec", pPlayer->GetCid());
 		return false;
+	}
 	if(pPlayer->m_IsDead)
+	{
+		log_info("winner", "cid=%d not a winner because dead", pPlayer->GetCid());
 		return false;
+	}
 	// you can never win with 0 kills
 	// this should cover edge cases where one spawns into the world
 	// where everyone else is currently in a death screen
 	if(!pPlayer->m_Spree)
+	{
+		log_info("winner", "cid=%d not a winner because no spree", pPlayer->GetCid());
 		return false;
+	}
 	// you can not win a round with less than 4 kills
 	// if players leave after the game started
 	// before they got killed by the leading player
 	// the leading player has to wait for new players to join
 	if(pPlayer->m_KillsThatCount < MIN_ZCATCH_KILLS)
+	{
+		log_info("winner", "cid=%d not a winner because not enuff kills", pPlayer->GetCid());
 		return false;
+	}
 	// there are no winners in release games even if the round ends
 	if(!IsCatchGameRunning())
+	{
+		log_info("winner", "cid=%d not a winner because game not running", pPlayer->GetCid());
 		return false;
+	}
 
 	if(pMessage)
 		str_copy(pMessage, "+1 win was saved on your name (see /rank_wins).", SizeOfMessage);
@@ -210,6 +228,7 @@ int CGameControllerZcatch::WinPointsForWin(const CPlayer *pPlayer)
 
 void CGameControllerZcatch::StartZcatchRound()
 {
+	log_info("zcatch", "starting round...");
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer)
@@ -236,6 +255,7 @@ void CGameControllerZcatch::OnRoundStart()
 	if(ActivePlayers < MIN_ZCATCH_PLAYERS && CatchGameState() != ECatchGameState::RELEASE_GAME)
 	{
 		SendChatTarget(-1, "Not enough players to start a round");
+		log_info("zcatch", "Not enough players to start a round active=%d", ActivePlayers);
 		SetCatchGameState(ECatchGameState::WAITING_FOR_PLAYERS);
 	}
 	StartZcatchRound();
@@ -374,6 +394,8 @@ void CGameControllerZcatch::KillPlayer(class CPlayer *pVictim, class CPlayer *pK
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
 	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
+
+	log_info("zcatch", "cid=%d got caught by %d", pVictim->GetCid(), pKiller->GetCid());
 
 	UpdateCatchTicks(pVictim, ECatchUpdate::CAUGHT);
 	pVictim->m_KillerId = pKiller->GetCid();
@@ -555,6 +577,7 @@ bool CGameControllerZcatch::CheckChangeGameState()
 		if(!g_Config.m_SvZcatchRequireMultipleIpsToStart || NumConnectedIps() >= MIN_ZCATCH_PLAYERS)
 		{
 			SendChatTarget(-1, "Enough players connected. Starting game!");
+			log_info("zcatch", "Enough players connected. Starting game!");
 			SetCatchGameState(ECatchGameState::RUNNING);
 		}
 		return true;
@@ -681,6 +704,7 @@ bool CGameControllerZcatch::DoWincheckRound()
 		if(!GotWinner)
 		{
 			SendChatTarget(-1, "Nobody won. Starting release game.");
+			log_info("zcatch", "Nobody won. Starting release game.");
 			SetCatchGameState(ECatchGameState::WAITING_FOR_PLAYERS);
 			ReleaseAllPlayers();
 			return false;

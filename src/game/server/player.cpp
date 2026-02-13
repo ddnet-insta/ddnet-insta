@@ -12,6 +12,7 @@
 #include <engine/antibot.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
+#include <generated/protocol.h>
 
 #include <game/gamecore.h>
 #include <game/teamscore.h>
@@ -690,6 +691,11 @@ CCharacter *CPlayer::ForceSpawn(vec2 Pos)
 void CPlayer::SetTeam(int Team, bool DoChatMsg)
 {
 	KillCharacter();
+
+	if(Team == TEAM_SPECTATORS)
+	{
+		log_info("player", "cid=%d joined spectators", GetCid());
+	}
 
 	m_Team = Team;
 	m_LastSetTeam = Server()->Tick();
