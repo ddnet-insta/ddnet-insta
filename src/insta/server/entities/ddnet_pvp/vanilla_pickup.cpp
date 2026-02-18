@@ -20,6 +20,7 @@ CVanillaPickup::CVanillaPickup(CGameWorld *pGameWorld, int Type, int SubType, in
 
 	m_Layer = Layer;
 	m_Number = Number;
+	m_Core = vec2(0.f, 0.f);
 
 	int SpawnDelay = m_Type == POWERUP_NINJA ? 90 : 0;
 	if(SpawnDelay > 0)
