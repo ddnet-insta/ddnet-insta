@@ -79,6 +79,8 @@ function(insta_patch_server)
       gamemodes/base_pvp/chat.cpp
       gamemodes/ddrace/block/block.cpp
       gamemodes/ddrace/block/block.h
+      gamemodes/ddrace/block/tblock.cpp
+      gamemodes/ddrace/block/tblock.h
       gamemodes/insta_core/insta_core.cpp
       gamemodes/insta_core/insta_core.h
       gamemodes/instagib/base_fng.cpp

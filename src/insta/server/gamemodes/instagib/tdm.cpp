@@ -16,12 +16,15 @@ void CGameControllerInstaTDM::Tick()
 	CGameControllerInstaBaseDM::Tick();
 }
 
+// Can not use OnKill() here because we need to cover team kills
+// https://github.com/ddnet-insta/ddnet-insta/issues/631
 int CGameControllerInstaTDM::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
 	if(pKiller && WeaponId != WEAPON_GAME)
 	{
 		// do team scoring
-		if(pKiller == pVictim->GetPlayer() || pKiller->GetTeam() == pVictim->GetPlayer()->GetTeam())
+		bool IsTeamOrSelfkill = pKiller->GetTeam() == pVictim->GetPlayer()->GetTeam();
+		if(IsTeamOrSelfkill)
 			AddTeamscore(pKiller->GetTeam() & 1, -1);
 		else
 			AddTeamscore(pKiller->GetTeam() & 1, 1);

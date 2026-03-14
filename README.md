@@ -281,6 +281,12 @@ Last to survive wins.
 A ddrace based gametype where the goal is to kill others by throwing them into freeze tiles.
 It is a free for all mode where one kill gives one point and first to reach the scorelimit wins.
 
+### tblock
+
+``sv_gametype block``
+
+Like block but with teams.
+
 ### ddrace
 
 ``sv_gametype ddrace``

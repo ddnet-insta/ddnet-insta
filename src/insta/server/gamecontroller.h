@@ -161,7 +161,7 @@ public:
 
 	/*
 		Function: OnKill
-			This method is called when one player kills another (no selfkills).
+			This method is called when one player kills another (no selfkills or team kills).
 			It should be called before the victims character is marked as dead.
 			It is similar to OnCharacterTakeDamage() and OnCharacterDeath()
 			and is here to stadardize the concept of what a kill is across game types.
