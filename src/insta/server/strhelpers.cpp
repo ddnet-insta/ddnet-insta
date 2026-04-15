@@ -1,6 +1,6 @@
 #include "strhelpers.h"
 
-#include <base/system.h>
+#include <base/str.h>
 
 const char *str_find_digit(const char *Haystack)
 {

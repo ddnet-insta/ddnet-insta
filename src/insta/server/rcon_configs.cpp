@@ -1,5 +1,4 @@
 #include <base/log.h>
-#include <base/system.h>
 
 #include <engine/console.h>
 #include <engine/server/server.h>

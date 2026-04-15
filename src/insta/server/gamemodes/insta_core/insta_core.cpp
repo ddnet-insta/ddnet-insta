@@ -1,7 +1,7 @@
 #include "insta_core.h"
 
+#include <base/io.h>
 #include <base/log.h>
-#include <base/system.h>
 #include <base/time.h>
 
 #include <engine/console.h>

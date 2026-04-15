@@ -1,7 +1,5 @@
 #include "block.h"
 
-#include <base/system.h>
-
 #include <engine/server.h>
 #include <engine/shared/config.h>
 

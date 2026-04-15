@@ -1,7 +1,7 @@
 #ifndef INSTA_SERVER_SQL_STATS_PLAYER_H
 #define INSTA_SERVER_SQL_STATS_PLAYER_H
 
-#include <base/system.h>
+#include <base/dbg.h>
 
 #include <insta/server/extra_columns.h>
 
