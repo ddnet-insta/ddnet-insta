@@ -697,6 +697,15 @@ bool CGameControllerInstaCore::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMs
 		return false;
 	if(pPlayer->GetTeam() == pMsg->m_Team)
 		return false;
+	// https://github.com/ddnet-insta/ddnet-insta/issues/640
+	// could also make the assert in ddnet-insta less strict
+	// or print a error message here
+	// but i think this is fine
+	// problem is that pMsg->m_Team is unsanitized user input
+	// and we want to call GetTeamName() in a bunch of places
+	// which would hit an assert
+	if(!IsValidTeam(pMsg->m_Team))
+		return false;
 
 	int Team = pMsg->m_Team;
 	char aReason[512] = "";
