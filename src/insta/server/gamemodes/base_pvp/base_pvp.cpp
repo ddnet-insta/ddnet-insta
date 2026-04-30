@@ -1,7 +1,6 @@
 #include "base_pvp.h"
 
 #include <base/log.h>
-#include <base/system.h>
 
 #include <engine/server/server.h>
 #include <engine/shared/config.h>

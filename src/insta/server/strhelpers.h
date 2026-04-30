@@ -1,9 +1,8 @@
 #ifndef INSTA_SERVER_STRHELPERS_H
 #define INSTA_SERVER_STRHELPERS_H
 
-#include <base/system.h>
+#include <base/types.h>
 
-#include <cctype>
 #include <cstring>
 
 const char *str_find_digit(const char *Haystack);

@@ -1,6 +1,6 @@
 // ddnet-insta specific gamecontroller methods
 #include <base/log.h>
-#include <base/system.h>
+#include <base/time.h>
 
 #include <engine/shared/config.h>
 

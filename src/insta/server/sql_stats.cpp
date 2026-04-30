@@ -2,7 +2,6 @@
 
 #include <base/log.h>
 #include <base/str.h>
-#include <base/system.h>
 #include <base/time.h>
 
 #include <engine/server/databases/connection.h>

@@ -1,3 +1,4 @@
+#include <base/io.h>
 #include <base/log.h>
 
 #include <engine/shared/config.h>
