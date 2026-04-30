@@ -3,6 +3,8 @@
 #include <base/str.h>
 #include <base/time.h>
 
+#include <cctype>
+
 const char *str_find_digit(const char *Haystack)
 {
 	char aaDigits[][2] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
