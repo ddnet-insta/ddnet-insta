@@ -2477,7 +2477,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 
 		MapView()->RenderGroupBorder();
-		MapView()->MapGrid()->OnRender(View);
+		MapView()->MapGrid()->Render();
 	}
 
 	const bool ShouldPan = Ui()->HotItem() == &m_MapEditorId && ((Input()->ModifierIsPressed() && Ui()->MouseButton(0)) || Ui()->MouseButton(2));
@@ -2652,8 +2652,10 @@ void CEditor::DoMapEditor(CUIRect View)
 					}
 					else
 					{
-						for(size_t k = 0; k < NumEditLayers; k++)
-							apEditLayers[k].second->BrushSelecting(r);
+						if(NumEditLayers > 0)
+						{
+							apEditLayers[0].second->BrushSelecting(r);
+						}
 						Ui()->MapScreen();
 					}
 				}
@@ -2674,8 +2676,10 @@ void CEditor::DoMapEditor(CUIRect View)
 					}
 					else
 					{
-						for(size_t k = 0; k < NumEditLayers; k++)
-							apEditLayers[k].second->BrushSelecting(r);
+						if(NumEditLayers > 0)
+						{
+							apEditLayers[0].second->BrushSelecting(r);
+						}
 						Ui()->MapScreen();
 					}
 				}
@@ -3765,10 +3769,7 @@ bool CEditor::ReplaceImage(const char *pFilename, int StorageType, bool CheckDup
 
 	std::shared_ptr<CEditorImage> pImg = Map()->SelectedImage();
 	pImg->CEditorImage::Free();
-	pImg->m_Width = ImgInfo.m_Width;
-	pImg->m_Height = ImgInfo.m_Height;
-	pImg->m_Format = ImgInfo.m_Format;
-	pImg->m_pData = ImgInfo.m_pData;
+	*pImg = std::move(ImgInfo);
 	str_copy(pImg->m_aName, aBuf);
 	pImg->m_External = IsVanillaImage(pImg->m_aName);
 
@@ -3823,10 +3824,8 @@ bool CEditor::AddImage(const char *pFilename, int StorageType, void *pUser)
 	}
 
 	std::shared_ptr<CEditorImage> pImg = std::make_shared<CEditorImage>(pEditor->Map());
-	pImg->m_Width = ImgInfo.m_Width;
-	pImg->m_Height = ImgInfo.m_Height;
-	pImg->m_Format = ImgInfo.m_Format;
-	pImg->m_pData = ImgInfo.m_pData;
+	*pImg = std::move(ImgInfo);
+
 	pImg->m_External = IsVanillaImage(aBuf);
 
 	ConvertToRgba(*pImg);
@@ -5345,7 +5344,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 											if(pEnvelope->GetChannels() == 1 || pEnvelope->GetChannels() == 4)
 											{
-												pEnvelope->m_vPoints[i].m_aValues[c] = std::clamp(pEnvelope->m_vPoints[i].m_aValues[c], 0, 1024);
+												pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::clamp(pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel], 0, 1024);
 												s_vAccurateDragValuesY[k] = std::clamp<float>(s_vAccurateDragValuesY[k], 0, 1024);
 											}
 										}
@@ -6582,8 +6581,9 @@ void CEditor::Render()
 		}
 	}
 
-	for(CEditorComponent &Component : m_vComponents)
-		Component.OnRender(View);
+	m_FileBrowser.Render();
+	m_Prompt.Render();
+	m_FontTyper.Render();
 
 	MapView()->UpdateZoom();
 
