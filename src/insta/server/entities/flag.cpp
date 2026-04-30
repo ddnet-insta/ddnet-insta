@@ -138,20 +138,18 @@ void CFlag::Snap(int SnappingClient)
 
 	if(Server()->IsSixup(SnappingClient))
 	{
-		protocol7::CNetObj_Flag *pFlag = Server()->SnapNewItem<protocol7::CNetObj_Flag>(m_Team);
-		if(!pFlag)
-			return;
-		pFlag->m_X = round_to_int(m_Pos.x);
-		pFlag->m_Y = round_to_int(m_Pos.y);
-		pFlag->m_Team = m_Team;
+		protocol7::CNetObj_Flag Flag = {};
+		Flag.m_X = round_to_int(m_Pos.x);
+		Flag.m_Y = round_to_int(m_Pos.y);
+		Flag.m_Team = m_Team;
+		Server()->SnapNewItem(m_Team, Flag);
 	}
 	else
 	{
-		CNetObj_Flag *pFlag = Server()->SnapNewItem<CNetObj_Flag>(m_Team);
-		if(!pFlag)
-			return;
-		pFlag->m_X = round_to_int(m_Pos.x);
-		pFlag->m_Y = round_to_int(m_Pos.y);
-		pFlag->m_Team = m_Team;
+		CNetObj_Flag Flag = {};
+		Flag.m_X = round_to_int(m_Pos.x);
+		Flag.m_Y = round_to_int(m_Pos.y);
+		Flag.m_Team = m_Team;
+		Server()->SnapNewItem(m_Team, Flag);
 	}
 }

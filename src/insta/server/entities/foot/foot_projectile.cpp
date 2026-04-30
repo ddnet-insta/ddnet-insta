@@ -242,7 +242,5 @@ void CFootProjectile::Snap(int SnappingClient)
 	if(SnappingClient != SERVER_DEMO_CLIENT && m_Owner != -1 && !TeamMask.test(SnappingClient))
 		return;
 
-	CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetId(), sizeof(CNetObj_Projectile)));
-	if(pProj)
-		FillInfo(pProj);
+	Server()->SnapNewItem(GetId(), NetInfoVanilla());
 }

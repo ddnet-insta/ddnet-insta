@@ -231,9 +231,7 @@ void CVanillaProjectile::Snap(int SnappingClient)
 	// ddnet-insta
 	if(m_Type == WEAPON_SHOTGUN)
 	{
-		CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetId(), sizeof(CNetObj_Projectile)));
-		if(pProj)
-			FillInfo(pProj);
+		Server()->SnapNewItem(GetId(), NetInfoVanilla());
 		return;
 	}
 
@@ -258,34 +256,27 @@ void CVanillaProjectile::Snap(int SnappingClient)
 	if(SnappingClient != SERVER_DEMO_CLIENT && m_Owner != -1 && !TeamMask.test(SnappingClient))
 		return;
 
-	CNetObj_DDRaceProjectile DDRaceProjectile;
-
 	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
-		CNetObj_DDNetProjectile *pDDNetProjectile = static_cast<CNetObj_DDNetProjectile *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPROJECTILE, GetId(), sizeof(CNetObj_DDNetProjectile)));
-		if(!pDDNetProjectile)
-		{
-			return;
-		}
-		FillExtraInfo(pDDNetProjectile);
+		Server()->SnapNewItem(GetId(), NetInfo());
 	}
-	else if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && FillExtraInfoLegacy(&DDRaceProjectile))
+	else if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && NetIsInfoLegacyCompatible())
 	{
-		int Type = SnappingClientVersion < VERSION_DDNET_MSG_LEGACY ? (int)NETOBJTYPE_PROJECTILE : NETOBJTYPE_DDRACEPROJECTILE;
-		void *pProj = Server()->SnapNewItem(Type, GetId(), sizeof(DDRaceProjectile));
-		if(!pProj)
+		if(SnappingClientVersion >= VERSION_DDNET_MSG_LEGACY)
 		{
-			return;
+			Server()->SnapNewItem(GetId(), NetInfoLegacy());
 		}
-		mem_copy(pProj, &DDRaceProjectile, sizeof(DDRaceProjectile));
+		else
+		{
+			CNetObj_DDRaceProjectile DDRaceProjectile = NetInfoLegacy();
+			CNetObj_Projectile Projectile = {};
+			static_assert(sizeof(DDRaceProjectile) == sizeof(Projectile));
+			mem_copy(&Projectile, &DDRaceProjectile, sizeof(Projectile));
+			Server()->SnapNewItem(GetId(), Projectile);
+		}
 	}
 	else
 	{
-		CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(GetId());
-		if(!pProj)
-		{
-			return;
-		}
-		FillInfo(pProj);
+		Server()->SnapNewItem(GetId(), NetInfoVanilla());
 	}
 }
