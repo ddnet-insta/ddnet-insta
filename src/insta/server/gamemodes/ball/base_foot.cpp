@@ -346,7 +346,7 @@ void CGameControllerBaseFoot::FireGrenade(CCharacter *Character, vec2 Direction,
 		SOUND_GRENADE_EXPLODE,
 		MouseTarget);
 
-	GameServer()->CreateSound(Character->GetPos(), SOUND_GRENADE_FIRE, Character->TeamMask());
+	GameServer()->CreateSound(Character->GetPos(), SOUND_GRENADE_FIRE, Character->TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	Character->LoseBall();
 }
 
