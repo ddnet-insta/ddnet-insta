@@ -111,7 +111,12 @@ jobs:
         echo "<!DOCTYPE html><html><head><title></title></head><body>" > settingscommands.html
         scripts/export_settings_commands_table.py >> settingscommands.html
         echo "</body></html>" >> settingscommands.html
-        tidy -errors --drop-empty-elements false settingscommands.html
+
+        # the ddnet-insta macro code breaks the export script
+        # so the html is invalid and the tidy step breaks
+        # we do not need that html anyways so we skip the step
+        # https://github.com/ddnet-insta/ddnet-insta/issues/649
+        # tidy -errors --drop-empty-elements false settingscommands.html
 
     - name: Check log error format
       run: |
