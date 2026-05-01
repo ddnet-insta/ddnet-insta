@@ -21,7 +21,7 @@ private:
 
 public:
 	CParticleCircle(CGameWorld *pGameWorld, int ClientId, int Amount) :
-		CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE, true, vec2(0.0f, 0.0f), RADIUS), m_ClientId(ClientId)
+		CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE, false, vec2(0.0f, 0.0f), RADIUS), m_ClientId(ClientId)
 	{
 		for(std::optional<int> &Particle : m_aParticles)
 			Particle = Server()->SnapNewId();

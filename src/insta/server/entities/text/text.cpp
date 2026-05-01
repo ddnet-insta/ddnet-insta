@@ -3,7 +3,7 @@
 #include <engine/server.h>
 
 CText::CText(CGameWorld *pGameWorld, CClientMask Mask, vec2 Pos, int AliveTicks, const char *pText, int EntType) :
-	CEntity(pGameWorld, EntType, true, Pos)
+	CEntity(pGameWorld, EntType, false, Pos)
 {
 	m_CurTicks = 0;
 	m_StartTick = Server()->Tick();
