@@ -15,23 +15,24 @@
 class CParticleCircle : public CEntity
 {
 private:
-	int m_aParticles[5];
+	std::optional<int> m_aParticles[5];
 	static constexpr float RADIUS = 30.0f;
 	const int m_ClientId;
 
 public:
 	CParticleCircle(CGameWorld *pGameWorld, int ClientId, int Amount) :
-		CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE, vec2(0.0f, 0.0f), RADIUS), m_ClientId(ClientId)
+		CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE, true, vec2(0.0f, 0.0f), RADIUS), m_ClientId(ClientId)
 	{
-		for(int &Particle : m_aParticles)
+		for(std::optional<int> &Particle : m_aParticles)
 			Particle = Server()->SnapNewId();
 		m_Number = Amount;
 		GameWorld()->InsertEntity(this);
 	}
 	~CParticleCircle() override
 	{
-		for(const int &Particle : m_aParticles)
-			Server()->SnapFreeId(Particle);
+		for(const std::optional<int> &Particle : m_aParticles)
+			if(Particle.has_value())
+				Server()->SnapFreeId(Particle.value());
 	}
 	void Tick() override
 	{
@@ -48,7 +49,9 @@ public:
 		const float Tick = (float)Server()->Tick() / 8.0f * (float)m_Number;
 		for(int i = 0; i < (int)std::size(m_aParticles); ++i)
 		{
-			const int &Particle = m_aParticles[i];
+			const std::optional<int> &Particle = m_aParticles[i];
+			if(!Particle.has_value())
+				continue;
 
 			float Angle = (float)i / (float)std::size(m_aParticles) * (2.0f * pi) + Tick;
 			vec2 Pos = m_Pos + direction(Angle) * RADIUS;
@@ -60,7 +63,7 @@ public:
 			Obj.m_VelY = 0;
 			Obj.m_Type = WEAPON_HAMMER;
 			Obj.m_StartTick = Server()->Tick();
-			Server()->SnapNewItem(Particle, Obj);
+			Server()->SnapNewItem(Particle.value(), Obj);
 		}
 	}
 };

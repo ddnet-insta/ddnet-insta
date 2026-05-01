@@ -14,7 +14,7 @@
 #include <insta/server/gamemodes/ball/base_foot.h>
 
 CFootPickup::CFootPickup(CGameWorld *pGameWorld, int Layer, int Number) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, vec2(0.0f, 0.0f), PICKUP_PHYS_SIZE)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, true, vec2(0.0f, 0.0f), PICKUP_PHYS_SIZE)
 {
 	m_Type = POWERUP_WEAPON;
 	m_Subtype = WEAPON_GRENADE;
@@ -85,6 +85,8 @@ void CFootPickup::Snap(int SnappingClient)
 {
 	if(NetworkClipped(SnappingClient))
 		return;
+	if(!GetId().has_value())
+		return;
 
 	CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
 	if(!pChar)
@@ -110,7 +112,7 @@ void CFootPickup::Snap(int SnappingClient)
 			return;
 	}
 
-	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup, SnappingClient), GetId(), m_Pos, m_Type, m_Subtype, m_Number, PICKUPFLAG_NO_PREDICT);
+	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup, SnappingClient), GetId().value(), m_Pos, m_Type, m_Subtype, m_Number, PICKUPFLAG_NO_PREDICT);
 }
 
 void CFootPickup::Move()

@@ -227,11 +227,13 @@ void CVanillaProjectile::Snap(int SnappingClient)
 
 	if(NetworkClipped(SnappingClient, GetPos(Ct)))
 		return;
+	if(!GetId().has_value())
+		return;
 
 	// ddnet-insta
 	if(m_Type == WEAPON_SHOTGUN)
 	{
-		Server()->SnapNewItem(GetId(), NetInfoVanilla());
+		Server()->SnapNewItem(GetId().value(), NetInfoVanilla());
 		return;
 	}
 
@@ -258,13 +260,13 @@ void CVanillaProjectile::Snap(int SnappingClient)
 
 	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
-		Server()->SnapNewItem(GetId(), NetInfo());
+		Server()->SnapNewItem(GetId().value(), NetInfo());
 	}
 	else if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && NetIsInfoLegacyCompatible())
 	{
 		if(SnappingClientVersion >= VERSION_DDNET_MSG_LEGACY)
 		{
-			Server()->SnapNewItem(GetId(), NetInfoLegacy());
+			Server()->SnapNewItem(GetId().value(), NetInfoLegacy());
 		}
 		else
 		{
@@ -272,11 +274,11 @@ void CVanillaProjectile::Snap(int SnappingClient)
 			CNetObj_Projectile Projectile = {};
 			static_assert(sizeof(DDRaceProjectile) == sizeof(Projectile));
 			mem_copy(&Projectile, &DDRaceProjectile, sizeof(Projectile));
-			Server()->SnapNewItem(GetId(), Projectile);
+			Server()->SnapNewItem(GetId().value(), Projectile);
 		}
 	}
 	else
 	{
-		Server()->SnapNewItem(GetId(), NetInfoVanilla());
+		Server()->SnapNewItem(GetId().value(), NetInfoVanilla());
 	}
 }

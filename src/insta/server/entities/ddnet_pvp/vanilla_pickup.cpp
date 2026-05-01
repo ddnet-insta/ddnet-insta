@@ -13,7 +13,7 @@
 static constexpr int gs_PickupPhysSize = 14;
 
 CVanillaPickup::CVanillaPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, vec2(0, 0), gs_PickupPhysSize)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, true, vec2(0, 0), gs_PickupPhysSize)
 {
 	m_Core = vec2(0.0f, 0.0f);
 	m_Type = Type;
@@ -149,6 +149,8 @@ void CVanillaPickup::Snap(int SnappingClient)
 {
 	if(m_SpawnTick != -1 || NetworkClipped(SnappingClient))
 		return;
+	if(!GetId().has_value())
+		return;
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	bool Sixup = Server()->IsSixup(SnappingClient);
@@ -165,7 +167,7 @@ void CVanillaPickup::Snap(int SnappingClient)
 			return;
 	}
 
-	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup, SnappingClient), GetId(), m_Pos, m_Type, m_Subtype, m_Number, PICKUPFLAG_NO_PREDICT);
+	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup, SnappingClient), GetId().value(), m_Pos, m_Type, m_Subtype, m_Number, PICKUPFLAG_NO_PREDICT);
 }
 
 void CVanillaPickup::Move()

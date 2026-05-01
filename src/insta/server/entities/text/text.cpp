@@ -3,7 +3,7 @@
 #include <engine/server.h>
 
 CText::CText(CGameWorld *pGameWorld, CClientMask Mask, vec2 Pos, int AliveTicks, const char *pText, int EntType) :
-	CEntity(pGameWorld, EntType, Pos)
+	CEntity(pGameWorld, EntType, true, Pos)
 {
 	m_CurTicks = 0;
 	m_StartTick = Server()->Tick();
@@ -71,7 +71,11 @@ void CText::SetData(float Cell)
 						continue;
 
 					const vec2 Pos = m_Pos + vec2((XCursorCols + (float)(c - MinC)) * Cell * 0.70f, ((float)r + YOffCells) * Cell * 0.70f);
-					const int EntityId = Server()->SnapNewId();
+					auto FreeId = Server()->SnapNewId();
+					if(!FreeId.has_value())
+						continue;
+
+					const int EntityId = FreeId.value();
 
 					auto *pD = new STextData();
 					pD->m_Id = EntityId;

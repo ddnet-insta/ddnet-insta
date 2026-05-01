@@ -227,6 +227,8 @@ void CFootProjectile::Snap(int SnappingClient)
 	const float Ct = (Server()->Tick() - m_StartTick) / static_cast<float>(Server()->TickSpeed());
 	if(NetworkClipped(SnappingClient, GetPos(Ct)))
 		return;
+	if(!GetId().has_value())
+		return;
 
 	const int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	if(SnappingClientVersion < VERSION_DDNET_ENTITY_NETOBJS)
@@ -242,5 +244,5 @@ void CFootProjectile::Snap(int SnappingClient)
 	if(SnappingClient != SERVER_DEMO_CLIENT && m_Owner != -1 && !TeamMask.test(SnappingClient))
 		return;
 
-	Server()->SnapNewItem(GetId(), NetInfoVanilla());
+	Server()->SnapNewItem(GetId().value(), NetInfoVanilla());
 }
