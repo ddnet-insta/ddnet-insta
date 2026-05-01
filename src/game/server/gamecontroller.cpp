@@ -821,10 +821,9 @@ void IGameController::Snap(int SnappingClient)
 	if(g_Config.m_SvNoWeakHook)
 		GameInfoEx.m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
 	GameInfoEx.m_Version = GAMEINFO_CURVERSION;
-	Server()->SnapNewItem(0, GameInfoEx);
-
 	GameInfoEx.m_Flags = SnapGameInfoExFlags(SnappingClient, GameInfoEx.m_Flags); // ddnet-insta
 	GameInfoEx.m_Flags2 = SnapGameInfoExFlags2(SnappingClient, GameInfoEx.m_Flags2); // ddnet-insta
+	Server()->SnapNewItem(0, GameInfoEx);
 
 	if(Server()->IsSixup(SnappingClient))
 	{
