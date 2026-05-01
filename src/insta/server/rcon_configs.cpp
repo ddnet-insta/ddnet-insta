@@ -36,16 +36,21 @@ void CGameContext::RegisterInstagibCommands()
 	Console()->Chain("sv_grenade_ammo_regen_on_kill", ConchainGrenadeAmmoRegenSetting, this);
 	Console()->Chain("sv_grenade_ammo_regen_reset_on_fire", ConchainGrenadeAmmoRegenSetting, this);
 
+// https://github.com/ddnet-insta/ddnet-insta/issues/649
+#define IgnoreDocReg Console()->Register
+
 	// generated undocumented chat commands
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;
 #define MACRO_RANK_COLUMN(name, sql_name, display_name, order_by) \
-	Console()->Register("rank_" #sql_name, "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaRank##name, this, "Shows the all time " #sql_name " rank of player name (your stats by default)");
+	IgnoreDocReg("rank_" #sql_name, "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaRank##name, this, "Shows the all time " #sql_name " rank of player name (your stats by default)");
 #define MACRO_TOP_COLUMN(name, sql_name, display_name, order_by) \
-	Console()->Register("top5" #sql_name, "?i[rank to start with]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaTop##name, this, "Shows the all time best ranks by " #sql_name);
+	IgnoreDocReg("top5" #sql_name, "?i[rank to start with]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaTop##name, this, "Shows the all time best ranks by " #sql_name);
 #include <insta/server/sql_columns_all.h>
 #undef MACRO_ADD_COLUMN
 #undef MACRO_RANK_COLUMN
 #undef MACRO_TOP_COLUMN
+
+#undef IgnoreDocReg
 
 	// chat commands
 #define CHAT_COMMAND(name, params, flags, callback, userdata, help) Console()->Register(name, params, flags, callback, userdata, help);
