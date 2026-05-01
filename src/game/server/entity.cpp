@@ -7,11 +7,12 @@
 #include "player.h"
 
 #include <game/server/gamecontroller.h> // ddnet-insta
+#include <game/server/gameworld.h>
 
 //////////////////////////////////////////////////
 // Entity
 //////////////////////////////////////////////////
-CEntity::CEntity(CGameWorld *pGameWorld, int ObjType, vec2 Pos, int ProximityRadius)
+CEntity::CEntity(CGameWorld *pGameWorld, int ObjType, bool SnapFreeId, vec2 Pos, int ProximityRadius)
 {
 	m_pGameWorld = pGameWorld;
 	m_pCCollision = GameServer()->Collision();
@@ -21,7 +22,8 @@ CEntity::CEntity(CGameWorld *pGameWorld, int ObjType, vec2 Pos, int ProximityRad
 	m_ProximityRadius = ProximityRadius;
 
 	m_MarkedForDestroy = false;
-	m_Id = Server()->SnapNewId();
+	if(SnapFreeId)
+		m_Id = Server()->SnapNewId();
 
 	m_pPrevTypeEntity = nullptr;
 	m_pNextTypeEntity = nullptr;
@@ -30,7 +32,8 @@ CEntity::CEntity(CGameWorld *pGameWorld, int ObjType, vec2 Pos, int ProximityRad
 CEntity::~CEntity()
 {
 	GameWorld()->RemoveEntity(this);
-	Server()->SnapFreeId(m_Id);
+	if(m_Id.has_value())
+		Server()->SnapFreeId(m_Id.value());
 }
 
 bool CEntity::NetworkClipped(int SnappingClient)
