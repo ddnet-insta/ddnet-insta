@@ -53,16 +53,14 @@ public:
 			float Angle = (float)i / (float)std::size(m_aParticles) * (2.0f * pi) + Tick;
 			vec2 Pos = m_Pos + direction(Angle) * RADIUS;
 
-			CNetObj_Projectile *pObj = Server()->SnapNewItem<CNetObj_Projectile>(Particle);
-			if(!pObj)
-				return;
-
-			pObj->m_X = Pos.x;
-			pObj->m_Y = Pos.y;
-			pObj->m_VelX = 0;
-			pObj->m_VelY = 0;
-			pObj->m_Type = WEAPON_HAMMER;
-			pObj->m_StartTick = Server()->Tick();
+			CNetObj_Projectile Obj = {};
+			Obj.m_X = Pos.x;
+			Obj.m_Y = Pos.y;
+			Obj.m_VelX = 0;
+			Obj.m_VelY = 0;
+			Obj.m_Type = WEAPON_HAMMER;
+			Obj.m_StartTick = Server()->Tick();
+			Server()->SnapNewItem(Particle, Obj);
 		}
 	}
 };

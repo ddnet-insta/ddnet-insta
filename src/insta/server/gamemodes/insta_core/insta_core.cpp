@@ -1198,31 +1198,24 @@ void CGameControllerInstaCore::Snap(int SnappingClient)
 	{
 		if(Server()->IsSixup(SnappingClient))
 		{
-			protocol7::CNetObj_GameDataFlag *pGameDataObj = Server()->SnapNewItem<protocol7::CNetObj_GameDataFlag>(0);
-			if(!pGameDataObj)
-				return;
+			protocol7::CNetObj_GameDataFlag GameData = {};
+			GameData.m_FlagCarrierRed = SnapFlagCarrierRed(SnappingClient);
+			GameData.m_FlagCarrierBlue = SnapFlagCarrierBlue(SnappingClient);
+			Server()->SnapNewItem(0, GameData);
 
-			pGameDataObj->m_FlagCarrierRed = SnapFlagCarrierRed(SnappingClient);
-			pGameDataObj->m_FlagCarrierBlue = SnapFlagCarrierBlue(SnappingClient);
-
-			protocol7::CNetObj_GameDataTeam *pGameDataTeam = Server()->SnapNewItem<protocol7::CNetObj_GameDataTeam>(0);
-			if(!pGameDataTeam)
-				return;
-
-			pGameDataTeam->m_TeamscoreRed = SnapTeamscoreRed(SnappingClient);
-			pGameDataTeam->m_TeamscoreBlue = SnapTeamscoreBlue(SnappingClient);
+			protocol7::CNetObj_GameDataTeam GameDataTeam = {};
+			GameDataTeam.m_TeamscoreRed = SnapTeamscoreRed(SnappingClient);
+			GameDataTeam.m_TeamscoreBlue = SnapTeamscoreBlue(SnappingClient);
+			Server()->SnapNewItem(0, GameDataTeam);
 		}
 		else
 		{
-			CNetObj_GameData *pGameDataObj = Server()->SnapNewItem<CNetObj_GameData>(0);
-			if(!pGameDataObj)
-				return;
-
-			pGameDataObj->m_FlagCarrierRed = SnapFlagCarrierRed(SnappingClient);
-			pGameDataObj->m_FlagCarrierBlue = SnapFlagCarrierBlue(SnappingClient);
-
-			pGameDataObj->m_TeamscoreRed = SnapTeamscoreRed(SnappingClient);
-			pGameDataObj->m_TeamscoreBlue = SnapTeamscoreBlue(SnappingClient);
+			CNetObj_GameData GameData = {};
+			GameData.m_FlagCarrierRed = SnapFlagCarrierRed(SnappingClient);
+			GameData.m_FlagCarrierBlue = SnapFlagCarrierBlue(SnappingClient);
+			GameData.m_TeamscoreRed = SnapTeamscoreRed(SnappingClient);
+			GameData.m_TeamscoreBlue = SnapTeamscoreBlue(SnappingClient);
+			Server()->SnapNewItem(0, GameData);
 		}
 	}
 }

@@ -34,17 +34,15 @@ void CLaserText::Snap(int SnappingClient)
 		if(NetworkClipped(SnappingClient, Pos))
 			continue;
 
-		auto *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(pData->m_Id);
-		if(!pObj)
-			return;
-
-		pObj->m_ToX = (float)Pos.x;
-		pObj->m_ToY = (float)Pos.y;
-		pObj->m_FromX = (float)Pos.x;
-		pObj->m_FromY = (float)Pos.y;
-		pObj->m_StartTick = Server()->Tick();
-		pObj->m_Owner = -1;
-		pObj->m_Type = LASERTYPE_RIFLE;
-		pObj->m_Flags = LASERFLAG_NO_PREDICT;
+		CNetObj_DDNetLaser Obj = {};
+		Obj.m_ToX = (float)Pos.x;
+		Obj.m_ToY = (float)Pos.y;
+		Obj.m_FromX = (float)Pos.x;
+		Obj.m_FromY = (float)Pos.y;
+		Obj.m_StartTick = Server()->Tick();
+		Obj.m_Owner = -1;
+		Obj.m_Type = LASERTYPE_RIFLE;
+		Obj.m_Flags = LASERFLAG_NO_PREDICT;
+		Server()->SnapNewItem(pData->m_Id, Obj);
 	}
 }
