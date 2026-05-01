@@ -334,7 +334,7 @@ void CGameControllerBaseFoot::FireGrenade(CCharacter *Character, vec2 Direction,
 		return;
 	}
 
-	CFootProjectile *pProj = new CFootProjectile(
+	new CFootProjectile(
 		&GameServer()->m_World,
 		WEAPON_GRENADE,
 		pPlayer->GetCid(),
@@ -345,10 +345,6 @@ void CGameControllerBaseFoot::FireGrenade(CCharacter *Character, vec2 Direction,
 		false,
 		SOUND_GRENADE_EXPLODE,
 		MouseTarget);
-
-	// pack the Projectile and send it to the client Directly
-	CNetObj_Projectile p;
-	pProj->FillInfo(&p);
 
 	GameServer()->CreateSound(Character->GetPos(), SOUND_GRENADE_FIRE, Character->TeamMask());
 	Character->LoseBall();
