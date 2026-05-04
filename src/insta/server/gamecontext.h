@@ -13,6 +13,8 @@
 #include <insta/server/enums.h>
 #include <insta/server/ip_storage.h>
 
+#include <vector>
+
 class CGameContext : public IGameServer
 {
 #endif // IN_CLASS_IGAMECONTEXT
@@ -69,6 +71,11 @@ public:
 	// in offline entries
 	CIpStorage *FindIpStorageEntryOfflineAndOnline(int EntryId);
 
+	// https://github.com/ddnet-insta/ddnet-insta/issues/638
+	// passwords that can be used in addition to the standard "password"
+	// config variable
+	std::vector<std::string> m_vPasswords;
+
 	// set by the config sv_display_score
 	EDisplayScore m_DisplayScore = EDisplayScore::ROUND_POINTS;
 
@@ -108,6 +115,10 @@ public:
 	static void ConSwapTeams(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserData);
 	static void ConForceTeamBalance(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddPassword(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemovePassword(IConsole::IResult *pResult, void *pUserData);
+	static void ConClearPasswords(IConsole::IResult *pResult, void *pUserData);
+	static void ConListPasswords(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddMapToPool(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearMapPool(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomMapFromPool(IConsole::IResult *pResult, void *pUserData);

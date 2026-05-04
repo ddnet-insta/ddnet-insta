@@ -1354,6 +1354,28 @@ bool CGameControllerInstaCore::OnClientPacket(int ClientId, bool Sys, int MsgId,
 		if(Server()->SixupUsernameAuth(ClientId, pCredentials))
 			return true;
 	}
+	else if(Sys && MsgId == NETMSG_INFO)
+	{
+		const char *pVersion = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+		if(Unpacker.Error())
+			return false;
+		const char *pPassword = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+		if(Unpacker.Error())
+			pPassword = nullptr;
+
+		if(pPassword)
+		{
+			const auto &vPasswords = GameServer()->m_vPasswords;
+			if(std::find(vPasswords.begin(), vPasswords.end(), pPassword) != vPasswords.end())
+			{
+				pPassword = g_Config.m_Password;
+			}
+		}
+
+		CServer *pServer = static_cast<CServer *>(Server());
+		pServer->OnNetMsgInfo(ClientId, pVersion, pPassword);
+		return false;
+	}
 
 	return false;
 }

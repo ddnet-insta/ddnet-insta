@@ -27,6 +27,11 @@ CONSOLE_COMMAND("swap_teams", "", CFGFLAG_SERVER, ConSwapTeams, this, "Swap the 
 CONSOLE_COMMAND("swap_teams_random", "", CFGFLAG_SERVER, ConSwapTeamsRandom, this, "Swap the current teams or not (random chance)")
 CONSOLE_COMMAND("force_teambalance", "", CFGFLAG_SERVER, ConForceTeamBalance, this, "Force team balance")
 
+CONSOLE_COMMAND("add_password", "r[password]", CFGFLAG_SERVER, ConAddPassword, this, "add another password in addition to the \"password\" config")
+CONSOLE_COMMAND("remove_password", "r[password]", CFGFLAG_SERVER, ConRemovePassword, this, "remove password added with \"add_password\"")
+CONSOLE_COMMAND("clear_passwords", "", CFGFLAG_SERVER, ConClearPasswords, this, "remove all passwords added with \"add_password\"")
+CONSOLE_COMMAND("list_passwords", "", CFGFLAG_SERVER, ConListPasswords, this, "list passwords added with \"add_password\"")
+
 CONSOLE_COMMAND("add_map_to_pool", "s[map name]", CFGFLAG_SERVER, ConAddMapToPool, this, "Can be picked by random_map_from_pool command (entries can be duplicated to increase chance)")
 CONSOLE_COMMAND("clear_map_pool", "", CFGFLAG_SERVER, ConClearMapPool, this, "Clears pool used by random_map_from_pool command")
 CONSOLE_COMMAND("random_map_from_pool", "", CFGFLAG_SERVER, ConRandomMapFromPool, this, "Changes to random map from pool (see add_map_to_pool)")

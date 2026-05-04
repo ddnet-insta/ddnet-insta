@@ -175,6 +175,10 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `swap_teams` Swap the current teams
 + `swap_teams_random` Swap the current teams or not (random chance)
 + `force_teambalance` Force team balance
++ `add_password` add another password in addition to the \"password\" config
++ `remove_password` remove password added with \"add_password\"
++ `clear_passwords` remove all passwords added with \"add_password\"
++ `list_passwords` list passwords added with \"add_password\"
 + `add_map_to_pool` Can be picked by random_map_from_pool command (entries can be duplicated to increase chance)
 + `clear_map_pool` Clears pool used by random_map_from_pool command
 + `random_map_from_pool` Changes to random map from pool (see add_map_to_pool)

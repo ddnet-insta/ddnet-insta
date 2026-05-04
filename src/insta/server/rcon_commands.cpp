@@ -135,6 +135,62 @@ void CGameContext::ConForceTeamBalance(IConsole::IResult *pResult, void *pUserDa
 	pSelf->m_pController->DoTeamBalance();
 }
 
+void CGameContext::ConAddPassword(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pPassword = pResult->GetString(0);
+
+	if(std::find(pSelf->m_vPasswords.begin(), pSelf->m_vPasswords.end(), pPassword) != pSelf->m_vPasswords.end())
+	{
+		log_warn("server", "the password '%s' was already added", pPassword);
+		return;
+	}
+
+	log_info("server", "the password '%s' now can be used to join the server", pPassword);
+	pSelf->m_vPasswords.emplace_back(pPassword);
+}
+
+void CGameContext::ConRemovePassword(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pPassword = pResult->GetString(0);
+
+	if(std::find(pSelf->m_vPasswords.begin(), pSelf->m_vPasswords.end(), pPassword) == pSelf->m_vPasswords.end())
+	{
+		log_warn("server", "the password '%s' is not in the list", pPassword);
+		return;
+	}
+
+	pSelf->m_vPasswords.erase(
+		std::remove(pSelf->m_vPasswords.begin(), pSelf->m_vPasswords.end(), pPassword),
+		pSelf->m_vPasswords.end());
+	log_warn("server", "removed password '%s'", pPassword);
+}
+
+void CGameContext::ConClearPasswords(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	log_info("server", "removing %" PRIzu " password entries", pSelf->m_vPasswords.size());
+	pSelf->m_vPasswords.clear();
+}
+
+void CGameContext::ConListPasswords(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	log_info("server", "there are %" PRIzu " password entries:", pSelf->m_vPasswords.size());
+	int NumPrinted = 0;
+	for(std::string &Password : pSelf->m_vPasswords)
+	{
+		// do not flood the rcon logs if there are a lot of passwords
+		if(NumPrinted > 10)
+		{
+			log_info("server", " and more ...");
+			break;
+		}
+		log_info("server", " '%s'", Password.c_str());
+	}
+}
+
 void CGameContext::ConAddMapToPool(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
