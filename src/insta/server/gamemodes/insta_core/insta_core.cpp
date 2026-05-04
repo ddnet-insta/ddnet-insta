@@ -607,6 +607,20 @@ void CGameControllerInstaCore::Tick()
 	CGameControllerDDNet::Tick();
 	GameServer()->m_IpStorageController.OnTick(Server()->Tick());
 
+	if(g_Config.m_SvPublishLiveStats && m_StatsPublishRequested)
+	{
+		int Seconds = (Server()->Tick() - m_LastStatsPublishTick) / Server()->TickSpeed();
+		// a bit of ratelimiting to not resend too often
+		// stats could change multiple times per tick
+		// and the publish can build a big json that
+		// gets sent over the network
+		if(Seconds > g_Config.m_SvLiveStatsInterval)
+		{
+			PublishRoundEndStats(false);
+			m_StatsPublishRequested = false;
+		}
+	}
+
 	if(m_TicksUntilShutdown)
 	{
 		m_TicksUntilShutdown--;

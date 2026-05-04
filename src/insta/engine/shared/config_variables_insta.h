@@ -139,6 +139,8 @@ MACRO_CONFIG_INT(SvRoundStatsFormatDiscord, sv_round_stats_format_discord, 1, 0,
 MACRO_CONFIG_INT(SvRoundStatsFormatHttp, sv_round_stats_format_http, 4, 0, 4, CFGFLAG_SERVER, "0=csv 1=psv 2=ascii table 3=markdown table 4=json")
 MACRO_CONFIG_INT(SvRoundStatsFormatFile, sv_round_stats_format_file, 1, 0, 4, CFGFLAG_SERVER, "0=csv 1=psv 2=ascii table 3=markdown table 4=json")
 MACRO_CONFIG_INT(SvPrintRoundStats, sv_print_round_stats, 0, 0, 1, CFGFLAG_SERVER, "print top players in chat on round end")
+MACRO_CONFIG_INT(SvPublishLiveStats, sv_publish_live_stats, 0, 0, 1, CFGFLAG_SERVER, "publish the round stats before the round ends as soon as the score changes")
+MACRO_CONFIG_INT(SvLiveStatsInterval, sv_live_stats_interval, 3, 1, 60, CFGFLAG_SERVER, "minimum delay in seconds between stats republish if sv_publish_live_stats is on")
 MACRO_CONFIG_STR(SvRaceStatsHttpEndpoints, sv_race_stats_http_endpoints, 512, "", CFGFLAG_SERVER, "publish stats on finish for each player individually")
 MACRO_CONFIG_INT(SvClearStatsOnRaceStart, sv_clear_stats_on_race_start, 0, 0, 1, CFGFLAG_SERVER, "Delete players round stats without saving them when touching the start line")
 MACRO_CONFIG_INT(SvKillTileDestroysBall, sv_kill_tile_destroys_ball, 0, 0, 1, CFGFLAG_SERVER, "Destroy the ball when it touches death tile (only foot)")

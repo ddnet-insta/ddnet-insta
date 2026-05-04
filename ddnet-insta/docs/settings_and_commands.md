@@ -132,6 +132,8 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_round_stats_format_http` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
 + `sv_round_stats_format_file` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
 + `sv_print_round_stats` print top players in chat on round end
++ `sv_publish_live_stats` publish the round stats before the round ends as soon as the score changes
++ `sv_live_stats_interval` minimum delay in seconds between stats republish if sv_publish_live_stats is on
 + `sv_clear_stats_on_race_start` Delete players round stats without saving them when touching the start line
 + `sv_kill_tile_destroys_ball` Destroy the ball when it touches death tile (only foot)
 + `sv_ball_bounce_friction` The ball looses that much speed after a bounce (only foot)

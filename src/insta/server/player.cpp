@@ -66,6 +66,11 @@ void CPlayer::AddScore(int Score)
 	if(GameServer()->GetDDRaceTeam(GetCid()))
 		return;
 
+	if(Score != 0 && GameServer()->m_pController && g_Config.m_SvPublishLiveStats)
+	{
+		GameServer()->m_pController->m_StatsPublishRequested = true;
+	}
+
 	// never decrement the tracked score
 	// so fakers can not remove points from others
 	if(Score > 0 && GameServer()->m_pController && GameServer()->m_pController->IsStatTrack())

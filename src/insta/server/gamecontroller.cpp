@@ -209,6 +209,11 @@ void IGameController::AddTeamscore(int Team, int Score)
 	if(Team != TEAM_RED && Team != TEAM_BLUE)
 		return;
 
+	if(g_Config.m_SvPublishLiveStats && Score != 0)
+	{
+		m_StatsPublishRequested = true;
+	}
+
 	m_aTeamscore[Team] += Score;
 }
 

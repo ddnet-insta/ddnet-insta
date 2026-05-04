@@ -1610,6 +1610,9 @@ public:
 	bool PublishRoundEndStats(bool LogStats);
 	void SendRoundTopMessage(int ClientId);
 
+	bool m_StatsPublishRequested = false;
+	int m_LastStatsPublishTick = 0;
+
 	enum
 	{
 		TIMER_INFINITE = -1,

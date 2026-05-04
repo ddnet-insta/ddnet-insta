@@ -390,21 +390,24 @@ bool IGameController::PublishRoundEndStats(bool LogStats)
 		NumSent++;
 		GetRoundEndStatsStrDiscord(aStats, sizeof(aStats));
 		PublishRoundEndStatsStrDiscord(aStats);
-		log_info("ddnet-insta", "publishing round stats to discord");
+		if(LogStats)
+			log_info("ddnet-insta", "publishing round stats to discord");
 	}
 	if(g_Config.m_SvRoundStatsHttpEndpoints[0] != '\0')
 	{
 		NumSent++;
 		GetRoundEndStatsStrHttp(aStats, sizeof(aStats));
 		PublishRoundEndStatsStrHttp(aStats);
-		log_info("ddnet-insta", "publishing round stats to custom http endpoint");
+		if(LogStats)
+			log_info("ddnet-insta", "publishing round stats to custom http endpoint");
 	}
 	if(g_Config.m_SvRoundStatsOutputFile[0] != '\0')
 	{
 		NumSent++;
 		GetRoundEndStatsStrFile(aStats, sizeof(aStats));
 		PublishRoundEndStatsStrFile(aStats);
-		log_info("ddnet-insta", "publishing round stats to file");
+		if(LogStats)
+			log_info("ddnet-insta", "publishing round stats to file");
 	}
 
 	if(aStats[0] && LogStats)
@@ -412,6 +415,7 @@ bool IGameController::PublishRoundEndStats(bool LogStats)
 		log_info("ddnet-insta", "%s", aStats);
 	}
 
+	m_LastStatsPublishTick = Server()->Tick();
 	return NumSent != 0;
 }
 
