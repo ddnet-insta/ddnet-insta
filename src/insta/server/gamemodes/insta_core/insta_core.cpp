@@ -499,19 +499,20 @@ void CGameControllerInstaCore::OnFlagGrab(CFlag *pFlag)
 {
 	if(!pFlag)
 		return;
-	if(!pFlag->IsAtStand())
-		return;
 	if(!pFlag->GetCarrier())
 		return;
-
 	CPlayer *pPlayer = pFlag->GetCarrier()->GetPlayer();
-	if(IsStatTrack())
-		pPlayer->m_Stats.m_FlagGrabs++;
-
-	log_info("game", "flag_grab player='%d:%s' team=%d",
+	log_info("game", "flag_grab at_stand=%d player='%d:%s' team=%d",
+		pFlag->IsAtStand(),
 		pPlayer->GetCid(),
 		Server()->ClientName(pFlag->GetCarrier()->GetPlayer()->GetCid()),
 		pPlayer->GetTeam());
+	if(!pFlag->IsAtStand())
+		return;
+
+	if(IsStatTrack())
+		pPlayer->m_Stats.m_FlagGrabs++;
+
 	GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_GRAB, pFlag->m_Team, -1);
 }
 
