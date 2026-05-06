@@ -1373,6 +1373,7 @@ public:
 	// but the actual implementation is in CGameControllerBasePvp::IsGrenadeGameType()
 	virtual bool IsGrenadeGameType() const { return true; }
 	virtual bool IsFngGameType() const { return false; }
+	virtual bool IsTrainFngGameType() const { return false; }
 	virtual bool IsZcatchGameType() const { return false; }
 	bool IsVanillaGameType() const { return m_IsVanillaGameType; }
 

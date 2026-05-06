@@ -3,6 +3,7 @@
 
 #include <generated/protocol.h>
 
+#include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
@@ -744,6 +745,52 @@ void CGameContext::ConTopSpikeColors(IConsole::IResult *pResult, void *pUserData
 		str_format(aBuf, sizeof(aBuf), "~ %s", pColor);
 		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
 	}
+}
+
+void CGameContext::ConSetSpawn(IConsole::IResult *pResult, void *pUserData)
+{
+	auto *pSelf = static_cast<CGameContext *>(pUserData);
+	if(!pSelf->m_pController->IsTrainFngGameType())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "This command is not available in this mode.");
+		return;
+	}
+
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+
+	CPlayer *pPlayer = pChr->GetPlayer();
+	if(!pPlayer)
+		return;
+
+	if(!pPlayer->m_pTrainSave)
+		pPlayer->m_pTrainSave = new CSaveTee();
+
+	pPlayer->m_pTrainSave->Save(pChr);
+	pSelf->SendChatTarget(pResult->m_ClientId, "Spawn position updated");
+}
+
+void CGameContext::ConSpawnReset(IConsole::IResult *pResult, void *pUserData)
+{
+	auto *pSelf = static_cast<CGameContext *>(pUserData);
+	if(!pSelf->m_pController->IsTrainFngGameType())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "This command is not available in this mode.");
+		return;
+	}
+
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+
+	CPlayer *pPlayer = pChr->GetPlayer();
+	if(!pPlayer || !pPlayer->m_pTrainSave)
+		return;
+
+	delete pPlayer->m_pTrainSave;
+	pPlayer->m_pTrainSave = nullptr;
+	pSelf->SendChatTarget(pResult->m_ClientId, "Spawn position reset");
 }
 
 // NOLINTBEGIN(misc-definitions-in-headers)

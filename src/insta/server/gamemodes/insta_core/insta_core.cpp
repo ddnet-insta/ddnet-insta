@@ -264,6 +264,12 @@ void CGameControllerInstaCore::InstaCoreDisconnect(CPlayer *pPlayer, const char 
 		m_pDeadSpecController->OnPlayerDisconnect(pPlayer);
 	m_InvalidateConnectedIpsCache = true;
 
+	if(pPlayer->m_pTrainSave)
+	{
+		delete pPlayer->m_pTrainSave;
+		pPlayer->m_pTrainSave = nullptr;
+	}
+
 	while(true)
 	{
 		if(!g_Config.m_SvPunishFreezeDisconnect)
@@ -577,6 +583,18 @@ void CGameControllerInstaCore::OnCharacterSpawn(class CCharacter *pChr)
 int CGameControllerInstaCore::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
 	CGameControllerDDNet::OnCharacterDeath(pVictim, pKiller, Weapon);
+
+	CPlayer *pPlayer = pVictim->GetPlayer();
+	if(pPlayer && pPlayer->m_pTrainSave)
+	{
+		pPlayer->m_DeathsPerSeconds++;
+		if(g_Config.m_SvDeathrateThreshold > 0 && pPlayer->m_DeathsPerSeconds > g_Config.m_SvDeathrateThreshold)
+		{
+			log_info("game", "High death rate: %d/sec, id: %d, limit: %d", pPlayer->m_DeathsPerSeconds, pPlayer->GetCid(), g_Config.m_SvDeathrateThreshold);
+			delete pPlayer->m_pTrainSave;
+			pPlayer->m_pTrainSave = nullptr;
+		}
+	}
 
 	if(pVictim->HasRainbow())
 		pVictim->Rainbow(false);
@@ -1191,6 +1209,8 @@ void CGameControllerInstaCore::InitPlayer(CPlayer *pPlayer)
 	pPlayer->m_DisplayScore = GameServer()->m_DisplayScore;
 	pPlayer->m_JoinTime = time_get();
 
+	pPlayer->m_DeathsPerSeconds = 0;
+	pPlayer->m_pTrainSave = nullptr;
 	RoundInitPlayer(pPlayer);
 }
 
@@ -1529,6 +1549,11 @@ bool CGameControllerInstaCore::IsPlaying(const CPlayer *pPlayer)
 void CGameControllerInstaCore::OnPlayerTick(class CPlayer *pPlayer)
 {
 	pPlayer->InstagibTick();
+
+	if(Server()->Tick() % Server()->TickSpeed() == 0)
+	{
+		pPlayer->m_DeathsPerSeconds = 0;
+	}
 
 	// Server forced delayed team change
 	if(pPlayer->m_ForceTeam.m_Tick > 0 && Server()->Tick() > pPlayer->m_ForceTeam.m_Tick)

@@ -122,6 +122,8 @@ function(insta_patch_server)
       gamemodes/instagib/tdm.h
       gamemodes/instagib/team_fng.cpp
       gamemodes/instagib/team_fng.h
+      gamemodes/instagib/trainfng/trainfng.cpp
+      gamemodes/instagib/trainfng/trainfng.h
       gamemodes/instagib/zcatch/colors.cpp
       gamemodes/instagib/zcatch/sql_columns.h
       gamemodes/instagib/zcatch/track_caught_time.cpp
