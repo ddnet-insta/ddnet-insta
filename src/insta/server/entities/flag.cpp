@@ -11,7 +11,7 @@
 #include <game/server/player.h>
 
 CFlag::CFlag(CGameWorld *pGameWorld, int Team) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_FLAG, true)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_FLAG, false)
 {
 	m_IsGrounded = true;
 	m_Team = Team;
