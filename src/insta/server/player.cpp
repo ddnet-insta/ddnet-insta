@@ -62,8 +62,8 @@ void CPlayer::AddScore(int Score)
 		return;
 	}
 
-	// never count score or win rounds in ddrace teams
-	if(GameServer()->GetDDRaceTeam(GetCid()))
+	// Don't count score or round wins for players in DDRace teams (except for TrainFNG game type)
+	if(GameServer()->GetDDRaceTeam(GetCid()) && GameServer()->m_pController && !GameServer()->m_pController->IsTrainFngGameType())
 		return;
 
 	if(Score != 0 && GameServer()->m_pController && g_Config.m_SvPublishLiveStats)

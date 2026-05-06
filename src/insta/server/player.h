@@ -367,6 +367,9 @@ public:
 
 	CSkinInfoManager m_SkinInfoManager;
 
+	int m_DeathsPerSeconds = 0;
+	CSaveTee *m_pTrainSave;
+
 	// needed for clang to avoid redundant access specifier
 private:
 #ifndef IN_CLASS_PLAYER

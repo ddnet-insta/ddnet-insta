@@ -84,3 +84,6 @@ CHAT_COMMAND("top5flags", "?i[rank to start with]", CFGFLAG_CHAT | CFGFLAG_SERVE
 CHAT_COMMAND("top5caps", "?i[rank to start with]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTopNumCaps, this, "Shows the all time best ranks by amount of flag captures")
 CHAT_COMMAND("rank_caps", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRankFlagCaptures, this, "Shows the all time flag capture rank of player name (your stats by default)")
 CHAT_COMMAND("top5spikes", "?s['gold'|'green'|'purple'] ?i[rank to start with]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTopSpikeColors, this, "Shows the all time best ranks by spike kills")
+
+CHAT_COMMAND("setspawn", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetSpawn, this, "Set the spawn point")
+CHAT_COMMAND("spawn_reset", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSpawnReset, this, "Resets the spawn point")

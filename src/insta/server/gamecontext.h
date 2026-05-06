@@ -19,6 +19,7 @@ class CGameContext : public IGameServer
 {
 #endif // IN_CLASS_IGAMECONTEXT
 	friend class IGameController;
+	friend class CGameControllerTrainFng;
 
 public:
 	// instagib/gamecontext.cpp
@@ -170,6 +171,8 @@ public:
 	static void ConTopNumCaps(IConsole::IResult *pResult, void *pUserData);
 	static void ConRankFlagCaptures(IConsole::IResult *pResult, void *pUserData);
 	static void ConTopSpikeColors(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetSpawn(IConsole::IResult *pResult, void *pUserData);
+	static void ConSpawnReset(IConsole::IResult *pResult, void *pUserData);
 
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;
 #define MACRO_RANK_COLUMN(name, sql_name, display_name, order_by) \

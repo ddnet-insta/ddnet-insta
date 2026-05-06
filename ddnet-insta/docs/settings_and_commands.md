@@ -152,6 +152,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_mystery_rounds_chance` The percentage of a mystery round happening! A random line from sv_mysteryrounds_filename will be executed.
 + `sv_shuffle_on_round_start` Should teams of players be re-assigned each round
 + `sv_kill_indicator` Shows the killer that he froze the player(only fng for now)
++ `sv_deathrate_threshold` Death frequency threshold per second. If the player dies more often, their saved training checkpoint is removed (0 = disabled)
 + `sv_spawn_weapons` possible values: grenade, laser
 + `sv_zcatch_colors` Color scheme for zCatch options: teetime, savander
 + `sv_display_score` values: points, round_points, spree, current_spree, win_points, wins, kills, round_kills
@@ -233,6 +234,8 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `/top5caps` Shows the all time best ranks by amount of flag captures
 + `/rank_caps` Shows the all time flag capture rank of player name (your stats by default)
 + `/top5spikes` Shows the all time best ranks by spike kills
++ `/setspawn` Set the spawn point
++ `/spawn_reset` Resets the spawn point
 
 # More
 
