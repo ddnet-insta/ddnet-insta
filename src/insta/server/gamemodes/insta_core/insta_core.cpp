@@ -562,6 +562,9 @@ void CGameControllerInstaCore::OnCharacterSpawn(class CCharacter *pChr)
 
 	pPlayer->UpdateLastToucher(-1, -1);
 
+	if(g_Config.m_SvFreezeOnSpawn)
+		pPlayer->FreezeOnSpawn(g_Config.m_SvFreezeOnSpawn);
+
 	if(pPlayer->m_IpStorage.has_value() && pPlayer->m_IpStorage.value().DeepUntilTick() > Server()->Tick())
 	{
 		pChr->SetDeepFrozen(true);

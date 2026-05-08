@@ -200,7 +200,7 @@ public:
 	// Freezes this player on the next spawn once.
 	// The passed message will be shown in public chat once the player spawns.
 	// If there is already a longer freeze pending it will not be overwritten.
-	[[gnu::format(printf, 3, 4)]] void FreezeOnSpawn(int Seconds, const char *pPublicChatMsg = "", ...);
+	[[gnu::format(printf, 3, 4)]] void FreezeOnSpawn(int Seconds, const char *pPublicChatMsg = nullptr, ...);
 
 	// fng and block
 	// track the enemy that last interacted with this tee

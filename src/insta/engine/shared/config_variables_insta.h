@@ -80,6 +80,7 @@ MACRO_CONFIG_INT(SvDropFlagOnVote, sv_drop_flag_on_vote, 0, 0, 1, CFGFLAG_SERVER
 MACRO_CONFIG_INT(SvLaserReloadTimeOnHit, sv_laser_reload_time_on_hit, 0, 0, 500, CFGFLAG_SERVER, "0=default/off ticks it takes to shoot again after a shot was hit (see also sv_fast_hit_full_auto)")
 MACRO_CONFIG_INT(SvFastHitFullAuto, sv_fast_hit_full_auto, 0, 0, 1, CFGFLAG_SERVER, "require fire button repress when sv_reload_time_on_hit is set")
 MACRO_CONFIG_INT(SvPunishFreezeDisconnect, sv_punish_freeze_disconnect, 1, 0, 1, CFGFLAG_SERVER, "freeze player for 20 seconds on rejoin when leaving server while being frozen")
+MACRO_CONFIG_INT(SvFreezeOnSpawn, sv_freeze_on_spawn, 0, 0, 60, CFGFLAG_SERVER, "freeze all players for x seconds after every respawn")
 MACRO_CONFIG_STR(SvDisplayScore, sv_display_score, 512, "round_points", CFGFLAG_SERVER, "values: points, round_points, spree, current_spree, win_points, wins, kills, round_kills")
 MACRO_CONFIG_INT(SvSelfDamageRespawnDelayMs, sv_self_damage_respawn_delay_ms, 500, 0, 10000, CFGFLAG_SERVER, "time in milliseconds it takes to respawn after dying by self damage")
 MACRO_CONFIG_INT(SvSelfKillRespawnDelayMs, sv_self_kill_respawn_delay_ms, 3000, 0, 10000, CFGFLAG_SERVER, "time in milliseconds it takes to respawn after sending kill bind")

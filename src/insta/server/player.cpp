@@ -345,6 +345,11 @@ void CPlayer::FreezeOnSpawn(int Seconds, const char *pPublicChatMsg, ...)
 		if(m_FreezeOnSpawn.value().m_Seconds > Seconds)
 			return;
 	}
+	if(!pPublicChatMsg)
+	{
+		m_FreezeOnSpawn = CFreezeOnSpawn(Seconds, "");
+		return;
+	}
 
 	va_list Args;
 	va_start(Args, pPublicChatMsg);
