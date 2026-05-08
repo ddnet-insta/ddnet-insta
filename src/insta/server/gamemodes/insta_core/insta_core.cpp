@@ -30,6 +30,7 @@
 #include <insta/server/entities/text/projectile.h>
 #include <insta/server/enums.h>
 #include <insta/server/ip_storage.h>
+#include <insta/server/structs.h>
 #include <insta/server/version.h>
 
 #include <optional>
@@ -565,18 +566,15 @@ void CGameControllerInstaCore::OnCharacterSpawn(class CCharacter *pChr)
 	{
 		pChr->SetDeepFrozen(true);
 	}
-	else if(pPlayer->m_FreezeOnSpawn)
+	else if(pPlayer->m_FreezeOnSpawn.has_value())
 	{
-		pChr->Freeze(pPlayer->m_FreezeOnSpawn);
-		pPlayer->m_FreezeOnSpawn = 0;
-
-		char aBuf[512];
-		str_format(
-			aBuf,
-			sizeof(aBuf),
-			"'%s' spawned frozen because he quit while being frozen",
-			Server()->ClientName(pPlayer->GetCid()));
-		SendChat(-1, TEAM_ALL, aBuf);
+		const CFreezeOnSpawn *pFreeze = &pPlayer->m_FreezeOnSpawn.value();
+		pChr->Freeze(pFreeze->Seconds());
+		if(pFreeze->PublicChatMessage()[0])
+			SendChat(-1, TEAM_ALL, pFreeze->PublicChatMessage());
+		if(pFreeze->DirectChatMessage()[0])
+			SendChatTarget(pPlayer->GetCid(), pFreeze->DirectChatMessage());
+		pPlayer->m_FreezeOnSpawn = std::nullopt;
 	}
 }
 
@@ -1920,8 +1918,10 @@ void CGameControllerInstaCore::RestoreFreezeStateOnRejoin(CPlayer *pPlayer)
 	{
 		log_info("ddnet-insta", "a frozen player rejoined removing slot %d (%" PRIzu " left)", Index, m_vFrozenQuitters.size() - 1);
 		m_vFrozenQuitters.erase(m_vFrozenQuitters.begin() + Index);
-
-		pPlayer->m_FreezeOnSpawn = 20;
+		pPlayer->FreezeOnSpawn(
+			20,
+			"'%s' spawned frozen because he quit while being frozen",
+			Server()->ClientName(pPlayer->GetCid()));
 	}
 }
 

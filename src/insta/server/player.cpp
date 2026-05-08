@@ -337,6 +337,23 @@ void CPlayer::SetTeamRaw(int Team)
 	m_Team = Team;
 }
 
+void CPlayer::FreezeOnSpawn(int Seconds, const char *pPublicChatMsg, ...)
+{
+	if(m_FreezeOnSpawn.has_value())
+	{
+		// do not shorten a pending freeze by overwriting it
+		if(m_FreezeOnSpawn.value().m_Seconds > Seconds)
+			return;
+	}
+
+	va_list Args;
+	va_start(Args, pPublicChatMsg);
+	char aMessage[512];
+	str_format_v(aMessage, sizeof(aMessage), pPublicChatMsg, Args);
+	m_FreezeOnSpawn = CFreezeOnSpawn(Seconds, aMessage);
+	va_end(Args);
+}
+
 void CPlayer::UpdateLastToucher(int ClientId, int Weapon)
 {
 	if(ClientId == GetCid())

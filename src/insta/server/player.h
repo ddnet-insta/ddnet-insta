@@ -195,7 +195,12 @@ public:
 	// amount of seconds to freeze on next spawn
 	// used for sv_punish_freeze_disconnect
 	// useful for fng and modes with anticamper
-	int m_FreezeOnSpawn = 0;
+	std::optional<CFreezeOnSpawn> m_FreezeOnSpawn = std::nullopt;
+
+	// Freezes this player on the next spawn once.
+	// The passed message will be shown in public chat once the player spawns.
+	// If there is already a longer freeze pending it will not be overwritten.
+	[[gnu::format(printf, 3, 4)]] void FreezeOnSpawn(int Seconds, const char *pPublicChatMsg = "", ...);
 
 	// fng and block
 	// track the enemy that last interacted with this tee

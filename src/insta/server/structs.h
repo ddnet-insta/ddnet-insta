@@ -1,6 +1,7 @@
 #ifndef INSTA_SERVER_STRUCTS_H
 #define INSTA_SERVER_STRUCTS_H
 
+#include <base/str.h>
 #include <base/vmath.h>
 
 #include <engine/shared/protocol.h>
@@ -114,6 +115,29 @@ public:
 	CLastToucher(int ClientId, uint32_t UniqueClientId, int Team, int Weapon, int ServerTick) :
 		m_ClientId(ClientId), m_UniqueClientId(UniqueClientId), m_Team(Team), m_Weapon(Weapon), m_TouchTick(ServerTick)
 	{
+	}
+};
+
+class CFreezeOnSpawn
+{
+public:
+	int m_Seconds = 3;
+	char m_aPublicChatMessage[512] = "";
+	char m_aDirectChatMessage[512] = "";
+
+	int Seconds() const { return m_Seconds; }
+	const char *PublicChatMessage() const { return m_aPublicChatMessage; }
+	const char *DirectChatMessage() const { return m_aDirectChatMessage; }
+
+	CFreezeOnSpawn(int Seconds)
+	{
+		m_Seconds = Seconds;
+	}
+
+	CFreezeOnSpawn(int Seconds, const char *pPublicChatMsg)
+	{
+		m_Seconds = Seconds;
+		str_copy(m_aDirectChatMessage, pPublicChatMsg);
 	}
 };
 
