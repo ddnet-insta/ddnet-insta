@@ -1314,7 +1314,7 @@ int CGameControllerInstaCore::SnapPlayerFlags7(int SnappingClient, CPlayer *pPla
 	return PlayerFlags7;
 }
 
-void CGameControllerInstaCore::SnapPlayer6(int SnappingClient, CPlayer *pPlayer, CNetObj_ClientInfo *pClientInfo, CNetObj_PlayerInfo *pPlayerInfo)
+void CGameControllerInstaCore::SnapClientInfo(int SnappingClient, CPlayer *pPlayer, CNetObj_ClientInfo *pClientInfo)
 {
 	if(!IsGameRunning() &&
 		IsGamePaused() &&

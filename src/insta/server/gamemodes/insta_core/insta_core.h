@@ -104,7 +104,7 @@ public:
 	int SnapTeamscoreRed(int SnappingClient) override;
 	int SnapTeamscoreBlue(int SnappingClient) override;
 	int SnapPlayerFlags7(int SnappingClient, CPlayer *pPlayer, int PlayerFlags7) override;
-	void SnapPlayer6(int SnappingClient, CPlayer *pPlayer, CNetObj_ClientInfo *pClientInfo, CNetObj_PlayerInfo *pPlayerInfo) override;
+	void SnapClientInfo(int SnappingClient, CPlayer *pPlayer, CNetObj_ClientInfo *pClientInfo) override;
 	void SnapDDNetPlayer(int SnappingClient, CPlayer *pPlayer, CNetObj_DDNetPlayer *pDDNetPlayer) override;
 	bool SendClientInfo7(const protocol7::CNetMsg_Sv_ClientInfo *pClientInfo, int ClientId) override;
 	bool SendClientDrop7(const protocol7::CNetMsg_Sv_ClientDrop *pMsg, int ClientId) override;

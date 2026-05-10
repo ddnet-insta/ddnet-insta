@@ -342,6 +342,7 @@ void CPlayer::Snap(int SnappingClient)
 	ClientInfo.m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
 	ClientInfo.m_ColorBody = m_TeeInfos.m_ColorBody;
 	ClientInfo.m_ColorFeet = m_TeeInfos.m_ColorFeet;
+	GameServer()->m_pController->SnapClientInfo(SnappingClient, this, &ClientInfo); // ddnet-insta
 	Server()->SnapNewItem(TranslatedId, ClientInfo);
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
@@ -363,7 +364,7 @@ void CPlayer::Snap(int SnappingClient)
 		}
 
 		// ddnet-insta
-		GameServer()->m_pController->SnapPlayer6(SnappingClient, this, &ClientInfo, &PlayerInfo);
+		GameServer()->m_pController->SnapPlayerInfo6(SnappingClient, this, &PlayerInfo);
 
 		Server()->SnapNewItem(TranslatedId, PlayerInfo);
 	}
