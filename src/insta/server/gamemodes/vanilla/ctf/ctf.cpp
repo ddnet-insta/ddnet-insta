@@ -16,6 +16,7 @@ CGameControllerCTF::CGameControllerCTF(class CGameContext *pGameServer) :
 	m_pGameType = "CTF*";
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
 	m_DefaultWeapon = WEAPON_GUN;
+	m_IsVanillaGameType = true;
 
 	m_pStatsTable = "ctf";
 	m_pExtraColumns = new CCtfColumns();
