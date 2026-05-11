@@ -62,6 +62,11 @@ void CGameControllerBlock::Tick()
 	{
 		if(!pPlayer)
 			continue;
+		CCharacter *pChr = pPlayer->GetCharacter();
+		if(!pChr)
+			continue;
+		if(pChr->m_FreezeTime)
+			continue;
 
 		pPlayer->ResetLastToucherAfterSeconds(3);
 	}
