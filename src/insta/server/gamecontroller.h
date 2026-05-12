@@ -94,6 +94,19 @@ public:
 	virtual bool IsPickupEntity(int Index) const;
 
 	/*
+		Function: DoesKillCount
+			Called when a character dies and checks if the kill should be ignored.
+			So the killer is not shown in the kill feed and not rewarded any points.
+
+		Arguments:
+			pVictim - The CCharacter that died.
+			Killer - The client id of the killer. Can be negative!
+			Weapon - What weapon that killed it. Can be -1 for undefined
+				weapon when switching team or player suicides.
+	*/
+	virtual bool DoesKillCount(class CCharacter *pVictim, int Killer, int Weapon);
+
+	/*
 		Function: OnCharacterDeathImpl
 			Called when a CCharacter in the world dies.
 			This contains the full death implementation that in regular ddnet lives

@@ -183,6 +183,13 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) cons
 		str_append(aMotd, "! WARNING: fng hammer tuning: on\n");
 	}
 
+	if(g_Config.m_SvIgnoreKillsBeforeRaceStart && !m_pController->IsBlockGameType())
+	{
+		// would be cool if we could check the map file here
+		// if there is no start line at all this should be a stronger warning
+		str_append(aMotd, "! WARNING: kills only count after starting the race\n");
+	}
+
 	if(g_Config.m_SvSwapFlags)
 		str_append(aMotd, "! WARNING: flag spawns are swapped\n");
 	if(g_Config.m_SvAllowZoom && !m_pController->IsDDRaceGameType())
