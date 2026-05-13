@@ -17,10 +17,13 @@
 #include <insta/server/protocol.h>
 #include <insta/server/version.h>
 
+#include <unordered_map>
+
 void CGameContext::OnInitInstagib()
 {
 	log_info("ddnet-insta", "running ddnet-insta version " DDNET_INSTA_VERSIONSTR);
 
+	RegisterIntConfigs();
 	UpdateVoteCheckboxes(); // ddnet-insta
 	AlertOnSpecialInstagibConfigs(); // ddnet-insta
 	ShowCurrentInstagibConfigsMotd(); // ddnet-insta
@@ -688,6 +691,29 @@ void CGameContext::ShuffleTeams() const
 		m_pController->DoTeamChange(m_apPlayers[aPlayer[i]], i < (PlayerTeam + Rnd) / 2 ? TEAM_RED : TEAM_BLUE, false);
 }
 
+void CGameContext::RegisterIntConfigs()
+{
+	if(!m_IntConfigs.empty())
+		return;
+
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
+	m_IntConfigs[#ScriptName] = &g_Config.m_##Name;
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) // ignore color
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) // ignore strings
+#include <insta/includes/engine/shared/config_variables.h>
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
+}
+
+std::optional<int> CGameContext::GetIntConfigValue(const char *pConfigName) const
+{
+	auto It = m_IntConfigs.find(pConfigName);
+	if(It == m_IntConfigs.end())
+		return std::nullopt;
+	return *It->second;
+}
+
 void CGameContext::UpdateVoteCheckboxes() const
 {
 	if(!g_Config.m_SvVoteCheckboxes)
@@ -698,38 +724,38 @@ void CGameContext::UpdateVoteCheckboxes() const
 	{
 		if(str_startswith(pCurrent->m_aDescription, "[ ]") || str_startswith(pCurrent->m_aDescription, "[x]"))
 		{
-			bool Checked = false;
-			int Len;
-			int Val;
+			std::optional<bool> Checked = false;
 
 			if(str_startswith(pCurrent->m_aCommand, "sv_gametype "))
 			{
 				const char *pVal = pCurrent->m_aCommand + str_length("sv_gametype ");
 				Checked = str_startswith_nocase(pVal, g_Config.m_SvGametype);
 			}
-#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
-	else if(str_startswith(pCurrent->m_aCommand, #ScriptName) && pCurrent->m_aCommand[str_length(#ScriptName)] == ' ') \
-	{ \
-		Len = str_length(#ScriptName); \
-		/* \
-		votes can directly match the command or have other commands \
-		or only start with it but then they should be delimited with a semicolon \
-		this allows to detect config option votes that also run additional commands on vote pass \
-		*/ \
-		if(pCurrent->m_aCommand[Len] != ';' && pCurrent->m_aCommand[Len] != '\0') \
-		{ \
-			Val = atoi(pCurrent->m_aCommand + Len + 1); \
-			Checked = g_Config.m_##Name == Val; \
-		} \
-	}
-#define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) // only int checkboxes for now
-#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) // only int checkboxes for now
-#include <insta/includes/engine/shared/config_variables.h>
-#undef MACRO_CONFIG_INT
-#undef MACRO_CONFIG_COL
-#undef MACRO_CONFIG_STR
+			// All ddnet-insta configs start with sv_ so we can optimize a bit for performance
+			// here by ignoring things like commands or other things that will never match anyways
+			else if(pCurrent->m_aCommand[0] == 's')
+			{
+				char aConfig[512];
+				size_t i;
+				for(i = 0; i < sizeof(aConfig) - 1 && pCurrent->m_aCommand[i]; i++)
+				{
+					if(pCurrent->m_aCommand[i] == ' ' || pCurrent->m_aCommand[i] == ';')
+						break;
+					aConfig[i] = pCurrent->m_aCommand[i];
+				}
+				aConfig[i] = '\0';
 
-			pCurrent->m_aDescription[1] = Checked ? 'x' : ' ';
+				std::optional<int> IntCfg = GetIntConfigValue(aConfig);
+				if(IntCfg.has_value())
+				{
+					int VoteVal = atoi(pCurrent->m_aCommand + i);
+					Checked = VoteVal == IntCfg.value();
+				}
+			}
+			if(Checked.has_value())
+			{
+				pCurrent->m_aDescription[1] = Checked.value() ? 'x' : ' ';
+			}
 		}
 		pCurrent = pCurrent->m_pNext;
 	}
