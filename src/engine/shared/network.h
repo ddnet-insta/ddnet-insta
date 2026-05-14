@@ -227,6 +227,12 @@ public:
 
 class CNetConnection
 {
+	// ddnet-insta
+public:
+	void OccupySlot();
+	void FreeOccupiedSlot();
+
+private:
 	// TODO: is this needed because this needs to be aware of
 	// the ack sequencing number and is also responsible for updating
 	// that. this should be fixed.
@@ -240,6 +246,9 @@ public:
 		CONNECT,
 		PENDING,
 		ONLINE,
+		// ddnet-insta introduced the OCCUPIED state for server side tees
+		// https://github.com/ddnet-insta/ddnet-insta/pull/500
+		OCCUPIED,
 		ERROR,
 	};
 
@@ -413,6 +422,12 @@ private:
 // server side
 class CNetServer
 {
+	// ddnet-insta
+public:
+	void OccupySlot(int ClientId);
+	void FreeOccupiedSlot(int ClientId);
+
+private:
 	struct CSlot
 	{
 	public:

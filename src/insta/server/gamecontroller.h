@@ -40,6 +40,29 @@ public:
 	//
 
 	/*
+		Function: CreateTee
+			Call this method to spawn a new tee in the world.
+			It is a server controlled tee with no real client connect to it.
+			That tee will take up a server slot.
+
+		Arguments:
+			pName - The display name of the new tee
+
+		Returns:
+			Client Id of the new tee. Or -1 on error.
+	*/
+	virtual int CreateTee(const char *pName) { return -1; }
+
+	/*
+		Function: DropTee
+			Counter part to CreateTee()
+
+		Arguments:
+			ClientId - Client id returned by CreateTee()
+	*/
+	virtual void DropTee(int ClientId) {}
+
+	/*
 		Function: OnCharacterTakeDamage
 			this function was added in ddnet-insta and is a non standard controller method.
 			neither ddnet nor teeworlds have this
