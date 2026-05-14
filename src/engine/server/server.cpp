@@ -4675,6 +4675,10 @@ int *CServer::GetIdMap(int ClientId)
 
 bool CServer::SetTimedOut(int ClientId, int OrigId)
 {
+	// ddnet-insta
+	if(m_aClients[ClientId].m_DebugDummy)
+		return false;
+
 	if(!m_NetServer.HasErrored(ClientId))
 	{
 		return false;

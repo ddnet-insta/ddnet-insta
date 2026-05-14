@@ -18,6 +18,9 @@ public:
 	CAuthManager *AuthManager() override { return &m_AuthManager; }
 	static void ConRedirect(IConsole::IResult *pResult, void *pUser);
 	bool SixupUsernameAuth(int ClientId, const char *pCredentials) override;
+	int CreateTee(const char *pName) override;
+	void DropTee(int ClientId) override;
+	bool IsDebugDummy(int ClientId) const override;
 
 private:
 #ifndef IN_CLASS_ENGINE_SERVER_SERVER

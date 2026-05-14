@@ -525,6 +525,10 @@ int CNetConnection::Update()
 {
 	int64_t Now = time_get();
 
+	// ddnet-insta
+	if(State() == EState::OCCUPIED)
+		return 0;
+
 	if(State() == EState::ERROR && m_TimeoutSituation && (Now - m_LastRecvTime) > time_freq() * g_Config.m_ConnTimeoutProtection)
 	{
 		m_TimeoutSituation = false;

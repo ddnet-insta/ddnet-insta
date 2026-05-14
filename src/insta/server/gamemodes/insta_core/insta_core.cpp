@@ -323,6 +323,9 @@ void CGameControllerInstaCore::InstaCoreDisconnect(CPlayer *pPlayer, const char 
 void CGameControllerInstaCore::PrintDisconnect(CPlayer *pPlayer, const char *pReason)
 {
 	int ClientId = pPlayer->GetCid();
+	if(Server()->IsDebugDummy(ClientId))
+		return;
+
 	if(Server()->ClientIngame(ClientId))
 	{
 		char aBuf[512];
@@ -343,6 +346,9 @@ void CGameControllerInstaCore::PrintDisconnect(CPlayer *pPlayer, const char *pRe
 void CGameControllerInstaCore::PrintConnect(CPlayer *pPlayer, const char *pName)
 {
 	int ClientId = pPlayer->GetCid();
+	if(Server()->IsDebugDummy(ClientId))
+		return;
+
 	if(!Server()->ClientPrevIngame(ClientId))
 	{
 		char aBuf[512];
@@ -565,6 +571,24 @@ void CGameControllerInstaCore::OnFlagCapture(CFlag *pFlag, float Time, int TimeT
 
 	if(IsStatTrack())
 		pPlayer->m_Stats.m_FlagCaptures++;
+}
+
+int CGameControllerInstaCore::CreateTee(const char *pName)
+{
+	int ClientId = Server()->CreateTee(pName);
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return -1;
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return -1;
+
+	pPlayer->SetAfk(false);
+	return ClientId;
+}
+
+void CGameControllerInstaCore::DropTee(int ClientId)
+{
+	Server()->DropTee(ClientId);
 }
 
 void CGameControllerInstaCore::OnCharacterSpawn(class CCharacter *pChr)

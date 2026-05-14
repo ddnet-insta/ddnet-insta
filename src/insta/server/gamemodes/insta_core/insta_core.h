@@ -74,6 +74,8 @@ public:
 	void OnFlagGrab(CFlag *pFlag) override;
 	void OnFlagCapture(CFlag *pFlag, float Time, int TimeTicks) override;
 
+	int CreateTee(const char *pName) override;
+	void DropTee(int ClientId) override;
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void Tick() override;

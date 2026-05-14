@@ -1,3 +1,4 @@
+#include <base/bytes.h>
 #include <base/log.h>
 #include <base/secure.h>
 
@@ -99,4 +100,69 @@ bool CServer::SixupUsernameAuth(int ClientId, const char *pCredentials)
 
 	OnNetMsgRconAuth(ClientId, aName, pPw, true);
 	return true;
+}
+
+int CServer::CreateTee(const char *pName)
+{
+	int ClientId = -1;
+	for(int i = 0; i < MaxClients(); i++)
+	{
+		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+			continue;
+
+		ClientId = i;
+		break;
+	}
+	if(ClientId == -1)
+		return ClientId;
+
+	CClient &Client = m_aClients[ClientId];
+	NewClientCallback(ClientId, this, false);
+	Client.m_DebugDummy = true;
+
+	// See https://en.wikipedia.org/wiki/Unique_local_address
+	Client.m_DebugDummyAddr.type = NETTYPE_IPV6;
+	Client.m_DebugDummyAddr.ip[0] = 0xfd;
+	// Global ID (40 bits): random
+	secure_random_fill(&Client.m_DebugDummyAddr.ip[1], 5);
+	// Subnet ID (16 bits): constant
+	Client.m_DebugDummyAddr.ip[6] = 0xc0;
+	Client.m_DebugDummyAddr.ip[7] = 0xde;
+	// Interface ID (64 bits): set to client ID
+	Client.m_DebugDummyAddr.ip[8] = 0x00;
+	Client.m_DebugDummyAddr.ip[9] = 0x00;
+	Client.m_DebugDummyAddr.ip[10] = 0x00;
+	Client.m_DebugDummyAddr.ip[11] = 0x00;
+	uint_to_bytes_be(&Client.m_DebugDummyAddr.ip[12], ClientId);
+	// Port: random like normal clients
+	Client.m_DebugDummyAddr.port = secure_rand_below(65535 - 1024) + 1024;
+	net_addr_str(&Client.m_DebugDummyAddr, Client.m_aDebugDummyAddrString.data(), Client.m_aDebugDummyAddrString.size(), true);
+	net_addr_str(&Client.m_DebugDummyAddr, Client.m_aDebugDummyAddrStringNoPort.data(), Client.m_aDebugDummyAddrStringNoPort.size(), false);
+
+	m_NetServer.OccupySlot(ClientId);
+	GameServer()->OnClientConnected(ClientId, nullptr);
+	Client.m_State = CClient::STATE_INGAME;
+	str_copy(Client.m_aName, pName);
+	GameServer()->OnClientEnter(ClientId);
+
+	return ClientId;
+}
+
+void CServer::DropTee(int ClientId)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return;
+	CClient &Client = m_aClients[ClientId];
+	if(!Client.m_DebugDummy)
+		return;
+
+	DelClientCallback(ClientId, "", this);
+	m_NetServer.FreeOccupiedSlot(ClientId);
+}
+
+bool CServer::IsDebugDummy(int ClientId) const
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return false;
+	return m_aClients[ClientId].m_DebugDummy;
 }

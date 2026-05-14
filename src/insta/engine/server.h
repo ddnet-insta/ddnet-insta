@@ -23,6 +23,15 @@ public:
 	virtual bool SixupUsernameAuth(int ClientId, const char *pCredentials) = 0;
 	virtual CAuthManager *AuthManager() = 0;
 
+	// Create a tee from the server side without a actual client connecting to it.
+	// Creates a full player and character instance and uses up a slot.
+	// Returns -1 on error and the new ClientId otherwise.
+	//
+	// WARNING: avoid calling this method. Use the IGameController::CreateTee() wrapper instead.
+	virtual int CreateTee(const char *pName) = 0;
+	virtual void DropTee(int ClientId) = 0;
+	virtual bool IsDebugDummy(int ClientId) const = 0;
+
 private:
 #ifndef IN_CLASS_ENGINE_SERVER
 };
