@@ -21,14 +21,8 @@ public:
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId) override;
 	bool DoWincheckRound() override;
 	void OnRoundStart() override;
-	void OnSpecChatCmd(IConsole::IResult *pResult, void *pUserData) override;
-	void OnPauseChatCmd(IConsole::IResult *pResult, void *pUserData) override;
-	void OnKillChatCmd(IConsole::IResult *pResult, void *pUserData) override;
-	bool CanSelfkill(class CPlayer *pPlayer, char *pErrorReason, int ErrorReasonSize) override;
 	void YouWillJoinSpecMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen) override;
 	void YouWillJoinGameMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen) override;
-	int SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags) override;
-	bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize) override;
 
 	void OnPlayerConnect(CPlayer *pPlayer) override;
 

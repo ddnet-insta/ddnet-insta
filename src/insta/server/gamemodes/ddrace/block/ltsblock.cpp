@@ -206,46 +206,4 @@ void CGameControllerLTSBlock::YouWillJoinGameMessage(CPlayer *pPlayer, char *pMs
 	str_copy(pMsg, "You will join the game once the match ends", MsgLen);
 }
 
-int CGameControllerLTSBlock::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
-{
-	// let the parent build the flags, then always re-enable zoom regardless
-	// of sv_allow_zoom so players can freely adjust their view distance
-	int Flags = CGameControllerBasePvp::SnapGameInfoExFlags(SnappingClient, DDRaceFlags);
-	Flags |= GAMEINFOFLAG_ALLOW_ZOOM;
-	return Flags;
-}
-
-bool CGameControllerLTSBlock::CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize)
-{
-	if(Team == TEAM_SPECTATORS)
-	{
-		if(pErrorReason)
-			str_copy(pErrorReason, "Spectators are not allowed in this gamemode", ErrorReasonSize);
-		return false;
-	}
-	return CGameControllerBlock::CanJoinTeam(Team, NotThisId, pErrorReason, ErrorReasonSize);
-}
-
-void CGameControllerLTSBlock::OnSpecChatCmd(IConsole::IResult *pResult, void *pUserData)
-{
-	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Spectating is not allowed in this gamemode.");
-}
-
-void CGameControllerLTSBlock::OnPauseChatCmd(IConsole::IResult *pResult, void *pUserData)
-{
-	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Spectating is not allowed in this gamemode.");
-}
-
-void CGameControllerLTSBlock::OnKillChatCmd(IConsole::IResult *pResult, void *pUserData)
-{
-	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Self kill is not allowed in this gamemode.");
-}
-
-bool CGameControllerLTSBlock::CanSelfkill(CPlayer *pPlayer, char *pErrorReason, int ErrorReasonSize)
-{
-	if(pErrorReason)
-		str_copy(pErrorReason, "Self kill is not allowed in this gamemode.", ErrorReasonSize);
-	return false;
-}
-
 REGISTER_GAMEMODE(ltsblock, CGameControllerLTSBlock(pGameServer));
