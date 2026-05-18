@@ -448,7 +448,7 @@ int CGameControllerBasePvp::OnCharacterDeath(class CCharacter *pVictim, class CP
 	// do scoring
 	if(!pKiller || Weapon == WEAPON_GAME)
 		return 0;
-	if(DoesKillCount(pVictim, pKiller->GetCid(), Weapon))
+	if(!DoesKillCount(pVictim, pKiller->GetCid(), Weapon))
 		return 0;
 
 	// never count score or win rounds in ddrace teams
