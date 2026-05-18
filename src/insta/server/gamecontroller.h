@@ -1955,6 +1955,7 @@ public:
 	// only used in ctf gametypes
 	class CFlag *m_apFlags[NUM_FLAGS];
 
+	class CExtraAccountTableController *m_pExtraAccountTableController = nullptr;
 	CSqlStats *m_pSqlStats = nullptr;
 	const char *m_pStatsTable = "";
 	const char *StatsTable() const { return m_pStatsTable; }

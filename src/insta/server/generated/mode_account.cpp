@@ -3,10 +3,28 @@
 #include <base/dbg.h>
 #include <base/log.h>
 #include <base/str.h>
+#include <insta/server/account.h>
 
 bool CAccountTableCity::CreateTable(class IDbConnection *pSqlServer, char *pError, int ErrorSize)
 {
-	return false;
+	char aBuf[4096];
+	str_format(aBuf, sizeof(aBuf),
+		"CREATE TABLE IF NOT EXISTS %s("
+		" username          VARCHAR(%d)   COLLATE %s NOT NULL,"
+		" level             INTEGER       DEFAULT 0,"
+		"PRIMARY KEY (username)"
+		");",
+		Name(),
+		MAX_USERNAME_LENGTH,
+		pSqlServer->BinaryCollate());
+
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return false;
+	}
+	pSqlServer->Print();
+	int NumInserted;
+	return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
 }
 
 bool CAccountTableCity::Save(IDbConnection *pSqlServer, const char *pUsername, char *pError, int ErrorSize)
@@ -46,4 +64,14 @@ bool CAccountTableCity::Save(IDbConnection *pSqlServer, const char *pUsername, c
 	}
 
 	return true;
+}
+
+CExtraAccountTableController::~CExtraAccountTableController()
+{
+	for(auto *pTable : m_vpTables)
+	{
+		delete pTable;
+		pTable = nullptr;
+	}
+	m_vpTables.clear();
 }

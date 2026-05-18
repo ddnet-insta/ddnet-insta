@@ -138,6 +138,26 @@ bool CSqlAccounts::CreateAccountsTableThread(IDbConnection *pSqlServer, const IS
 	return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
 }
 
+bool CSqlAccounts::CreateExtraAccountsTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
+{
+	if(w == Write::NORMAL_FAILED)
+	{
+		if(!MysqlAvailable())
+		{
+			log_error("sql-thread", "failed to create extra accounts table! Make sure to compile with MySQL support if you want to use accounts");
+			return false;
+		}
+
+		dbg_assert(false, "CreateExtraAccountsTableThread failed to write");
+		return false;
+	}
+	if(w != Write::NORMAL)
+		return false;
+
+	const auto *pData = dynamic_cast<const CSqlCreateExtraAccountsTableRequest *>(pGameData);
+	return pData->m_pTable->CreateTable(pSqlServer, pError, ErrorSize);
+}
+
 bool CSqlAccounts::AccountWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
 	if(w != Write::NORMAL)

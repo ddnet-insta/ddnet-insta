@@ -20,8 +20,15 @@ CGameControllerCity::CGameControllerCity(CGameContext *pGameServer) :
 	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
 	m_pSqlStats->CreateTable(m_pStatsTable);
 
-	std::vector<IAccountTable *> vpTables;
-	vpTables.emplace_back(new CAccountTableCity());
+	// TODO: this can be abstracted away and called on demand
+	m_pExtraAccountTableController = new CExtraAccountTableController();
+
+	// TODO: this can be a neat helper like AddExtraAccTable(); which also allocates the table above
+	m_pExtraAccountTableController->m_vpTables.emplace_back(new CAccountTableCity());
+
+	// TODO: abstract this away to the on init method
+	for(auto *pTable : m_pExtraAccountTableController->m_vpTables)
+		m_pSqlStats->CreateExtraAccountsTable(pTable);
 }
 
 CGameControllerCity::~CGameControllerCity() = default;

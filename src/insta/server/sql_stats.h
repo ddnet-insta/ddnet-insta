@@ -10,6 +10,7 @@
 
 #include <insta/server/ddnet_db_utils/ddnet_db_utils.h>
 #include <insta/server/extra_columns.h>
+#include <insta/server/generated/mode_account.h>
 #include <insta/server/sql_stats_player.h>
 
 struct ISqlData;
@@ -284,6 +285,16 @@ struct CSqlCreateTableRequest : ISqlData
 	char m_aColumns[2048];
 };
 
+struct CSqlCreateExtraAccountsTableRequest : ISqlData
+{
+	CSqlCreateExtraAccountsTableRequest() :
+		ISqlData(nullptr)
+	{
+	}
+	// holy multi threading offense
+	class IAccountTable *m_pTable;
+};
+
 class CSqlStats
 {
 	CDbConnectionPool *m_pPool;
@@ -372,6 +383,7 @@ public:
 	void CreateTable(const char *pName);
 	void CreateFastcapTable();
 	void CreateAccountsTable();
+	void CreateExtraAccountsTable(class IAccountTable *pTable);
 	void SaveRoundStats(const char *pName, const char *pTable, CSqlStatsPlayer *pStats);
 	void SaveFastcap(int ClientId, int TimeTicks, const char *pTimestamp, bool Grenade, bool StatTrack);
 

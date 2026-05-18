@@ -1234,6 +1234,14 @@ void CSqlStats::CreateAccountsTable()
 	m_pPool->ExecuteWrite(CSqlAccounts::CreateAccountsTableThread, std::move(Tmp), "create accounts table");
 }
 
+void CSqlStats::CreateExtraAccountsTable(class IAccountTable *pTable)
+{
+	auto Tmp = std::make_unique<CSqlCreateExtraAccountsTableRequest>();
+	// HOLY MULTI THREADING RISK
+	Tmp->m_pTable = pTable;
+	m_pPool->ExecuteWrite(CSqlAccounts::CreateExtraAccountsTableThread, std::move(Tmp), "create extra accounts table");
+}
+
 bool CSqlStats::CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
 	if(w == Write::NORMAL_FAILED)

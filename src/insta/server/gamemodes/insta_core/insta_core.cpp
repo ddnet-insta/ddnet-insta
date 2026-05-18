@@ -92,6 +92,12 @@ CGameControllerInstaCore::~CGameControllerInstaCore()
 		delete m_pExtraColumns;
 		m_pExtraColumns = nullptr;
 	}
+
+	if(m_pExtraAccountTableController)
+	{
+		delete m_pExtraAccountTableController;
+		m_pExtraAccountTableController = nullptr;
+	}
 }
 
 void CGameControllerInstaCore::SendChatTarget(int To, const char *pText, int Flags) const
