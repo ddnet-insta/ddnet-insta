@@ -81,6 +81,8 @@ function(insta_patch_server)
       gamemodes/base_pvp/base_pvp.cpp
       gamemodes/base_pvp/base_pvp.h
       gamemodes/base_pvp/chat.cpp
+      gamemodes/city/city.cpp
+      gamemodes/city/city.h
       gamemodes/ddrace/block/block.cpp
       gamemodes/ddrace/block/block.h
       gamemodes/ddrace/block/tblock.cpp
@@ -151,6 +153,8 @@ function(insta_patch_server)
       gamemodes/vanilla/fly/fly.h
       gamemodes/vanilla/tsmash/tsmash.cpp
       gamemodes/vanilla/tsmash/tsmash.h
+      generated/mode_account.cpp
+      generated/mode_account.h
       ip_storage.cpp
       ip_storage.h
       password_hash.cpp

@@ -3,6 +3,8 @@
 
 #include <engine/shared/protocol.h>
 
+#include <insta/server/generated/mode_account.h>
+
 #define MIN_USERNAME_LENGTH 1
 #define MAX_USERNAME_LENGTH 24
 #define MAX_PASSWORD_LENGTH 128
@@ -32,6 +34,8 @@ public:
 	// TODO:
 	// created_at
 	// updated_at
+
+	CModeAccount m_Mode;
 
 	const char *Username() const
 	{
@@ -65,6 +69,8 @@ public:
 		m_IsLoggedIn = false;
 		m_aServerIp[0] = '\0';
 		m_ServerPort = 0;
+
+		m_Mode.Reset();
 	}
 
 	CAccount()
