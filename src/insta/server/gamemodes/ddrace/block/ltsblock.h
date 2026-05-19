@@ -25,6 +25,7 @@ public:
 	void YouWillJoinGameMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen) override;
 
 	void OnPlayerConnect(CPlayer *pPlayer) override;
+	void OnCreditsChatCmd(IConsole::IResult *pResult, void *pUserData) override;
 
 private:
 	// team the player was in when they died, so we can put them back at the start of the next round

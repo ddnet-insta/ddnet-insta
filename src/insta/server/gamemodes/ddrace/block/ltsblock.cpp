@@ -194,6 +194,23 @@ void CGameControllerLTSBlock::OnPlayerConnect(CPlayer *pPlayer)
 	CGameControllerBlock::OnPlayerConnect(pPlayer);
 	// reset slot so a reconnecting player doesn't inherit the previous occupant's team
 	m_aPreDeathTeam[pPlayer->GetCid()] = TEAM_SPECTATORS;
+
+	// Prevent bypassing death by reconnecting mid-round
+	if(CountAlivePlayersTeam(TEAM_RED) + CountAlivePlayersTeam(TEAM_BLUE) > 0)
+	{
+		m_pDeadSpecController->KillPlayer(pPlayer, -1);
+		GameServer()->SendChatTarget(pPlayer->GetCid(), "You have to wait for the round to end before you can join");
+	}
+}
+
+void CGameControllerLTSBlock::OnCreditsChatCmd(IConsole::IResult *pResult, void *pUserData)
+{
+	static constexpr const char *CREDITS[] = {
+		"ltsblock created by Noa for tpl.world",
+		"For more information see /credits_insta",
+	};
+	for(const char *pLine : CREDITS)
+		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", pLine);
 }
 
 void CGameControllerLTSBlock::YouWillJoinSpecMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen)
