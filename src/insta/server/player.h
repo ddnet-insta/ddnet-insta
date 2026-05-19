@@ -294,6 +294,15 @@ public:
 	std::shared_ptr<CInstaSqlResult> m_StatsQueryResult;
 	std::shared_ptr<CInstaSqlResult> m_FastcapQueryResult;
 
+	// If sv_ignore_kills_before_race_start is set to 1
+	// only kills during or after the ddrace race do count.
+	// This counter tracks how many kills were made that did
+	// not cause any stats to be tracked or points to be gained.
+	// To warn the players that their current gameplay is not being
+	// rewarded and that they should probably move to the start line
+	// https://github.com/ddnet-insta/ddnet-insta/issues/656
+	int m_NumIgnoredKillsBeforeRaceStart = 0;
+
 	/*
 		m_HasGhostCharInGame
 

@@ -11,6 +11,7 @@
 #include <engine/console.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/shared/config.h>
+#include <engine/shared/json.h>
 #include <engine/shared/jsonwriter.h>
 #include <engine/shared/localization.h>
 
@@ -638,11 +639,6 @@ void CTouchControls::CJoystickTouchButtonBehavior::OnUpdate()
 }
 
 // Joystick that uses the active action.
-void CTouchControls::CJoystickActionTouchButtonBehavior::Init(CTouchButton *pTouchButton)
-{
-	CPredefinedTouchButtonBehavior::Init(pTouchButton);
-}
-
 int CTouchControls::CJoystickActionTouchButtonBehavior::SelectedAction() const
 {
 	return m_pTouchControls->m_ActionSelected;
@@ -1221,7 +1217,7 @@ bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned FileLeng
 {
 	json_settings JsonSettings{};
 	char aError[256];
-	json_value *pConfiguration = json_parse_ex(&JsonSettings, static_cast<const json_char *>(pFileData), FileLength, aError);
+	json_value *pConfiguration = JsonParseEx(&JsonSettings, static_cast<const json_char *>(pFileData), FileLength, aError);
 
 	if(pConfiguration == nullptr)
 	{

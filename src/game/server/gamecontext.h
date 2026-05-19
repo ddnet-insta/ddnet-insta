@@ -24,6 +24,7 @@
 #include <insta/server/ip_storage.h> // ddnet-insta
 #include <insta/server/persistent_client_data.h> // ddnet-insta
 #include <insta/server/persistent_data.h> // ddnet-insta
+#include <insta/server/strhelpers.h> // ddnet-insta
 
 #include <map>
 #include <memory>

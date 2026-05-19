@@ -2654,6 +2654,7 @@ if(CLIENT)
     editor_ui.cpp
     editor_ui.h
     enums.h
+    envelope_editor.cpp
     explanations.cpp
     explanations.h
     file_browser.cpp
@@ -2981,6 +2982,8 @@ if(SERVER)
     gamemodes/mod.h
     gameworld.cpp
     gameworld.h
+    interactions.cpp
+    interactions.h
     mutes.cpp
     player.cpp
     player.h
