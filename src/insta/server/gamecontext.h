@@ -12,6 +12,7 @@
 
 #include <insta/server/enums.h>
 #include <insta/server/ip_storage.h>
+#include <insta/server/strhelpers.h>
 
 #include <vector>
 
@@ -20,6 +21,8 @@ class CGameContext : public IGameServer
 #endif // IN_CLASS_IGAMECONTEXT
 	friend class IGameController;
 	friend class CGameControllerTrainFng;
+
+	std::unordered_map<const char *, int *, CStrHash, CStrEq> m_IntConfigs;
 
 public:
 	// instagib/gamecontext.cpp
@@ -42,7 +45,11 @@ public:
 	void UndeepJail(CIpStorage *pEntry);
 	void ListDeepJails(int RequesterId) const;
 	void ShuffleTeams() const;
+	void RegisterIntConfigs();
 	void UpdateVoteCheckboxes() const;
+
+	// If passed "sv_port" it might return 8303
+	std::optional<int> GetIntConfigValue(const char *pConfigName) const;
 
 	// prints not allowed message in chat for ClientId and returns false
 	// if calling votes with chat commands such as !shuffle or /shuffle

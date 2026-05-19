@@ -7,6 +7,7 @@
 #include <generated/protocol.h>
 
 #include <game/mapitems.h>
+#include <game/race_state.h>
 #include <game/server/entities/character.h>
 #include <game/server/entities/door.h>
 #include <game/server/gamecontext.h>
@@ -26,8 +27,62 @@ bool IGameController::IsPickupEntity(int Index) const
 	       Index == ENTITY_POWERUP_NINJA;
 }
 
+bool IGameController::DoesKillCount(CCharacter *pVictim, int Killer, int Weapon)
+{
+	if(g_Config.m_SvIgnoreKillsBeforeRaceStart)
+	{
+		CPlayer *pKiller = (Killer < 0) ? nullptr : GameServer()->m_apPlayers[Killer];
+		bool IgnoreKill = false;
+
+		// state cheated and finished are also considered as started here
+		// we want to still count kills in those states
+		if(pVictim->m_DDRaceState == ERaceState::NONE)
+		{
+			if(g_Config.m_SvDebugStats)
+			{
+				log_info(
+					"stats",
+					"kill ignored because the victim '%s' did not touch the start line yet and sv_ignore_kills_before_race_start is 1",
+					Server()->ClientName(pVictim->GetPlayer()->GetCid()));
+			}
+			IgnoreKill = true;
+		}
+		else if(pKiller && pKiller->GetCharacter() && pKiller->GetCharacter()->m_DDRaceState == ERaceState::NONE)
+		{
+			if(g_Config.m_SvDebugStats)
+			{
+				log_info(
+					"stats",
+					"kill ignored because the killer '%s' did not touch the start line yet and sv_ignore_kills_before_race_start is 1",
+					Server()->ClientName(Killer));
+			}
+			IgnoreKill = true;
+		}
+
+		if(
+			IgnoreKill &&
+			pKiller &&
+			Killer != pVictim->GetPlayer()->GetCid())
+		{
+			int Kills = ++pKiller->m_NumIgnoredKillsBeforeRaceStart;
+			if(Kills == 3 || Kills % 25 == 0)
+			{
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "You need to start the race for your kills to count (%d kills ignored)", pKiller->m_NumIgnoredKillsBeforeRaceStart);
+				GameServer()->SendChatTarget(Killer, aBuf);
+			}
+		}
+		if(IgnoreKill)
+			return false;
+	}
+	return true;
+}
+
 void IGameController::OnCharacterDeathImpl(CCharacter *pVictim, int Killer, int Weapon, bool SendKillMsg)
 {
+	if(!DoesKillCount(pVictim, Killer, Weapon))
+		Killer = pVictim->GetPlayer()->GetCid();
+
 	if(Killer != WEAPON_GAME && pVictim->m_SetSavePos[RESCUEMODE_AUTO])
 		pVictim->GetPlayer()->m_LastDeath = pVictim->m_RescueTee[RESCUEMODE_AUTO];
 	pVictim->StopRecording();

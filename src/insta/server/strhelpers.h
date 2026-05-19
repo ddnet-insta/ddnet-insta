@@ -4,6 +4,30 @@
 #include <base/types.h>
 
 #include <cstring>
+#include <string_view>
+
+// These are used for int configs where
+// the keys are const char * and C++ std::unordered_map needs
+// a hash callback otherwise it will compare the pointer addresses
+//
+// The name is a bit ambiguous here. Because the C could be the class prefix
+// or stand for a C-string but whatever
+class CStrHash
+{
+public:
+	size_t operator()(const char *s) const noexcept
+	{
+		return std::hash<std::string_view>{}(s);
+	}
+};
+class CStrEq
+{
+public:
+	bool operator()(const char *a, const char *b) const noexcept
+	{
+		return std::strcmp(a, b) == 0;
+	}
+};
 
 const char *str_find_digit(const char *Haystack);
 bool str_contains_ip(const char *pStr);
