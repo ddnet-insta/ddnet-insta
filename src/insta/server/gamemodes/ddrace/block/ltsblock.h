@@ -18,6 +18,7 @@ public:
 
 	bool IsDeadSpecGameType() override { return true; }
 
+	void Tick() override;
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId) override;
 	bool DoWincheckRound() override;
 	void OnRoundStart() override;
@@ -25,7 +26,9 @@ public:
 	void YouWillJoinGameMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen) override;
 
 	void OnPlayerConnect(CPlayer *pPlayer) override;
+	void OnPlayerDisconnect(CPlayer *pPlayer, const char *pReason) override;
 	void OnCreditsChatCmd(IConsole::IResult *pResult, void *pUserData) override;
+	void OnRoundEnd() override;
 
 private:
 	// team the player was in when they died, so we can put them back at the start of the next round
@@ -34,7 +37,13 @@ private:
 	// set while we're killing characters to reset the round so OnCharacterDeath doesn't mark the survivors as dead
 	bool m_bRoundReset = false;
 
-	int CountAlivePlayersTeam(int Team) const;
+	// true while a round is in progress (players have spawned and the fight is on)
+	bool m_bRoundActive = false;
+
+	void CountAlivePlayersByTeam(int &AliveRed, int &AliveBlue) const;
+	void RestorePlayersFromPreDeathTeam(bool OnlyDeadPlayers);
+	void RespawnNonSpectatorPlayers(bool OnlyWithoutCharacter);
+	void ResetRoundStateIfEmpty();
 	void StartNewRound();
 };
 #endif

@@ -33,15 +33,78 @@ CGameControllerLTSBlock::CGameControllerLTSBlock(class CGameContext *pGameServer
 
 CGameControllerLTSBlock::~CGameControllerLTSBlock() = default;
 
-int CGameControllerLTSBlock::CountAlivePlayersTeam(int Team) const
+void CGameControllerLTSBlock::CountAlivePlayersByTeam(int &AliveRed, int &AliveBlue) const
 {
-	int Count = 0;
+	AliveRed = 0;
+	AliveBlue = 0;
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
-		if(pPlayer && !pPlayer->m_IsDead && pPlayer->GetTeam() == Team)
-			Count++;
+		if(!pPlayer || pPlayer->m_IsDead)
+			continue;
+
+		if(pPlayer->GetTeam() == TEAM_RED)
+			AliveRed++;
+		else if(pPlayer->GetTeam() == TEAM_BLUE)
+			AliveBlue++;
 	}
-	return Count;
+}
+
+void CGameControllerLTSBlock::RestorePlayersFromPreDeathTeam(bool OnlyDeadPlayers)
+{
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(OnlyDeadPlayers && !pPlayer->m_IsDead)
+			continue;
+
+		int OrigTeam = m_aPreDeathTeam[pPlayer->GetCid()];
+		if(OrigTeam != TEAM_RED && OrigTeam != TEAM_BLUE)
+			continue;
+
+		pPlayer->m_ForceTeam.m_Tick = 0;
+		pPlayer->m_IsDead = false;
+		pPlayer->m_KillerId = -1;
+		m_aPreDeathTeam[pPlayer->GetCid()] = TEAM_SPECTATORS;
+
+		if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+			DoTeamChange(pPlayer, OrigTeam, false);
+	}
+}
+
+void CGameControllerLTSBlock::RespawnNonSpectatorPlayers(bool OnlyWithoutCharacter)
+{
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer || pPlayer->GetTeam() == TEAM_SPECTATORS)
+			continue;
+		if(OnlyWithoutCharacter && pPlayer->GetCharacter())
+			continue;
+
+		// zero out any respawn cooldown so everyone spawns on the same tick
+		pPlayer->m_RespawnTick = Server()->Tick();
+		pPlayer->Respawn();
+	}
+}
+
+void CGameControllerLTSBlock::ResetRoundStateIfEmpty()
+{
+	if(!m_bRoundActive)
+		return;
+	int AliveRed = 0;
+	int AliveBlue = 0;
+	CountAlivePlayersByTeam(AliveRed, AliveBlue);
+
+	// if no fighters are left, the round cannot progress and all dead-spec players
+	// must be released so they can join the next fight normally
+	if(AliveRed + AliveBlue > 0)
+		return;
+
+	m_bRoundActive = false;
+	m_pDeadSpecController->RespawnAllPlayers();
+
+	for(int &Team : m_aPreDeathTeam)
+		Team = TEAM_SPECTATORS;
 }
 
 int CGameControllerLTSBlock::OnCharacterDeath(CCharacter *pVictim, CPlayer *pKiller, int WeaponId)
@@ -50,10 +113,13 @@ int CGameControllerLTSBlock::OnCharacterDeath(CCharacter *pVictim, CPlayer *pKil
 	if(m_bRoundReset)
 		return 0;
 
-	// remember the team so we can respawn them at the start of the next round
-	m_aPreDeathTeam[pVictim->GetPlayer()->GetCid()] = pVictim->GetPlayer()->GetTeam();
-
-	m_pDeadSpecController->KillPlayer(pVictim->GetPlayer(), pKiller ? pKiller->GetCid() : -1);
+	// only apply dead-spec logic when a real round is in progress (both teams had players)
+	if(m_bRoundActive)
+	{
+		// remember the team so we can respawn them at the start of the next round
+		m_aPreDeathTeam[pVictim->GetPlayer()->GetCid()] = pVictim->GetPlayer()->GetTeam();
+		m_pDeadSpecController->KillPlayer(pVictim->GetPlayer(), pKiller ? pKiller->GetCid() : -1);
+	}
 
 	// track kill/death stats like regular block, but don't add team score
 	return CGameControllerBlock::OnCharacterDeath(pVictim, pKiller, WeaponId);
@@ -64,8 +130,9 @@ bool CGameControllerLTSBlock::DoWincheckRound()
 	if(IGameController::DoWincheckRound())
 		return true;
 
-	int AliveRed = CountAlivePlayersTeam(TEAM_RED);
-	int AliveBlue = CountAlivePlayersTeam(TEAM_BLUE);
+	int AliveRed = 0;
+	int AliveBlue = 0;
+	CountAlivePlayersByTeam(AliveRed, AliveBlue);
 
 	if(AliveRed > 0 && AliveBlue > 0)
 		return false;
@@ -113,26 +180,10 @@ bool CGameControllerLTSBlock::DoWincheckRound()
 
 void CGameControllerLTSBlock::StartNewRound()
 {
+	m_bRoundActive = false;
+
 	// bring killed players back to their teams
-	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
-	{
-		if(!pPlayer || !pPlayer->m_IsDead)
-			continue;
-
-		int OrigTeam = m_aPreDeathTeam[pPlayer->GetCid()];
-
-		// skip permanent spectators just in case
-		if(OrigTeam != TEAM_RED && OrigTeam != TEAM_BLUE)
-			continue;
-
-		pPlayer->m_ForceTeam.m_Tick = 0;
-		pPlayer->m_IsDead = false;
-		pPlayer->m_KillerId = -1;
-		m_aPreDeathTeam[pPlayer->GetCid()] = TEAM_SPECTATORS;
-
-		if(pPlayer->GetTeam() == TEAM_SPECTATORS)
-			DoTeamChange(pPlayer, OrigTeam, false);
-	}
+	RestorePlayersFromPreDeathTeam(true);
 
 	// kill all characters so everyone respawns fresh; m_bRoundReset stops OnCharacterDeath from marking survivors as dead
 	m_bRoundReset = true;
@@ -145,13 +196,24 @@ void CGameControllerLTSBlock::StartNewRound()
 	}
 	m_bRoundReset = false;
 
-	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	RespawnNonSpectatorPlayers(false);
+}
+
+void CGameControllerLTSBlock::Tick()
+{
+	CGameControllerBlock::Tick();
+	ResetRoundStateIfEmpty();
+
+	int AliveRed = 0;
+	int AliveBlue = 0;
+	CountAlivePlayersByTeam(AliveRed, AliveBlue);
+
+	// activate the round once both teams have at least one player
+	// mirrors bombs pattern: OnRoundStart() fires at server init with no players
+	// so we must not rely on it to set m_bRoundActive = true
+	if(!m_bRoundActive && !m_Warmup && AliveRed > 0 && AliveBlue > 0)
 	{
-		if(!pPlayer || pPlayer->GetTeam() == TEAM_SPECTATORS)
-			continue;
-		// zero out any respawn cooldown so everyone spawns on the same tick
-		pPlayer->m_RespawnTick = Server()->Tick();
-		pPlayer->Respawn();
+		m_bRoundActive = true;
 	}
 }
 
@@ -161,32 +223,15 @@ void CGameControllerLTSBlock::OnRoundStart()
 
 	// restore players who were dead-speced at the end of the previous match
 	// m_aPreDeathTeam is TEAM_SPECTATORS for players who never competed
-	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
-	{
-		if(!pPlayer || pPlayer->GetTeam() != TEAM_SPECTATORS)
-			continue;
+	RestorePlayersFromPreDeathTeam(false);
+	RespawnNonSpectatorPlayers(true);
+	// m_bRoundActive is not set here, Tick() will set it once both teams have a player
+}
 
-		int OrigTeam = m_aPreDeathTeam[pPlayer->GetCid()];
-		if(OrigTeam != TEAM_RED && OrigTeam != TEAM_BLUE)
-			continue;
-
-		pPlayer->m_ForceTeam.m_Tick = 0;
-		pPlayer->m_IsDead = false;
-		pPlayer->m_KillerId = -1;
-		m_aPreDeathTeam[pPlayer->GetCid()] = TEAM_SPECTATORS;
-
-		DoTeamChange(pPlayer, OrigTeam, false);
-	}
-
-	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
-	{
-		if(!pPlayer || pPlayer->GetTeam() == TEAM_SPECTATORS)
-			continue;
-		if(pPlayer->GetCharacter())
-			continue;
-		pPlayer->m_RespawnTick = Server()->Tick();
-		pPlayer->Respawn();
-	}
+void CGameControllerLTSBlock::OnRoundEnd()
+{
+	CGameControllerBlock::OnRoundEnd();
+	m_bRoundActive = false;
 }
 
 void CGameControllerLTSBlock::OnPlayerConnect(CPlayer *pPlayer)
@@ -196,11 +241,22 @@ void CGameControllerLTSBlock::OnPlayerConnect(CPlayer *pPlayer)
 	m_aPreDeathTeam[pPlayer->GetCid()] = TEAM_SPECTATORS;
 
 	// Prevent bypassing death by reconnecting mid-round
-	if(CountAlivePlayersTeam(TEAM_RED) + CountAlivePlayersTeam(TEAM_BLUE) > 0)
+	// m_bRoundActive is only true once Tick() has confirmed both teams have players,
+	// so a genuine first/second joiner will never be blocked here
+	if(m_bRoundActive)
 	{
+		// Keep the team they were assigned on connect so StartNewRound can move
+		// them back into red/blue instead of leaving them in spectators forever
+		m_aPreDeathTeam[pPlayer->GetCid()] = pPlayer->GetTeam();
 		m_pDeadSpecController->KillPlayer(pPlayer, -1);
 		GameServer()->SendChatTarget(pPlayer->GetCid(), "You have to wait for the round to end before you can join");
 	}
+}
+
+void CGameControllerLTSBlock::OnPlayerDisconnect(CPlayer *pPlayer, const char *pReason)
+{
+	CGameControllerBlock::OnPlayerDisconnect(pPlayer, pReason);
+	ResetRoundStateIfEmpty();
 }
 
 void CGameControllerLTSBlock::OnCreditsChatCmd(IConsole::IResult *pResult, void *pUserData)
