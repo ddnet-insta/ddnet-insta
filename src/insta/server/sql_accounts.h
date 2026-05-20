@@ -10,7 +10,7 @@
 #include <insta/server/account.h>
 #include <insta/server/extra_columns.h>
 #include <insta/server/sql_stats_player.h>
-#include <insta/server/todo_codegen/mode_account.h>
+#include <generated/insta/mode_account.h>
 
 #include <cstdint>
 

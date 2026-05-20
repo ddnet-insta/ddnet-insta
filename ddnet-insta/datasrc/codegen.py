@@ -406,4 +406,3 @@ class GenExtraTables:
         else:
             print(f"Invalid arg '{arg}'", file=sys.stderr)
             exit(1)
-

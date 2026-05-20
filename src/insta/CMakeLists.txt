@@ -1,14 +1,36 @@
+function(generate_acc_table output_file script_parameter)
+  add_custom_command(OUTPUT ${output_file}
+    COMMAND ${Python3_EXECUTABLE} ddnet-insta/datasrc/tables.py ${script_parameter}
+      > "${PROJECT_BINARY_DIR}/${output_file}"
+    DEPENDS
+      # tidy-alphabetical-start
+      ddnet-insta/datasrc/codegen.py
+      ddnet-insta/datasrc/tables.py
+      # tidy-alphabetical-end
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  )
+endfunction()
+
+file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/src/generated/insta")
+generate_acc_table("src/generated/insta/mode_account.h" "header")
+generate_acc_table("src/generated/insta/mode_account.cpp" "source")
+
 function(insta_patch_engine)
     set_src(INSTA_ENGINE_INTERFACE GLOB src/insta/engine
+      # tidy-alphabetical-start
       gameserver.h
       server.h
+      # tidy-alphabetical-end
     )
 
     set_src(INSTA_ENGINE_SHARED GLOB_RECURSE src/insta/engine/shared
+      # tidy-alphabetical-start
       config_variables_insta.h
+      # tidy-alphabetical-end
     )
 
     set_src(INSTA_INCLUDES GLOB_RECURSE src/insta/includes
+      # tidy-alphabetical-start
       character.h
       chat_commands.h
       engine/gameserver.h
@@ -19,6 +41,7 @@ function(insta_patch_engine)
       gamecontroller.h
       player.h
       rcon_commands.h
+      # tidy-alphabetical-end
     )
 
     set(ENGINE_INTERFACE ${ENGINE_INTERFACE} PARENT_SCOPE)
@@ -34,6 +57,7 @@ function(insta_patch_server)
     file(GLOB_RECURSE INSTA_EXTERNAL_GAMEMODES "src/external_gamemodes/*.cpp" "src/external_gamemodes/*.h")
 
     set_src(INSTA_SERVER GLOB_RECURSE src/insta/server
+      # tidy-alphabetical-start
       account.cpp
       account.h
       antibob.cpp
@@ -183,18 +207,24 @@ function(insta_patch_server)
       strhelpers.cpp
       strhelpers.h
       structs.h
-      todo_codegen/mode_account.cpp
-      todo_codegen/mode_account.h
       version.h
+      # tidy-alphabetical-end
     )
 
     set_src(INSTA_ENGINE_SERVER GLOB_RECURSE src/insta/engine/server
+      # tidy-alphabetical-start
       server.cpp
       server.h
+      # tidy-alphabetical-end
+    )
+
+    set(INSTA_GENERATED
+      src/generated/insta/mode_account.h
+      src/generated/insta/mode_account.cpp
     )
 
     set(GAME_SERVER ${GAME_SERVER} PARENT_SCOPE)
-    list(APPEND GAME_SERVER ${INSTA_EXTERNAL_GAMEMODES} ${INSTA_SERVER})
+    list(APPEND GAME_SERVER ${INSTA_EXTERNAL_GAMEMODES} ${INSTA_SERVER} ${INSTA_GENERATED})
     set(GAME_SERVER ${GAME_SERVER} PARENT_SCOPE)
 
     set(ENGINE_SERVER_WITHOUT_MAIN ${ENGINE_SERVER_WITHOUT_MAIN} PARENT_SCOPE)

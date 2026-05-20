@@ -3,7 +3,7 @@
 
 #include <engine/shared/protocol.h>
 
-#include <insta/server/todo_codegen/mode_account.h>
+#include <generated/insta/mode_account.h>
 
 #define MIN_USERNAME_LENGTH 1
 #define MAX_USERNAME_LENGTH 24
