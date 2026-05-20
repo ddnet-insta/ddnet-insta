@@ -55,6 +55,8 @@ bool CAccountTableCity::Load(class IDbConnection *pSqlServer, const char *pUsern
 
 	if(End)
 	{
+		log_error("sql-thread", "THIS IS BAD");
+
 		// TODO: need to write to pError here i guess
 		return false; // not a fatal error but no account loaded
 	}
@@ -107,16 +109,24 @@ bool CAccountTableCity::Save(IDbConnection *pSqlServer, const char *pUsername, c
 bool CExtraAccountTableController::Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, const std::vector<EExtraAccTable> &vTables, char *pError, int ErrorSize)
 {
 	bool Ok = true;
+	log_info("sql-thread", "loading extra tables..");
 	for(const auto Table : vTables)
 	{
 		switch(Table)
 		{
 		case EExtraAccTable::CITY:
+			log_info("sql-thread", " loading city data...");
 			if(!CAccountTableCity::Load(pSqlServer, pUsername, pAccount, pError, ErrorSize))
 				Ok = false;
 			break;
 		}
 	}
+
+	if(!Ok)
+	{
+		log_error("sql-thread", "EXTRA TABLES FAILED TO LOAD");
+	}
+
 	return Ok;
 }
 
