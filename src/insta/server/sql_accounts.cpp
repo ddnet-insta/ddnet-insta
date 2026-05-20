@@ -19,6 +19,7 @@
 
 #include <cstdlib>
 #include <thread>
+#include <vector>
 
 class IDbConnection;
 
@@ -173,7 +174,7 @@ bool CSqlAccounts::AccountWorker(IDbConnection *pSqlServer, const ISqlData *pGam
 
 	if(pData->m_RequestType == EAccountPlayerRequestType::CHAT_CMD_LOGIN)
 	{
-		if(!LoadAccount(pSqlServer, pData->m_aUsername, &pResult->m_Data.m_Account, pError, ErrorSize))
+		if(!LoadAccount(pSqlServer, pData->m_aUsername, &pResult->m_Data.m_Account, pData->m_vTables, pError, ErrorSize))
 		{
 			pResult->m_MessageKind = EAccountPlayerRequestType::LOGIN_FAILED;
 			str_copy(pResult->m_Data.m_aaMessages[0], "Wrong username or password"); // wrong username
@@ -408,13 +409,14 @@ bool CSqlAccounts::AccountSaveAndLogoutWorker(IDbConnection *pSqlServer, const I
 	log_info("sql-thread", "logging out account '%s'", pData->m_Account.m_aUsername);
 	if(!SetAccountInt(pSqlServer, pData->m_Account.m_aUsername, "logged_in", 0, pError, ErrorSize))
 	{
-		str_copy(pResult->m_aMessage, "Logout failed");
+		str_copy(pResult->m_aMessage, "Logout failed (error code 1)");
 		return false;
 	}
 
-	if(pData->m_Account.m_Mode.m_City.has_value())
+	if(!CExtraAccountTableController::Save(pSqlServer, pData->m_Account.m_aUsername, &pData->m_Account, pData->m_vTables, pError, ErrorSize))
 	{
-		CAccountTableCity::Save(pSqlServer, pData->m_Account.m_aUsername, &pData->m_Account.m_Mode.m_City.value(), pError, ErrorSize);
+		str_copy(pResult->m_aMessage, "Logout failed (error code 2)");
+		return false;
 	}
 
 	return true;
@@ -508,7 +510,7 @@ bool CSqlAccounts::ForceLogout(IDbConnection *pSqlServer, const CSqlPlayerAccoun
 	dbg_assert(pData->m_RequestType == EAccountRconPlayerRequestType::ACC_LOGOUT, "invalid request type");
 
 	CAccount Account;
-	if(!LoadAccount(pSqlServer, pData->m_aUsername, &Account, pError, ErrorSize))
+	if(!LoadAccount(pSqlServer, pData->m_aUsername, &Account, {}, pError, ErrorSize))
 	{
 		pResult->m_MessageKind = EAccountRconPlayerRequestType::LOG_ERROR;
 		str_format(
@@ -570,7 +572,7 @@ bool CSqlAccounts::LockAccount(IDbConnection *pSqlServer, const CSqlPlayerAccoun
 	dbg_assert(pData->m_RequestType == EAccountRconPlayerRequestType::ACC_LOCK, "invalid request type");
 
 	CAccount Account;
-	if(!LoadAccount(pSqlServer, pData->m_aUsername, &Account, pError, ErrorSize))
+	if(!LoadAccount(pSqlServer, pData->m_aUsername, &Account, {}, pError, ErrorSize))
 	{
 		str_format(
 			pResult->m_aaMessages[0],
@@ -627,7 +629,7 @@ bool CSqlAccounts::UnlockAccount(IDbConnection *pSqlServer, const CSqlPlayerAcco
 	dbg_assert(pData->m_RequestType == EAccountRconPlayerRequestType::ACC_UNLOCK, "invalid request type");
 
 	CAccount Account;
-	if(!LoadAccount(pSqlServer, pData->m_aUsername, &Account, pError, ErrorSize))
+	if(!LoadAccount(pSqlServer, pData->m_aUsername, &Account, {}, pError, ErrorSize))
 	{
 		str_format(
 			pResult->m_aaMessages[0],
@@ -669,7 +671,7 @@ bool CSqlAccounts::AccountInfo(IDbConnection *pSqlServer, const CSqlPlayerAccoun
 	dbg_assert(pData->m_RequestType == EAccountRconPlayerRequestType::ACC_INFO, "invalid request type");
 
 	CAccount Account;
-	if(!LoadAccount(pSqlServer, pData->m_aUsername, &Account, pError, ErrorSize))
+	if(!LoadAccount(pSqlServer, pData->m_aUsername, &Account, {}, pError, ErrorSize))
 	{
 		str_format(
 			pResult->m_aaMessages[0],
@@ -833,7 +835,7 @@ bool CSqlAccounts::SetPassword(IDbConnection *pSqlServer, const char *pUsername,
 	return true;
 }
 
-bool CSqlAccounts::LoadAccount(IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, char *pError, int ErrorSize)
+bool CSqlAccounts::LoadAccount(IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, const std::vector<EExtraAccTable> &vTables, char *pError, int ErrorSize)
 {
 	char aBuf[4096];
 	str_copy(
@@ -880,6 +882,12 @@ bool CSqlAccounts::LoadAccount(IDbConnection *pSqlServer, const char *pUsername,
 		pSqlServer->GetString(Offset++, pAccount->m_aContact, sizeof(pAccount->m_aContact));
 		pAccount->m_Pin = pSqlServer->GetInt(Offset++);
 		pSqlServer->GetString(Offset++, pAccount->m_aRegisterIp, sizeof(pAccount->m_aRegisterIp));
+
+		if(!CExtraAccountTableController::Load(pSqlServer, pAccount->m_aUsername, pAccount, vTables, pError, ErrorSize))
+		{
+			// TODO: how do we handle this error properly?
+			return false;
+		}
 	}
 
 	return true;

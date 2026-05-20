@@ -10,6 +10,7 @@
 #include <insta/server/account.h>
 #include <insta/server/extra_columns.h>
 #include <insta/server/sql_stats_player.h>
+#include <insta/server/todo_codegen/mode_account.h>
 
 #include <cstdint>
 
@@ -201,7 +202,9 @@ private:
 	// writes account details to pAccount if it returned true
 	//
 	// you can pass nullptr for pAccount if you do not need the details
-	static bool LoadAccount(IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, char *pError, int ErrorSize);
+	//
+	// vTables specifies which additional tables should be loaded
+	static bool LoadAccount(IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, const std::vector<EExtraAccTable> &vTables, char *pError, int ErrorSize);
 
 	// returns false on error
 	// sets pColumn to Value where the username is pUsername

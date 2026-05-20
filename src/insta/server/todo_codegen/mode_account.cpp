@@ -31,9 +31,46 @@ bool CAccountTableCity::CreateTable(class IDbConnection *pSqlServer, char *pErro
 	return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
 }
 
-bool CAccountTableCity::Save(IDbConnection *pSqlServer, const char *pUsername, const void *pUserData, char *pError, int ErrorSize)
+bool CAccountTableCity::Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, char *pError, int ErrorSize)
 {
-	const CAccountDataCity *pData = static_cast<const CAccountDataCity *>(pUserData);
+	const char *pQuery =
+		"SELECT"
+		" level "
+		"FROM account_city "
+		"WHERE username = ?;";
+	if(!pSqlServer->PrepareStatement(pQuery, pError, ErrorSize))
+	{
+		log_error("sql-thread", "prepare failed query: %s", pQuery);
+		return false;
+	}
+	pSqlServer->BindString(1, pUsername);
+	pSqlServer->Print();
+
+	bool End;
+	if(!pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		log_error("sql-thread", "step failed query: %s", pQuery);
+		return false;
+	}
+
+	if(End)
+	{
+		// TODO: need to write to pError here i guess
+		return false; // not a fatal error but no account loaded
+	}
+
+	if(pAccount)
+	{
+		int Offset = 1;
+		pAccount->m_Mode.m_City.m_Level = pSqlServer->GetInt(Offset++);
+	}
+
+	return true;
+}
+
+bool CAccountTableCity::Save(IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize)
+{
+	// const CAccountDataCity *pData = static_cast<const CAccountDataCity *>(pUserData);
 	const char *pQuery =
 		"UPDATE account_city "
 		"SET"
@@ -67,20 +104,72 @@ bool CAccountTableCity::Save(IDbConnection *pSqlServer, const char *pUsername, c
 	return true;
 }
 
-bool CExtraAccountTableController::Save(class IDbConnection *pSqlServer, const char *pUsername, const CAccount *pAccount, char *pError, int ErrorSize)
+bool CExtraAccountTableController::Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, const std::vector<EExtraAccTable> &vTables, char *pError, int ErrorSize)
 {
 	bool Ok = true;
-	if(pAccount->m_Mode.m_City.has_value())
+	for(const auto Table : vTables)
 	{
-		log_info("sql-thread", "saving city data...");
-		if(!CAccountTableCity::Save(pSqlServer, pAccount->Username(), &pAccount->m_Mode.m_City.value(), pError, ErrorSize))
-			Ok = false;
+		switch(Table)
+		{
+		case EExtraAccTable::CITY:
+			if(!CAccountTableCity::Load(pSqlServer, pUsername, pAccount, pError, ErrorSize))
+				Ok = false;
+			break;
+		}
 	}
+	return Ok;
+}
+
+bool CExtraAccountTableController::Save(class IDbConnection *pSqlServer, const char *pUsername, const CAccount *pAccount, const std::vector<EExtraAccTable> &vTables, char *pError, int ErrorSize)
+{
+	bool Ok = true;
+
+	log_info("sql-thread", "saving extra tables..");
+
+	for(const auto Table : vTables)
+	{
+		switch(Table)
+		{
+		case EExtraAccTable::CITY:
+			log_info("sql-thread", " saving city data...");
+			if(!CAccountTableCity::Save(pSqlServer, pAccount->Username(), &pAccount->m_Mode.m_City, pError, ErrorSize))
+				Ok = false;
+			break;
+		}
+	}
+
 	return Ok;
 }
 
 void CExtraAccountTableController::InitPlayer(CPlayer *pPlayer)
 {
+	// TODO: I do not think it is a good idea to init the std optionals here to some empty value
+	//       in the sql worker is a bit nasty if we want to load an account and store the result
+	//       to a CAccount instance but the load depends on input from a CAccount which is the same
+	//       class but different fields used for input and output at the same time
+	//       so we end up with
+	//       ```C++
+	//       CAccount Acc;
+	//       CAccount AccExtraInput = pPlayer->m_Account;
+	//       LoadAccount(&Acc, &AccExtraInput); // WTF?
+	//       ```
+	//       Better would be if the sql worker could just enable tables explicitly based on a list of enum values
+	//       ```C++
+	//       CAccount Acc;
+	//       std::vector<EExtraAccTable> vTables;
+	//       vTables.emplace_back(EExtraAccTable::CITY);
+	//       LoadAccount(&Acc, vTables);
+	//       ```
+	//       This enum could also be the only identifier the server stores at all.
+	//       hm maybe not xd because of create table
+	//       we dont even need to store that in the player instance at all we can ask the controller on save
+	//       because it is the same for all
+	//
+	//       i do not like copy pasting a vector around everywhere
+	//       so maybe a bit flag or static array would be better
+	//       but tbh we copy paste a bunch of strings when loading accounts one smol vector shouldnt have much of an impact
+
+	/*
 	for(const auto *pTable : m_vpTables)
 	{
 		switch (pTable->Type()) {
@@ -90,6 +179,7 @@ void CExtraAccountTableController::InitPlayer(CPlayer *pPlayer)
 			break;
 		}
 	}
+	*/
 }
 
 CExtraAccountTableController::~CExtraAccountTableController()

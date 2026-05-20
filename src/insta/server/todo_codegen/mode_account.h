@@ -4,6 +4,8 @@
 
 // TODO: two classes? one for player instances and one for the gamemode so it can create the table
 
+#include <base/log.h>
+
 #include <optional>
 #include <vector>
 
@@ -49,16 +51,16 @@ public:
 class CAccountTableCity : public IAccountTable
 {
 public:
-
 	// we need the name in the save method which is static so we have to hardcode it
 	// which is fine because the code should be generated anyways
 	// const char *Name() const override { return "account_city"; }
-	
+
 	EExtraAccTable Type() const override { return EExtraAccTable::CITY; }
 
 	bool CreateTable(class IDbConnection *pSqlServer, char *pError, int ErrorSize) override;
 
-	static bool Save(class IDbConnection *pSqlServer, const char *pUsername, const void *pUserData, char *pError, int ErrorSize);
+	static bool Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, char *pError, int ErrorSize);
+	static bool Save(class IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize);
 };
 
 // player instance
@@ -75,7 +77,14 @@ public:
 	//
 	// WARNING: don't access this variable directly and instead wrap it in a getter
 	//          so the above mentioned refactor can be applied easily
-	std::optional<CAccountDataCity> m_City = std::nullopt;
+	// std::optional<CAccountDataCity> m_City = std::nullopt; // ok never mind i use an enum vector to request and a value to store
+
+	CAccountDataCity m_City;
+
+	CModeAccount()
+	{
+		log_info("extra-acc", "MODE ACCOUNT CONSTRUCTED");
+	}
 
 	void Reset()
 	{
@@ -86,11 +95,15 @@ public:
 class CExtraAccountTableController
 {
 public:
+	// TODO: remove this vector and only use the enums
 	std::vector<IAccountTable *> m_vpTables;
+
+	std::vector<EExtraAccTable> m_vTables;
 
 	~CExtraAccountTableController();
 
-	static bool Save(class IDbConnection *pSqlServer, const char *pUsername, const CAccount *pAccount, char *pError, int ErrorSize);
+	static bool Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, const std::vector<EExtraAccTable> &vTables, char *pError, int ErrorSize);
+	static bool Save(class IDbConnection *pSqlServer, const char *pUsername, const CAccount *pAccount, const std::vector<EExtraAccTable> &vTables, char *pError, int ErrorSize);
 
 	void InitPlayer(CPlayer *pPlayer);
 };

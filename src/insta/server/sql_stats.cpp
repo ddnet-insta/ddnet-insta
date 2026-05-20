@@ -181,6 +181,12 @@ void CSqlStats::ExecPlayerAccountThread(
 	Tmp->m_RequestType = RequestType;
 	str_copy(Tmp->m_aUserIpAddr, Server()->ClientAddrString(ClientId, false), sizeof(Tmp->m_aUserIpAddr));
 
+	Tmp->m_vTables.clear();
+	if(GameServer()->m_pController->m_pExtraAccountTableController)
+	{
+		Tmp->m_vTables = GameServer()->m_pController->m_pExtraAccountTableController->m_vTables;
+	}
+
 	m_pPool->ExecuteWrite(pFuncPtr, std::move(Tmp), pThreadName);
 }
 
@@ -443,6 +449,11 @@ void CSqlStats::SaveAndLogoutAccount(CPlayer *pPlayer, const char *pSuccessMessa
 	pPlayer->m_AccountLogoutQueryResult = std::make_shared<CAccountManagementResult>(pSuccessMessage);
 	auto Tmp = std::make_unique<CSqlPlayerAccountData>(pPlayer->m_AccountLogoutQueryResult, g_Config.m_SvDebugStats);
 	Tmp->m_Account = pPlayer->m_Account;
+	Tmp->m_vTables.clear();
+	if(GameServer()->m_pController->m_pExtraAccountTableController)
+	{
+		Tmp->m_vTables = GameServer()->m_pController->m_pExtraAccountTableController->m_vTables;
+	}
 	m_pPool->ExecuteWrite(CSqlAccounts::AccountSaveAndLogoutWorker, std::move(Tmp), "save and logout");
 }
 

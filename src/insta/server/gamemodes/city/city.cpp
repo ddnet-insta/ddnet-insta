@@ -28,6 +28,9 @@ CGameControllerCity::CGameControllerCity(CGameContext *pGameServer) :
 	// TODO: this can be a neat helper like AddExtraAccTable(); which also allocates the table above
 	m_pExtraAccountTableController->m_vpTables.emplace_back(new CAccountTableCity());
 
+	// TODO: remove line above and only use this
+	m_pExtraAccountTableController->m_vTables.emplace_back(EExtraAccTable::CITY);
+
 	// TODO: abstract this away to the on init method
 	for(auto *pTable : m_pExtraAccountTableController->m_vpTables)
 		m_pSqlStats->CreateExtraAccountsTable(pTable);

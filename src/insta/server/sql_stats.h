@@ -148,6 +148,8 @@ struct CSqlPlayerAccountRequest : CSqlInstaData
 	char m_aServerIp[64];
 	int m_ServerPort;
 	char m_aUserIpAddr[64];
+
+	std::vector<EExtraAccTable> m_vTables;
 };
 
 // data to be writtem
@@ -160,6 +162,7 @@ struct CSqlPlayerAccountData : CSqlInstaData
 	}
 
 	CAccount m_Account;
+	std::vector<EExtraAccTable> m_vTables;
 };
 
 // data to be writtem
