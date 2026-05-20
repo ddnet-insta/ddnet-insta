@@ -2,6 +2,7 @@
 
 from typing import Protocol
 import textwrap
+import sys
 
 class SqlCol(Protocol):
     name: str
@@ -388,16 +389,21 @@ class GenExtraTables:
         """)
         return code
 
-    def generate(self, acc_table: ExtraAccTable):
-        # TODO: we need to print 1 file at a time smh
-        #       so cmake can redirect the output to the correct location
-        print(self.header(acc_table))
-        print(self.source(acc_table))
+    def print_usage(self):
+        print(f"codegen.py [header|source]")
 
-class AccTableCity:
-    name = "foo"
-    columns = []
-    pass
+    def cli(self, args: list[str], acc_table: ExtraAccTable):
+        if len(args) != 2:
+            self.print_usage()
+            exit(1)
+        arg = args[1]
+        if arg == 'header':
+            print(self.header(acc_table))
+        elif arg == 'source':
+            print(self.source(acc_table))
+        elif arg == 'help' or arg == '-h' or arg == '--help':
+            self.print_usage()
+        else:
+            print(f"Invalid arg '{arg}'", file=sys.stderr)
+            exit(1)
 
-gen = GenExtraTables()
-gen.generate(AccTableCity())
