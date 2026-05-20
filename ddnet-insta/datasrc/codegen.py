@@ -389,6 +389,8 @@ class GenExtraTables:
         return code
 
     def generate(self, acc_table: ExtraAccTable):
+        # TODO: we need to print 1 file at a time smh
+        #       so cmake can redirect the output to the correct location
         print(self.header(acc_table))
         print(self.source(acc_table))
 
