@@ -15,6 +15,7 @@
 #include <insta/server/password_hash.h>
 #include <insta/server/sql_stats.h>
 #include <insta/server/sql_stats_player.h>
+#include <insta/server/todo_codegen/mode_account.h>
 
 #include <cstdlib>
 #include <thread>
@@ -410,6 +411,12 @@ bool CSqlAccounts::AccountSaveAndLogoutWorker(IDbConnection *pSqlServer, const I
 		str_copy(pResult->m_aMessage, "Logout failed");
 		return false;
 	}
+
+	if(pData->m_Account.m_Mode.m_City.has_value())
+	{
+		CAccountTableCity::Save(pSqlServer, pData->m_Account.m_aUsername, &pData->m_Account.m_Mode.m_City.value(), pError, ErrorSize);
+	}
+
 	return true;
 }
 

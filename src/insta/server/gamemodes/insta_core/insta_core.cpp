@@ -1308,7 +1308,7 @@ void CGameControllerInstaCore::InitPlayer(CPlayer *pPlayer)
 	// TODO: persist on map change
 	if(m_pExtraAccountTableController)
 	{
-		pPlayer->m_Account.m_Mode.Reset();
+		m_pExtraAccountTableController->InitPlayer(pPlayer);
 	}
 }
 
