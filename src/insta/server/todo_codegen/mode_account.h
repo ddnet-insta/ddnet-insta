@@ -59,6 +59,7 @@ public:
 
 	bool CreateTable(class IDbConnection *pSqlServer, char *pError, int ErrorSize) override;
 
+	static bool Insert(class IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize);
 	static bool Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, char *pError, int ErrorSize);
 	static bool Save(class IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize);
 };

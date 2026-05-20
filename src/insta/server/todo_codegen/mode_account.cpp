@@ -12,6 +12,8 @@
 
 bool CAccountTableCity::CreateTable(class IDbConnection *pSqlServer, char *pError, int ErrorSize)
 {
+	// TODO: make the username a proper unique foreign key
+
 	char aBuf[4096];
 	str_format(aBuf, sizeof(aBuf),
 		"CREATE TABLE IF NOT EXISTS account_city("
@@ -29,6 +31,39 @@ bool CAccountTableCity::CreateTable(class IDbConnection *pSqlServer, char *pErro
 	pSqlServer->Print();
 	int NumInserted;
 	return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
+}
+
+bool CAccountTableCity::Insert(class IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize)
+{
+	const char *pQuery =
+		"INSERT INTO account_city("
+		" username, "
+		" level "
+		") VALUES ("
+		" ?,"
+		" ?"
+		");";
+
+	if(!pSqlServer->PrepareStatement(pQuery, pError, ErrorSize))
+	{
+		log_error("sql-thread", "prepare insert failed query=%s", pQuery);
+		return false;
+	}
+
+	int Offset = 1;
+	pSqlServer->BindString(Offset++, pUsername);
+	pSqlServer->BindInt(Offset++, pData->m_Level);
+	pSqlServer->Print();
+
+	int NumInserted;
+	if(!pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
+	{
+		return false;
+	}
+
+	// TODO: check NumInserted
+
+	return true;
 }
 
 bool CAccountTableCity::Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, char *pError, int ErrorSize)
@@ -55,10 +90,23 @@ bool CAccountTableCity::Load(class IDbConnection *pSqlServer, const char *pUsern
 
 	if(End)
 	{
-		log_error("sql-thread", "THIS IS BAD");
+		// https://github.com/ddnet-insta/ddnet-insta/pull/660#issuecomment-4496155696
+		// the additional data is not guranteed to exist so if we fail to load
+		// we assume we have to init it here
 
-		// TODO: need to write to pError here i guess
-		return false; // not a fatal error but no account loaded
+		// TODO: do we need to call some proper constructor here?
+		//       i feel like this 0 intializes which might not be the defaults
+		//       we want for all data
+		CAccountDataCity NewCityData = {};
+
+		if(!Insert(pSqlServer, pUsername, &NewCityData, pError, ErrorSize))
+		{
+			log_error("sql-thread", "THIS IS BAD");
+			// TODO: need to write to pError here i guess
+			return false;
+		}
+		pAccount->m_Mode.m_City = NewCityData;
+		return true;
 	}
 
 	if(pAccount)
