@@ -1,5 +1,6 @@
 #include "mode_account.h"
 #include <engine/server/databases/connection.h>
+#include <game/server/player.h>
 #include <base/dbg.h>
 #include <base/log.h>
 #include <base/str.h>
@@ -64,6 +65,10 @@ bool CAccountTableCity::Save(IDbConnection *pSqlServer, const char *pUsername, c
 	}
 
 	return true;
+}
+
+void CExtraAccountTableController::InitPlayer(CPlayer *pPlayer)
+{
 }
 
 CExtraAccountTableController::~CExtraAccountTableController()

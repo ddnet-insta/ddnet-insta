@@ -3,7 +3,7 @@
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
-#include <insta/server/generated/mode_account.h>
+#include <insta/server/todo_codegen/mode_account.h>
 #include <vector>
 
 CGameControllerCity::CGameControllerCity(CGameContext *pGameServer) :

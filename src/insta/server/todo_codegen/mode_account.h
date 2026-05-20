@@ -5,6 +5,9 @@
 // TODO: two classes? one for player instances and one for the gamemode so it can create the table
 
 #include <vector>
+
+class CPlayer;
+
 class IAccountTable
 {
 	public:
@@ -17,7 +20,7 @@ class IAccountTable
 class CAccountTableCity : public IAccountTable
 {
 public:
-	const char *Name() const override { return "city"; }
+	const char *Name() const override { return "account_city"; }
 	bool CreateTable(class IDbConnection *pSqlServer, char *pError, int ErrorSize) override;
 	bool Save(class IDbConnection *pSqlServer, const char *pUsername, char *pError, int ErrorSize) override;
 
@@ -40,4 +43,6 @@ class CExtraAccountTableController
 		std::vector<IAccountTable *> m_vpTables;
 
 		~CExtraAccountTableController();
+
+	void InitPlayer(CPlayer *pPlayer);
 };

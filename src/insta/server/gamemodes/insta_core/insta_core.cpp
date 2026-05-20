@@ -1304,6 +1304,12 @@ void CGameControllerInstaCore::InitPlayer(CPlayer *pPlayer)
 		pPlayer->m_FirstJoinTime = time_get();
 
 	RoundInitPlayer(pPlayer);
+
+	// TODO: persist on map change
+	if(m_pExtraAccountTableController)
+	{
+		pPlayer->m_Account.m_Mode.Reset();
+	}
 }
 
 void CGameControllerInstaCore::Snap(int SnappingClient)

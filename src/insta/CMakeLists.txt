@@ -153,8 +153,6 @@ function(insta_patch_server)
       gamemodes/vanilla/fly/fly.h
       gamemodes/vanilla/tsmash/tsmash.cpp
       gamemodes/vanilla/tsmash/tsmash.h
-      generated/mode_account.cpp
-      generated/mode_account.h
       ip_storage.cpp
       ip_storage.h
       password_hash.cpp
@@ -185,6 +183,8 @@ function(insta_patch_server)
       strhelpers.cpp
       strhelpers.h
       structs.h
+      todo_codegen/mode_account.cpp
+      todo_codegen/mode_account.h
       version.h
     )
 
