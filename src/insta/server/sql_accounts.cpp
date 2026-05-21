@@ -6,6 +6,8 @@
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/config.h>
 
+#include <generated/insta/mode_account.h>
+
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
@@ -15,7 +17,6 @@
 #include <insta/server/password_hash.h>
 #include <insta/server/sql_stats.h>
 #include <insta/server/sql_stats_player.h>
-#include <insta/server/todo_codegen/mode_account.h>
 
 #include <cstdlib>
 #include <thread>

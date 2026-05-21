@@ -6,12 +6,13 @@
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/protocol.h>
 
+#include <generated/insta/mode_account.h>
+
 #include <game/server/scoreworker.h>
 
 #include <insta/server/ddnet_db_utils/ddnet_db_utils.h>
 #include <insta/server/extra_columns.h>
 #include <insta/server/sql_stats_player.h>
-#include <insta/server/todo_codegen/mode_account.h>
 
 struct ISqlData;
 class IDbConnection;

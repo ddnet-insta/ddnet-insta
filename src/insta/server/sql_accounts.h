@@ -5,12 +5,13 @@
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/protocol.h>
 
+#include <generated/insta/mode_account.h>
+
 #include <game/server/scoreworker.h>
 
 #include <insta/server/account.h>
 #include <insta/server/extra_columns.h>
 #include <insta/server/sql_stats_player.h>
-#include <generated/insta/mode_account.h>
 
 #include <cstdint>
 
