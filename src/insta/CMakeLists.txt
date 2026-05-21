@@ -1,11 +1,11 @@
 function(generate_acc_table output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
-    COMMAND ${Python3_EXECUTABLE} ddnet-insta/datasrc/tables.py ${script_parameter}
+    COMMAND ${Python3_EXECUTABLE} ddnet-insta/datasrc/codegen.py ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
       # tidy-alphabetical-start
       ddnet-insta/datasrc/codegen.py
-      ddnet-insta/datasrc/tables.py
+      ddnet-insta/datasrc/acc_tables/city.py
       # tidy-alphabetical-end
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )

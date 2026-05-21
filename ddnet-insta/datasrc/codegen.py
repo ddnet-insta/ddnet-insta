@@ -3,6 +3,11 @@
 from typing import Protocol
 import textwrap
 import sys
+import importlib
+import pkgutil
+import inspect
+from pathlib import Path
+from sys import stderr
 
 class SqlCol(Protocol):
     name: str
@@ -12,12 +17,35 @@ class ExtraAccTable(Protocol):
     name: str
     columns: list[SqlCol]
 
-
 class GenExtraTables:
     def __init__(self):
+        self.tables: list[ExtraAccTable] = []
         pass
 
-    def header(self, acc_table: ExtraAccTable):
+    def load_tables(self, table_dir: str) -> list[ExtraAccTable]:
+        tables = []
+        table_path = Path(table_dir)
+        for file in table_path.glob("*.py"):
+            print(file)
+
+            module_name = file.stem
+            class_name = "".join(part.capitalize() for part in module_name.split("_"))
+            class_name = "AccTable" + class_name
+
+            # Load the module from file path
+            spec = importlib.util.spec_from_file_location(module_name, file)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+
+            cls = getattr(module, class_name, None)
+            if cls is None:
+                print(f"Error: in file {file} the expected class {class_name} was not found!", file=stderr)
+                exit(1)
+                continue
+            tables.append(cls)
+        return tables
+
+    def header(self):
         code = textwrap.dedent("""
         #pragma once
 
@@ -132,8 +160,7 @@ class GenExtraTables:
         """)
         return code
 
-
-    def source(self, acc_table: ExtraAccTable):
+    def source(self):
         code = textwrap.dedent("""
         #include "mode_account.h"
 
@@ -392,17 +419,21 @@ class GenExtraTables:
     def print_usage(self):
         print(f"codegen.py [header|source]")
 
-    def cli(self, args: list[str], acc_table: ExtraAccTable):
+    def cli(self, args: list[str]):
         if len(args) != 2:
             self.print_usage()
             exit(1)
+        self.tables = self.load_tables("acc_tables")
         arg = args[1]
         if arg == 'header':
-            print(self.header(acc_table))
+            print(self.header())
         elif arg == 'source':
-            print(self.source(acc_table))
+            print(self.source())
         elif arg == 'help' or arg == '-h' or arg == '--help':
             self.print_usage()
         else:
             print(f"Invalid arg '{arg}'", file=sys.stderr)
             exit(1)
+
+gen = GenExtraTables()
+gen.cli(sys.argv)
