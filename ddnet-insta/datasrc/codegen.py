@@ -3,6 +3,7 @@
 from typing import Protocol
 import textwrap
 import sys
+import os
 import importlib
 import pkgutil
 import inspect
@@ -41,7 +42,6 @@ class GenExtraTables:
             if cls is None:
                 print(f"Error: in file {file} the expected class {class_name} was not found!", file=stderr)
                 exit(1)
-                continue
             tables.append(cls)
         return tables
 
@@ -423,7 +423,8 @@ class GenExtraTables:
         if len(args) != 2:
             self.print_usage()
             exit(1)
-        self.tables = self.load_tables("acc_tables")
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        self.tables = self.load_tables(dir_path + "/acc_tables")
         arg = args[1]
         if arg == 'header':
             print(self.header())
