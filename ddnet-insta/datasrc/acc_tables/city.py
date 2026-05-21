@@ -2,5 +2,4 @@
 
 class AccTableCity:
     name = "foo"
-    # yellow
     columns = []
