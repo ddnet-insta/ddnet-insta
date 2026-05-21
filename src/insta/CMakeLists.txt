@@ -1,14 +1,19 @@
 function(insta_patch_engine)
     set_src(INSTA_ENGINE_INTERFACE GLOB src/insta/engine
+      # tidy-alphabetical-start
       gameserver.h
       server.h
+      # tidy-alphabetical-end
     )
 
     set_src(INSTA_ENGINE_SHARED GLOB_RECURSE src/insta/engine/shared
+      # tidy-alphabetical-start
       config_variables_insta.h
+      # tidy-alphabetical-end
     )
 
     set_src(INSTA_INCLUDES GLOB_RECURSE src/insta/includes
+      # tidy-alphabetical-start
       character.h
       chat_commands.h
       engine/gameserver.h
@@ -19,6 +24,7 @@ function(insta_patch_engine)
       gamecontroller.h
       player.h
       rcon_commands.h
+      # tidy-alphabetical-end
     )
 
     set(ENGINE_INTERFACE ${ENGINE_INTERFACE} PARENT_SCOPE)
@@ -34,6 +40,7 @@ function(insta_patch_server)
     file(GLOB_RECURSE INSTA_EXTERNAL_GAMEMODES "src/external_gamemodes/*.cpp" "src/external_gamemodes/*.h")
 
     set_src(INSTA_SERVER GLOB_RECURSE src/insta/server
+      # tidy-alphabetical-start
       antibob.cpp
       antibob.h
       chat_commands.cpp
@@ -171,11 +178,14 @@ function(insta_patch_server)
       strhelpers.h
       structs.h
       version.h
+      # tidy-alphabetical-end
     )
 
     set_src(INSTA_ENGINE_SERVER GLOB_RECURSE src/insta/engine/server
+      # tidy-alphabetical-start
       server.cpp
       server.h
+      # tidy-alphabetical-end
     )
 
     set(GAME_SERVER ${GAME_SERVER} PARENT_SCOPE)
