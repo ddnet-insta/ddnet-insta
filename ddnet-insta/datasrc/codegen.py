@@ -27,8 +27,6 @@ class GenExtraTables:
         tables = []
         table_path = Path(table_dir)
         for file in table_path.glob("*.py"):
-            print(file)
-
             module_name = file.stem
             class_name = "".join(part.capitalize() for part in module_name.split("_"))
             class_name = "AccTable" + class_name
