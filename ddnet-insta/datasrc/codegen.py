@@ -132,6 +132,13 @@ class GenExtraTables:
             code += self.behavior_class_header(tab) + "\n"
         return code
 
+    def tables_as_class_members(self) -> str:
+        lines = []
+        for tab in self.tables:
+            name = tab.name_camel()
+            lines.append(f"    CAccountData{name} m_{name};")
+        return "\n".join(lines)
+
     def header(self):
         code = textwrap.dedent("""
         #pragma once
@@ -195,8 +202,9 @@ class GenExtraTables:
             // WARNING: don't access this variable directly and instead wrap it in a getter
             //          so the above mentioned refactor can be applied easily
             // std::optional<CAccountDataCity> m_City = std::nullopt; // ok never mind i use an enum vector to request and a value to store
-
-            CAccountDataCity m_City;
+        """)
+        code += self.tables_as_class_members()
+        code += textwrap.dedent("""
 
             CModeAccount()
             {
