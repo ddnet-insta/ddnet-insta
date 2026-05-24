@@ -289,14 +289,13 @@ struct CSqlCreateTableRequest : ISqlData
 	char m_aColumns[2048];
 };
 
-struct CSqlCreateExtraAccountsTableRequest : ISqlData
+struct CSqlCreateExtraAccountsTablesRequest : ISqlData
 {
-	CSqlCreateExtraAccountsTableRequest() :
+	CSqlCreateExtraAccountsTablesRequest() :
 		ISqlData(nullptr)
 	{
 	}
-	// holy multi threading offense
-	class IAccountTable *m_pTable;
+	std::vector<EExtraAccTable> m_vTables;
 };
 
 class CSqlStats
@@ -387,7 +386,7 @@ public:
 	void CreateTable(const char *pName);
 	void CreateFastcapTable();
 	void CreateAccountsTable();
-	void CreateExtraAccountsTable(class IAccountTable *pTable);
+	void CreateExtraAccountsTables(const std::vector<EExtraAccTable> &vTables);
 	void SaveRoundStats(const char *pName, const char *pTable, CSqlStatsPlayer *pStats);
 	void SaveFastcap(int ClientId, int TimeTicks, const char *pTimestamp, bool Grenade, bool StatTrack);
 

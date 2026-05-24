@@ -157,7 +157,7 @@ bool CSqlAccounts::CreateExtraAccountsTableThread(IDbConnection *pSqlServer, con
 	if(w != Write::NORMAL)
 		return false;
 
-	const auto *pData = dynamic_cast<const CSqlCreateExtraAccountsTableRequest *>(pGameData);
+	const auto *pData = dynamic_cast<const CSqlCreateExtraAccountsTablesRequest *>(pGameData);
 	return pData->m_pTable->CreateTable(pSqlServer, pError, ErrorSize);
 }
 

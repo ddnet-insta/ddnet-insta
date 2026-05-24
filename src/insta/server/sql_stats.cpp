@@ -1245,11 +1245,10 @@ void CSqlStats::CreateAccountsTable()
 	m_pPool->ExecuteWrite(CSqlAccounts::CreateAccountsTableThread, std::move(Tmp), "create accounts table");
 }
 
-void CSqlStats::CreateExtraAccountsTable(class IAccountTable *pTable)
+void CSqlStats::CreateExtraAccountsTables(const std::vector<EExtraAccTable> &vTables)
 {
-	auto Tmp = std::make_unique<CSqlCreateExtraAccountsTableRequest>();
-	// HOLY MULTI THREADING RISK
-	Tmp->m_pTable = pTable;
+	auto Tmp = std::make_unique<CSqlCreateExtraAccountsTablesRequest>();
+	Tmp->m_vTables = vTables;
 	m_pPool->ExecuteWrite(CSqlAccounts::CreateExtraAccountsTableThread, std::move(Tmp), "create extra accounts table");
 }
 
