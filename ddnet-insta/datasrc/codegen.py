@@ -307,23 +307,67 @@ class GenExtraTables:
             code += self.create_table_method(tab) + "\n"
         return code
 
-    def source(self):
-        code = textwrap.dedent("""
-        #include "mode_account.h"
+    def insert_method(self, table: AccTable) -> str:
+        lines = [
+        'bool CAccountTable' + table.name_camel() + '::Insert(class IDbConnection *pSqlServer, const char *pUsername, const CAccountData' + table.name_camel() + ' *pData, char *pError, int ErrorSize)'
+        '{',
+        '    const char *pQuery =',
+        '        "INSERT INTO account_' + table.name_snake().lower() + '("',
+        '        " username, "'
+        ]
 
-        #include <base/dbg.h>
-        #include <base/log.h>
-        #include <base/str.h>
+        for col in table.columns:
+            lines.append('        " ' + col.name_snake().lower() + ' "')
 
-        #include <engine/server/databases/connection.h>
+        lines += [
+            '        ") VALUES ("',
+            '        " ?,"'
+        ]
 
-        #include <game/server/player.h>
+        for _ in table.columns:
+            lines.append('        " ?"')
 
-        #include <insta/server/account.h>
+        lines += [
+            '        ");";',
+            '',
+            '    if(!pSqlServer->PrepareStatement(pQuery, pError, ErrorSize))',
+            '    {',
+            '        log_error("sql-thread", "prepare insert failed query=%s", pQuery);',
+            '        return false;',
+            '    }'
+                '',
+            '    int Offset = 1;',
+            '    pSqlServer->BindString(Offset++, pUsername);',
+        ]
 
-        """)
-        code += self.create_table_methods()
-        code += textwrap.dedent("""
+        for col in table.columns:
+            if col.data_type == "INTEGER":
+                lines.append('    pSqlServer->BindInt(Offset++, pData->m_' + col.name_camel() + ');',)
+            else:
+                print(f"in table {table.name_camel()} colum {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
+                exit(1)
+
+        lines += [
+            '    pSqlServer->Print();',
+            '',
+            '    int NumInserted;',
+            '    if(!pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))',
+            '    {',
+            '        return false;',
+            '    }',
+            '',
+            '    // TODO: check NumInserted',
+            '',
+            '    return true;',
+            '}'
+        ]
+        return "\n".join(lines)
+
+    def insert_methods(self) -> str:
+        """
+        generates the method implementations for all tables
+        that perform the sql insert. looks like this:
+
 
         bool CAccountTableCity::Insert(class IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize)
         {
@@ -357,6 +401,81 @@ class GenExtraTables:
 
             return true;
         }
+        """
+        code = ""
+        for tab in self.tables:
+            code += self.insert_method(tab) + "\n"
+        return code
+
+    def load_method(self, table: AccTable) -> str:
+        lines = [
+            'bool CAccountTable' + table.name_camel() + '::Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, char *pError, int ErrorSize)',
+            '{',
+            '    const char *pQuery =',
+            '        "SELECT"',
+        ]
+        num = 0
+        for col in table.columns:
+            num += 1
+            last = num == len(table.columns) - 1
+            if last:
+                lines.append('        " ' + col.name_camel().lower() + ' "')
+            else:
+                lines.append('        " ' + col.name_camel().lower() + ', "')
+        lines += [
+            '        "FROM account_' + table.name_snake().lower() + ' "',
+            '        "WHERE username = ?;";',
+            '    if(!pSqlServer->PrepareStatement(pQuery, pError, ErrorSize))',
+            '    {',
+            '        log_error("sql-thread", "prepare failed query: %s", pQuery);',
+            '        return false;',
+            '    }',
+            '    pSqlServer->BindString(1, pUsername);',
+            '    pSqlServer->Print();',
+            '',
+            '    bool End;',
+            '    if(!pSqlServer->Step(&End, pError, ErrorSize))',
+            '    {',
+            '        log_error("sql-thread", "step failed query: %s", pQuery);',
+            '        return false;',
+            '    }',
+            '',
+            '    if(End)',
+            '    {',
+            '        // https://github.com/ddnet-insta/ddnet-insta/pull/660#issuecomment-4496155696',
+            '        // the additional data is not guranteed to exist so if we fail to load',
+            '        // we assume we have to init it here',
+            '',
+            '        // TODO: do we need to call some proper constructor here?',
+            '        //       i feel like this 0 intializes which might not be the defaults',
+            '        //       we want for all data',
+            '        CAccountDataCity NewData = {};',
+            '',
+            '        if(!Insert(pSqlServer, pUsername, &NewData, pError, ErrorSize))',
+            '        {',
+            '            log_error("sql-thread", "THIS IS BAD");',
+            '            // TODO: need to write to pError here i guess',
+            '            return false;',
+            '        }',
+            '        pAccount->m_Mode.m_City = NewData;',
+            '        return true;',
+            '    }',
+            '',
+            '    if(pAccount)',
+            '    {',
+            '        int Offset = 1;',
+            '        pAccount->m_Mode.m_City.m_Level = pSqlServer->GetInt(Offset++);',
+            '    }',
+            '',
+            '    return true;',
+            '}'
+        ]
+        return "\n".join(lines)
+
+    def load_methods(self) -> str:
+        """
+        code to load data from db for all tables
+        looks like this
 
         bool CAccountTableCity::Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, char *pError, int ErrorSize)
         {
@@ -389,15 +508,15 @@ class GenExtraTables:
                 // TODO: do we need to call some proper constructor here?
                 //       i feel like this 0 intializes which might not be the defaults
                 //       we want for all data
-                CAccountDataCity NewCityData = {};
+                CAccountDataCity NewData = {};
 
-                if(!Insert(pSqlServer, pUsername, &NewCityData, pError, ErrorSize))
+                if(!Insert(pSqlServer, pUsername, &NewData, pError, ErrorSize))
                 {
                     log_error("sql-thread", "THIS IS BAD");
                     // TODO: need to write to pError here i guess
                     return false;
                 }
-                pAccount->m_Mode.m_City = NewCityData;
+                pAccount->m_Mode.m_City = NewData;
                 return true;
             }
 
@@ -409,6 +528,31 @@ class GenExtraTables:
 
             return true;
         }
+        """
+        code = ""
+        for tab in self.tables:
+            code += self.load_method(tab) + "\n"
+        return code
+
+    def source(self):
+        code = textwrap.dedent("""
+        #include "mode_account.h"
+
+        #include <base/dbg.h>
+        #include <base/log.h>
+        #include <base/str.h>
+
+        #include <engine/server/databases/connection.h>
+
+        #include <game/server/player.h>
+
+        #include <insta/server/account.h>
+
+        """)
+        code += self.create_table_methods()
+        code += self.insert_methods()
+        code += self.load_methods()
+        code += textwrap.dedent("""
 
         bool CAccountTableCity::Save(IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize)
         {
