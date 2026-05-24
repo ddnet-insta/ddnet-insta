@@ -5,6 +5,7 @@
 #include <engine/server/databases/connection.h>
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/config.h>
+#include <generated/protocol.h>
 
 
 #include <game/server/gamecontext.h>
@@ -155,6 +156,8 @@ bool CSqlAccounts::CreateExtraAccountsTableThread(IDbConnection *pSqlServer, con
 	}
 	if(w != Write::NORMAL)
 		return false;
+
+	CNetObjHandler Handler;
 
 	return false;
 	// const auto *pData = dynamic_cast<const CSqlCreateExtraAccountsTablesRequest *>(pGameData);
