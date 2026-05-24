@@ -220,9 +220,6 @@ class GenExtraTables:
         class CExtraAccountTableController
         {
         public:
-            // TODO: remove this vector and only use the enums
-            std::vector<IAccountTable *> m_vpTables;
-
             std::vector<EExtraAccTable> m_vTables;
 
             ~CExtraAccountTableController();
@@ -877,9 +874,9 @@ class GenExtraTables:
             //       but tbh we copy paste a bunch of strings when loading accounts one smol vector shouldnt have much of an impact
 
             /*
-            for(const auto *pTable : m_vpTables)
+            for(const auto Table : m_vTables)
             {
-                switch (pTable->Type()) {
+                switch (Table) {
         """)
         code += self.init_cases()
         code += textwrap.dedent("""
@@ -890,12 +887,7 @@ class GenExtraTables:
 
         CExtraAccountTableController::~CExtraAccountTableController()
         {
-            for(auto *pTable : m_vpTables)
-            {
-                delete pTable;
-                pTable = nullptr;
-            }
-            m_vpTables.clear();
+            m_vTables.clear();
         }
         """)
         return code
