@@ -235,7 +235,7 @@ class GenExtraTables:
 
     def create_table_method(self, table: AccTable) -> str:
         lines = [
-        'bool CAccountTableCity::CreateTable(class IDbConnection *pSqlServer, char *pError, int ErrorSize)',
+        'bool CAccountTable' + table.name_camel() + '::CreateTable(class IDbConnection *pSqlServer, char *pError, int ErrorSize)',
         '{',
         '    // TODO: make the username a proper unique foreign key',
         '',
@@ -459,7 +459,7 @@ class GenExtraTables:
             '        // TODO: do we need to call some proper constructor here?',
             '        //       i feel like this 0 intializes which might not be the defaults',
             '        //       we want for all data',
-            '        CAccountDataCity NewData = {};',
+            '        CAccountData' + table.name_camel() + ' NewData = {};',
             '',
             '        if(!Insert(pSqlServer, pUsername, &NewData, pError, ErrorSize))',
             '        {',
