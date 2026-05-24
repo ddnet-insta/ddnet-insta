@@ -56,7 +56,7 @@ class GenExtraTables:
 
     def data_class(self, table: AccTable) -> str:
         lines = [
-            "class CAccountDataCity",
+            "class CAccountData" + table.name_camel(),
             "{",
             "public:"
         ]

@@ -7,6 +7,7 @@ function(generate_acc_table output_file script_parameter)
       ddnet-insta/datasrc/codegen.py
       ddnet-insta/datasrc/table.py
       ddnet-insta/datasrc/acc_tables/city.py
+      ddnet-insta/datasrc/acc_tables/mmo.py
       # tidy-alphabetical-end
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
