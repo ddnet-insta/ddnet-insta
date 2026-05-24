@@ -722,6 +722,26 @@ class GenExtraTables:
         ]
         return "\n".join(lines)
 
+    def save_case(self, table: AccTable) -> list[str]:
+        """
+        generates case in switch statement that calls save method for one specific table
+
+        case EExtraAccTable::CITY:
+            log_info("sql-thread", " saving city data...");
+            if(!CAccountTableCity::Save(pSqlServer, pAccount->Username(), &pAccount->m_Mode.m_City, pError, ErrorSize))
+                Ok = false;
+            break;
+        """
+        lines = [
+            '        case EExtraAccTable::' + table.name_snake().upper() + ':',
+            '            log_info("sql-thread", " saving ' + table.name_camel() + ' data...");',
+            '            if(!CAccountTable' + table.name_camel() + '::Save(pSqlServer, pAccount->Username(), &pAccount->m_Mode.m_' + table.name_camel() + ', pError, ErrorSize))',
+            '                Ok = false;',
+            '            break;',
+            '        }',
+        ]
+        return lines
+
     def controller_save(self):
         """
         generates code that switches over all tables and calls the matching savers
@@ -760,11 +780,10 @@ class GenExtraTables:
             '    {',
             '        switch(Table)',
             '        {',
-            '        case EExtraAccTable::CITY:',
-            '            log_info("sql-thread", " saving city data...");',
-            '            if(!CAccountTableCity::Save(pSqlServer, pAccount->Username(), &pAccount->m_Mode.m_City, pError, ErrorSize))',
-            '                Ok = false;',
-            '            break;',
+        ]
+        for tab in self.tables:
+            lines += self.save_case(tab)
+        lines += [
             '        }',
             '    }',
             '',
