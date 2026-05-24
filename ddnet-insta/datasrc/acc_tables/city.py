@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from codegen import AccTable, SqlColumn
+from table import AccTable, SqlColumn
 
 class AccTableCity(AccTable):
     def __init__(self, name: str) -> None:
