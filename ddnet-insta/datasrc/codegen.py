@@ -930,7 +930,9 @@ class GenExtraTables:
         {
             m_vTables.clear();
         }
+
         """)
+        code += self.controller_create_thread()
         return code
 
     def print_usage(self):

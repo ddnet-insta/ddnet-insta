@@ -5,8 +5,7 @@
 #include <engine/server/databases/connection.h>
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/config.h>
-#include <generated/protocol.h>
-
+#include <generated/insta/mode_account.h>
 
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
@@ -157,11 +156,8 @@ bool CSqlAccounts::CreateExtraAccountsTableThread(IDbConnection *pSqlServer, con
 	if(w != Write::NORMAL)
 		return false;
 
-	CNetObjHandler Handler;
-
-	return false;
-	// const auto *pData = dynamic_cast<const CSqlCreateExtraAccountsTablesRequest *>(pGameData);
-	// return CreateExtraAccountsTablesThread(pData->m_vTables, pSqlServer, pError, ErrorSize);
+	const auto *pData = dynamic_cast<const CSqlCreateExtraAccountsTablesRequest *>(pGameData);
+	return CreateExtraAccountsTablesThread(pData->m_vTables, pSqlServer, pError, ErrorSize);
 }
 
 bool CSqlAccounts::AccountWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
