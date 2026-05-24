@@ -316,16 +316,28 @@ class GenExtraTables:
         '        " username, "'
         ]
 
+        num = 0
         for col in table.columns:
-            lines.append('        " ' + col.name_snake().lower() + ' "')
+            num += 1
+            last = num == len(table.columns)
+            if last:
+                lines.append('        " ' + col.name_snake().lower() + ' "')
+            else:
+                lines.append('        " ' + col.name_snake().lower() + ', "')
 
         lines += [
             '        ") VALUES ("',
             '        " ?,"'
         ]
 
+        num = 0
         for _ in table.columns:
-            lines.append('        " ?"')
+            num += 1
+            last = num == len(table.columns)
+            if last:
+                lines.append('        " ?"')
+            else:
+                lines.append('        " ?,"')
 
         lines += [
             '        ");";',
@@ -417,7 +429,7 @@ class GenExtraTables:
         num = 0
         for col in table.columns:
             num += 1
-            last = num == len(table.columns) - 1
+            last = num == len(table.columns)
             if last:
                 lines.append('        " ' + col.name_camel().lower() + ' "')
             else:
@@ -553,7 +565,7 @@ class GenExtraTables:
         num = 0
         for col in table.columns:
             num += 1
-            last = num == len(table.columns) - 1
+            last = num == len(table.columns)
             name = col.name_snake().lower()
             if last:
                 lines.append('        " ' + name + ' = ? "')
