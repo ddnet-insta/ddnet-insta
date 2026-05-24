@@ -86,8 +86,9 @@ class GenExtraTables:
         return code
 
     def behavior_class_header(self, table: AccTable) -> str:
+        name = table.name_camel()
         lines = [
-        "class CAccountTable" + table.name_camel() + " : public IAccountTable",
+        "class CAccountTable" + name + " : public IAccountTable",
         "{",
         "public:",
         "    // we need the name in the save method which is static so we have to hardcode it",
@@ -98,9 +99,9 @@ class GenExtraTables:
         ""
         "    bool CreateTable(class IDbConnection *pSqlServer, char *pError, int ErrorSize) override;",
         "",
-        "    static bool Insert(class IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize);",
+        f"    static bool Insert(class IDbConnection *pSqlServer, const char *pUsername, const CAccountData{name} *pData, char *pError, int ErrorSize);",
         "    static bool Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, char *pError, int ErrorSize);",
-        "    static bool Save(class IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize);",
+        f"    static bool Save(class IDbConnection *pSqlServer, const char *pUsername, const CAccountData{name} *pData, char *pError, int ErrorSize);",
         "};"
         ]
         return "\n".join(lines)
