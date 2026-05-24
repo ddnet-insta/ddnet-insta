@@ -24,7 +24,6 @@ void CGameControllerInstaCore::EnableAccTable(EExtraAccTable Table)
 	m_pExtraAccountTableController->m_vTables.emplace_back(Table);
 }
 
-
 void CGameControllerInstaCore::CreateAccountsTable()
 {
 	m_pSqlStats->CreateAccountsTable();

@@ -975,7 +975,7 @@ public:
 	*/
 	virtual bool IsPlaying(const CPlayer *pPlayer);
 
-	virtual void CreateAccountsTable() {};
+	virtual void CreateAccountsTable() {}
 
 	/*
 		Function: OnLogin

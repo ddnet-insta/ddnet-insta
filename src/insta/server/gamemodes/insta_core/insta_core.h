@@ -136,7 +136,7 @@ public:
 	int FreeInGameSlots() override;
 
 	// TODO: move these
-	
+
 	// WARNING: only call this in your gamemodes constructor.
 	void EnableAccTable(EExtraAccTable Table);
 
