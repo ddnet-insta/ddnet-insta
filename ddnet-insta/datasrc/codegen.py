@@ -835,6 +835,7 @@ class GenExtraTables:
         for tab in self.tables:
             lines += self.create_tabele_thread_case(tab)
         lines += [
+            '		}',
             '	}',
             '	return Ok;',
             '}'
