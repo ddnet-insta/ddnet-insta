@@ -792,6 +792,28 @@ class GenExtraTables:
         ]
         return "\n".join(lines)
 
+    def init_case(self, table: AccTable) -> list[str]:
+        return [
+            '            case EExtraAccTable::' + table.name_snake().upper() + ':',
+            '                log_info("player", "init ' + table.name_camel() + ' table..");',
+            '                pPlayer->m_Account.m_Mode.m_' + table.name_camel() + ' = CAccountData' + table.name_camel() + '();',
+            '            break;'
+        ]
+
+    def init_cases(self) -> str:
+        """
+        init player tables
+
+        case EExtraAccTable::CITY:
+            log_info("player", "init city table..");
+            pPlayer->m_Account.m_Mode.m_City = CAccountDataCity();
+        break;
+        """
+        lines = []
+        for tab in self.tables:
+            lines += self.init_case(tab)
+        return "\n".join(lines)
+
     def source(self):
         code = textwrap.dedent("""
         #include "mode_account.h"
@@ -847,10 +869,9 @@ class GenExtraTables:
             for(const auto *pTable : m_vpTables)
             {
                 switch (pTable->Type()) {
-                    case EExtraAccTable::CITY:
-                        log_info("player", "init city table..");
-                        pPlayer->m_Account.m_Mode.m_City = CAccountDataCity();
-                    break;
+        """)
+        code += self.init_cases()
+        code += textwrap.dedent("""
                 }
             }
             */
