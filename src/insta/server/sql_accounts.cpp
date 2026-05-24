@@ -141,35 +141,6 @@ bool CSqlAccounts::CreateAccountsTableThread(IDbConnection *pSqlServer, const IS
 	return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
 }
 
-bool CreateExtraAccountsTablesThread(const std::vector<EExtraAccTable> &vTables, IDbConnection *pSqlServer, char *pError, int ErrorSize)
-{
-	bool Ok = true;
-	for(auto Table : vTables)
-	{
-		switch (Table) {
-			case EExtraAccTable::CITY:
-			{
-					CAccountTableCity Table;
-					if(!Table.CreateTable(pSqlServer, pError, ErrorSize))
-					{
-						Ok = false;
-					}
-			}
-			break;
-			case EExtraAccTable::MMO:
-			{
-					CAccountTableMmo Table;
-					if(!Table.CreateTable(pSqlServer, pError, ErrorSize))
-					{
-						Ok = false;
-					}
-			}
-			break;
-		}
-	}
-	return Ok;
-}
-
 bool CSqlAccounts::CreateExtraAccountsTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
 	if(w == Write::NORMAL_FAILED)
@@ -186,11 +157,8 @@ bool CSqlAccounts::CreateExtraAccountsTableThread(IDbConnection *pSqlServer, con
 	if(w != Write::NORMAL)
 		return false;
 
-	// const auto *pData = dynamic_cast<const CSqlCreateExtraAccountsTablesRequest *>(pGameData);
-
-	// TODO: unhardcode this
-	CAccountTableCity City;
-	return City.CreateTable(pSqlServer, pError, ErrorSize);
+	const auto *pData = dynamic_cast<const CSqlCreateExtraAccountsTablesRequest *>(pGameData);
+	return CreateExtraAccountsTablesThread(pData->m_vTables, pSqlServer, pError, ErrorSize);
 }
 
 bool CSqlAccounts::AccountWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
