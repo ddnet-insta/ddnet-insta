@@ -22,25 +22,7 @@ CGameControllerCity::CGameControllerCity(CGameContext *pGameServer) :
 	m_pExtraColumns = nullptr; // new CCityColumns();
 	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
 	m_pSqlStats->CreateTable(m_pStatsTable);
-
-	// TODO: this can be abstracted away and called on demand
-	m_pExtraAccountTableController = new CExtraAccountTableController();
-
-	// TODO: remove line above and only use this
-	m_pExtraAccountTableController->m_vTables.emplace_back(EExtraAccTable::CITY);
-
-	// TODO: abstract this away to the on init method
-	for(auto Table : m_pExtraAccountTableController->m_vTables)
-	{
-		switch (Table) {
-			case EExtraAccTable::CITY:
-				m_pSqlStats->CreateExtraAccountsTable(new CAccountTableCity());
-			break;
-			case EExtraAccTable::MMO:
-				m_pSqlStats->CreateExtraAccountsTable(new CAccountTableMmo());
-			break;
-		}
-	}
+	EnableAccTable(EExtraAccTable::CITY);
 }
 
 CGameControllerCity::~CGameControllerCity() = default;

@@ -157,8 +157,11 @@ bool CSqlAccounts::CreateExtraAccountsTableThread(IDbConnection *pSqlServer, con
 	if(w != Write::NORMAL)
 		return false;
 
-	const auto *pData = dynamic_cast<const CSqlCreateExtraAccountsTablesRequest *>(pGameData);
-	return pData->m_pTable->CreateTable(pSqlServer, pError, ErrorSize);
+	// const auto *pData = dynamic_cast<const CSqlCreateExtraAccountsTablesRequest *>(pGameData);
+
+	// TODO: unhardcode this
+	CAccountTableCity City;
+	return City.CreateTable(pSqlServer, pError, ErrorSize);
 }
 
 bool CSqlAccounts::AccountWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
