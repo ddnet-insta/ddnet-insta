@@ -541,25 +541,50 @@ class GenExtraTables:
             code += self.load_method(tab) + "\n"
         return code
 
-    def source(self):
-        code = textwrap.dedent("""
-        #include "mode_account.h"
+    def save_method(self, table: AccTable) -> str:
+        lines = [
+            'bool CAccountTableCity::Save(IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize)',
+            '{',
+            '    // const CAccountDataCity *pData = static_cast<const CAccountDataCity *>(pUserData);',
+            '    const char *pQuery =',
+            '        "UPDATE account_city "',
+            '        "SET"',
+            '        " level = ? " // TODO: remove hardcode',
+            '        "WHERE username = ?;";',
+            '',
+            '    if(!pSqlServer->PrepareStatement(pQuery, pError, ErrorSize))',
+            '    {',
+            '        log_error("sql-thread", "prepare update failed query=%s", pQuery);',
+            '        return false;',
+            '    }',
+            '',
+            '    pSqlServer->BindInt(1, pData->m_Level); // TODO: remove hardcode',
+            '    pSqlServer->BindString(2, pUsername);',
+            '    pSqlServer->Print();',
+            '',
+            '    int NumUpdated;',
+            '    if(!pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))',
+            '    {',
+            '        log_error("sql-thread", "update failed query=%s", pQuery);',
+            '        return false;',
+            '    }',
+            '',
+            '    if(NumUpdated != 1)',
+            '    {',
+            '        log_error("sql-thread", "affected %d rows when trying to update the account of one player!", NumUpdated);',
+            '        dbg_assert(false, "FATAL ERROR: your database is probably corrupted! Time to restore the backup.");',
+            '        return false;',
+            '    }',
+            '',
+            '    return true;',
+            '}'
+        ]
+        return "\n".join(lines)
 
-        #include <base/dbg.h>
-        #include <base/log.h>
-        #include <base/str.h>
-
-        #include <engine/server/databases/connection.h>
-
-        #include <game/server/player.h>
-
-        #include <insta/server/account.h>
-
-        """)
-        code += self.create_table_methods()
-        code += self.insert_methods()
-        code += self.load_methods()
-        code += textwrap.dedent("""
+    def save_methods(self) -> str:
+        """
+        save methods for all tables
+        looks like this
 
         bool CAccountTableCity::Save(IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize)
         {
@@ -596,6 +621,32 @@ class GenExtraTables:
 
             return true;
         }
+        """
+        code = ""
+        for tab in self.tables:
+            code += self.save_method(tab) + "\n"
+        return code
+
+    def source(self):
+        code = textwrap.dedent("""
+        #include "mode_account.h"
+
+        #include <base/dbg.h>
+        #include <base/log.h>
+        #include <base/str.h>
+
+        #include <engine/server/databases/connection.h>
+
+        #include <game/server/player.h>
+
+        #include <insta/server/account.h>
+
+        """)
+        code += self.create_table_methods()
+        code += self.insert_methods()
+        code += self.load_methods()
+        code += self.save_methods()
+        code += textwrap.dedent("""
 
         bool CExtraAccountTableController::Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, const std::vector<EExtraAccTable> &vTables, char *pError, int ErrorSize)
         {
