@@ -543,13 +543,24 @@ class GenExtraTables:
 
     def save_method(self, table: AccTable) -> str:
         lines = [
-            'bool CAccountTableCity::Save(IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize)',
+            'bool CAccountTable' + table.name_camel() + '::Save(IDbConnection *pSqlServer, const char *pUsername, const CAccountData' + table.name_camel() + ' *pData, char *pError, int ErrorSize)',
             '{',
             '    // const CAccountDataCity *pData = static_cast<const CAccountDataCity *>(pUserData);',
             '    const char *pQuery =',
-            '        "UPDATE account_city "',
-            '        "SET"',
-            '        " level = ? " // TODO: remove hardcode',
+            '        "UPDATE account_' +  table.name_snake().lower() + ' "',
+            '        "SET"'
+        ]
+        num = 0
+        for col in table.columns:
+            num += 1
+            last = num == len(table.columns) - 1
+            name = col.name_snake().lower()
+            if last:
+                lines.append('        " ' + name + ' = ? "')
+            else:
+                lines.append('        " ' + name + ' = ?, "')
+
+        lines += [ 
             '        "WHERE username = ?;";',
             '',
             '    if(!pSqlServer->PrepareStatement(pQuery, pError, ErrorSize))',
@@ -558,8 +569,18 @@ class GenExtraTables:
             '        return false;',
             '    }',
             '',
-            '    pSqlServer->BindInt(1, pData->m_Level); // TODO: remove hardcode',
-            '    pSqlServer->BindString(2, pUsername);',
+            '    int Offset = 1;',
+        ]
+
+        for col in table.columns:
+            if col.data_type == "INTEGER":
+                lines.append('    pSqlServer->BindInt(Offset++, pData->m_' + col.name_camel() + ');')
+            else:
+                print(f"in table {table.name_camel()} colum {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
+                exit(1)
+
+        lines += [
+            '    pSqlServer->BindString(Offset, pUsername);',
             '    pSqlServer->Print();',
             '',
             '    int NumUpdated;',
