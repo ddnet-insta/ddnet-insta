@@ -248,7 +248,14 @@ class GenExtraTables:
         ]
 
         for col in table.columns:
-            lines.append('        " level             INTEGER       DEFAULT 0,"')
+            name = col.name_snake().lower()
+            align = 32
+            if col.data_type == "INTEGER":
+                spaces = " " * (align - len(name))
+                lines.append('        " ' + name + spaces + 'INTEGER       DEFAULT 0,"')
+            else:
+                print(f"in table {table.name_camel()} colum {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
+                exit(1)
 
         lines += [
         '        "PRIMARY KEY (username)"',
