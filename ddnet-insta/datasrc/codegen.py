@@ -648,26 +648,10 @@ class GenExtraTables:
             code += self.save_method(tab) + "\n"
         return code
 
-    def source(self):
-        code = textwrap.dedent("""
-        #include "mode_account.h"
-
-        #include <base/dbg.h>
-        #include <base/log.h>
-        #include <base/str.h>
-
-        #include <engine/server/databases/connection.h>
-
-        #include <game/server/player.h>
-
-        #include <insta/server/account.h>
-
-        """)
-        code += self.create_table_methods()
-        code += self.insert_methods()
-        code += self.load_methods()
-        code += self.save_methods()
-        code += textwrap.dedent("""
+    def controller_load(self):
+        """
+        generates code that switches over all tables and calls the matching loaders
+        looks something like this
 
         bool CExtraAccountTableController::Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, const std::vector<EExtraAccTable> &vTables, char *pError, int ErrorSize)
         {
@@ -692,6 +676,38 @@ class GenExtraTables:
 
             return Ok;
         }
+        """
+        lines = [
+            'bool CExtraAccountTableController::Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, const std::vector<EExtraAccTable> &vTables, char *pError, int ErrorSize)',
+            '{',
+            '    bool Ok = true;',
+            '    log_info("sql-thread", "loading extra tables..");',
+            '    for(const auto Table : vTables)',
+            '    {',
+            '        switch(Table)',
+            '        {',
+            '        case EExtraAccTable::CITY:',
+            '            log_info("sql-thread", " loading city data...");',
+            '            if(!CAccountTableCity::Load(pSqlServer, pUsername, pAccount, pError, ErrorSize))',
+            '                Ok = false;',
+            '            break;',
+            '        }',
+            '    }',
+            '',
+            '    if(!Ok)',
+            '    {',
+            '        log_error("sql-thread", "EXTRA TABLES FAILED TO LOAD");',
+            '    }',
+            '',
+            '    return Ok;',
+            '}'
+        ]
+        return "\n".join(lines)
+
+    def controller_save(self):
+        """
+        generates code that switches over all tables and calls the matching savers
+        looks something like this
 
         bool CExtraAccountTableController::Save(class IDbConnection *pSqlServer, const char *pUsername, const CAccount *pAccount, const std::vector<EExtraAccTable> &vTables, char *pError, int ErrorSize)
         {
@@ -713,6 +729,54 @@ class GenExtraTables:
 
             return Ok;
         }
+        """
+
+        lines = [
+            'bool CExtraAccountTableController::Save(class IDbConnection *pSqlServer, const char *pUsername, const CAccount *pAccount, const std::vector<EExtraAccTable> &vTables, char *pError, int ErrorSize)',
+            '{',
+            '    bool Ok = true;',
+            '',
+            '    log_info("sql-thread", "saving extra tables..");',
+            '',
+            '    for(const auto Table : vTables)',
+            '    {',
+            '        switch(Table)',
+            '        {',
+            '        case EExtraAccTable::CITY:',
+            '            log_info("sql-thread", " saving city data...");',
+            '            if(!CAccountTableCity::Save(pSqlServer, pAccount->Username(), &pAccount->m_Mode.m_City, pError, ErrorSize))',
+            '                Ok = false;',
+            '            break;',
+            '        }',
+            '    }',
+            '',
+            '    return Ok;',
+            '}'
+        ]
+        return "\n".join(lines)
+
+    def source(self):
+        code = textwrap.dedent("""
+        #include "mode_account.h"
+
+        #include <base/dbg.h>
+        #include <base/log.h>
+        #include <base/str.h>
+
+        #include <engine/server/databases/connection.h>
+
+        #include <game/server/player.h>
+
+        #include <insta/server/account.h>
+
+        """)
+        code += self.create_table_methods()
+        code += self.insert_methods()
+        code += self.load_methods()
+        code += self.save_methods()
+        code += self.controller_load()
+        code += self.controller_save()
+        code += textwrap.dedent("""
 
         void CExtraAccountTableController::InitPlayer(CPlayer *pPlayer)
         {
