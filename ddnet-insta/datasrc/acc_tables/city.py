@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
-class AccTableCity:
-    name = "foo"
-    columns = []
+from codegen import AccTable, SqlColumn
+
+class AccTableCity(AccTable):
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
+        self.columns.append(SqlColumn("level", "INTEGER"))
+

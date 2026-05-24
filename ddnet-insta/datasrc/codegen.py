@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from typing import Protocol
 import textwrap
 import sys
 import os
@@ -10,20 +9,14 @@ import inspect
 from pathlib import Path
 from sys import stderr
 
-class SqlCol(Protocol):
-    name: str
-    data_type: str
-
-class ExtraAccTable(Protocol):
-    name: str
-    columns: list[SqlCol]
+from table import AccTable, SqlColumn
 
 class GenExtraTables:
     def __init__(self):
-        self.tables: list[ExtraAccTable] = []
+        self.tables: list[AccTable] = []
         pass
 
-    def load_tables(self, table_dir: str) -> list[ExtraAccTable]:
+    def load_tables(self, table_dir: str) -> list[AccTable]:
         tables = []
         table_path = Path(table_dir)
         for file in table_path.glob("*.py"):
