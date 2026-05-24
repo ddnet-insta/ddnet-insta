@@ -33,8 +33,26 @@ class GenExtraTables:
             if cls is None:
                 print(f"Error: in file {file} the expected class {class_name} was not found!", file=stderr)
                 exit(1)
-            tables.append(cls)
+            tables.append(cls())
         return tables
+
+    def table_enum(self) -> str:
+        """
+        builds a enum that looks something like this
+
+        enum class EExtraAccTable
+        {
+            CITY,
+        };
+        """
+        lines = [
+                "enum class EExtraAccTable",
+                "{"
+        ]
+        for tab in self.tables:
+            lines.append(f"    {tab.name_snake().upper()},")
+        lines.append("};")
+        return "\n".join(lines)
 
     def header(self):
         code = textwrap.dedent("""
@@ -51,12 +69,9 @@ class GenExtraTables:
 
         class CPlayer;
         class CAccount;
-
-        enum class EExtraAccTable
-        {
-            CITY,
-        };
-
+        """)
+        code += self.table_enum()
+        code += textwrap.dedent("""
         class IAccountTable
         {
         public:

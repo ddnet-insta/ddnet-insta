@@ -3,7 +3,6 @@
 from table import AccTable, SqlColumn
 
 class AccTableCity(AccTable):
-    def __init__(self, name: str) -> None:
-        super().__init__(name)
+    def __init__(self) -> None:
+        super().__init__("city")
         self.columns.append(SqlColumn("level", "INTEGER"))
-
