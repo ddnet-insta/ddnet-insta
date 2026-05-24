@@ -648,6 +648,25 @@ class GenExtraTables:
             code += self.save_method(tab) + "\n"
         return code
 
+    def load_case(self, table: AccTable) -> list[str]:
+        """
+        builds case in switch statement to load one specific table
+
+        case EExtraAccTable::CITY:
+            log_info("sql-thread", " loading city data...");
+            if(!CAccountTableCity::Load(pSqlServer, pUsername, pAccount, pError, ErrorSize))
+                Ok = false;
+            break;
+        """
+        lines = [
+            '        case EExtraAccTable::' + table.name_snake().upper() + ':',
+            '            log_info("sql-thread", " loading ' + table.name_camel() + ' data...");',
+            '            if(!CAccountTable' + table.name_camel() + '::Load(pSqlServer, pUsername, pAccount, pError, ErrorSize))',
+            '                Ok = false;',
+            '            break;',
+        ]
+        return lines
+
     def controller_load(self):
         """
         generates code that switches over all tables and calls the matching loaders
@@ -686,11 +705,10 @@ class GenExtraTables:
             '    {',
             '        switch(Table)',
             '        {',
-            '        case EExtraAccTable::CITY:',
-            '            log_info("sql-thread", " loading city data...");',
-            '            if(!CAccountTableCity::Load(pSqlServer, pUsername, pAccount, pError, ErrorSize))',
-            '                Ok = false;',
-            '            break;',
+        ]
+        for tab in self.tables:
+            lines += self.load_case(tab)
+        lines += [
             '        }',
             '    }',
             '',
