@@ -1,6 +1,7 @@
 #ifndef INSTA_SERVER_GAMEMODES_INSTA_CORE_INSTA_CORE_H
 #define INSTA_SERVER_GAMEMODES_INSTA_CORE_INSTA_CORE_H
 
+#include <generated/insta/mode_account.h>
 #include <generated/protocol7.h>
 
 #include <game/server/gamemodes/ddnet.h>
@@ -133,6 +134,11 @@ public:
 	void YouWillJoinGameMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen) override;
 	bool CanStillJoinDeadSpecGame(const CPlayer *pPlayerOrNullptr, char *pMsg, size_t MsgLen) override;
 	int FreeInGameSlots() override;
+
+	// TODO: move these
+	
+	// WARNING: only call this in your gamemodes constructor.
+	void EnableAccTable(EExtraAccTable Table);
 
 	// accounts.cpp
 	void OnLogin(const CAccount *pAccount, class CPlayer *pPlayer) override;

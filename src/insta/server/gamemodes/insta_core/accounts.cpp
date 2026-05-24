@@ -13,6 +13,17 @@
 
 #include <algorithm>
 
+void CGameControllerInstaCore::EnableAccTable(EExtraAccTable Table)
+{
+	if(!m_pExtraAccountTableController)
+	{
+		m_pExtraAccountTableController = new CExtraAccountTableController();
+	}
+
+	// TODO: error on duplicated entries
+	m_pExtraAccountTableController->m_vTables.emplace_back(Table);
+}
+
 void CGameControllerInstaCore::OnLogin(const CAccount *pAccount, class CPlayer *pPlayer)
 {
 	if(!g_Config.m_SvAccounts)
