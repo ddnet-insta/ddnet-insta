@@ -64,7 +64,7 @@ class GenExtraTables:
             if col.data_type == "INTEGER":
                 lines.append(f"    int m_{col.name_camel()} = 0;")
             else:
-                print(f"in table {table.name_camel()} colum {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
+                print(f"in table {table.name_camel()} column {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
                 exit(1)
         lines.append("};")
         return "\n".join(lines)
@@ -255,7 +255,7 @@ class GenExtraTables:
                 spaces = " " * (align - len(name))
                 lines.append('        " ' + name + spaces + 'INTEGER       DEFAULT 0,"')
             else:
-                print(f"in table {table.name_camel()} colum {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
+                print(f"in table {table.name_camel()} column {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
                 exit(1)
 
         lines += [
@@ -357,7 +357,7 @@ class GenExtraTables:
             if col.data_type == "INTEGER":
                 lines.append('    pSqlServer->BindInt(Offset++, pData->m_' + col.name_camel() + ');',)
             else:
-                print(f"in table {table.name_camel()} colum {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
+                print(f"in table {table.name_camel()} column {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
                 exit(1)
 
         lines += [
@@ -456,11 +456,11 @@ class GenExtraTables:
             '    if(End)',
             '    {',
             '        // https://github.com/ddnet-insta/ddnet-insta/pull/660#issuecomment-4496155696',
-            '        // the additional data is not guranteed to exist so if we fail to load',
+            '        // the additional data is not guaranteed to exist so if we fail to load',
             '        // we assume we have to init it here',
             '',
             '        // TODO: do we need to call some proper constructor here?',
-            '        //       i feel like this 0 intializes which might not be the defaults',
+            '        //       i feel like this 0 initializes which might not be the defaults',
             '        //       we want for all data',
             '        CAccountData' + table.name_camel() + ' NewData = {};',
             '',
@@ -482,7 +482,7 @@ class GenExtraTables:
             if col.data_type == "INTEGER":
                 lines.append('        pAccount->m_Mode.m_' + table.name_camel() + '.m_' + col.name_camel() + ' = pSqlServer->GetInt(Offset++);')
             else:
-                print(f"in table {table.name_camel()} colum {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
+                print(f"in table {table.name_camel()} column {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
                 exit(1)
         lines += [
             '    }',
@@ -522,11 +522,11 @@ class GenExtraTables:
             if(End)
             {
                 // https://github.com/ddnet-insta/ddnet-insta/pull/660#issuecomment-4496155696
-                // the additional data is not guranteed to exist so if we fail to load
+                // the additional data is not guaranteed to exist so if we fail to load
                 // we assume we have to init it here
 
                 // TODO: do we need to call some proper constructor here?
-                //       i feel like this 0 intializes which might not be the defaults
+                //       i feel like this 0 initializes which might not be the defaults
                 //       we want for all data
                 CAccountDataCity NewData = {};
 
@@ -589,7 +589,7 @@ class GenExtraTables:
             if col.data_type == "INTEGER":
                 lines.append('    pSqlServer->BindInt(Offset++, pData->m_' + col.name_camel() + ');')
             else:
-                print(f"in table {table.name_camel()} colum {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
+                print(f"in table {table.name_camel()} column {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
                 exit(1)
 
         lines += [
@@ -804,7 +804,7 @@ class GenExtraTables:
         ]
         return "\n".join(lines)
 
-    def create_tabele_thread_case(self, table: AccTable) -> list[str]:
+    def create_table_thread_case(self, table: AccTable) -> list[str]:
         lines = [
             '			case EExtraAccTable::' + table.name_snake().upper() + ':',
             '			{',
@@ -833,7 +833,7 @@ class GenExtraTables:
             '		switch (TableKind) {',
         ]
         for tab in self.tables:
-            lines += self.create_tabele_thread_case(tab)
+            lines += self.create_table_thread_case(tab)
         lines += [
             '		}',
             '	}',
