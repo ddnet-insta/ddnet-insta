@@ -467,7 +467,7 @@ class GenExtraTables:
         ]
         for col in table.columns:
             if col.data_type == "INTEGER":
-                lines.append('        pAccount->m_Mode.m_{' + table.name_camel() + '}.m_' + col.name_camel() + ' = pSqlServer->GetInt(Offset++);')
+                lines.append('        pAccount->m_Mode.m_' + table.name_camel() + '.m_' + col.name_camel() + ' = pSqlServer->GetInt(Offset++);')
             else:
                 print(f"in table {table.name_camel()} colum {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
                 exit(1)
