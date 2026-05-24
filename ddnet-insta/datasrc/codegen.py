@@ -828,9 +828,9 @@ class GenExtraTables:
             'bool CreateExtraAccountsTablesThread(const std::vector<EExtraAccTable> &vTables, IDbConnection *pSqlServer, char *pError, int ErrorSize)',
             '{',
             '	bool Ok = true;',
-            '	for(auto Table : vTables)',
+            '	for(auto TableKind : vTables)',
             '	{',
-            '		switch (Table) {',
+            '		switch (TableKind) {',
         ]
         for tab in self.tables:
             lines += self.create_tabele_thread_case(tab)
