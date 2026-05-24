@@ -738,7 +738,6 @@ class GenExtraTables:
             '            if(!CAccountTable' + table.name_camel() + '::Save(pSqlServer, pAccount->Username(), &pAccount->m_Mode.m_' + table.name_camel() + ', pError, ErrorSize))',
             '                Ok = false;',
             '            break;',
-            '        }',
         ]
         return lines
 
