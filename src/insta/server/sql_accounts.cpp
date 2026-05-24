@@ -141,6 +141,35 @@ bool CSqlAccounts::CreateAccountsTableThread(IDbConnection *pSqlServer, const IS
 	return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
 }
 
+bool CreateExtraAccountsTablesThread(const std::vector<EExtraAccTable> &vTables, IDbConnection *pSqlServer, char *pError, int ErrorSize)
+{
+	bool Ok = true;
+	for(auto Table : vTables)
+	{
+		switch (Table) {
+			case EExtraAccTable::CITY:
+			{
+					CAccountTableCity Table;
+					if(!Table.CreateTable(pSqlServer, pError, ErrorSize))
+					{
+						Ok = false;
+					}
+			}
+			break;
+			case EExtraAccTable::MMO:
+			{
+					CAccountTableMmo Table;
+					if(!Table.CreateTable(pSqlServer, pError, ErrorSize))
+					{
+						Ok = false;
+					}
+			}
+			break;
+		}
+	}
+	return Ok;
+}
+
 bool CSqlAccounts::CreateExtraAccountsTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
 	if(w == Write::NORMAL_FAILED)

@@ -230,6 +230,9 @@ class GenExtraTables:
 
             void InitPlayer(CPlayer *pPlayer);
         };
+
+        // TODO: remove from global namespace
+        bool CreateExtraAccountsTablesThread(const std::vector<EExtraAccTable> &vTables, IDbConnection *pSqlServer, char *pError, int ErrorSize);
         """)
         return code
 
@@ -797,6 +800,43 @@ class GenExtraTables:
             '    }',
             '',
             '    return Ok;',
+            '}'
+        ]
+        return "\n".join(lines)
+
+    def create_tabele_thread_case(self, table: AccTable) -> list[str]:
+        lines = [
+            '			case EExtraAccTable::' + table.name_snake().upper() + ':',
+            '			{',
+            '					CAccountTable' + table.name_camel() + ' Table;',
+            '					if(!Table.CreateTable(pSqlServer, pError, ErrorSize))',
+            '					{',
+            '						Ok = false;',
+            '					}',
+            '			}',
+            '			break;'
+        ]
+        return lines
+
+    def controller_create_thread(self) -> str:
+        """
+        method called by the worker thread
+        which calls the table creation workers for the selected tables
+        """
+        lines = [
+            '// TODO: make this a static class member or use a namespace',
+            'bool CreateExtraAccountsTablesThread(const std::vector<EExtraAccTable> &vTables, IDbConnection *pSqlServer, char *pError, int ErrorSize)',
+            '{',
+            '	bool Ok = true;',
+            '	for(auto Table : vTables)',
+            '	{',
+            '		switch (Table) {',
+        ]
+        for tab in self.tables:
+            lines += self.create_tabele_thread_case(tab)
+        lines += [
+            '	}',
+            '	return Ok;',
             '}'
         ]
         return "\n".join(lines)
