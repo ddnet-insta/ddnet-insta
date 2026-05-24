@@ -235,19 +235,42 @@ class GenExtraTables:
         """)
         return code
 
-    def source(self):
-        code = textwrap.dedent("""
-        #include "mode_account.h"
+    def create_table_method(self, table: AccTable) -> str:
+        lines = [
+        'bool CAccountTableCity::CreateTable(class IDbConnection *pSqlServer, char *pError, int ErrorSize)',
+        '{',
+        '    // TODO: make the username a proper unique foreign key',
+        '',
+        '    char aBuf[4096];',
+        '    str_format(aBuf, sizeof(aBuf),',
+        '        "CREATE TABLE IF NOT EXISTS account_city("',
+        '        " username          VARCHAR(%d)   COLLATE %s NOT NULL,"'
+        ]
 
-        #include <base/dbg.h>
-        #include <base/log.h>
-        #include <base/str.h>
+        for col in table.columns:
+            lines.append('        " level             INTEGER       DEFAULT 0,"')
 
-        #include <engine/server/databases/connection.h>
+        lines += [
+        '        "PRIMARY KEY (username)"',
+        '        ");",',
+        '        MAX_USERNAME_LENGTH,',
+        '        pSqlServer->BinaryCollate());',
+        '',
+        '    if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))',
+        '    {',
+        '        return false;',
+        '    }',
+        '    pSqlServer->Print();',
+        '    int NumInserted;',
+        '    return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);',
+        '}'
+        ]
+        return "\n".join(lines)
 
-        #include <game/server/player.h>
-
-        #include <insta/server/account.h>
+    def create_table_methods(self) -> str:
+        """
+        generates the CreateTable() method implementation
+        for all account tables. It looks something like this:
 
         bool CAccountTableCity::CreateTable(class IDbConnection *pSqlServer, char *pError, int ErrorSize)
         {
@@ -271,6 +294,29 @@ class GenExtraTables:
             int NumInserted;
             return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
         }
+        """
+        code = ""
+        for tab in self.tables:
+            code += self.create_table_method(tab) + "\n"
+        return code
+
+    def source(self):
+        code = textwrap.dedent("""
+        #include "mode_account.h"
+
+        #include <base/dbg.h>
+        #include <base/log.h>
+        #include <base/str.h>
+
+        #include <engine/server/databases/connection.h>
+
+        #include <game/server/player.h>
+
+        #include <insta/server/account.h>
+
+        """)
+        code += self.create_table_methods()
+        code += textwrap.dedent("""
 
         bool CAccountTableCity::Insert(class IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize)
         {
