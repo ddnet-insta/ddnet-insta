@@ -244,7 +244,7 @@ class GenExtraTables:
         '',
         '    char aBuf[4096];',
         '    str_format(aBuf, sizeof(aBuf),',
-        '        "CREATE TABLE IF NOT EXISTS account_city("',
+        '        "CREATE TABLE IF NOT EXISTS account_' + table.name_snake().lower() + '("',
         '        " username          VARCHAR(%d)   COLLATE %s NOT NULL,"'
         ]
 
