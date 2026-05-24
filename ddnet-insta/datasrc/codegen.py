@@ -457,14 +457,21 @@ class GenExtraTables:
             '            // TODO: need to write to pError here i guess',
             '            return false;',
             '        }',
-            '        pAccount->m_Mode.m_City = NewData;',
+            '        pAccount->m_Mode.m_' + table.name_camel() + ' = NewData;',
             '        return true;',
             '    }',
             '',
             '    if(pAccount)',
             '    {',
-            '        int Offset = 1;',
-            '        pAccount->m_Mode.m_City.m_Level = pSqlServer->GetInt(Offset++);',
+            '        int Offset = 1;'
+        ]
+        for col in table.columns:
+            if col.data_type == "INTEGER":
+                lines.append('        pAccount->m_Mode.m_{' + table.name_camel() + '}.m_' + col.name_camel() + ' = pSqlServer->GetInt(Offset++);')
+            else:
+                print(f"in table {table.name_camel()} colum {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
+                exit(1)
+        lines += [
             '    }',
             '',
             '    return true;',
