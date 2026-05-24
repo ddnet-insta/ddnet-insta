@@ -16,9 +16,16 @@ def split_words(text: str) -> list[str]:
 
 class SqlColumn:
     def __init__(self, name: str, data_type: str) -> None:
-        self.name = name
+        self.name = split_words(name)
         self.data_type = data_type
         pass
+
+    def name_snake(self) -> str:
+        return name_to_snake(self.name)
+
+    def name_camel(self) -> str:
+        return name_to_camel(self.name)
+
 
 class AccTable:
     name: list[str] = []

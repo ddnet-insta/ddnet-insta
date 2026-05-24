@@ -54,6 +54,84 @@ class GenExtraTables:
         lines.append("};")
         return "\n".join(lines)
 
+    def data_class(self, table: AccTable) -> str:
+        lines = [
+            "class CAccountDataCity",
+            "{",
+            "public:"
+        ]
+        for col in table.columns:
+            if col.data_type == "INTEGER":
+                lines.append(f"    int m_{col.name_camel()} = 0;")
+            else:
+                print(f"in table {table.name_camel()} colum {col.name_camel()} has unsupported data type '{col.data_type}'", file=stderr)
+                exit(1)
+        lines.append("};")
+        return "\n".join(lines)
+
+    def data_classes(self) -> str:
+        """
+        defines one header only data class
+        for every table they look like this
+
+        class CAccountDataCity
+        {
+        public:
+            int m_Level = 0;
+        };
+        """
+        code = ""
+        for tab in self.tables:
+            code += self.data_class(tab) + "\n"
+        return code
+
+    def behavior_class_header(self, table: AccTable) -> str:
+        lines = [
+        "class CAccountTable" + table.name_camel() + " : public IAccountTable",
+        "{",
+        "public:",
+        "    // we need the name in the save method which is static so we have to hardcode it",
+        "    // which is fine because the code should be generated anyways",
+        '    // const char *Name() const override { return "account_' + table.name_snake().lower() + '"; }',
+        ""
+        "    EExtraAccTable Type() const override { return EExtraAccTable::" + table.name_snake().upper() + "; }",
+        ""
+        "    bool CreateTable(class IDbConnection *pSqlServer, char *pError, int ErrorSize) override;",
+        "",
+        "    static bool Insert(class IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize);",
+        "    static bool Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, char *pError, int ErrorSize);",
+        "    static bool Save(class IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize);",
+        "};"
+        ]
+        return "\n".join(lines)
+
+    def behavior_classes_header(self) -> str:
+        """
+        generates the code for all table classes in the header file
+        that define the behavior of interacting with the database
+        they look like this
+
+        class CAccountTableCity : public IAccountTable
+        {
+        public:
+            // we need the name in the save method which is static so we have to hardcode it
+            // which is fine because the code should be generated anyways
+            // const char *Name() const override { return "account_city"; }
+
+            EExtraAccTable Type() const override { return EExtraAccTable::CITY; }
+
+            bool CreateTable(class IDbConnection *pSqlServer, char *pError, int ErrorSize) override;
+
+            static bool Insert(class IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize);
+            static bool Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, char *pError, int ErrorSize);
+            static bool Save(class IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize);
+        };
+        """
+        code = ""
+        for tab in self.tables:
+            code += self.behavior_class_header(tab) + "\n"
+        return code
+
     def header(self):
         code = textwrap.dedent("""
         #pragma once
@@ -97,27 +175,10 @@ class GenExtraTables:
         //       so during the time where this is already set by the mode
         //       on player join but the player did not login yet
         //       or the query did not load the data yet this will be in unloaded state but non null
-        class CAccountDataCity
-        {
-        public:
-            int m_Level = 0;
-        };
-
-        class CAccountTableCity : public IAccountTable
-        {
-        public:
-            // we need the name in the save method which is static so we have to hardcode it
-            // which is fine because the code should be generated anyways
-            // const char *Name() const override { return "account_city"; }
-
-            EExtraAccTable Type() const override { return EExtraAccTable::CITY; }
-
-            bool CreateTable(class IDbConnection *pSqlServer, char *pError, int ErrorSize) override;
-
-            static bool Insert(class IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize);
-            static bool Load(class IDbConnection *pSqlServer, const char *pUsername, CAccount *pAccount, char *pError, int ErrorSize);
-            static bool Save(class IDbConnection *pSqlServer, const char *pUsername, const CAccountDataCity *pData, char *pError, int ErrorSize);
-        };
+        """)
+        code += self.data_classes()
+        code += self.behavior_classes_header()
+        code += textwrap.dedent("""
 
         // player instance
         class CModeAccount
