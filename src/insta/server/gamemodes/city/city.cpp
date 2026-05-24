@@ -23,6 +23,7 @@ CGameControllerCity::CGameControllerCity(CGameContext *pGameServer) :
 	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
 	m_pSqlStats->CreateTable(m_pStatsTable);
 	EnableAccTable(EExtraAccTable::CITY);
+	EnableAccTable(EExtraAccTable::MMO);
 }
 
 CGameControllerCity::~CGameControllerCity() = default;

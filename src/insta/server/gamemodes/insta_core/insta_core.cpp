@@ -188,7 +188,7 @@ void CGameControllerInstaCore::OnInit(bool ServerStart)
 
 	if(g_Config.m_SvAccounts)
 	{
-		m_pSqlStats->CreateAccountsTable();
+		CreateAccountsTable();
 
 		dbg_assert(g_Config.m_SvPort != 0, "sv_port can not be 0 when sv_accounts is on! Otherwise wrong accounts get logged out");
 		dbg_assert(GameServer()->GetHostname(nullptr, 0), "sv_hostname can not be empty when sv_accounts is on! Otherwise wrong accounts get logged out");

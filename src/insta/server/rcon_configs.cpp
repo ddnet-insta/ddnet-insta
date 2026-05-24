@@ -327,7 +327,7 @@ void CGameContext::ConchainAccounts(IConsole::IResult *pResult, void *pUserData,
 	// on activate
 	if(g_Config.m_SvAccounts && pSelf->m_pController && !AccountsWereOn)
 	{
-		pSelf->m_pController->m_pSqlStats->CreateAccountsTable();
+		pSelf->m_pController->CreateAccountsTable();
 	}
 }
 

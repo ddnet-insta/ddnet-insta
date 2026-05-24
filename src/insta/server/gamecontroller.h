@@ -975,6 +975,8 @@ public:
 	*/
 	virtual bool IsPlaying(const CPlayer *pPlayer);
 
+	virtual void CreateAccountsTable() {};
+
 	/*
 		Function: OnLogin
 			Called when the login thread finished successfully

@@ -141,6 +141,7 @@ public:
 	void EnableAccTable(EExtraAccTable Table);
 
 	// accounts.cpp
+	void CreateAccountsTable() override;
 	void OnLogin(const CAccount *pAccount, class CPlayer *pPlayer) override;
 	void OnRegister(class CPlayer *pPlayer) override;
 	void LogoutAccount(class CPlayer *pPlayer, const char *pSuccessMessage) override;
