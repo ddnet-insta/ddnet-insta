@@ -46,6 +46,8 @@ function(insta_patch_server)
       chat_commands.cpp
       chat_commands.h
       column_template.h
+      db/stats.cpp
+      db/stats.h
       ddnet_db_utils/ddnet_db_utils.cpp
       ddnet_db_utils/ddnet_db_utils.h
       dead_spec_controller.cpp
@@ -171,8 +173,6 @@ function(insta_patch_server)
       skin_info_manager.cpp
       skin_info_manager.h
       sql_columns_all.h
-      sql_stats.cpp
-      sql_stats.h
       sql_stats_player.h
       strhelpers.cpp
       strhelpers.h

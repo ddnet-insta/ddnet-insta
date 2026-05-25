@@ -12,7 +12,7 @@
 #include <game/server/player.h>
 #include <game/server/score.h>
 
-#include <insta/server/sql_stats.h>
+#include <insta/server/db/stats.h>
 #include <insta/server/sql_stats_player.h>
 #include <insta/server/structs.h>
 

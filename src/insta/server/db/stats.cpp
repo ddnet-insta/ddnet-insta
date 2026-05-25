@@ -1,4 +1,4 @@
-#include "sql_stats.h"
+#include "stats.h"
 
 #include <base/log.h>
 #include <base/str.h>

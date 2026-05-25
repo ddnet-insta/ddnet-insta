@@ -8,11 +8,11 @@
 
 #include <base/vmath.h>
 
+#include <insta/server/db/stats.h>
 #include <insta/server/enums.h>
 #include <insta/server/ip_storage.h>
 #include <insta/server/round_stats_player.h>
 #include <insta/server/skin_info_manager.h>
-#include <insta/server/sql_stats.h>
 #include <insta/server/sql_stats_player.h>
 #include <insta/server/structs.h>
 

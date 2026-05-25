@@ -17,11 +17,11 @@
 #include <game/server/teams.h>
 #include <game/teamscore.h>
 
+#include <insta/server/db/stats.h>
 #include <insta/server/entities/ddnet_pvp/vanilla_projectile.h>
 #include <insta/server/entities/flag.h>
 #include <insta/server/enums.h>
 #include <insta/server/gamemodes/insta_core/insta_core.h>
-#include <insta/server/sql_stats.h>
 #include <insta/server/structs.h>
 
 #include <cstdint>

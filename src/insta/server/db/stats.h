@@ -1,5 +1,5 @@
-#ifndef INSTA_SERVER_SQL_STATS_H
-#define INSTA_SERVER_SQL_STATS_H
+#ifndef INSTA_SERVER_DB_STATS_H
+#define INSTA_SERVER_DB_STATS_H
 
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/protocol.h>

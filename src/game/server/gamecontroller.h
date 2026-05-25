@@ -16,8 +16,8 @@
 #include <game/server/gamecontext.h> // ddnet-insta
 #include <game/server/teams.h>
 
+#include <insta/server/db/stats.h> // ddnet-insta
 #include <insta/server/enums.h> // ddnet-insta
-#include <insta/server/sql_stats.h> // ddnet-insta
 #include <insta/server/structs.h> // ddnet-insta
 
 struct CScoreLoadBestTimeResult;
