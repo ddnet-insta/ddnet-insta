@@ -12,8 +12,8 @@ CGameControllerGCTF::CGameControllerGCTF(class CGameContext *pGameServer) :
 
 	m_pStatsTable = "gctf";
 	m_pExtraColumns = new CGCTFColumns();
-	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
-	m_pSqlStats->CreateTable(m_pStatsTable);
+	Db()->Stats()->SetExtraColumns(m_pExtraColumns);
+	Db()->Stats()->CreateTable(m_pStatsTable);
 }
 
 CGameControllerGCTF::~CGameControllerGCTF() = default;

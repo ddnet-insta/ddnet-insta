@@ -25,6 +25,7 @@
 #include <game/version.h>
 
 #include <insta/server/antibob.h>
+#include <insta/server/db/insta.h>
 #include <insta/server/entities/flag.h>
 #include <insta/server/entities/text/laser.h>
 #include <insta/server/entities/text/projectile.h>
@@ -64,9 +65,9 @@ CGameControllerInstaCore::CGameControllerInstaCore(class CGameContext *pGameServ
 	// set the stats table to the gametype name in all lowercase
 	// if you want to track stats in a sql database for that gametype
 	m_pStatsTable = "";
-	m_pSqlStats = new CSqlStats(GameServer(), ((CServer *)Server())->DbPool());
+	m_pInstaDatabase = new CDbInsta(GameServer(), ((CServer *)Server())->DbPool());
 	m_pExtraColumns = nullptr;
-	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	Db()->Stats()->SetExtraColumns(m_pExtraColumns);
 }
 
 CGameControllerInstaCore::~CGameControllerInstaCore()
@@ -80,10 +81,10 @@ CGameControllerInstaCore::~CGameControllerInstaCore()
 	//
 	//       this also has to save player sprees that were not ended yet!
 	dbg_msg("ddnet-insta", "cleaning up database connection ...");
-	if(m_pSqlStats)
+	if(Db()->Stats())
 	{
-		delete m_pSqlStats;
-		m_pSqlStats = nullptr;
+		delete m_pInstaDatabase;
+		m_pInstaDatabase = nullptr;
 	}
 
 	if(m_pExtraColumns)
@@ -542,7 +543,7 @@ void CGameControllerInstaCore::OnFlagCapture(CFlag *pFlag, float Time, int TimeT
 		char aTimestamp[TIMESTAMP_STR_LENGTH];
 		str_timestamp_format(aTimestamp, sizeof(aTimestamp), TimestampFormat::SPACE); // 2019-04-02 19:41:58
 
-		m_pSqlStats->SaveFastcap(ClientId, TimeTicks, aTimestamp, Grenade, IsStatTrack());
+		Db()->Stats()->SaveFastcap(ClientId, TimeTicks, aTimestamp, Grenade, IsStatTrack());
 	}
 
 	if(IsStatTrack())
@@ -1995,7 +1996,7 @@ void CGameControllerInstaCore::SaveStatsOnRoundEnd(CPlayer *pPlayer)
 			pPlayer->m_Stats.m_Losses++;
 	}
 
-	m_pSqlStats->SaveRoundStats(Server()->ClientName(pPlayer->GetCid()), StatsTable(), &pPlayer->m_Stats);
+	Db()->Stats()->SaveRoundStats(Server()->ClientName(pPlayer->GetCid()), StatsTable(), &pPlayer->m_Stats);
 
 	// instead of doing a db write and read for ALL players
 	// on round end we manually sum up the stats for save servers
@@ -2093,13 +2094,13 @@ void CGameControllerInstaCore::SaveStatsOnDisconnect(CPlayer *pPlayer)
 		pPlayer->m_Stats.m_Losses++;
 
 	dbg_msg("sql", "saving stats of disconnecting player '%s' CountAsLoss=%d (%s)", Server()->ClientName(pPlayer->GetCid()), CountAsLoss, pLossReason);
-	m_pSqlStats->SaveRoundStats(Server()->ClientName(pPlayer->GetCid()), StatsTable(), &pPlayer->m_Stats);
+	Db()->Stats()->SaveRoundStats(Server()->ClientName(pPlayer->GetCid()), StatsTable(), &pPlayer->m_Stats);
 }
 
 void CGameControllerInstaCore::LoadNewPlayerNameData(CPlayer *pPlayer)
 {
 	pPlayer->m_SavedStats.Reset();
-	m_pSqlStats->LoadInstaPlayerData(pPlayer->GetCid(), m_pStatsTable);
+	Db()->Stats()->LoadInstaPlayerData(pPlayer->GetCid(), m_pStatsTable);
 }
 
 void CGameControllerInstaCore::OnLoadedNameStats(const CSqlStatsPlayer *pStats, class CPlayer *pPlayer)

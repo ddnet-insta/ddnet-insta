@@ -32,8 +32,8 @@ CGameControllerBomb::CGameControllerBomb(class CGameContext *pGameServer) :
 	m_pDeadSpecController = new CDeadSpecController(this, pGameServer);
 	m_pStatsTable = "bomb";
 	m_pExtraColumns = new CBombColumns();
-	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
-	m_pSqlStats->CreateTable(m_pStatsTable);
+	Db()->Stats()->SetExtraColumns(m_pExtraColumns);
+	Db()->Stats()->CreateTable(m_pStatsTable);
 }
 
 CGameControllerBomb::~CGameControllerBomb() = default;

@@ -10,8 +10,8 @@ CGameControllerICTF::CGameControllerICTF(class CGameContext *pGameServer) :
 
 	m_pStatsTable = "ictf";
 	m_pExtraColumns = new CICTFColumns();
-	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
-	m_pSqlStats->CreateTable(m_pStatsTable);
+	Db()->Stats()->SetExtraColumns(m_pExtraColumns);
+	Db()->Stats()->CreateTable(m_pStatsTable);
 }
 
 CGameControllerICTF::~CGameControllerICTF() = default;

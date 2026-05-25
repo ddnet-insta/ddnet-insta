@@ -18,6 +18,7 @@
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
 
+#include <insta/server/db/insta.h>
 #include <insta/server/db/stats.h>
 #include <insta/server/enums.h>
 #include <insta/server/sql_stats_player.h>
@@ -1710,7 +1711,13 @@ public:
 	// only used in ctf gametypes
 	class CFlag *m_apFlags[NUM_FLAGS];
 
-	CSqlStats *m_pSqlStats = nullptr;
+	CDbInsta *m_pInstaDatabase = nullptr;
+
+	// the ddnet-insta database connection for stats
+	// which is different than ddnet's database connection
+	// for ranks and points
+	CDbInsta *Db() { return m_pInstaDatabase; }
+
 	const char *m_pStatsTable = "";
 	const char *StatsTable() const { return m_pStatsTable; }
 

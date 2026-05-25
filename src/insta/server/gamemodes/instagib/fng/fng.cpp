@@ -19,8 +19,8 @@ CGameControllerFng::CGameControllerFng(class CGameContext *pGameServer) :
 
 	m_pStatsTable = "fng";
 	m_pExtraColumns = new CFngColumns();
-	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
-	m_pSqlStats->CreateTable(m_pStatsTable);
+	Db()->Stats()->SetExtraColumns(m_pExtraColumns);
+	Db()->Stats()->CreateTable(m_pStatsTable);
 }
 
 CGameControllerFng::~CGameControllerFng() = default;

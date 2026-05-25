@@ -46,6 +46,8 @@ function(insta_patch_server)
       chat_commands.cpp
       chat_commands.h
       column_template.h
+      db/insta.cpp
+      db/insta.h
       db/stats.cpp
       db/stats.h
       ddnet_db_utils/ddnet_db_utils.cpp

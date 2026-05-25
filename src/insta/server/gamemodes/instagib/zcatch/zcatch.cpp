@@ -34,8 +34,8 @@ CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
 	if(m_pStatsTable[0])
 	{
 		m_pExtraColumns = new CZcatchColumns();
-		m_pSqlStats->SetExtraColumns(m_pExtraColumns);
-		m_pSqlStats->CreateTable(m_pStatsTable);
+		Db()->Stats()->SetExtraColumns(m_pExtraColumns);
+		Db()->Stats()->CreateTable(m_pStatsTable);
 	}
 }
 

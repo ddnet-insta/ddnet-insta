@@ -452,7 +452,7 @@ void CGameContext::ConStatsAllTime(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
-	pSelf->m_pController->m_pSqlStats->ShowStats(pResult->m_ClientId, pName, pSelf->m_pController->StatsTable(), EInstaSqlRequestType::CHAT_CMD_STATSALL);
+	pSelf->m_pController->Db()->Stats()->ShowStats(pResult->m_ClientId, pName, pSelf->m_pController->StatsTable(), EInstaSqlRequestType::CHAT_CMD_STATSALL);
 }
 
 void CGameContext::ConMultis(IConsole::IResult *pResult, void *pUserData)
@@ -471,7 +471,7 @@ void CGameContext::ConMultis(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
-	pSelf->m_pController->m_pSqlStats->ShowStats(pResult->m_ClientId, pName, pSelf->m_pController->StatsTable(), EInstaSqlRequestType::CHAT_CMD_MULTIS);
+	pSelf->m_pController->Db()->Stats()->ShowStats(pResult->m_ClientId, pName, pSelf->m_pController->StatsTable(), EInstaSqlRequestType::CHAT_CMD_MULTIS);
 }
 
 void CGameContext::ConSteals(IConsole::IResult *pResult, void *pUserData)
@@ -490,7 +490,7 @@ void CGameContext::ConSteals(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
-	pSelf->m_pController->m_pSqlStats->ShowStats(pResult->m_ClientId, pName, pSelf->m_pController->StatsTable(), EInstaSqlRequestType::CHAT_CMD_STEALS);
+	pSelf->m_pController->Db()->Stats()->ShowStats(pResult->m_ClientId, pName, pSelf->m_pController->StatsTable(), EInstaSqlRequestType::CHAT_CMD_STEALS);
 }
 
 void CGameContext::ConRoundTop(IConsole::IResult *pResult, void *pUserData)
@@ -543,7 +543,7 @@ void CGameContext::ConRankKills(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
-	pSelf->m_pController->m_pSqlStats->ShowRank(pResult->m_ClientId, pName, "Kills", "kills", pSelf->m_pController->StatsTable(), "DESC");
+	pSelf->m_pController->Db()->Stats()->ShowRank(pResult->m_ClientId, pName, "Kills", "kills", pSelf->m_pController->StatsTable(), "DESC");
 }
 
 void CGameContext::ConInstaRankPoints(IConsole::IResult *pResult, void *pUserData)
@@ -562,7 +562,7 @@ void CGameContext::ConInstaRankPoints(IConsole::IResult *pResult, void *pUserDat
 	}
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
-	pSelf->m_pController->m_pSqlStats->ShowRank(pResult->m_ClientId, pName, "Points", "points", pSelf->m_pController->StatsTable(), "DESC");
+	pSelf->m_pController->Db()->Stats()->ShowRank(pResult->m_ClientId, pName, "Points", "points", pSelf->m_pController->StatsTable(), "DESC");
 }
 
 void CGameContext::ConTopKills(IConsole::IResult *pResult, void *pUserData)
@@ -582,7 +582,7 @@ void CGameContext::ConTopKills(IConsole::IResult *pResult, void *pUserData)
 
 	const char *pName = pSelf->Server()->ClientName(pResult->m_ClientId);
 	int Offset = pResult->NumArguments() ? pResult->GetInteger(0) : 1;
-	pSelf->m_pController->m_pSqlStats->ShowTop(pResult->m_ClientId, pName, "Kills", "kills", pSelf->m_pController->StatsTable(), "DESC", Offset);
+	pSelf->m_pController->Db()->Stats()->ShowTop(pResult->m_ClientId, pName, "Kills", "kills", pSelf->m_pController->StatsTable(), "DESC", Offset);
 }
 
 void CGameContext::ConRankFastcaps(IConsole::IResult *pResult, void *pUserData)
@@ -607,7 +607,7 @@ void CGameContext::ConRankFastcaps(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
-	pSelf->m_pController->m_pSqlStats->ShowFastcapRank(
+	pSelf->m_pController->Db()->Stats()->ShowFastcapRank(
 		pResult->m_ClientId,
 		pName,
 		pSelf->Map()->BaseName(),
@@ -639,7 +639,7 @@ void CGameContext::ConTopFastcaps(IConsole::IResult *pResult, void *pUserData)
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
 	int Offset = pResult->NumArguments() ? pResult->GetInteger(0) : 1;
-	pSelf->m_pController->m_pSqlStats->ShowFastcapTop(
+	pSelf->m_pController->Db()->Stats()->ShowFastcapTop(
 		pResult->m_ClientId,
 		pName,
 		pSelf->Map()->BaseName(),
@@ -666,7 +666,7 @@ void CGameContext::ConTopNumCaps(IConsole::IResult *pResult, void *pUserData)
 
 	const char *pName = pSelf->Server()->ClientName(pResult->m_ClientId);
 	int Offset = pResult->NumArguments() ? pResult->GetInteger(0) : 1;
-	pSelf->m_pController->m_pSqlStats->ShowTop(pResult->m_ClientId, pName, "Flag captures", "flag_captures", pSelf->m_pController->StatsTable(), "DESC", Offset);
+	pSelf->m_pController->Db()->Stats()->ShowTop(pResult->m_ClientId, pName, "Flag captures", "flag_captures", pSelf->m_pController->StatsTable(), "DESC", Offset);
 }
 
 void CGameContext::ConRankFlagCaptures(IConsole::IResult *pResult, void *pUserData)
@@ -691,7 +691,7 @@ void CGameContext::ConRankFlagCaptures(IConsole::IResult *pResult, void *pUserDa
 	}
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
-	pSelf->m_pController->m_pSqlStats->ShowRank(pResult->m_ClientId, pName, "Flag captures", "flag_captures", pSelf->m_pController->StatsTable(), "DESC");
+	pSelf->m_pController->Db()->Stats()->ShowRank(pResult->m_ClientId, pName, "Flag captures", "flag_captures", pSelf->m_pController->StatsTable(), "DESC");
 }
 
 void CGameContext::ConTopSpikeColors(IConsole::IResult *pResult, void *pUserData)
@@ -727,7 +727,7 @@ void CGameContext::ConTopSpikeColors(IConsole::IResult *pResult, void *pUserData
 			char aDbColumn[64];
 			str_format(aDbColumn, sizeof(aDbColumn), "%s_spikes", pColor);
 
-			pSelf->m_pController->m_pSqlStats->ShowTop(
+			pSelf->m_pController->Db()->Stats()->ShowTop(
 				pResult->m_ClientId, pName,
 				aDisplayName,
 				aDbColumn,
@@ -810,7 +810,7 @@ void CGameContext::ConSpawnReset(IConsole::IResult *pResult, void *pUserData)
 		} \
 \
 		const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId); \
-		pSelf->m_pController->m_pSqlStats->ShowRank(pResult->m_ClientId, pName, display_name, #sql_name, pSelf->m_pController->StatsTable(), order_by); \
+		pSelf->m_pController->Db()->Stats()->ShowRank(pResult->m_ClientId, pName, display_name, #sql_name, pSelf->m_pController->StatsTable(), order_by); \
 	}
 #define MACRO_TOP_COLUMN(name, sql_name, display_name, order_by) \
 	void CGameContext::ConInstaTop##name(IConsole::IResult *pResult, void *pUserData) \
@@ -828,7 +828,7 @@ void CGameContext::ConSpawnReset(IConsole::IResult *pResult, void *pUserData)
 \
 		const char *pName = pSelf->Server()->ClientName(pResult->m_ClientId); \
 		int Offset = pResult->NumArguments() ? pResult->GetInteger(0) : 1; \
-		pSelf->m_pController->m_pSqlStats->ShowTop(pResult->m_ClientId, pName, display_name, #sql_name, pSelf->m_pController->StatsTable(), order_by, Offset); \
+		pSelf->m_pController->Db()->Stats()->ShowTop(pResult->m_ClientId, pName, display_name, #sql_name, pSelf->m_pController->StatsTable(), order_by, Offset); \
 	}
 #include <insta/server/sql_columns_all.h>
 #undef MACRO_ADD_COLUMN

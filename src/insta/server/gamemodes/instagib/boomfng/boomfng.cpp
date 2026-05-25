@@ -19,8 +19,8 @@ CGameControllerBoomfng::CGameControllerBoomfng(class CGameContext *pGameServer) 
 
 	m_pStatsTable = "boomfng";
 	m_pExtraColumns = new CBoomfngColumns();
-	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
-	m_pSqlStats->CreateTable(m_pStatsTable);
+	Db()->Stats()->SetExtraColumns(m_pExtraColumns);
+	Db()->Stats()->CreateTable(m_pStatsTable);
 }
 
 CGameControllerBoomfng::~CGameControllerBoomfng() = default;

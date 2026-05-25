@@ -16,8 +16,8 @@ CGameControllerFoot::CGameControllerFoot(class CGameContext *pGameServer) :
 
 	m_pStatsTable = "foot";
 	m_pExtraColumns = new CFootColumns();
-	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
-	m_pSqlStats->CreateTable(m_pStatsTable);
+	Db()->Stats()->SetExtraColumns(m_pExtraColumns);
+	Db()->Stats()->CreateTable(m_pStatsTable);
 }
 
 CGameControllerFoot::~CGameControllerFoot() = default;

@@ -12,8 +12,8 @@ CGameControllerITDM::CGameControllerITDM(class CGameContext *pGameServer) :
 
 	m_pStatsTable = "itdm";
 	m_pExtraColumns = new CIdmColumns(); // yes itdm and idm have the same db columns
-	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
-	m_pSqlStats->CreateTable(m_pStatsTable);
+	Db()->Stats()->SetExtraColumns(m_pExtraColumns);
+	Db()->Stats()->CreateTable(m_pStatsTable);
 }
 
 CGameControllerITDM::~CGameControllerITDM() = default;

@@ -49,7 +49,7 @@ void CGameControllerBasePvp::OnInit()
 
 	if(GameFlags() & GAMEFLAG_FLAGS)
 	{
-		m_pSqlStats->CreateFastcapTable();
+		Db()->Stats()->CreateFastcapTable();
 	}
 
 	// TODO: do not use IsDDRaceGameType() or IsVanillaGameType() for weapon configs

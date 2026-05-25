@@ -20,8 +20,8 @@ CGameControllerTBlock::CGameControllerTBlock(class CGameContext *pGameServer) :
 
 	m_pStatsTable = "tblock";
 	m_pExtraColumns = nullptr;
-	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
-	m_pSqlStats->CreateTable(m_pStatsTable);
+	Db()->Stats()->SetExtraColumns(m_pExtraColumns);
+	Db()->Stats()->CreateTable(m_pStatsTable);
 }
 
 CGameControllerTBlock::~CGameControllerTBlock() = default;

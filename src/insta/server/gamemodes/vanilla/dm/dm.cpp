@@ -12,8 +12,8 @@ CGameControllerDM::CGameControllerDM(class CGameContext *pGameServer) :
 
 	m_pStatsTable = "dm";
 	m_pExtraColumns = new CDmColumns();
-	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
-	m_pSqlStats->CreateTable(m_pStatsTable);
+	Db()->Stats()->SetExtraColumns(m_pExtraColumns);
+	Db()->Stats()->CreateTable(m_pStatsTable);
 }
 
 CGameControllerDM::~CGameControllerDM() = default;

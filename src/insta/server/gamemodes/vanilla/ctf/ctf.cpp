@@ -20,8 +20,8 @@ CGameControllerCTF::CGameControllerCTF(class CGameContext *pGameServer) :
 
 	m_pStatsTable = "ctf";
 	m_pExtraColumns = new CCtfColumns();
-	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
-	m_pSqlStats->CreateTable(m_pStatsTable);
+	Db()->Stats()->SetExtraColumns(m_pExtraColumns);
+	Db()->Stats()->CreateTable(m_pStatsTable);
 }
 
 CGameControllerCTF::~CGameControllerCTF() = default;

@@ -19,8 +19,8 @@ CGameControllerSolofng::CGameControllerSolofng(class CGameContext *pGameServer) 
 
 	m_pStatsTable = "solofng";
 	m_pExtraColumns = new CSolofngColumns();
-	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
-	m_pSqlStats->CreateTable(m_pStatsTable);
+	Db()->Stats()->SetExtraColumns(m_pExtraColumns);
+	Db()->Stats()->CreateTable(m_pStatsTable);
 }
 
 CGameControllerSolofng::~CGameControllerSolofng() = default;

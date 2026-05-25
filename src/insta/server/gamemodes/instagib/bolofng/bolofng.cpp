@@ -19,8 +19,8 @@ CGameControllerBolofng::CGameControllerBolofng(class CGameContext *pGameServer) 
 
 	m_pStatsTable = "bolofng";
 	m_pExtraColumns = new CBolofngColumns();
-	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
-	m_pSqlStats->CreateTable(m_pStatsTable);
+	Db()->Stats()->SetExtraColumns(m_pExtraColumns);
+	Db()->Stats()->CreateTable(m_pStatsTable);
 }
 
 CGameControllerBolofng::~CGameControllerBolofng() = default;

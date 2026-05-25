@@ -146,8 +146,8 @@ CGameControllerTsmash::CGameControllerTsmash(class CGameContext *pGameServer, bo
 
 	m_pStatsTable = Teams ? "ttsmash" : "tsmash";
 	m_pExtraColumns = nullptr;
-	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
-	m_pSqlStats->CreateTable(m_pStatsTable);
+	Db()->Stats()->SetExtraColumns(m_pExtraColumns);
+	Db()->Stats()->CreateTable(m_pStatsTable);
 }
 
 CGameControllerTsmash::~CGameControllerTsmash() = default;

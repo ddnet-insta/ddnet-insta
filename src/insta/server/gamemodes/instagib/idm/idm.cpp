@@ -10,8 +10,8 @@ CGameControllerIDM::CGameControllerIDM(class CGameContext *pGameServer) :
 
 	m_pStatsTable = "idm";
 	m_pExtraColumns = new CIdmColumns();
-	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
-	m_pSqlStats->CreateTable(m_pStatsTable);
+	Db()->Stats()->SetExtraColumns(m_pExtraColumns);
+	Db()->Stats()->CreateTable(m_pStatsTable);
 }
 
 CGameControllerIDM::~CGameControllerIDM() = default;
