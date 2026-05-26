@@ -14,6 +14,7 @@ struct ISqlData;
 class IDbConnection;
 class IServer;
 class CGameContext;
+class CDbInsta;
 
 enum class EInstaSqlRequestType
 {
@@ -196,6 +197,8 @@ class CSqlStats
 	IServer *Server() const { return m_pServer; }
 	CGameContext *m_pGameServer;
 	IServer *m_pServer;
+	CDbInsta *m_pInstaDatabase = nullptr;
+	CDbInsta *Db() { return m_pInstaDatabase; }
 
 	CExtraColumns *m_pExtraColumns = nullptr;
 
@@ -247,10 +250,8 @@ class CSqlStats
 		bool OnlyStatTrack,
 		int Offset);
 
-	bool RateLimitPlayer(int ClientId);
-
 public:
-	CSqlStats(CGameContext *pGameServer, CDbConnectionPool *pPool);
+	CSqlStats(CGameContext *pGameServer, CDbConnectionPool *pPool, CDbInsta *pInstaDatabase);
 	~CSqlStats() = default;
 
 	void SetExtraColumns(CExtraColumns *pExtraColumns);

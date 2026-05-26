@@ -23,6 +23,8 @@ public:
 	~CDbInsta() = default;
 
 	CSqlStats *Stats() { return &m_Stats; }
+
+	bool RateLimitPlayer(int ClientId);
 };
 
 #endif

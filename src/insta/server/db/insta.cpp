@@ -27,6 +27,19 @@ CDbInsta::CDbInsta(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	m_pPool(pPool),
 	m_pGameServer(pGameServer),
 	m_pServer(pGameServer->Server()),
-	m_Stats(pGameServer, pPool)
+	m_Stats(pGameServer, pPool, this)
 {
 }
+
+// this shares one ratelimit with ddnet based requests such as /rank, /times, /top5team and so on
+bool CDbInsta::RateLimitPlayer(int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(pPlayer == 0)
+		return true;
+	if(pPlayer->m_LastSqlQuery + (int64_t)g_Config.m_SvSqlQueriesDelay * Server()->TickSpeed() >= Server()->Tick())
+		return true;
+	pPlayer->m_LastSqlQuery = Server()->Tick();
+	return false;
+}
+

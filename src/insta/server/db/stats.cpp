@@ -12,6 +12,7 @@
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
 
+#include <insta/server/db/insta.h>
 #include <insta/server/ddnet_db_utils/ddnet_db_utils.h>
 #include <insta/server/extra_columns.h>
 #include <insta/server/sql_stats_player.h>
@@ -56,18 +57,6 @@ std::shared_ptr<CInstaSqlResult> CSqlStats::NewInstaSqlResult(int ClientId)
 		return nullptr;
 	pCurPlayer->m_StatsQueryResult = std::make_shared<CInstaSqlResult>();
 	return pCurPlayer->m_StatsQueryResult;
-}
-
-// this shares one ratelimit with ddnet based requests such as /rank, /times, /top5team and so on
-bool CSqlStats::RateLimitPlayer(int ClientId)
-{
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
-	if(pPlayer == 0)
-		return true;
-	if(pPlayer->m_LastSqlQuery + (int64_t)g_Config.m_SvSqlQueriesDelay * Server()->TickSpeed() >= Server()->Tick())
-		return true;
-	pPlayer->m_LastSqlQuery = Server()->Tick();
-	return false;
 }
 
 void CSqlStats::ExecPlayerStatsThread(
@@ -159,10 +148,11 @@ void CSqlStats::ExecPlayerFastcapRankOrTopThread(
 	m_pPool->Execute(pFuncPtr, std::move(Tmp), pThreadName);
 }
 
-CSqlStats::CSqlStats(CGameContext *pGameServer, CDbConnectionPool *pPool) :
+CSqlStats::CSqlStats(CGameContext *pGameServer, CDbConnectionPool *pPool, CDbInsta *pInstaDatabase) :
 	m_pPool(pPool),
 	m_pGameServer(pGameServer),
-	m_pServer(pGameServer->Server())
+	m_pServer(pGameServer->Server()),
+	m_pInstaDatabase(pInstaDatabase)
 {
 }
 
@@ -193,7 +183,7 @@ void CSqlStats::LoadInstaPlayerData(int ClientId, const char *pTable)
 
 void CSqlStats::ShowStats(int ClientId, const char *pName, const char *pTable, EInstaSqlRequestType RequestType)
 {
-	if(RateLimitPlayer(ClientId))
+	if(Db()->RateLimitPlayer(ClientId))
 		return;
 	ExecPlayerStatsThread(ShowStatsWorker, "show stats", ClientId, pName, pTable, RequestType);
 }
@@ -206,7 +196,7 @@ void CSqlStats::ShowRank(
 	const char *pTable,
 	const char *pOrderBy)
 {
-	if(RateLimitPlayer(ClientId))
+	if(Db()->RateLimitPlayer(ClientId))
 		return;
 	ExecPlayerRankOrTopThread(
 		ShowRankWorker,
@@ -229,7 +219,7 @@ void CSqlStats::ShowTop(
 	const char *pOrderBy,
 	int Offset)
 {
-	if(RateLimitPlayer(ClientId))
+	if(Db()->RateLimitPlayer(ClientId))
 		return;
 	ExecPlayerRankOrTopThread(
 		ShowTopWorker,
@@ -251,7 +241,7 @@ void CSqlStats::ShowFastcapRank(
 	bool Grenade,
 	bool OnlyStatTrack)
 {
-	if(RateLimitPlayer(ClientId))
+	if(Db()->RateLimitPlayer(ClientId))
 		return;
 	ExecPlayerFastcapRankOrTopThread(
 		ShowFastcapRankWorker,
@@ -274,7 +264,7 @@ void CSqlStats::ShowFastcapTop(
 	bool OnlyStatTrack,
 	int Offset)
 {
-	if(RateLimitPlayer(ClientId))
+	if(Db()->RateLimitPlayer(ClientId))
 		return;
 
 	ExecPlayerFastcapRankOrTopThread(
