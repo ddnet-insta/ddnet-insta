@@ -42,4 +42,3 @@ bool CDbInsta::RateLimitPlayer(int ClientId)
 	pPlayer->m_LastSqlQuery = Server()->Tick();
 	return false;
 }
-
