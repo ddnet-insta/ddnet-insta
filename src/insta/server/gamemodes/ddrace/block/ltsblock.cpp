@@ -87,6 +87,107 @@ void CGameControllerLTSBlock::RespawnNonSpectatorPlayers(bool OnlyWithoutCharact
 	}
 }
 
+bool CGameControllerLTSBlock::IsCharacterFrozen(const CCharacter *pChr) const
+{
+	if(!pChr)
+		return false;
+
+	const CCharacterCore *pCore = pChr->Core();
+	return pChr->m_FreezeTime > 0 || (pCore && (pCore->m_DeepFrozen || pCore->m_LiveFrozen));
+}
+
+void CGameControllerLTSBlock::ResetFrozenTeamTimers()
+{
+	m_RedTeamFrozenTicks = 0;
+	m_BlueTeamFrozenTicks = 0;
+}
+
+bool CGameControllerLTSBlock::HandleFrozenTeamTimeout(int AliveRed, int AliveBlue)
+{
+	if(!m_bRoundActive || m_Warmup > 0)
+	{
+		ResetFrozenTeamTimers();
+		return false;
+	}
+
+	bool AllRedFrozen = AliveRed > 0;
+	bool AllBlueFrozen = AliveBlue > 0;
+	int SeenRed = 0;
+	int SeenBlue = 0;
+
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer || pPlayer->m_IsDead)
+			continue;
+
+		int Team = pPlayer->GetTeam();
+		if(Team != TEAM_RED && Team != TEAM_BLUE)
+			continue;
+
+		const CCharacter *pChr = pPlayer->GetCharacter();
+		if(Team == TEAM_RED)
+		{
+			SeenRed++;
+			if(!IsCharacterFrozen(pChr))
+				AllRedFrozen = false;
+		}
+		else
+		{
+			SeenBlue++;
+			if(!IsCharacterFrozen(pChr))
+				AllBlueFrozen = false;
+		}
+	}
+
+	if(SeenRed != AliveRed)
+		AllRedFrozen = false;
+	if(SeenBlue != AliveBlue)
+		AllBlueFrozen = false;
+
+	m_RedTeamFrozenTicks = (AllRedFrozen && AliveBlue > 0) ? m_RedTeamFrozenTicks + 1 : 0;
+	m_BlueTeamFrozenTicks = (AllBlueFrozen && AliveRed > 0) ? m_BlueTeamFrozenTicks + 1 : 0;
+
+	const int FreezeLossTicks = 5 * Server()->TickSpeed();
+	const bool RedTimedOut = m_RedTeamFrozenTicks > FreezeLossTicks;
+	const bool BlueTimedOut = m_BlueTeamFrozenTicks > FreezeLossTicks;
+	if(!RedTimedOut && !BlueTimedOut)
+		return false;
+
+	ResetFrozenTeamTimers();
+
+	if(RedTimedOut && BlueTimedOut)
+	{
+		GameServer()->SendChat(-1, TEAM_ALL, "Both teams stayed frozen too long. Starting new round.");
+		StartNewRound();
+		return true;
+	}
+
+	int LosingTeam = RedTimedOut ? TEAM_RED : TEAM_BLUE;
+	int WinningTeam = (LosingTeam == TEAM_RED) ? TEAM_BLUE : TEAM_RED;
+
+	// forcekill the frozen team, but skip death bookkeeping
+	m_bRoundReset = true;
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer || pPlayer->GetTeam() != LosingTeam)
+			continue;
+		if(CCharacter *pChr = pPlayer->GetCharacter())
+			pChr->Die(-1, WEAPON_GAME, false);
+	}
+	m_bRoundReset = false;
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "%s team was fully frozen for 5 seconds and loses the round!", GetTeamName(LosingTeam));
+	GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+
+	AddTeamscore(WinningTeam, 1);
+	if(IGameController::DoWincheckRound())
+		return true;
+
+	StartNewRound();
+	return true;
+}
+
 void CGameControllerLTSBlock::ResetRoundStateIfEmpty()
 {
 	if(!m_bRoundActive)
@@ -101,6 +202,7 @@ void CGameControllerLTSBlock::ResetRoundStateIfEmpty()
 		return;
 
 	m_bRoundActive = false;
+	ResetFrozenTeamTimers();
 	m_pDeadSpecController->RespawnAllPlayers();
 
 	for(int &Team : m_aPreDeathTeam)
@@ -181,6 +283,7 @@ bool CGameControllerLTSBlock::DoWincheckRound()
 void CGameControllerLTSBlock::StartNewRound()
 {
 	m_bRoundActive = false;
+	ResetFrozenTeamTimers();
 
 	// bring killed players back to their teams
 	RestorePlayersFromPreDeathTeam(true);
@@ -215,6 +318,8 @@ void CGameControllerLTSBlock::Tick()
 	{
 		m_bRoundActive = true;
 	}
+
+	HandleFrozenTeamTimeout(AliveRed, AliveBlue);
 }
 
 void CGameControllerLTSBlock::OnRoundStart()
@@ -232,6 +337,7 @@ void CGameControllerLTSBlock::OnRoundEnd()
 {
 	CGameControllerBlock::OnRoundEnd();
 	m_bRoundActive = false;
+	ResetFrozenTeamTimers();
 }
 
 void CGameControllerLTSBlock::OnPlayerConnect(CPlayer *pPlayer)

@@ -41,9 +41,15 @@ private:
 	bool m_bRoundActive = false;
 
 	void CountAlivePlayersByTeam(int &AliveRed, int &AliveBlue) const;
+	bool IsCharacterFrozen(const CCharacter *pChr) const;
+	bool HandleFrozenTeamTimeout(int AliveRed, int AliveBlue);
+	void ResetFrozenTeamTimers(); // so stale values do not carry over
 	void RestorePlayersFromPreDeathTeam(bool OnlyDeadPlayers);
 	void RespawnNonSpectatorPlayers(bool OnlyWithoutCharacter);
 	void ResetRoundStateIfEmpty();
 	void StartNewRound();
+
+	int m_RedTeamFrozenTicks = 0;
+	int m_BlueTeamFrozenTicks = 0;
 };
 #endif
