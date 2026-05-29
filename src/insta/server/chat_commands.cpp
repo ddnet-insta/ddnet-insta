@@ -536,7 +536,7 @@ void CGameContext::ConRankKills(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_pController)
 		return;
 
-	if(pSelf->m_pController->IsDDRaceGameType())
+	if(pSelf->m_pController->IsDDRaceGameType() && !pSelf->m_pController->IsBlockGameType())
 	{
 		pSelf->SendChatTarget(pResult->m_ClientId, "This command is not available in ddrace gametypes.");
 		return;
@@ -803,7 +803,7 @@ void CGameContext::ConSpawnReset(IConsole::IResult *pResult, void *pUserData)
 			return; \
 		if(!pSelf->m_pController) \
 			return; \
-		if(pSelf->m_pController->IsDDRaceGameType()) \
+		if(pSelf->m_pController->IsDDRaceGameType() && !pSelf->m_pController->IsBlockGameType()) \
 		{ \
 			pSelf->SendChatTarget(pResult->m_ClientId, "This command is not available in ddrace gametypes."); \
 			return; \
@@ -820,7 +820,7 @@ void CGameContext::ConSpawnReset(IConsole::IResult *pResult, void *pUserData)
 			return; \
 		if(!pSelf->m_pController) \
 			return; \
-		if(pSelf->m_pController->IsDDRaceGameType()) \
+		if(pSelf->m_pController->IsDDRaceGameType() && !pSelf->m_pController->IsBlockGameType())  \
 		{ \
 			pSelf->SendChatTarget(pResult->m_ClientId, "This command is not available in ddrace gametypes."); \
 			return; \
