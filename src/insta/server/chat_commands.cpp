@@ -820,7 +820,7 @@ void CGameContext::ConSpawnReset(IConsole::IResult *pResult, void *pUserData)
 			return; \
 		if(!pSelf->m_pController) \
 			return; \
-		if(pSelf->m_pController->IsDDRaceGameType() && !pSelf->m_pController->IsBlockGameType())  \
+		if(pSelf->m_pController->IsDDRaceGameType() && !pSelf->m_pController->IsBlockGameType()) \
 		{ \
 			pSelf->SendChatTarget(pResult->m_ClientId, "This command is not available in ddrace gametypes."); \
 			return; \
