@@ -53,7 +53,7 @@ void CGameControllerBlock::OnCharacterSpawn(class CCharacter *pChr)
 
 	// give default weapons
 	pChr->GiveWeapon(WEAPON_HAMMER, false, -1);
-	pChr->GiveWeapon(WEAPON_GUN, false, 10);
+	pChr->GiveWeapon(WEAPON_GUN, false, -1);
 }
 
 void CGameControllerBlock::Tick()
