@@ -415,7 +415,10 @@ void IGameController::DoTeamBalance()
 
 bool IGameController::OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim)
 {
-	if(UnfreezeOnLaserHit())
+	// https://github.com/ddnet-insta/ddnet-insta/issues/662
+	// this also gets called for shotgun if it is a laser shotgun
+	// so we need to explicitly only unfreeze if it is weapon laser
+	if(UnfreezeOnLaserHit() && Weapon == WEAPON_LASER)
 		pVictim->Unfreeze();
 
 	return true;
