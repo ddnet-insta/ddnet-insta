@@ -1,7 +1,11 @@
 #ifndef INSTA_SERVER_PERSISTENT_CLIENT_DATA_H
 #define INSTA_SERVER_PERSISTENT_CLIENT_DATA_H
 
+#include <base/types.h>
+
 #include <insta/server/sql_stats_player.h>
+
+#include <cstdint>
 
 class CInstaPersistentClientData
 {
@@ -11,6 +15,7 @@ public:
 	// virtual void OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPersistentClientData *pData) {};
 	// virtual void OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData) {};
 
+	NETADDR m_Addr;
 	CSqlStatsPlayer m_SessionStats;
 
 	//

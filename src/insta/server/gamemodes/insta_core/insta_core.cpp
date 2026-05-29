@@ -1,7 +1,9 @@
 #include "insta_core.h"
 
+#include <base/dbg.h>
 #include <base/io.h>
 #include <base/log.h>
+#include <base/net.h>
 #include <base/time.h>
 
 #include <engine/console.h>
@@ -1169,12 +1171,37 @@ bool CGameControllerInstaCore::OnSkinChange7(protocol7::CNetMsg_Cl_SkinChange *p
 
 void CGameControllerInstaCore::OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPersistentClientData *pData)
 {
+	pData->m_Insta.m_Addr = *Server()->ClientAddr(pPlayer->GetCid());
 	pData->m_Insta.m_SessionStats = pPlayer->m_SessionStats;
 	pData->m_Insta.m_SessionStats.Merge(&pPlayer->m_Stats);
 }
 
 void CGameControllerInstaCore::OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData)
 {
+	// https://github.com/ddnet-insta/ddnet-insta/issues/192
+	// https://github.com/ddnet-insta/ddnet-insta/pull/264#issuecomment-2647909642
+	//
+	// the correctness of loading the matching data for the correct player is
+	// a upstream responsibility not ours. But ddnet does not store critical data there.
+	// We do! This could mess with stats and even with account security if it breaks.
+	// So in that edge case even if caused upstream we want to be alerted here.
+	//
+	// Initially I tried to use unique client ids but they get reset on reload so they do not match.
+	// I did notice that ip and port is not supposed to change during a reload.
+	// I hope this ip check would not be affected by the potential bug. Ideally this would be
+	// checked a bit later than on load to make sure there is no order issue on the call site in the server
+	// which would still leave old persistent data together with a wrong address when the load happens.
+	bool SameAddr = net_addr_comp(&pData->m_Insta.m_Addr, Server()->ClientAddr(pPlayer->GetCid())) == 0;
+	if(!SameAddr)
+	{
+		char aExpectedAddr[512];
+		net_addr_str(&pData->m_Insta.m_Addr, aExpectedAddr, sizeof(aExpectedAddr), true);
+		dbg_assert_failed(
+			"player with ip %s tried to load persistent data for ip %s",
+			Server()->ClientAddrString(pPlayer->GetCid(), true),
+			aExpectedAddr);
+	}
+
 	pPlayer->m_SessionStats = pData->m_Insta.m_SessionStats;
 }
 
