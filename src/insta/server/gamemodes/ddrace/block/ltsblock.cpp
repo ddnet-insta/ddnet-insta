@@ -93,7 +93,10 @@ bool CGameControllerLTSBlock::IsCharacterFrozen(const CCharacter *pChr) const
 		return false;
 
 	const CCharacterCore *pCore = pChr->Core();
-	return pChr->m_FreezeTime > 0 || (pCore && (pCore->m_DeepFrozen || pCore->m_LiveFrozen));
+	if(!pCore)
+		return false;
+
+	return pCore->m_IsInFreeze;
 }
 
 void CGameControllerLTSBlock::ResetFrozenTeamTimers()
@@ -112,8 +115,6 @@ bool CGameControllerLTSBlock::HandleFrozenTeamTimeout(int AliveRed, int AliveBlu
 
 	bool AllRedFrozen = AliveRed > 0;
 	bool AllBlueFrozen = AliveBlue > 0;
-	int SeenRed = 0;
-	int SeenBlue = 0;
 
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
@@ -127,27 +128,20 @@ bool CGameControllerLTSBlock::HandleFrozenTeamTimeout(int AliveRed, int AliveBlu
 		const CCharacter *pChr = pPlayer->GetCharacter();
 		if(Team == TEAM_RED)
 		{
-			SeenRed++;
 			if(!IsCharacterFrozen(pChr))
 				AllRedFrozen = false;
 		}
 		else
 		{
-			SeenBlue++;
 			if(!IsCharacterFrozen(pChr))
 				AllBlueFrozen = false;
 		}
 	}
 
-	if(SeenRed != AliveRed)
-		AllRedFrozen = false;
-	if(SeenBlue != AliveBlue)
-		AllBlueFrozen = false;
-
 	m_RedTeamFrozenTicks = (AllRedFrozen && AliveBlue > 0) ? m_RedTeamFrozenTicks + 1 : 0;
 	m_BlueTeamFrozenTicks = (AllBlueFrozen && AliveRed > 0) ? m_BlueTeamFrozenTicks + 1 : 0;
 
-	const int FreezeLossTicks = 5 * Server()->TickSpeed();
+	const int FreezeLossTicks = 5 * Server()->TickSpeed(); // hardcoded to 5 seconds, don't know if it's worth making this configurable
 	const bool RedTimedOut = m_RedTeamFrozenTicks > FreezeLossTicks;
 	const bool BlueTimedOut = m_BlueTeamFrozenTicks > FreezeLossTicks;
 	if(!RedTimedOut && !BlueTimedOut)
