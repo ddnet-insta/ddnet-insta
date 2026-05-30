@@ -24,7 +24,6 @@ CGameContext *CDbInsta::GameServer() const { return m_pGameServer; }
 IServer *CDbInsta::Server() const { return m_pServer; }
 
 CDbInsta::CDbInsta(CGameContext *pGameServer, CDbConnectionPool *pPool) :
-	m_pPool(pPool),
 	m_pGameServer(pGameServer),
 	m_pServer(pGameServer->Server()),
 	m_Stats(pGameServer, pPool, this)

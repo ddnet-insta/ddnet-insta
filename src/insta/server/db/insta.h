@@ -10,7 +10,6 @@ class CGameContext;
 
 class CDbInsta
 {
-	CDbConnectionPool *m_pPool;
 	CGameContext *GameServer() const;
 	IServer *Server() const;
 	CGameContext *m_pGameServer;
