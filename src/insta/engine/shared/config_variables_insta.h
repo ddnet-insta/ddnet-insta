@@ -87,6 +87,7 @@ MACRO_CONFIG_INT(SvSelfKillRespawnDelayMs, sv_self_kill_respawn_delay_ms, 3000, 
 MACRO_CONFIG_INT(SvEnemyKillRespawnDelayMs, sv_enemy_kill_respawn_delay_ms, 500, 0, 10000, CFGFLAG_SERVER, "time in milliseconds it takes to respawn after getting killed by enemies")
 MACRO_CONFIG_INT(SvWorldKillRespawnDelayMs, sv_world_kill_respawn_delay_ms, 500, 0, 10000, CFGFLAG_SERVER, "time in milliseconds it takes to respawn after touching a deathtile")
 MACRO_CONFIG_INT(SvGameKillRespawnDelayMs, sv_game_kill_respawn_delay_ms, 500, 0, 10000, CFGFLAG_SERVER, "time in milliseconds it takes to respawn after team change, round start and so on")
+MACRO_CONFIG_INT(SvLogRaceStart, sv_log_race_start, 0, 0, 1, CFGFLAG_SERVER, "print a log message when a player touches the start line and starts a race")
 
 // clang-format off
 /*

@@ -1555,11 +1555,55 @@ bool CGameControllerInstaCore::OnRaceFinish(CPlayer *pPlayer, int TimeTicks, con
 
 bool CGameControllerInstaCore::OnRaceStart(int ClientId)
 {
+	CPlayer *pPlayer = GetPlayerOrNullptr(ClientId);
+	if(!pPlayer)
+		return false;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return false;
+
+	// log race start, only when the timer actually starts, not when crossing the start tile again while already in a run
+	if(g_Config.m_SvLogRaceStart)
+	{
+		const int Team = Teams().m_Core.Team(ClientId);
+		if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || Team == TEAM_FLOCK)
+		{
+			log_info("game", "'%s' has started the race.", Server()->ClientName(ClientId));
+		}
+		else
+		{
+			if(Teams().GetTeamState(Team) < ETeamState::STARTED)
+			{
+				char aBuf[MAX_CLIENTS * (MAX_NAME_LENGTH + 16) + 64];
+				str_copy(aBuf, "Team");
+				bool First = true;
+				for(int i = 0; i < MAX_CLIENTS; ++i)
+				{
+					if(Teams().m_Core.Team(i) != Team)
+						continue;
+					CPlayer *pTeamPlayer = GetPlayerOrNullptr(i);
+					if(!pTeamPlayer || !pTeamPlayer->IsPlaying())
+						continue;
+					if(First)
+					{
+						str_append(aBuf, " '");
+						First = false;
+					}
+					else
+					{
+						str_append(aBuf, "' & '");
+					}
+					str_append(aBuf, Server()->ClientName(i));
+				}
+				str_append(aBuf, " has started the race.");
+				log_info("game", "%s", aBuf);
+			}
+		}
+	}
+
 	if(g_Config.m_SvClearStatsOnRaceStart)
 	{
-		CPlayer *pPlayer = GetPlayerOrNullptr(ClientId);
-		if(pPlayer)
-			pPlayer->ResetStats();
+		pPlayer->ResetStats();
 	}
 	return false;
 }

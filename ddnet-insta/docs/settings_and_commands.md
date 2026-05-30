@@ -106,6 +106,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_enemy_kill_respawn_delay_ms` time in milliseconds it takes to respawn after getting killed by enemies
 + `sv_world_kill_respawn_delay_ms` time in milliseconds it takes to respawn after touching a deathtile
 + `sv_game_kill_respawn_delay_ms` time in milliseconds it takes to respawn after team change, round start and so on
++ `sv_log_race_start` print a log message when a player touches the start line and starts a race
 + `sv_chat_ratelimit_long_messages` Needs sv_spamprotection 0 (0=off, 1=only messages longer than 12 chars are limited)
 + `sv_chat_ratelimit_spectators` Needs sv_spamprotection 0 (0=off, 1=specs have slow chat)
 + `sv_chat_ratelimit_public_chat` Needs sv_spamprotection 0 (0=off, 1=non team chat is slow)
