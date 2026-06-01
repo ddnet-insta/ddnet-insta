@@ -169,6 +169,7 @@ public:
 	void RconUnlockAccount(int ClientId, const char *pUsername) override;
 	void RconAccountInfo(int ClientId, const char *pUsername) override;
 	void RconAccountStatus(int ClientId) override;
+	void ProcessSelectIntResult(CSelectIntResult &Result);
 	void ProcessAccountRconCmdResult(CAccountRconCmdResult &Result);
 
 private:

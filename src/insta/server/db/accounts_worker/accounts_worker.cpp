@@ -53,6 +53,36 @@ void CAccountPlayerResult::SetVariant(CAccountChatCmd RequestType)
 	}
 }
 
+bool CAccountsWorker::SelectIntWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlSelectIntRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CSelectIntResult *>(pGameData->m_pResult.get());
+	str_copy(pResult->m_aQuery, pData->m_aQuery);
+
+	if(!pSqlServer->PrepareStatement(pData->m_aQuery, pError, ErrorSize))
+	{
+		log_error("sql-thread", "prepare failed query: %s", pData->m_aQuery);
+		return false;
+	}
+	// pSqlServer->BindString(1, pUsername);
+	pSqlServer->Print();
+
+	bool End;
+	if(!pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		log_error("sql-thread", "step failed query: %s", pData->m_aQuery);
+		return false;
+	}
+
+	if(End)
+	{
+		return false; // not a fatal error but no entry found
+	}
+
+	pResult->m_OutputValue = pSqlServer->GetInt(1);
+	return true;
+}
+
 bool CAccountsWorker::CheckNameClaimedWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const auto *pData = dynamic_cast<const CSqlCheckNameClaimRequest *>(pGameData);

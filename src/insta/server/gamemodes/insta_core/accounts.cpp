@@ -2,6 +2,7 @@
 
 #include <base/dbg.h>
 #include <base/log.h>
+#include <base/str.h>
 #include <base/time.h>
 
 #include <engine/console.h>
@@ -14,6 +15,7 @@
 #include <game/server/player.h>
 
 #include <insta/server/db/accounts.h>
+#include <insta/server/db/accounts_worker/accounts_worker.h>
 #include <insta/server/db/stats.h>
 
 #include <algorithm>
@@ -421,6 +423,9 @@ void CGameControllerInstaCore::RconAccountStatus(int ClientId)
 		log_info("accounts", " extra tables loaded by mode: 0");
 	}
 
+	auto Num = Db()->Accounts()->SelectInt("SELECT count(*) FROM accounts");
+	log_info("accounts", " number of accounts: %s", Num.ValueAsString());
+
 	// TODO: also show other stats here like:
 	//       - amount of account registrations on this server
 	//         no db query needed just track every signup in a variable
@@ -452,6 +457,20 @@ void CGameControllerInstaCore::OnAccountInfo(int AdminUniqueClientId, const char
 	else
 		str_copy(aDate, "never");
 	log_info("account", " last login date: %s", aDate);
+}
+
+void CGameControllerInstaCore::ProcessSelectIntResult(CSelectIntResult &Result)
+{
+	for(auto &Select : Db()->Accounts()->m_vSelectInts)
+	{
+		if(str_comp(Select.m_aQuery, Result.m_aQuery))
+			continue;
+
+		Select.m_IsDone = true;
+		Select.m_Value = Result.m_OutputValue;
+		return;
+	}
+	log_error("ddnet-insta", "no matching int lookup request found");
 }
 
 void CGameControllerInstaCore::ProcessAccountRconCmdResult(CAccountRconCmdResult &Result)

@@ -268,6 +268,23 @@ struct CSqlCheckNameClaimRequest : ISqlData
 	char m_aDisplayName[MAX_NAME_LENGTH];
 };
 
+// read request
+struct CSqlSelectIntRequest : ISqlData
+{
+	CSqlSelectIntRequest(std::shared_ptr<ISqlResult> pResult) :
+		ISqlData(std::move(pResult))
+	{
+	}
+
+	char m_aQuery[2048];
+};
+
+struct CSelectIntResult : ISqlResult
+{
+	std::optional<int> m_OutputValue = std::nullopt;
+	char m_aQuery[2048];
+};
+
 class CAccountsWorker
 {
 public:
@@ -278,6 +295,7 @@ public:
 	static bool AccountSaveAndLogoutWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 	static bool LogoutAllAccountsOnCurrentServerThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 	static bool CheckNameClaimedWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool SelectIntWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 
 private:
 	// chat_cmds.cpp

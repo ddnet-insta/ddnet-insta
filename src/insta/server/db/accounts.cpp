@@ -9,12 +9,33 @@
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
 
+#include <insta/server/db/accounts_worker/accounts_worker.h>
+
 CDbAccounts::CDbAccounts(CGameContext *pGameServer, CDbConnectionPool *pPool, CDbInsta *pInstaDatabase) :
 	m_pPool(pPool),
 	m_pGameServer(pGameServer),
 	m_pServer(pGameServer->Server()),
 	m_pInstaDatabase(pInstaDatabase)
 {
+}
+
+CDbAccounts::CSelectInt CDbAccounts::SelectInt(const char *pQuery)
+{
+	for(auto Known : m_vSelectInts)
+		if(!str_comp(Known.m_aQuery, pQuery))
+			return Known;
+
+	CSelectInt Select;
+	str_copy(Select.m_aQuery, pQuery);
+	m_vSelectInts.emplace_back(Select);
+
+	std::shared_ptr<CSelectIntResult> pResult = std::make_shared<CSelectIntResult>();
+	GameServer()->m_vSelectIntQueryResults.emplace_back(pResult);
+
+	auto Tmp = std::make_unique<CSqlSelectIntRequest>(pResult);
+	str_copy(Tmp->m_aQuery, pQuery);
+	m_pPool->Execute(CAccountsWorker::SelectIntWorker, std::move(Tmp), "select int");
+	return Select;
 }
 
 void CDbAccounts::CreateTable()

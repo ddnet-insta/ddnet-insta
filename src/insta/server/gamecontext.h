@@ -11,6 +11,7 @@
 #include <engine/server.h>
 #include <engine/shared/protocol.h>
 
+#include <insta/server/db/accounts_worker/accounts_worker.h>
 #include <insta/server/enums.h>
 #include <insta/server/ip_storage.h>
 #include <insta/server/strhelpers.h>
@@ -117,6 +118,10 @@ public:
 	// results of the sql worker thread
 	// for rcon commands operating on accounts
 	std::vector<std::shared_ptr<CAccountRconCmdResult>> m_vAccountRconCmdQueryResults;
+
+	// results of the sql worker thread
+	// for generic server operations
+	std::vector<std::shared_ptr<CSelectIntResult>> m_vSelectIntQueryResults;
 
 	// is set to time_get() when sv_accounts was attempted to be set to 1
 	// but it failed because sv_hostname or sv_port were not set yet

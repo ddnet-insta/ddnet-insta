@@ -10,6 +10,9 @@
 #include <insta/server/extra_columns.h>
 #include <insta/server/sql_stats_player.h>
 
+#include <optional>
+#include <vector>
+
 struct ISqlData;
 class IDbConnection;
 class IServer;
@@ -44,6 +47,36 @@ class CDbAccounts
 public:
 	CDbAccounts(CGameContext *pGameServer, CDbConnectionPool *pPool, CDbInsta *pInstaDatabase);
 	~CDbAccounts() = default;
+
+	class CSelectInt
+	{
+	public:
+		std::optional<int> m_Value = std::nullopt;
+		bool m_IsDone = false;
+		bool IsDone() const { return m_IsDone; }
+		char m_aQuery[2048] = "";
+
+		const char *ValueAsString()
+		{
+			if(!IsDone())
+			{
+				str_copy(m_aValueStrBuf, "(pending)");
+				return m_aValueStrBuf;
+			}
+			if(!m_Value.has_value())
+			{
+				str_copy(m_aValueStrBuf, "(error)");
+				return m_aValueStrBuf;
+			}
+			str_format(m_aValueStrBuf, sizeof(m_aValueStrBuf), "%d", m_Value.value());
+			return m_aValueStrBuf;
+		}
+
+	private:
+		char m_aValueStrBuf[512] = "";
+	};
+	std::vector<CSelectInt> m_vSelectInts;
+	CSelectInt SelectInt(const char *pQuery);
 
 	void CreateTable();
 

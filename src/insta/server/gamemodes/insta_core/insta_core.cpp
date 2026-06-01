@@ -27,6 +27,7 @@
 #include <game/version.h>
 
 #include <insta/server/antibob.h>
+#include <insta/server/db/accounts_worker/accounts_worker.h>
 #include <insta/server/db/insta.h>
 #include <insta/server/entities/flag.h>
 #include <insta/server/entities/text/laser.h>
@@ -765,6 +766,22 @@ void CGameControllerInstaCore::Tick()
 				return true;
 			}),
 		GameServer()->m_vAccountRconCmdQueryResults.end());
+	GameServer()->m_vSelectIntQueryResults.erase(
+		std::remove_if(
+			GameServer()->m_vSelectIntQueryResults.begin(),
+			GameServer()->m_vSelectIntQueryResults.end(),
+			[this](std::shared_ptr<CSelectIntResult> pResult) {
+				// this should not be null ever anyways?
+				if(!pResult)
+					return true;
+				if(!pResult->m_Completed)
+					return false;
+
+				ProcessSelectIntResult(*pResult);
+				pResult = nullptr;
+				return true;
+			}),
+		GameServer()->m_vSelectIntQueryResults.end());
 
 	// only check expires every second not every tick
 	// to avoid wasting clock cycles
