@@ -260,7 +260,7 @@ void CGameControllerDDNet::DoTeamChange(class CPlayer *pPlayer, int Team, bool D
 		}
 	}
 
-	IGameController::DoTeamChange(pPlayer, Team, DoChatMsg);
+	IGameController::DoTeamChange(pPlayer, Team, /* Suppress chat message */ false);
 }
 
 REGISTER_GAMEMODE(ddnet, CGameControllerDDNet(pGameServer));
