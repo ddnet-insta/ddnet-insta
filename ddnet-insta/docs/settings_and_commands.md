@@ -245,6 +245,7 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `/logout` logout account
 + `/changepassword` change the password of your account
 + `/claimname` claim the current nick name so nobody else can use it
++ `/profile` show a users profile
 + `/slow_account_operation` used to simulate high load for debugging account system stability
 + `/score` change which type of score is displayed in scoreboard
 + `/points` Shows the all time points rank of player name (your stats by default)

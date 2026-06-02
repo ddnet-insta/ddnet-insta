@@ -998,6 +998,8 @@ public:
 	*/
 	virtual void OnLogin(const CAccount *pAccount, class CPlayer *pPlayer) {}
 
+	virtual void OnProfile(const CAccount *pAccount, class CPlayer *pPlayer) {}
+
 	/*
 		Function: OnRegister
 			Called when the register thread finished successfully

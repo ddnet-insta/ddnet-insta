@@ -30,6 +30,7 @@ void CAccountPlayerResult::SetVariant(EAccountChatCmd RequestType)
 	m_MessageKind = RequestType;
 	switch(RequestType)
 	{
+	case EAccountChatCmd::CHAT_CMD_PROFILE:
 	case EAccountChatCmd::CHAT_CMD_REGISTER:
 	case EAccountChatCmd::CHAT_CMD_LOGIN:
 	case EAccountChatCmd::CHAT_CMD_CHANGE_PASSWORD:

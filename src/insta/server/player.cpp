@@ -13,6 +13,7 @@
 #include <game/server/player.h>
 #include <game/server/score.h>
 
+#include <insta/server/db/accounts_worker/accounts_worker.h>
 #include <insta/server/db/stats.h>
 #include <insta/server/sql_stats_player.h>
 #include <insta/server/structs.h>
@@ -331,6 +332,9 @@ void CPlayer::ProcessAccountResult(CAccountPlayerResult &Result)
 		break;
 	case EAccountChatCmd::LOGIN_FAILED:
 		GameServer()->m_pController->OnFailedAccountLogin(this, Result.m_Data.m_aaMessages[0]);
+		break;
+	case EAccountChatCmd::CHAT_CMD_PROFILE:
+		GameServer()->m_pController->OnProfile(&Result.m_Data.m_Account, this);
 		break;
 	}
 }

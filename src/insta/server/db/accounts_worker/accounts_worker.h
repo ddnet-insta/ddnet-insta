@@ -56,6 +56,9 @@ enum class EAccountChatCmd
 	// this is used for debugging only
 	// /slow_account_operation chat command
 	CHAT_CMD_SLOW_ACCOUNT_OPERATION,
+
+	// /profile chat command
+	CHAT_CMD_PROFILE,
 };
 
 // TODO: can this be split into two enums?
@@ -286,6 +289,7 @@ private:
 	static bool ChatCmdChangePassword(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ChatCmdClaimName(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ChatCmdSlowOperation(IDbConnection *pSqlServer, const CSqlPlayerAccountRequest *pData, CAccountPlayerResult *pResult, char *pError, int ErrorSize);
+	static bool ChatCmdProfile(IDbConnection *pSqlServer, const CSqlPlayerAccountRequest *pData, CAccountPlayerResult *pResult, char *pError, int ErrorSize);
 
 	// TODO: should the return type switched from a bool to an enum to represent the 3 different cases?
 	//       - success

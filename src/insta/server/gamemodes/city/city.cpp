@@ -27,6 +27,15 @@ void CGameControllerCity::OnInit(bool ServerStart)
 	CGameControllerDM::OnInit(ServerStart);
 }
 
+void CGameControllerCity::OnProfile(const CAccount *pAccount, class CPlayer *pPlayer)
+{
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "profile of '%s'", pAccount->Username());
+	SendChatTarget(pPlayer->GetCid(), aBuf);
+	str_format(aBuf, sizeof(aBuf), " chips: %d", pAccount->m_Mode.m_City.m_Chips);
+	SendChatTarget(pPlayer->GetCid(), aBuf);
+}
+
 bool CGameControllerCity::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos)
 {
 	CPlayer *pPlayer = Character.GetPlayer();

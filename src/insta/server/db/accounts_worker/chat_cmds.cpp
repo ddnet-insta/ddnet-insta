@@ -40,6 +40,8 @@ bool CAccountsWorker::ChatCmdWorker(IDbConnection *pSqlServer, const ISqlData *p
 		return ChatCmdClaimName(pSqlServer, pGameData, pError, ErrorSize);
 	case EAccountChatCmd::CHAT_CMD_SLOW_ACCOUNT_OPERATION:
 		return ChatCmdSlowOperation(pSqlServer, pData, pResult, pError, ErrorSize);
+	case EAccountChatCmd::CHAT_CMD_PROFILE:
+		return ChatCmdProfile(pSqlServer, pData, pResult, pError, ErrorSize);
 	}
 
 	log_error("sql-thread", "invalid request type %d", (int)pData->m_RequestType);
@@ -364,5 +366,16 @@ bool CAccountsWorker::ChatCmdSlowOperation(IDbConnection *pSqlServer, const CSql
 	log_info("sql-thread", "finished slow debug operation");
 	pResult->m_MessageKind = EAccountChatCmd::CHAT_CMD_SLOW_ACCOUNT_OPERATION;
 	str_copy(pResult->m_Data.m_aaMessages[0], "slow debug operation reached main thread");
+	return true;
+}
+
+bool CAccountsWorker::ChatCmdProfile(IDbConnection *pSqlServer, const CSqlPlayerAccountRequest *pData, CAccountPlayerResult *pResult, char *pError, int ErrorSize)
+{
+	dbg_assert(pData->m_RequestType == EAccountChatCmd::CHAT_CMD_PROFILE, "ChatCmdProfile called with wrong request type");
+	pResult->m_MessageKind = EAccountChatCmd::DIRECT;
+	str_copy(pResult->m_Data.m_aaMessages[0], "Something went wrong");
+	if(!LoadAccount(pSqlServer, pData->m_aUsername, &pResult->m_Data.m_Account, pData->m_vTables, pError, ErrorSize))
+		return true;
+	pResult->m_MessageKind = pData->m_RequestType;
 	return true;
 }

@@ -268,6 +268,7 @@ public:
 	static void ConLogoutAccount(IConsole::IResult *pResult, void *pUserData);
 	static void ConChangePassword(IConsole::IResult *pResult, void *pUserData);
 	static void ConClaimName(IConsole::IResult *pResult, void *pUserData);
+	static void ConProfile(IConsole::IResult *pResult, void *pUserData);
 	static void ConSlowAccountOperation(IConsole::IResult *pResult, void *pUserData);
 	static void ConScore(IConsole::IResult *pResult, void *pUserData);
 	static void ConRankKills(IConsole::IResult *pResult, void *pUserData);

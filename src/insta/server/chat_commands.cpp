@@ -769,6 +769,21 @@ void CGameContext::ConClaimName(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_pController->RequestClaimName(pPlayer);
 }
 
+void CGameContext::ConProfile(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(BlockAccountOperation(pSelf, pResult->m_ClientId, "Profile"))
+		return;
+
+	pSelf->m_pController->Db()->Accounts()->ChatCmd(
+		pResult->m_ClientId,
+		pResult->GetString(0),
+		"",
+		"",
+		"",
+		EAccountChatCmd::CHAT_CMD_PROFILE);
+}
+
 void CGameContext::ConSlowAccountOperation(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

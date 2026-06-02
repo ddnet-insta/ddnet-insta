@@ -65,6 +65,7 @@ CHAT_COMMAND("login", "s[username] s[password]", CFGFLAG_CHAT | CFGFLAG_SERVER, 
 CHAT_COMMAND("logout", "", CFGFLAG_CHAT, ConLogoutAccount, this, "logout account")
 CHAT_COMMAND("changepassword", "s[old password] s[new password] s[new password repeat]", CFGFLAG_CHAT, ConChangePassword, this, "change the password of your account")
 CHAT_COMMAND("claimname", "", CFGFLAG_CHAT, ConClaimName, this, "claim the current nick name so nobody else can use it")
+CHAT_COMMAND("profile", "s[username]", CFGFLAG_CHAT, ConProfile, this, "show a users profile")
 
 #ifdef CONF_DEBUG
 CHAT_COMMAND("slow_account_operation", "", CFGFLAG_CHAT, ConSlowAccountOperation, this, "used to simulate high load for debugging account system stability")
