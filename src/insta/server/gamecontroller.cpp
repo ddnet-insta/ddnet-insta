@@ -402,7 +402,7 @@ void IGameController::DoTeamBalance()
 		if(pPlayer)
 		{
 			int Temp = pPlayer->m_LastActionTick;
-			DoTeamChange(pPlayer, BiggerTeam ^ 1);
+			DoTeamChange(pPlayer, BiggerTeam ^ 1, true);
 			pPlayer->m_LastActionTick = Temp;
 			pPlayer->Respawn();
 			GameServer()->SendGameMsg(protocol7::GAMEMSG_TEAM_BALANCE_VICTIM, pPlayer->GetTeam(), pPlayer->GetCid());
