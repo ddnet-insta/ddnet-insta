@@ -1,6 +1,7 @@
 #include "base_pvp.h"
 
 #include <base/log.h>
+#include <base/logger.h>
 
 #include <engine/server/server.h>
 #include <engine/shared/config.h>
@@ -43,9 +44,9 @@ CGameControllerBasePvp::CGameControllerBasePvp(class CGameContext *pGameServer) 
 
 CGameControllerBasePvp::~CGameControllerBasePvp() = default;
 
-void CGameControllerBasePvp::OnInit()
+void CGameControllerBasePvp::OnInit(bool ServerStart)
 {
-	CGameControllerInstaCore::OnInit();
+	CGameControllerInstaCore::OnInit(ServerStart);
 
 	if(GameFlags() & GAMEFLAG_FLAGS)
 	{

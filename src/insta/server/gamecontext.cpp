@@ -1,4 +1,5 @@
 #include <base/dbg.h>
+#include <base/io.h>
 #include <base/log.h>
 #include <base/types.h>
 
@@ -11,15 +12,14 @@
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
+#include <game/server/score.h>
 
-#include <insta/server/enums.h>
-#include <insta/server/ip_storage.h>
 #include <insta/server/protocol.h>
 #include <insta/server/version.h>
 
 #include <unordered_map>
 
-void CGameContext::OnInitInstagib()
+void CGameContext::OnInitInstagib(bool ServerStart)
 {
 	log_info("ddnet-insta", "running ddnet-insta version " DDNET_INSTA_VERSIONSTR);
 
@@ -34,7 +34,7 @@ void CGameContext::OnInitInstagib()
 
 	m_pHttp = Kernel()->RequestInterface<IHttp>();
 
-	m_pController->OnInit();
+	m_pController->OnInit(ServerStart);
 	m_pController->OnRoundStart();
 }
 
@@ -648,6 +648,48 @@ CIpStorage *CGameContext::FindIpStorageEntryOfflineAndOnline(int EntryId)
 	return nullptr;
 }
 
+bool CGameContext::GetHostname(char *pHostname, int HostnameSize)
+{
+	if(pHostname && HostnameSize)
+		pHostname[0] = '\0';
+	if(g_Config.m_SvHostname[0])
+	{
+		if(pHostname)
+			str_copy(pHostname, g_Config.m_SvHostname, HostnameSize);
+		return true;
+	}
+	if(m_aHostnameCached[0])
+	{
+		if(pHostname)
+			str_copy(pHostname, m_aHostnameCached, HostnameSize);
+		return true;
+	}
+
+#if defined(CONF_PLATFORM_LINUX)
+	IOHANDLE File = io_open("/etc/hostname", IOFLAG_READ);
+	if(File)
+	{
+		char *pContent = io_read_all_str(File);
+		if(pContent && pContent[0])
+		{
+			if(pHostname)
+				str_copy(pHostname, io_read_all_str(File), HostnameSize);
+			str_copy(m_aHostnameCached, pContent);
+		}
+		free(pContent);
+		io_close(File);
+		return m_aHostnameCached[0];
+	}
+	return false;
+#elif defined(CONF_PLATFORM_WINDOWS)
+	if(pHostname)
+		str_copy(pHostname, "windows", HostnameSize);
+	return true;
+#else
+	return false;
+#endif
+}
+
 bool CGameContext::IsChatCmdAllowed(int ClientId) const
 {
 	if(g_Config.m_SvBangCommands < 2)
@@ -689,6 +731,77 @@ void CGameContext::ShuffleTeams() const
 
 	for(int i = 0; i < PlayerTeam; i++)
 		m_pController->DoTeamChange(m_apPlayers[aPlayer[i]], i < (PlayerTeam + Rnd) / 2 ? TEAM_RED : TEAM_BLUE, false);
+}
+
+void CGameContext::ChangeName(int ClientId, const char *pName, bool Silent, bool UpdateSixup)
+{
+	// WARNING: the code below has to be kept in sync with CGameContext::OnChangeInfoNetMessage()
+
+	CPlayer *pPlayer = m_apPlayers[ClientId];
+	char aOldName[MAX_NAME_LENGTH];
+	str_copy(aOldName, Server()->ClientName(ClientId), sizeof(aOldName));
+
+	Server()->SetClientName(ClientId, pName);
+	const char *pNewName = Server()->ClientName(ClientId);
+
+	if(!Silent)
+	{
+		char aChatText[256];
+		str_format(
+			aChatText,
+			sizeof(aChatText),
+			"'%s' changed name to '%s'",
+			pPlayer->m_DisplayName.LastBroadcastedName(),
+			pNewName);
+		SendChat(-1, TEAM_ALL, aChatText);
+		pPlayer->m_DisplayName.SetLastBroadcastedName(pNewName);
+	}
+
+	// reload scores
+	Score()->PlayerData(ClientId)->Reset();
+	// ddnet-insta replaced Server()->SetClientScore() with ResetPlayerScore() which calls it internally
+	m_pController->ResetPlayerScore(pPlayer);
+	Score()->LoadPlayerData(ClientId);
+
+	// ddnet-insta
+	m_pController->LoadNewPlayerNameData(pPlayer);
+
+	LogEvent("Name change", ClientId);
+
+	if(UpdateSixup)
+	{
+		protocol7::CNetMsg_Sv_ClientDrop Drop;
+		Drop.m_ClientId = ClientId;
+		Drop.m_pReason = "";
+		Drop.m_Silent = true;
+
+		protocol7::CNetMsg_Sv_ClientInfo Info;
+		Info.m_ClientId = ClientId;
+		Info.m_pName = Server()->ClientName(ClientId);
+		Info.m_Country = Server()->ClientCountry(ClientId);
+		Info.m_pClan = Server()->ClientClan(ClientId);
+		Info.m_Local = 0;
+		Info.m_Silent = true;
+		Info.m_Team = m_pController->GetPlayerTeam(pPlayer, true); // ddnet-insta
+
+		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+		{
+			Info.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_aaSkinPartNames[p];
+			Info.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
+			Info.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
+		}
+
+		for(int i = 0; i < Server()->MaxClients(); i++)
+		{
+			if(i != ClientId)
+			{
+				Server()->SendPackMsg(&Drop, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
+				Server()->SendPackMsg(&Info, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
+			}
+		}
+
+		Server()->ExpireServerInfo();
+	}
 }
 
 void CGameContext::RegisterIntConfigs()

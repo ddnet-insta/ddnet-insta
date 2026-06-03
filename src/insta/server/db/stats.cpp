@@ -18,6 +18,7 @@
 #include <insta/server/sql_stats_player.h>
 
 #include <cstdlib>
+#include <memory>
 
 class IDbConnection;
 
@@ -996,6 +997,13 @@ void CSqlStats::CreateFastcapTable()
 	Tmp->m_aColumns[0] = '\0';
 	Tmp->m_aColumns[0] = '\0';
 	m_pPool->ExecuteWrite(CreateFastcapTableThread, std::move(Tmp), "create fastcap table");
+}
+
+void CSqlStats::CreateExtraAccountsTables(const std::vector<EExtraAccTable> &vTables)
+{
+	auto Tmp = std::make_unique<CSqlCreateExtraAccountsTablesRequest>();
+	Tmp->m_vTables = vTables;
+	m_pPool->ExecuteWrite(CAccountsWorker::CreateExtraAccountsTableThread, std::move(Tmp), "create extra accounts table");
 }
 
 bool CSqlStats::CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)

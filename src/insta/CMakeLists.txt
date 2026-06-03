@@ -1,3 +1,22 @@
+function(generate_acc_table output_file script_parameter)
+  add_custom_command(OUTPUT ${output_file}
+    COMMAND ${Python3_EXECUTABLE} ddnet-insta/datasrc/codegen.py ${script_parameter}
+      > "${PROJECT_BINARY_DIR}/${output_file}"
+    DEPENDS
+      # tidy-alphabetical-start
+      ddnet-insta/datasrc/acc_tables/city.py
+      ddnet-insta/datasrc/acc_tables/mmo.py
+      ddnet-insta/datasrc/codegen.py
+      ddnet-insta/datasrc/table.py
+      # tidy-alphabetical-end
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  )
+endfunction()
+
+file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/src/generated/insta")
+generate_acc_table("src/generated/insta/mode_account.h" "header")
+generate_acc_table("src/generated/insta/mode_account.cpp" "source")
+
 function(insta_patch_engine)
     set_src(INSTA_ENGINE_INTERFACE GLOB src/insta/engine
       # tidy-alphabetical-start
@@ -41,11 +60,20 @@ function(insta_patch_server)
 
     set_src(INSTA_SERVER GLOB_RECURSE src/insta/server
       # tidy-alphabetical-start
+      account.cpp
+      account.h
       antibob.cpp
       antibob.h
       chat_commands.cpp
       chat_commands.h
       column_template.h
+      db/accounts.cpp
+      db/accounts.h
+      db/accounts_worker/accounts_worker.cpp
+      db/accounts_worker/accounts_worker.h
+      db/accounts_worker/chat_cmds.cpp
+      db/accounts_worker/rcon_cmds.cpp
+      db/accounts_worker/table.cpp
       db/insta.cpp
       db/insta.h
       db/stats.cpp
@@ -54,6 +82,8 @@ function(insta_patch_server)
       ddnet_db_utils/ddnet_db_utils.h
       dead_spec_controller.cpp
       dead_spec_controller.h
+      display_name.cpp
+      display_name.h
       entities/character.cpp
       entities/character.h
       entities/ddnet_pvp/vanilla_pickup.cpp
@@ -88,10 +118,13 @@ function(insta_patch_server)
       gamemodes/base_pvp/base_pvp.cpp
       gamemodes/base_pvp/base_pvp.h
       gamemodes/base_pvp/chat.cpp
+      gamemodes/city/city.cpp
+      gamemodes/city/city.h
       gamemodes/ddrace/block/block.cpp
       gamemodes/ddrace/block/block.h
       gamemodes/ddrace/block/tblock.cpp
       gamemodes/ddrace/block/tblock.h
+      gamemodes/insta_core/accounts.cpp
       gamemodes/insta_core/insta_core.cpp
       gamemodes/insta_core/insta_core.h
       gamemodes/instagib/base_fng.cpp
@@ -159,11 +192,15 @@ function(insta_patch_server)
       gamemodes/vanilla/tsmash/tsmash.h
       ip_storage.cpp
       ip_storage.h
+      password_hash.cpp
+      password_hash.h
       persistent_client_data.h
       persistent_data.h
       player.cpp
       player.h
       protocol.h
+      ratelimits.cpp
+      ratelimits.h
       rcon_commands.cpp
       rcon_commands.h
       rcon_configs.cpp
@@ -190,8 +227,13 @@ function(insta_patch_server)
       # tidy-alphabetical-end
     )
 
+    set(INSTA_GENERATED
+      src/generated/insta/mode_account.h
+      src/generated/insta/mode_account.cpp
+    )
+
     set(GAME_SERVER ${GAME_SERVER} PARENT_SCOPE)
-    list(APPEND GAME_SERVER ${INSTA_EXTERNAL_GAMEMODES} ${INSTA_SERVER})
+    list(APPEND GAME_SERVER ${INSTA_EXTERNAL_GAMEMODES} ${INSTA_SERVER} ${INSTA_GENERATED})
     set(GAME_SERVER ${GAME_SERVER} PARENT_SCOPE)
 
     set(ENGINE_SERVER_WITHOUT_MAIN ${ENGINE_SERVER_WITHOUT_MAIN} PARENT_SCOPE)
