@@ -1,3 +1,4 @@
+#include <base/log.h>
 #include <base/str.h>
 #include <base/time.h>
 
@@ -114,6 +115,55 @@ void CPlayer::InstagibTick()
 		ProcessStatsResult(*m_FastcapQueryResult);
 		m_FastcapQueryResult = nullptr;
 	}
+	if(m_AccountQueryResult != nullptr && m_AccountQueryResult->m_Completed)
+	{
+		ProcessAccountResult(*m_AccountQueryResult);
+		m_AccountQueryResult = nullptr;
+	}
+	if(m_AccountLogoutQueryResult != nullptr && m_AccountLogoutQueryResult->m_Completed)
+	{
+		if(!m_AccountLogoutQueryResult->m_Success)
+		{
+			GameServer()->SendChatTarget(GetCid(), m_AccountLogoutQueryResult->m_aMessage);
+		}
+		else if(GameServer()->m_pController)
+		{
+			GameServer()->m_pController->OnLogout(this, m_AccountLogoutQueryResult->m_aMessage);
+		}
+		m_AccountLogoutQueryResult = nullptr;
+	}
+	if(m_CheckClaimNameQueryResult != nullptr && m_CheckClaimNameQueryResult->m_Completed)
+	{
+		auto pResult = m_CheckClaimNameQueryResult;
+
+		if(str_comp(m_DisplayName.WantedName(), pResult->m_Owner.m_aDisplayName))
+		{
+			// log error may seem a bit strict
+			// but name changes should be dropped
+			// if a old name is still being looked up
+			// so if we hit this branch something got into a bad state
+			log_error(
+				"names",
+				"got claim name result for display name '%s' but wanted name is '%s'",
+				pResult->m_Owner.m_aDisplayName, m_DisplayName.WantedName());
+		}
+		else
+		{
+			// log_debug("names", "name owner for '%s' is '%s'", pResult->m_aDisplayName, pResult->m_aOwnerUsername);
+
+			m_DisplayName.SetNameOwner(&pResult->m_Owner);
+
+			// if players join with an unclaimed name
+			// the change from pending to confirmed should be silent
+			// the join message already contained this name
+			bool Silent = m_DisplayName.NumChanges() == 1;
+			bool UpdateSixup = true;
+
+			GameServer()->ChangeName(GetCid(), m_DisplayName.DisplayName(), Silent, UpdateSixup);
+		}
+
+		m_CheckClaimNameQueryResult = nullptr;
+	}
 
 	RainbowTick();
 }
@@ -209,6 +259,82 @@ void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)
 			GameServer()->m_pController->OnLoadedNameStats(&Result.m_Stats, this);
 			break;
 		}
+	}
+}
+
+void CPlayer::ProcessAccountResult(CAccountPlayerResult &Result)
+{
+	if(!Result.m_Success)
+	{
+		GameServer()->SendChatTarget(GetCid(), "Something went wrong. Please contact an administrator.");
+		return;
+	}
+
+	switch(Result.m_MessageKind)
+	{
+	case EAccountChatCmd::LOG_INFO:
+		for(auto &aMessage : Result.m_Data.m_aaMessages)
+		{
+			if(aMessage[0] == 0)
+				break;
+			log_info("ddnet-insta", "%s", aMessage);
+		}
+		break;
+	case EAccountChatCmd::LOG_ERROR:
+		for(auto &aMessage : Result.m_Data.m_aaMessages)
+		{
+			if(aMessage[0] == 0)
+				break;
+			log_error("ddnet-insta", "%s", aMessage);
+		}
+		break;
+	case EAccountChatCmd::CHAT_CMD_SLOW_ACCOUNT_OPERATION:
+	case EAccountChatCmd::DIRECT:
+		for(auto &aMessage : Result.m_Data.m_aaMessages)
+		{
+			if(aMessage[0] == 0)
+				break;
+			GameServer()->SendChatTarget(m_ClientId, aMessage);
+		}
+		break;
+	case EAccountChatCmd::ALL:
+	{
+		bool PrimaryMessage = true;
+		for(auto &aMessage : Result.m_Data.m_aaMessages)
+		{
+			if(aMessage[0] == 0)
+				break;
+
+			if(GameServer()->ProcessSpamProtection(m_ClientId) && PrimaryMessage)
+				break;
+
+			GameServer()->SendChat(-1, TEAM_ALL, aMessage, -1);
+			PrimaryMessage = false;
+		}
+		break;
+	}
+	case EAccountChatCmd::BROADCAST:
+		if(Result.m_Data.m_aBroadcast[0] != 0)
+			GameServer()->SendBroadcast(Result.m_Data.m_aBroadcast, -1);
+		break;
+	case EAccountChatCmd::CHAT_CMD_REGISTER:
+		GameServer()->m_pController->OnRegister(this);
+		break;
+	case EAccountChatCmd::CHAT_CMD_LOGIN:
+		GameServer()->m_pController->OnLogin(&Result.m_Data.m_Account, this);
+		break;
+	case EAccountChatCmd::CHAT_CMD_CHANGE_PASSWORD:
+		GameServer()->m_pController->OnChangePassword(this);
+		break;
+	case EAccountChatCmd::CHAT_CMD_DISPLAY_NAME:
+		GameServer()->m_pController->OnDisplayNameSet(this, Result.m_Data.m_NameClaim.m_aDisplayName, Result.m_Data.m_NameClaim.m_aNameOwner);
+		break;
+	case EAccountChatCmd::CHAT_CMD_LOCK_NAME:
+		GameServer()->m_pController->OnNameLocked(this, Result.m_Data.m_NameClaim.m_aDisplayName, Result.m_Data.m_NameClaim.m_aNameOwner, Result.m_Data.m_NameClaim.m_IsProtected);
+		break;
+	case EAccountChatCmd::LOGIN_FAILED:
+		GameServer()->m_pController->OnFailedAccountLogin(this, Result.m_Data.m_LoginFailed.m_aError, Result.m_Data.m_LoginFailed.m_aUsername);
+		break;
 	}
 }
 

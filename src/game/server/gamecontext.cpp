@@ -2989,27 +2989,34 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 	// set infos
 	if(Server()->WouldClientNameChange(ClientId, pMsg->m_pName) && !ProcessSpamProtection(ClientId))
 	{
-		char aOldName[MAX_NAME_LENGTH];
-		str_copy(aOldName, Server()->ClientName(ClientId));
+		// ddnet-insta start
+		//
+		// WARNING: if there is a git conflict here apply the new upstream changes
+		//          to CGameContext::ChangeName()
+		//          the key changes are that all the ddnet code moved to the ChangeName() method
+		if(g_Config.m_SvClaimableNames)
+		{
+			// request name change
+			// the actual change happens in CGamecontext::ChangeName
+			// once the db query finished
+			if(str_comp(pMsg->m_pName, pPlayer->m_DisplayName.WantedName()))
+			{
+				pPlayer->m_DisplayName.SetWantedName(pMsg->m_pName);
+				const char *pWantedName = pPlayer->m_DisplayName.WantedName();
+				if(!m_pController->Db()->Accounts()->CheckNameClaimed(ClientId, pWantedName))
+					log_error("ddnet-insta", "failed to lookup name");
+			}
+			Server()->SetClientName(ClientId, pPlayer->m_DisplayName.DisplayName());
+		}
+		else
+		{
+			pPlayer->m_DisplayName.SetWantedName(pMsg->m_pName);
+			pPlayer->m_DisplayName.SetLastBroadcastedName(pMsg->m_pName);
+			ChangeName(ClientId, pMsg->m_pName, false, false);
 
-		Server()->SetClientName(ClientId, pMsg->m_pName);
-
-		char aChatText[256];
-		str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientId));
-		SendChat(-1, TEAM_ALL, aChatText);
-
-		// reload scores
-		Score()->PlayerData(ClientId)->Reset();
-		// ddnet-insta replaced Server()->SetClientScore() with ResetPlayerScore() which calls it internally
-		m_pController->ResetPlayerScore(pPlayer);
-		Score()->LoadPlayerData(ClientId);
-
-		// ddnet-insta
-		m_pController->LoadNewPlayerNameData(pPlayer);
-
-		SixupNeedsUpdate = true;
-
-		LogEvent("Name change", ClientId);
+			SixupNeedsUpdate = true;
+		}
+		// ddnet-insta end
 	}
 
 	if(Server()->WouldClientClanChange(ClientId, pMsg->m_pClan))
@@ -4508,7 +4515,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	m_pAntibot->RoundStart(this);
 
-	OnInitInstagib(); // ddnet-insta
+	OnInitInstagib(pPersistentData == nullptr); // ddnet-insta
 }
 
 void CGameContext::CreateAllEntities(bool Initial)
@@ -4764,6 +4771,12 @@ void CGameContext::OnShutdown(void *pPersistentData)
 		// ddnet-insta
 		m_pController->OnDataPersist(pPersistent);
 	}
+
+	// ddnet-insta
+	if(!pPersistent)
+		m_pController->OnShutdown();
+	else
+		m_pController->OnBeforeReload();
 
 	Antibot()->RoundEnd();
 
