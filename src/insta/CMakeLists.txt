@@ -4,6 +4,7 @@ function(generate_acc_table output_file script_parameter)
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
       # tidy-alphabetical-start
+      ddnet-insta/datasrc/acc_tables/city.py
       ddnet-insta/datasrc/codegen.py
       ddnet-insta/datasrc/table.py
       # tidy-alphabetical-end
@@ -117,6 +118,8 @@ function(insta_patch_server)
       gamemodes/base_pvp/base_pvp.cpp
       gamemodes/base_pvp/base_pvp.h
       gamemodes/base_pvp/chat.cpp
+      gamemodes/city/city.cpp
+      gamemodes/city/city.h
       gamemodes/ddrace/block/block.cpp
       gamemodes/ddrace/block/block.h
       gamemodes/ddrace/block/ltsblock.cpp
