@@ -35,6 +35,10 @@ void CGameContext::RegisterInstagibCommands()
 	Console()->Chain("sv_grenade_ammo_regen_speed", ConchainGrenadeAmmoRegenSetting, this);
 	Console()->Chain("sv_grenade_ammo_regen_on_kill", ConchainGrenadeAmmoRegenSetting, this);
 	Console()->Chain("sv_grenade_ammo_regen_reset_on_fire", ConchainGrenadeAmmoRegenSetting, this);
+	Console()->Chain("sv_accounts", ConchainAccounts, this);
+	Console()->Chain("sv_port", ConchainAccounts, this);
+	Console()->Chain("sv_hostname", ConchainAccounts, this);
+	Console()->Chain("sv_claimable_names", ConchainClaimableNames, this);
 
 // https://github.com/ddnet-insta/ddnet-insta/issues/649
 #define IgnoreDocReg Console()->Register
@@ -255,5 +259,122 @@ void CGameContext::ConchainGrenadeAmmoRegenSetting(IConsole::IResult *pResult, v
 		CGameContext *pSelf = (CGameContext *)pUserData;
 		if(pSelf->m_pController)
 			log_warn("server", "WARNING: that config has no effect as long as sv_grenade_ammo_regen is off");
+	}
+}
+
+void CGameContext::ConchainAccounts(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	bool AccountsWereOn = g_Config.m_SvAccounts != 0;
+	char aOldHostnameCfg[512];
+	str_copy(aOldHostnameCfg, g_Config.m_SvHostname);
+	char aOldHostname[512];
+	pSelf->GetHostname(aOldHostname, sizeof(aOldHostname));
+
+	pfnCallback(pResult, pCallbackUserData);
+
+	if(pResult->NumArguments() == 0)
+		return;
+
+	// check disallow changing sv_hostname
+	if(g_Config.m_SvAccounts && aOldHostname[0] != '\0' && str_comp(aOldHostnameCfg, g_Config.m_SvHostname))
+	{
+		log_error("ddnet-insta", "changing sv_hostname is not allowed while sv_accounts is on");
+		str_copy(g_Config.m_SvHostname, aOldHostnameCfg);
+		return;
+	}
+
+	// check activate
+	if(g_Config.m_SvAccounts == 0 && !AccountsWereOn && pSelf->m_LastAccountTurnOnAttempt)
+	{
+		bool PortAndHostSet = g_Config.m_SvPort != 0 && pSelf->GetHostname(nullptr, 0);
+		int SecondsSinceLastAttempt = (time_get() - pSelf->m_LastAccountTurnOnAttempt) / time_freq();
+		if(PortAndHostSet && SecondsSinceLastAttempt < 10)
+		{
+			log_warn("ddnet-insta", "sv_accounts turned on because sv_port and sv_hostname are now set. Please set sv_accounts after sv_port and sv_hostname in your config.");
+			g_Config.m_SvAccounts = 1;
+		}
+	}
+
+	// check deactivate
+	if(g_Config.m_SvAccounts)
+	{
+		if(g_Config.m_SvPort == 0)
+		{
+			log_error("ddnet-insta", "sv_accounts can not be turned on if sv_port is 0");
+			g_Config.m_SvAccounts = 0;
+		}
+		if(!pSelf->GetHostname(nullptr, 0))
+		{
+			log_error("ddnet-insta", "sv_accounts can not be turned on if sv_hostname is unset");
+			g_Config.m_SvAccounts = 0;
+		}
+
+		if(g_Config.m_SvAccounts == 0)
+		{
+			pSelf->m_LastAccountTurnOnAttempt = time_get();
+		}
+	}
+
+	// on deactivate
+	if(!g_Config.m_SvAccounts && pSelf->m_pController && AccountsWereOn)
+	{
+		log_info("ddnet-insta", "logging out all players ...");
+		pSelf->m_pController->LogoutAllAccounts("Logged out of account (account system deactivated)");
+	}
+
+	// on activate
+	if(g_Config.m_SvAccounts && pSelf->m_pController && !AccountsWereOn)
+	{
+		pSelf->m_pController->CreateAccountsTable();
+	}
+}
+
+void CGameContext::ConchainClaimableNames(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	bool WasOn = g_Config.m_SvClaimableNames != 0;
+	pfnCallback(pResult, pCallbackUserData);
+	bool IsOn = g_Config.m_SvClaimableNames != 0;
+
+	bool Changed = WasOn != IsOn;
+
+	if(!Changed)
+		return;
+	if(pResult->NumArguments() == 0)
+		return;
+	if(!pSelf->m_pController)
+		return;
+
+	if(IsOn)
+	{
+		for(CPlayer *pPlayer : pSelf->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+
+			const char *pWantedName = pPlayer->m_DisplayName.WantedName();
+			if(!pSelf->m_pController->Db()->Accounts()->CheckNameClaimed(pPlayer->GetCid(), pWantedName))
+				log_error("ddnet-insta", "failed to lookup name for cid=%d", pPlayer->GetCid());
+
+			pSelf->Server()->SetClientName(pPlayer->GetCid(), pPlayer->m_DisplayName.DisplayName());
+		}
+	}
+	else
+	{
+		for(CPlayer *pPlayer : pSelf->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+
+			const char *pWantedName = pPlayer->m_DisplayName.WantedName();
+			const char *pCurrentName = pSelf->Server()->ClientName(pPlayer->GetCid());
+			if(!str_comp(pWantedName, pCurrentName))
+				continue;
+
+			pSelf->Server()->SetClientName(pPlayer->GetCid(), pWantedName);
+		}
 	}
 }
