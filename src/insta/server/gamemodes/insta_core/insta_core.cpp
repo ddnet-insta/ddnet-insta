@@ -1171,6 +1171,7 @@ bool CGameControllerInstaCore::OnSkinChange7(protocol7::CNetMsg_Cl_SkinChange *p
 
 void CGameControllerInstaCore::OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPersistentClientData *pData)
 {
+	pData->m_Insta.m_IsValid = true;
 	pData->m_Insta.m_Addr = *Server()->ClientAddr(pPlayer->GetCid());
 	pData->m_Insta.m_SessionStats = pPlayer->m_SessionStats;
 	pData->m_Insta.m_SessionStats.Merge(&pPlayer->m_Stats);
@@ -1178,6 +1179,12 @@ void CGameControllerInstaCore::OnClientDataPersist(CPlayer *pPlayer, CGameContex
 
 void CGameControllerInstaCore::OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData)
 {
+	// switched gametype from pure ddnet to a ddnet-insta mode
+	// skip loading uninitialized ddnet-insta data
+	// https://github.com/ddnet-insta/ddnet-insta/issues/669
+	if(!pData->m_Insta.m_IsValid)
+		return;
+
 	// https://github.com/ddnet-insta/ddnet-insta/issues/192
 	// https://github.com/ddnet-insta/ddnet-insta/pull/264#issuecomment-2647909642
 	//

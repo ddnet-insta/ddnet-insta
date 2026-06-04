@@ -366,6 +366,15 @@ public:
 			And to load the data again you have to also implement
 			OnClientDataRestore()
 
+			WARNING: be careful if you store gametype specific data here.
+				 if the server changes gametype at runtime with players connected
+				 by running the rcon command "sv_gametype xyz;reload"
+				 the data persistence and loading will be handled by two different
+				 gametype controllers! So there will be data corruption unless
+				 you explicitly handle that case!
+				 So adding new data here should ideally be done in the insta core controller
+				 or in the core controller of your fork which is used for all modes.
+
 		Arguments:
 			pPlayer - the player that is about to be destroyed (read from here)
 			pData - the struct that can store the values across map changes (write to this)
@@ -385,6 +394,10 @@ public:
 
 			And to load the data again you have to also implement
 			OnClientDataRestore()
+
+			WARNING: see the warning section in OnClientDatRestore()
+				 if you override this method and extend it in one gamemode
+				 there will be data corruption on gametype change
 
 		Arguments:
 			pPlayer - the player that is about to be destroyed (write to this)
