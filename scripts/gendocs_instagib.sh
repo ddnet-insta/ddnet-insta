@@ -86,25 +86,26 @@ gen_console_cmds() {
 	local cfg
 	local desc
 	local cmd
+	local ignore_cmd
 	local ignore_list=()
 	while IFS= read -r ignore_cmd; do
 		[[ -n "$ignore_cmd" ]] && ignore_list+=("$ignore_cmd")
 	done < <(get_ignore_list "$header_file")
-
-	local ignore_pattern=""
-	if [ ${#ignore_list[@]} -gt 0 ]; then
-		ignore_pattern="($(
-			IFS='|'
-			echo "${ignore_list[*]}"
-		))"
-	fi
 
 	while read -r cfg; do
 		desc="$(echo "$cfg" | cut -d',' -f3- | cut -d'"' -f2-)"
 		desc="${desc::-2}"
 		cmd="$(echo "$cfg" | cut -d',' -f1 | cut -d'"' -f2)"
 
-		if [[ -z "$ignore_pattern" ]] || ! [[ "$cmd" =~ $ignore_pattern ]]; then
+		local ignore=0
+		for ignore_cmd in "${ignore_list[@]}"; do
+			[[ "$ignore_cmd" = "$cmd" ]] || continue
+
+			ignore=1
+			break
+		done
+
+		if [ "$ignore" = 0 ]; then
 			echo "+ \`$prefix$cmd\` $desc"
 		fi
 	done < <(grep "^$macros_name" "$header_file")
