@@ -1,5 +1,7 @@
 // This file can be included several times.
-// doc gen ignore: ready, pause, pausevoted, specvoted, shuffle, swap, drop, spec, team, lock, unlock, invite, join, team0mode, kill
+// doc gen ignore: pause, spec, pausevoted, specvoted
+// doc gen ignore: swap, team, lock, unlock, invite, join, team0mode, kill
+// doc gen ignore: ready, drop, shuffle
 
 #ifndef CHAT_COMMAND
 #error "The config macros must be defined"
