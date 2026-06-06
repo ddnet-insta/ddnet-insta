@@ -72,7 +72,6 @@ public:
 	void Rainbow(bool Activate);
 	bool HasRainbow() const { return m_Rainbow; }
 
-	const class CPlayer *GetPlayer() const { return m_pPlayer; }
 	int HookedPlayer() const { return m_Core.HookedPlayer(); }
 	CNetObj_PlayerInput GetLatestInput() { return m_LatestInput; }
 	int m_LastHookState = HOOK_IDLE;
