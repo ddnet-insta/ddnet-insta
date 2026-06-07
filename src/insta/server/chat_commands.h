@@ -62,6 +62,17 @@ CHAT_COMMAND("multis", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConMult
 CHAT_COMMAND("steals", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSteals, this, "Shows all time and round fng kill steal stats")
 CHAT_COMMAND("round_top", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRoundTop, this, "Shows the top players of the current round")
 
+CHAT_COMMAND("register", "s[username] s[password] s[repeat password]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRegister, this, "register account")
+CHAT_COMMAND("login", "s[username] s[password]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConLogin, this, "login to account")
+CHAT_COMMAND("logout", "", CFGFLAG_CHAT, ConLogoutAccount, this, "logout account")
+CHAT_COMMAND("changepassword", "s[old password] s[new password] s[new password repeat]", CFGFLAG_CHAT, ConChangePassword, this, "change the password of your account")
+CHAT_COMMAND("claimname", "", CFGFLAG_CHAT, ConClaimName, this, "claim the current nick name so nobody else can use it")
+CHAT_COMMAND("profile", "s[username]", CFGFLAG_CHAT, ConProfile, this, "show a users profile")
+
+#ifdef CONF_DEBUG
+CHAT_COMMAND("slow_account_operation", "", CFGFLAG_CHAT, ConSlowAccountOperation, this, "used to simulate high load for debugging account system stability")
+#endif
+
 // which points to display in scoreboard
 // all time stats are implicit and round stats are specific
 // so "points" is all time stats of players points

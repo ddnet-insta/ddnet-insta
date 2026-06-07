@@ -20,6 +20,7 @@
 #include <game/mapbugs.h>
 #include <game/voting.h>
 
+#include <insta/server/db/accounts_worker/accounts_worker.h> // ddnet-insta
 #include <insta/server/db/insta.h> // ddnet-insta
 #include <insta/server/enums.h> // ddnet-insta
 #include <insta/server/ip_storage.h> // ddnet-insta
@@ -31,6 +32,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_set> // ddnet-insta unclaimable names
 #include <vector> // ddnet-insta map pool
 
 // ddnet-insta

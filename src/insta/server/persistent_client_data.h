@@ -3,6 +3,8 @@
 
 #include <base/types.h>
 
+#include <insta/server/account.h>
+#include <insta/server/display_name.h>
 #include <insta/server/sql_stats_player.h>
 
 #include <cstdint>
@@ -17,6 +19,9 @@ public:
 
 	NETADDR m_Addr;
 	CSqlStatsPlayer m_SessionStats;
+	CDisplayName m_DisplayName;
+	CAccount m_Account;
+	int m_FirstJoinTime;
 
 	//
 	//  Add custom members for mods below this comment to avoid merge conflicts.
