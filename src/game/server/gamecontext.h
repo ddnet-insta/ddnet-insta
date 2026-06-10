@@ -198,8 +198,9 @@ class CGameContext : public IGameServer
 	void AddVote(const char *pDescription, const char *pCommand);
 	static int MapScan(const char *pName, int IsDir, int DirType, void *pUserData);
 
-	struct CPersistentData
+	class CPersistentData
 	{
+	public:
 		// ddnet-insta
 		CInstaPersistentData m_Insta;
 
@@ -207,8 +208,9 @@ class CGameContext : public IGameServer
 		CUuid m_PrevGameUuid;
 	};
 
-	struct CPersistentClientData
+	class CPersistentClientData
 	{
+	public:
 		// ddnet-insta
 		CInstaPersistentClientData m_Insta;
 

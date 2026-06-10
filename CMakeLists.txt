@@ -683,7 +683,7 @@ if(DISCORD_DYNAMIC)
     message(SEND_ERROR "You must enable the DISCORD flag if you want to link the Discord SDK")
   endif()
 endif()
-if(NOT(PNG_FOUND))
+if((CLIENT OR TOOLS) AND NOT(PNG_FOUND))
   message(SEND_ERROR "You must install libpng to compile ${CMAKE_PROJECT_NAME}")
 endif()
 if(CLIENT AND NOT(FREETYPE_FOUND))
@@ -3247,6 +3247,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     compression_test.cpp
     csv_test.cpp
     datafile_test.cpp
+    dbg_test.cpp
     editor_test.cpp
     fs_test.cpp
     gameworld_test.cpp

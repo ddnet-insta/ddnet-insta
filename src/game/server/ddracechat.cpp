@@ -603,7 +603,7 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pSelf->Server()->SetTimeoutProtected(pResult->m_ClientId);
-	str_copy(pPlayer->m_aTimeoutCode, pResult->GetString(0), sizeof(pPlayer->m_aTimeoutCode));
+	str_copy(pPlayer->m_aTimeoutCode, pResult->GetString(0));
 }
 
 void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
@@ -1539,7 +1539,7 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
-		str_copy(aBufName, "Your", sizeof(aBufName));
+		str_copy(aBufName, "Your");
 		ClientId = pResult->m_ClientId;
 	}
 
