@@ -1171,6 +1171,7 @@ bool CGameControllerInstaCore::OnSkinChange7(protocol7::CNetMsg_Cl_SkinChange *p
 
 void CGameControllerInstaCore::OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPersistentClientData *pData)
 {
+	str_copy(pData->m_Insta.m_aGameType, m_pGameType);
 	pData->m_Insta.m_Addr = *Server()->ClientAddr(pPlayer->GetCid());
 	pData->m_Insta.m_SessionStats = pPlayer->m_SessionStats;
 	pData->m_Insta.m_SessionStats.Merge(&pPlayer->m_Stats);
@@ -1178,6 +1179,30 @@ void CGameControllerInstaCore::OnClientDataPersist(CPlayer *pPlayer, CGameContex
 
 void CGameControllerInstaCore::OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData)
 {
+	// we can not load any data if the previous controller was pure ddnet which
+	// persisted no data at all
+	//
+	// https://github.com/ddnet-insta/ddnet-insta/issues/669
+	if(pData->m_Insta.m_aGameType[0] == '\0')
+		return;
+	if(str_comp(pData->m_Insta.m_aGameType, m_pGameType))
+	{
+		// instead of doing a useless warning log that will never be printed here
+		// we can try to whitelist compatible gametypes somehow
+		// so that adding a new gametype will always print this
+		//
+		// but also that is a bit weird. Actually this should be printed
+		// as soon as the controller did override the persist or restore method.
+		// Not sure if that is technically possible.
+		if(g_Config.m_Debug)
+		{
+			log_warn(
+				"ddnet-insta",
+				"warning data persisted by '%s' is now loaded by '%s'",
+				pData->m_Insta.m_aGameType,
+				m_pGameType);
+		}
+	}
 	// https://github.com/ddnet-insta/ddnet-insta/issues/192
 	// https://github.com/ddnet-insta/ddnet-insta/pull/264#issuecomment-2647909642
 	//
@@ -1212,6 +1237,31 @@ void CGameControllerInstaCore::OnDataPersist(CGameContext::CPersistentData *pDat
 
 void CGameControllerInstaCore::OnDataRestore(const CGameContext::CPersistentData *pData)
 {
+	// we can not load any data if the previous controller was pure ddnet which
+	// persisted no data at all
+	//
+	// https://github.com/ddnet-insta/ddnet-insta/issues/669
+	if(pData->m_Insta.m_aGameType[0] == '\0')
+		return;
+	if(str_comp(pData->m_Insta.m_aGameType, m_pGameType))
+	{
+		// instead of doing a useless warning log that will never be printed here
+		// we can try to whitelist compatible gametypes somehow
+		// so that adding a new gametype will always print this
+		//
+		// but also that is a bit weird. Actually this should be printed
+		// as soon as the controller did override the persist or restore method.
+		// Not sure if that is technically possible.
+		if(g_Config.m_Debug)
+		{
+			log_warn(
+				"ddnet-insta",
+				"warning data persisted by '%s' is now loaded by '%s'",
+				pData->m_Insta.m_aGameType,
+				m_pGameType);
+		}
+	}
+
 	str_copy(GameServer()->m_aGameType, pData->m_Insta.m_aGameType);
 }
 

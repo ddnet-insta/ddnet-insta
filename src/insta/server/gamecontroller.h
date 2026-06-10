@@ -366,6 +366,18 @@ public:
 			And to load the data again you have to also implement
 			OnClientDataRestore()
 
+			See also OnDataPersist() if you want to store more global server state
+			instead of player specific data
+
+			WARNING: be careful if you store gametype specific data here.
+				 if the server changes gametype at runtime with players connected
+				 by running the rcon command "sv_gametype xyz;reload"
+				 the data persistence and loading will be handled by two different
+				 gametype controllers! So there will be data corruption unless
+				 you explicitly handle that case!
+				 So adding new data here should ideally be done in the insta core controller
+				 or in the core controller of your fork which is used for all modes.
+
 		Arguments:
 			pPlayer - the player that is about to be destroyed (read from here)
 			pData - the struct that can store the values across map changes (write to this)
@@ -374,17 +386,11 @@ public:
 
 	/*
 		Function: OnClientDataRestore
-			Will be called on map load. But only for players
-			that have persisted data from the last map change.
+			Counter part to OnClientDataPersist()
 
-			Will be called before map changes.
-			Store your data here that you want to keep across map changes.
-			To extended the data struct have a look at the file
-
-			src/game/server/instagib/persistent_client_data.h
-
-			And to load the data again you have to also implement
-			OnClientDataRestore()
+			WARNING: see the warning section in OnClientDataPersist()
+				 if you override this method and extend it in one gamemode
+				 there will be data corruption on gametype change
 
 		Arguments:
 			pPlayer - the player that is about to be destroyed (write to this)
@@ -392,7 +398,44 @@ public:
 	*/
 	virtual void OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData) {}
 
+	/*
+		Function: OnClientDataPersist
+			Will be called before map changes.
+			Store your data here that you want to keep across map changes.
+			To extended the data struct have a look at the file
+
+			src/game/server/instagib/persistent_data.h
+
+			And to load the data again you have to also implement
+			OnDataRestore()
+
+			See also OnClientDataPersist() if you want to store player specific data
+
+			WARNING: be careful if you store gametype specific data here.
+				 if the server changes gametype at runtime with players connected
+				 by running the rcon command "sv_gametype xyz;reload"
+				 the data persistence and loading will be handled by two different
+				 gametype controllers! So there will be data corruption unless
+				 you explicitly handle that case!
+				 So adding new data here should ideally be done in the insta core controller
+				 or in the core controller of your fork which is used for all modes.
+
+		Arguments:
+			pData - the struct that can store the values across map changes (write to this)
+	*/
 	virtual void OnDataPersist(CGameContext::CPersistentData *pData) {}
+
+	/*
+		Function: OnDataRestore
+			Counter part to OnDataPersist()
+
+			WARNING: see the warning section in OnDataPersist()
+				 if you override this method and extend it in one gamemode
+				 there will be data corruption on gametype change
+
+		Arguments:
+			pData - the struct that can store the values across map changes (read from here)
+	*/
 	virtual void OnDataRestore(const CGameContext::CPersistentData *pData) {}
 
 	/*
