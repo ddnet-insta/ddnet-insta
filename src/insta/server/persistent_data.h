@@ -9,6 +9,14 @@ public:
 	// virtual void OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPersistentClientData *pData) {};
 	// virtual void OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData) {};
 
+	// This has dual use:
+	// - It is used to persist the CGameContext::m_aGameType variable across gametype changes
+	//   do detectect gametype changes and call the controller hook OnGameTypeChange()
+	// - It is used to detect potential incompatibilities between the stored data and the current
+	//   controller loading it.
+	//   For example the pure ddnet gametype does not persist any ddnet-insta data
+	//   so we can not load the uninitialized data when changing gametype from ddnet to a ddnet-insta mode
+	//   https://github.com/ddnet-insta/ddnet-insta/issues/669
 	char m_aGameType[512] = "";
 
 	//
