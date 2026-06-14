@@ -34,7 +34,7 @@ CDbInsta::CDbInsta(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 bool CDbInsta::RateLimitPlayer(int ClientId)
 {
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
-	if(pPlayer == 0)
+	if(pPlayer == nullptr)
 		return true;
 	if(pPlayer->m_LastSqlQuery + (int64_t)g_Config.m_SvSqlQueriesDelay * Server()->TickSpeed() >= Server()->Tick())
 		return true;

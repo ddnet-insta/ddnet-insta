@@ -516,7 +516,7 @@ void IGameController::ResetGame()
 		if(!pPlayer)
 			continue;
 
-		pPlayer->m_HasGhostCharInGame = pPlayer->GetCharacter() != 0;
+		pPlayer->m_HasGhostCharInGame = pPlayer->GetCharacter() != nullptr;
 	}
 	GameServer()->m_World.m_ResetRequested = true;
 }

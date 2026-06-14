@@ -438,7 +438,7 @@ bool CGameControllerBasePvp::IsLoser(const CPlayer *pPlayer)
 	if(pPlayer->GetTeam() == TEAM_SPECTATORS)
 		return false;
 
-	return !IsWinner(pPlayer, 0, 0);
+	return !IsWinner(pPlayer, nullptr, 0);
 }
 
 int CGameControllerBasePvp::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)

@@ -15,7 +15,7 @@ CFlag::CFlag(CGameWorld *pGameWorld, int Team) :
 {
 	m_IsGrounded = true;
 	m_Team = Team;
-	m_pCarrier = NULL;
+	m_pCarrier = nullptr;
 	m_GrabTick = 0;
 
 	Reset();
@@ -60,7 +60,7 @@ void CFlag::Grab(CCharacter *pChar)
 void CFlag::Drop(vec2 Direction)
 {
 	m_pLastCarrier = m_pCarrier;
-	m_pCarrier = 0;
+	m_pCarrier = nullptr;
 	m_Vel = Direction;
 	m_DropTick = Server()->Tick();
 }

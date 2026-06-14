@@ -90,7 +90,7 @@ int CGameControllerBaseCTF::OnCharacterDeath(class CCharacter *pVictim, class CP
 			HadFlag |= 1;
 		}
 		if(pFlag && pFlag->GetCarrier() == pVictim)
-			pFlag->SetCarrier(0);
+			pFlag->SetCarrier(nullptr);
 	}
 
 	return HadFlag;

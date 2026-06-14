@@ -659,7 +659,7 @@ bool CGameControllerZcatch::DoWincheckRound()
 				continue;
 
 			// this player ended the round
-			if(IsWinner(pPlayer, 0, 0))
+			if(IsWinner(pPlayer, nullptr, 0))
 			{
 				char aBuf[512];
 				int WinPoints = WinPointsForWin(pPlayer);
