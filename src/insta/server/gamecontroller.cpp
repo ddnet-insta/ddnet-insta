@@ -796,7 +796,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 				if(!pPlayer)
 					continue;
 
-				pPlayer->m_HasGhostCharInGame = pPlayer->GetCharacter() != 0;
+				pPlayer->m_HasGhostCharInGame = pPlayer->GetCharacter() != nullptr;
 			}
 
 			if(Timer != 0)

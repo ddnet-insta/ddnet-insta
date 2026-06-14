@@ -720,7 +720,7 @@ void CGameContext::UpdateVoteCheckboxes() const
 		return;
 
 	CVoteOptionServer *pCurrent = m_pVoteOptionFirst;
-	while(pCurrent != NULL)
+	while(pCurrent != nullptr)
 	{
 		if(str_startswith(pCurrent->m_aDescription, "[ ]") || str_startswith(pCurrent->m_aDescription, "[x]"))
 		{

@@ -56,7 +56,7 @@ void CVanillaPickup::Tick()
 	}
 
 	// Check if a player intersected us
-	CCharacter *pChr = GameWorld()->ClosestCharacter(m_Pos, GetProximityRadius() + ms_CollisionExtraSize, 0);
+	CCharacter *pChr = GameWorld()->ClosestCharacter(m_Pos, GetProximityRadius() + ms_CollisionExtraSize, nullptr);
 	if(pChr && pChr->IsAlive())
 	{
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChr->Team()])
