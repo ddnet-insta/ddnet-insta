@@ -10,6 +10,7 @@ class CExtraColumns
 {
 public:
 	virtual ~CExtraColumns() = default;
+	virtual CExtraColumns *Clone() const = 0;
 
 	/*
 		CreateTable

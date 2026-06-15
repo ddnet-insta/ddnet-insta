@@ -104,6 +104,9 @@ class CSkinInfoManager
 
 	CSkinOverrideRequest m_aOverrideRequests[(int)ESkinPrio::NUM_SKINPRIOS];
 
+	CTeeInfo m_TeeInfoCached;
+	bool m_IsTeeInfoCached = false;
+
 public:
 	bool NeedsNetMessage7();
 	void OnSendNetMessage7();

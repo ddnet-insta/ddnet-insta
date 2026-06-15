@@ -97,4 +97,9 @@ public:
 #include SQL_COLUMN_FILE
 #undef MACRO_ADD_COLUMN
 	}
+
+	CExtraColumns *Clone() const override
+	{
+		return new SQL_COLUMN_CLASS(*this);
+	}
 };

@@ -78,8 +78,7 @@ void CSqlStats::ExecPlayerStatsThread(
 
 	if(m_pExtraColumns)
 	{
-		Tmp->m_pExtraColumns = (CExtraColumns *)malloc(sizeof(CExtraColumns));
-		mem_copy(Tmp->m_pExtraColumns, m_pExtraColumns, sizeof(CExtraColumns));
+		Tmp->m_pExtraColumns = m_pExtraColumns->Clone();
 		if(g_Config.m_SvDebugStats > 1)
 			dbg_msg("sql", "allocated memory at %p", Tmp->m_pExtraColumns);
 	}
@@ -112,8 +111,7 @@ void CSqlStats::ExecPlayerRankOrTopThread(
 
 	if(m_pExtraColumns)
 	{
-		Tmp->m_pExtraColumns = (CExtraColumns *)malloc(sizeof(CExtraColumns));
-		mem_copy(Tmp->m_pExtraColumns, m_pExtraColumns, sizeof(CExtraColumns));
+		Tmp->m_pExtraColumns = m_pExtraColumns->Clone();
 		if(g_Config.m_SvDebugStats > 1)
 			dbg_msg("sql", "allocated memory at %p", Tmp->m_pExtraColumns);
 	}
@@ -170,7 +168,7 @@ CSqlInstaData::~CSqlInstaData()
 	{
 		if(m_DebugStats > 1)
 			dbg_msg("sql-thread", "free memory at %p", m_pExtraColumns);
-		free(m_pExtraColumns);
+		delete m_pExtraColumns;
 		m_pExtraColumns = nullptr;
 	}
 }
@@ -285,8 +283,7 @@ void CSqlStats::SaveRoundStats(const char *pName, const char *pTable, CSqlStatsP
 
 	if(m_pExtraColumns)
 	{
-		Tmp->m_pExtraColumns = (CExtraColumns *)malloc(sizeof(CExtraColumns));
-		mem_copy(Tmp->m_pExtraColumns, m_pExtraColumns, sizeof(CExtraColumns));
+		Tmp->m_pExtraColumns = m_pExtraColumns->Clone();
 		if(g_Config.m_SvDebugStats > 1)
 			dbg_msg("sql", "allocated memory at %p", Tmp->m_pExtraColumns);
 	}

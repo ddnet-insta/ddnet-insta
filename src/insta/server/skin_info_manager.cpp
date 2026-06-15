@@ -58,46 +58,55 @@ void CSkinInfoManager::OnSendNetMessage7()
 void CSkinInfoManager::SetUserChoice(CTeeInfo Info)
 {
 	m_TeeInfoUserChoice = Info;
+	m_IsTeeInfoCached = false;
 }
 
 void CSkinInfoManager::SetSkinName(ESkinPrio Priority, const char *pSkinName)
 {
 	m_aOverrideRequests[(int)Priority].m_SkinName = std::string(pSkinName);
+	m_IsTeeInfoCached = false;
 }
 
 void CSkinInfoManager::UnsetSkinName(ESkinPrio Priority)
 {
 	m_aOverrideRequests[(int)Priority].m_SkinName = std::nullopt;
+	m_IsTeeInfoCached = false;
 }
 
 void CSkinInfoManager::SetColorBody(ESkinPrio Priority, int Color)
 {
 	m_aOverrideRequests[(int)Priority].m_ColorBody = Color;
+	m_IsTeeInfoCached = false;
 }
 
 void CSkinInfoManager::UnsetColorBody(ESkinPrio Priority)
 {
 	m_aOverrideRequests[(int)Priority].m_ColorBody = std::nullopt;
+	m_IsTeeInfoCached = false;
 }
 
 void CSkinInfoManager::SetColorFeet(ESkinPrio Priority, int Color)
 {
 	m_aOverrideRequests[(int)Priority].m_ColorFeet = Color;
+	m_IsTeeInfoCached = false;
 }
 
 void CSkinInfoManager::UnsetColorFeet(ESkinPrio Priority)
 {
 	m_aOverrideRequests[(int)Priority].m_ColorFeet = std::nullopt;
+	m_IsTeeInfoCached = false;
 }
 
 void CSkinInfoManager::SetUseCustomColor(ESkinPrio Priority, bool Value)
 {
 	m_aOverrideRequests[(int)Priority].m_UseCustomColor = Value;
+	m_IsTeeInfoCached = false;
 }
 
 void CSkinInfoManager::UnsetUseCustomColor(ESkinPrio Priority)
 {
 	m_aOverrideRequests[(int)Priority].m_UseCustomColor = std::nullopt;
+	m_IsTeeInfoCached = false;
 }
 
 void CSkinInfoManager::UnsetAll(ESkinPrio Priority)
@@ -106,6 +115,7 @@ void CSkinInfoManager::UnsetAll(ESkinPrio Priority)
 	UnsetColorBody(Priority);
 	UnsetColorFeet(Priority);
 	UnsetUseCustomColor(Priority);
+	m_IsTeeInfoCached = false;
 }
 
 void CSkinInfoManager::SkinName(char *pSkinNameOut, int SizeOfSkinNameOut)
@@ -199,7 +209,9 @@ ESkinPrio CSkinInfoManager::UseCustomColorPriority()
 
 CTeeInfo CSkinInfoManager::TeeInfo()
 {
-	// TODO: cache this
+	if(m_IsTeeInfoCached)
+		return m_TeeInfoCached;
+
 	CTeeInfo Info = m_TeeInfoUserChoice;
 
 	// 0.6
@@ -254,5 +266,7 @@ CTeeInfo CSkinInfoManager::TeeInfo()
 			PartUseCustomColor = UseCustomColor();
 	}
 
+	m_TeeInfoCached = Info;
+	m_IsTeeInfoCached = true;
 	return Info;
 }
