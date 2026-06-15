@@ -65,7 +65,8 @@ void CDeadSpecController::OnPlayerConnect(CPlayer *pPlayer)
 
 void CDeadSpecController::OnPlayerDisconnect(CPlayer *pPlayer)
 {
-	dbg_assert(m_apPlayers[pPlayer->GetCid()], "dead spec slot for cid=%d is not set", pPlayer->GetCid());
+	if(!m_apPlayers[pPlayer->GetCid()])
+		return;
 	delete m_apPlayers[pPlayer->GetCid()];
 	m_apPlayers[pPlayer->GetCid()] = nullptr;
 }
