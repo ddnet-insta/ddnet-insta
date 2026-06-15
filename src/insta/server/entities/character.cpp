@@ -68,11 +68,7 @@ float CCharacter::DistToTouchingTile(int Tile)
 		{
 			if((Collision()->GetIndex(PosX, PosY) == Tile))
 			{
-				vec2 TileCenter = vec2(PosX, PosY);
-				TileCenter.x *= 32;
-				TileCenter.y *= 32;
-				TileCenter.x += 16;
-				TileCenter.y += 16;
+				vec2 TileCenter = vec2(PosX * 32 + 16, PosY * 32 + 16);
 				float Dist = distance(TileCenter, TeeCenter);
 				if(Dist < ClosestDistance)
 					ClosestDistance = Dist;
@@ -89,9 +85,7 @@ float CCharacter::DistToTouchingTile(int Tile)
 		{
 			if((Collision()->GetFrontIndex(PosX, PosY) == Tile))
 			{
-				vec2 TileCenter = vec2(PosX / 32, PosY / 32);
-				TileCenter.x += 16;
-				TileCenter.y += 16;
+				vec2 TileCenter = vec2(PosX * 32 + 16, PosY * 32 + 16);
 				float Dist = distance(TileCenter, TeeCenter);
 				if(Dist < ClosestDistance)
 					ClosestDistance = Dist;
