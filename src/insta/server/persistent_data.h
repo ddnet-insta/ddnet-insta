@@ -1,6 +1,8 @@
 #ifndef INSTA_SERVER_PERSISTENT_DATA_H
 #define INSTA_SERVER_PERSISTENT_DATA_H
 
+#include <insta/server/config_enums.h>
+
 class CInstaPersistentData
 {
 public:
@@ -18,6 +20,8 @@ public:
 	//   so we can not load the uninitialized data when changing gametype from ddnet to a ddnet-insta mode
 	//   https://github.com/ddnet-insta/ddnet-insta/issues/669
 	char m_aGameType[512] = "";
+
+	CConfigEnums m_ConfigEnums;
 
 	//
 	//  Add custom members for mods below this comment to avoid merge conflicts.

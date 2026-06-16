@@ -1233,6 +1233,7 @@ void CGameControllerInstaCore::OnClientDataRestore(CPlayer *pPlayer, const CGame
 void CGameControllerInstaCore::OnDataPersist(CGameContext::CPersistentData *pData)
 {
 	str_copy(pData->m_Insta.m_aGameType, GameServer()->m_aGameType);
+	pData->m_Insta.m_ConfigEnums = *GameServer()->ConfigEnums();
 }
 
 void CGameControllerInstaCore::OnDataRestore(const CGameContext::CPersistentData *pData)
@@ -1263,6 +1264,7 @@ void CGameControllerInstaCore::OnDataRestore(const CGameContext::CPersistentData
 	}
 
 	str_copy(GameServer()->m_aGameType, pData->m_Insta.m_aGameType);
+	GameServer()->LoadConfigEnums(&pData->m_Insta.m_ConfigEnums);
 }
 
 // called on round init and on join

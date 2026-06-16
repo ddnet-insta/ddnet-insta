@@ -1750,6 +1750,7 @@ public:
 	// it is safe to pass in any ClientId
 	// returned value might be null
 	CPlayer *GetPlayerOrNullptr(int ClientId) const;
+	const class CConfigEnums *ConfigEnums() const;
 
 	// only used in ctf gametypes
 	class CFlag *m_apFlags[NUM_FLAGS];
