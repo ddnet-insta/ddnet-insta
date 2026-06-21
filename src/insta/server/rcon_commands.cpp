@@ -405,3 +405,18 @@ void CGameContext::ConInstaRestart(IConsole::IResult *pResult, void *pUserData)
 	else
 		pSelf->m_pController->DoWarmup(Seconds);
 }
+
+void CGameContext::ConDumpCoords(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->GetVictim();
+
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if(!pChr)
+		return;
+
+	const vec2 Pos = pChr->GetPos();
+	const float X = Pos.x / 32.0f;
+	const float Y = Pos.y / 32.0f;
+	log_info("game", "coords id=%d name='%s' x=%.2f y=%.2f", Victim, pSelf->Server()->ClientName(Victim), X, Y);
+}

@@ -165,3 +165,4 @@ MACRO_CONFIG_STR(SvMysteryRoundsResetFileName, sv_mystery_rounds_reset_filename,
 MACRO_CONFIG_INT(SvShuffleOnRoundStart, sv_shuffle_on_round_start, 0, 0, 1, CFGFLAG_SERVER, "Should teams of players be re-assigned each round")
 MACRO_CONFIG_INT(SvKillIndicator, sv_kill_indicator, 0, 0, 1, CFGFLAG_SERVER, "Shows the killer that he froze the player(only fng for now)")
 MACRO_CONFIG_INT(SvDeathrateThreshold, sv_deathrate_threshold, 5, 0, 30, CFGFLAG_SERVER, "Death frequency threshold per second. If the player dies more often, their saved training checkpoint is removed (0 = disabled)")
+MACRO_CONFIG_INT(SvLogCoordsOnDeath, sv_log_coords_on_death, 0, 0, 1, CFGFLAG_SERVER, "Log player coordinates on death to the server console")

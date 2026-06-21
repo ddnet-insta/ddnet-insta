@@ -140,6 +140,20 @@ void IGameController::LogKillMessage(CCharacter *pVictim, int Killer, int Weapon
 			Killer, Server()->ClientName(Killer),
 			pVictim->GetPlayer()->GetCid(), Server()->ClientName(pVictim->GetPlayer()->GetCid()), Weapon, ModeSpecial);
 	}
+
+	if(Config()->m_SvLogCoordsOnDeath)
+	{
+		const vec2 Pos = pVictim->GetPos();
+		const float X = Pos.x / 32.0f;
+		const float Y = Pos.y / 32.0f;
+		log_info(
+			"game",
+			"id=%d name='%s' died at x=%.2f y=%.2f",
+			pVictim->GetPlayer()->GetCid(),
+			Server()->ClientName(pVictim->GetPlayer()->GetCid()),
+			X,
+			Y);
+	}
 }
 
 int IGameController::SnapRoundStartTick(int SnappingClient)
