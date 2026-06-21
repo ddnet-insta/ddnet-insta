@@ -155,6 +155,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_shuffle_on_round_start` Should teams of players be re-assigned each round
 + `sv_kill_indicator` Shows the killer that he froze the player(only fng for now)
 + `sv_deathrate_threshold` Death frequency threshold per second. If the player dies more often, their saved training checkpoint is removed (0 = disabled)
++ `sv_log_coords_on_death` Log player coordinates on death to the server console
 + `sv_spawn_weapons` possible values: grenade, laser
 + `sv_zcatch_colors` Color scheme for zCatch options: teetime, savander
 + `sv_display_score` values: points, round_points, spree, current_spree, win_points, wins, kills, round_kills
@@ -194,6 +195,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `known_antibot` runs the antibot command known (depends on antibob antibot module)
 + `kick_events_antibot` runs the antibot command kick_events (depends on antibob antibot module)
 + `redirect` Redirect client to given port use victim \"all\" to redirect all but your self
++ `dump_coords` Dump coordinates of a player or all players
 + `deep_jailid` deep freeze (undeep tile works) will be restored on respawn and reconnect
 + `deep_jailip` deep freeze (undeep tile works) will be restored on respawn and reconnect
 + `deep_jails` list all perma deeped players deeped by deep_jailid and deep_jailip commands

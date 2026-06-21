@@ -140,6 +140,7 @@ public:
 	static void ConDeepJailIp(IConsole::IResult *pResult, void *pUserData);
 	static void ConDeepJails(IConsole::IResult *pResult, void *pUserData);
 	static void ConUndeepJail(IConsole::IResult *pResult, void *pUserData);
+	static void ConDumpCoords(IConsole::IResult *pResult, void *pUserData);
 	static void ConInstaPause(IConsole::IResult *pResult, void *pUserData);
 	static void ConInstaRestart(IConsole::IResult *pResult, void *pUserData);
 

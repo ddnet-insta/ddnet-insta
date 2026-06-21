@@ -45,6 +45,7 @@ CONSOLE_COMMAND("known_antibot", "", CFGFLAG_SERVER, ConKnownAntibot, this, "run
 CONSOLE_COMMAND("kick_events_antibot", "s[comma sep event ids]", CFGFLAG_SERVER, ConKickEventsAntibot, this, "runs the antibot command kick_events (depends on antibob antibot module)")
 
 CONSOLE_COMMAND("redirect", "v[victim] i[port]", CFGFLAG_SERVER, CServer::ConRedirect, Server(), "Redirect client to given port use victim \"all\" to redirect all but your self")
+CONSOLE_COMMAND("dump_coords", "v[victim]", CFGFLAG_SERVER, ConDumpCoords, this, "Dump coordinates of a player or all players")
 CONSOLE_COMMAND("deep_jailid", "v[victim] i[minutes]", CFGFLAG_SERVER, ConDeepJailId, this, "deep freeze (undeep tile works) will be restored on respawn and reconnect")
 CONSOLE_COMMAND("deep_jailip", "s[ip] i[minutes]", CFGFLAG_SERVER, ConDeepJailIp, this, "deep freeze (undeep tile works) will be restored on respawn and reconnect")
 CONSOLE_COMMAND("deep_jails", "", CFGFLAG_SERVER, ConDeepJails, this, "list all perma deeped players deeped by deep_jailid and deep_jailip commands")
