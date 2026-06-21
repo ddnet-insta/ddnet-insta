@@ -145,6 +145,7 @@ MACRO_CONFIG_INT(SvPublishLiveStats, sv_publish_live_stats, 0, 0, 1, CFGFLAG_SER
 MACRO_CONFIG_INT(SvLiveStatsInterval, sv_live_stats_interval, 3, 1, 60, CFGFLAG_SERVER, "minimum delay in seconds between stats republish if sv_publish_live_stats is on")
 MACRO_CONFIG_STR(SvRaceStatsHttpEndpoints, sv_race_stats_http_endpoints, 512, "", CFGFLAG_SERVER, "publish stats on finish for each player individually")
 MACRO_CONFIG_INT(SvClearStatsOnRaceStart, sv_clear_stats_on_race_start, 0, 0, 1, CFGFLAG_SERVER, "Delete players round stats without saving them when touching the start line")
+MACRO_CONFIG_INT(SvLogRaceStart, sv_log_race_start, 0, 0, 1, CFGFLAG_SERVER, "Log in console when a player or team starts the race")
 MACRO_CONFIG_INT(SvKillTileDestroysBall, sv_kill_tile_destroys_ball, 0, 0, 1, CFGFLAG_SERVER, "Destroy the ball when it touches death tile (only foot)")
 MACRO_CONFIG_INT(SvBallBounceFriction, sv_ball_bounce_friction, 50, 0, 100000, CFGFLAG_SERVER, "The ball looses that much speed after a bounce (only foot)")
 MACRO_CONFIG_INT(SvBallExplode, sv_ball_explode, 0, 0, 1, CFGFLAG_SERVER, "Should the grenades explode (only foot)")
