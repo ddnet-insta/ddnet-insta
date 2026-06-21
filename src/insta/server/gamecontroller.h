@@ -747,7 +747,7 @@ public:
 		Returns:
 			return true to not run the ddnet code and abort the start
 	*/
-	virtual bool OnRaceStart(int ClientId) { return false; }
+	virtual bool OnRaceStart(int ClientId);
 
 	/*
 		Function: OnChangeInfoNetMessage

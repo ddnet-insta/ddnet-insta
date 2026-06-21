@@ -944,3 +944,74 @@ void IGameController::OnCreditsChatCmd(IConsole::IResult *pResult, void *pUserDa
 {
 	CGameContext::ConCredits(pResult, pUserData);
 }
+
+bool IGameController::OnRaceStart(int ClientId)
+{
+	if(!g_Config.m_SvLogRaceStart)
+		return false;
+
+	CPlayer *pPlayer = GetPlayerOrNullptr(ClientId);
+	if(!pPlayer)
+		return false;
+
+	const int Team = GameServer()->GetDDRaceTeam(ClientId);
+	if(Team == TEAM_SUPER)
+		return false;
+
+	if(Team == TEAM_FLOCK)
+	{
+		if(Teams().GetDDRaceState(pPlayer) != ERaceState::STARTED)
+		{
+			log_info("game", "'%s' has started the race.", Server()->ClientName(ClientId));
+		}
+		return false;
+	}
+
+	if(Teams().GetTeamState(Team) >= ETeamState::STARTED)
+		return false;
+
+	int aTeamMembers[MAX_CLIENTS];
+	int NumMembers = 0;
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		CPlayer *pMember = GetPlayerOrNullptr(i);
+		if(pMember && pMember->IsPlaying() && GameServer()->GetDDRaceTeam(i) == Team)
+		{
+			aTeamMembers[NumMembers++] = i;
+		}
+	}
+
+	if(NumMembers == 0)
+		return false;
+
+	if(NumMembers == 1)
+	{
+		log_info("game", "'%s' has started the race.", Server()->ClientName(aTeamMembers[0]));
+		return false;
+	}
+
+	char aNamesBuf[MAX_CLIENTS * (MAX_NAME_LENGTH + 3)] = "";
+	for(int i = 0; i < NumMembers; ++i)
+	{
+		char aFormattedName[MAX_NAME_LENGTH + 2];
+		str_format(aFormattedName, sizeof(aFormattedName), "'%s'", Server()->ClientName(aTeamMembers[i]));
+
+		if(i == 0)
+		{
+			str_copy(aNamesBuf, aFormattedName);
+		}
+		else if(i == NumMembers - 1)
+		{
+			str_append(aNamesBuf, " & ");
+			str_append(aNamesBuf, aFormattedName);
+		}
+		else
+		{
+			str_append(aNamesBuf, ", ");
+			str_append(aNamesBuf, aFormattedName);
+		}
+	}
+
+	log_info("game", "%s has started the race in team %d", aNamesBuf, Team);
+	return false;
+}

@@ -137,6 +137,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_publish_live_stats` publish the round stats before the round ends as soon as the score changes
 + `sv_live_stats_interval` minimum delay in seconds between stats republish if sv_publish_live_stats is on
 + `sv_clear_stats_on_race_start` Delete players round stats without saving them when touching the start line
++ `sv_log_race_start` Log in console when a player or team starts the race
 + `sv_kill_tile_destroys_ball` Destroy the ball when it touches death tile (only foot)
 + `sv_ball_bounce_friction` The ball looses that much speed after a bounce (only foot)
 + `sv_ball_explode` Should the grenades explode (only foot)

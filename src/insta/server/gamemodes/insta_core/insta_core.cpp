@@ -1611,7 +1611,7 @@ bool CGameControllerInstaCore::OnRaceStart(int ClientId)
 		if(pPlayer)
 			pPlayer->ResetStats();
 	}
-	return false;
+	return IGameController::OnRaceStart(ClientId);
 }
 
 bool CGameControllerInstaCore::IsPlaying(const CPlayer *pPlayer)
