@@ -11,7 +11,7 @@
 
 int CGameControllerZcatch::GetBodyColorTeetime(int Kills)
 {
-	return (maximum(0, 160 - (Kills * 10)) * 0x010000) + 0xff00;
+	return (std::max(0, 160 - (Kills * 10)) * 0x010000) + 0xff00;
 }
 
 int CGameControllerZcatch::GetBodyColorSavander(int Kills)

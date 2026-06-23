@@ -462,7 +462,7 @@ bool CSqlStats::ShowTopWorker(IDbConnection *pSqlServer, const ISqlData *pGameDa
 
 	auto *paMessages = pResult->m_aaMessages;
 
-	int LimitStart = maximum(absolute(pData->m_Offset) - 1, 0);
+	int LimitStart = std::max(absolute(pData->m_Offset) - 1, 0);
 	const char *pOrder = pData->m_Offset >= 0 ? "DESC" : "ASC";
 
 	char aBuf[512];
@@ -511,7 +511,7 @@ bool CSqlStats::ShowFastcapTopWorker(IDbConnection *pSqlServer, const ISqlData *
 	const auto *pData = dynamic_cast<const CSqlPlayerFastcapRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CInstaSqlResult *>(pGameData->m_pResult.get());
 
-	int LimitStart = maximum(absolute(pData->m_Offset) - 1, 0);
+	int LimitStart = std::max(absolute(pData->m_Offset) - 1, 0);
 	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
 
 	if(pData->m_OnlyStatTrack)

@@ -124,7 +124,7 @@ void CCharacter::AmmoRegen()
 			if((Server()->Tick() - m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart) >= AmmoRegenTime * Server()->TickSpeed() / 1000)
 			{
 				// Add some ammo
-				m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo = minimum(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo + 1, MaxAmmo);
+				m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo = std::min(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo + 1, MaxAmmo);
 				m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
 			}
 		}

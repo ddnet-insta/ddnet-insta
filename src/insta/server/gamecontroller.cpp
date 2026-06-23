@@ -217,7 +217,7 @@ int IGameController::FreeInGameSlots()
 
 	int Players = m_aTeamSize[TEAM_RED] + m_aTeamSize[TEAM_BLUE];
 	int Slots = Server()->MaxClients() - g_Config.m_SvSpectatorSlots;
-	return maximum(0, Slots - Players);
+	return std::max(0, Slots - Players);
 }
 
 bool IGameController::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId)

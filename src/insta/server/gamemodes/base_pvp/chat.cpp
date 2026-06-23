@@ -334,7 +334,7 @@ bool CGameControllerBasePvp::IsChatBlocked(const CNetMsg_Cl_Say *pMsg, int Lengt
 	// to cover those cases.
 	// It should still filter out the reconnecting spam bots.
 	int SecondsConnected = (time_get() - pPlayer->m_JoinTime) / time_freq();
-	int SecondsUntilAllowed = maximum(0, 20 - SecondsConnected);
+	int SecondsUntilAllowed = std::max(0, 20 - SecondsConnected);
 	if(SecondsUntilAllowed == 0)
 		return false;
 

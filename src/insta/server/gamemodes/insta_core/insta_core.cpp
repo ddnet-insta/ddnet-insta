@@ -1809,7 +1809,7 @@ int CGameControllerInstaCore::FreeInGameSlots()
 		}
 
 		int Slots = Server()->MaxClients() - g_Config.m_SvSpectatorSlots;
-		return maximum(0, Slots - Players);
+		return std::max(0, Slots - Players);
 	}
 
 	return IGameController::FreeInGameSlots();
@@ -2278,7 +2278,7 @@ void CGameControllerInstaCore::ApplyVanillaDamage(int &Dmg, int From, int Weapon
 	if(From == pPlayer->GetCid())
 	{
 		// m_pPlayer only inflicts half damage on self
-		Dmg = maximum(1, Dmg / 2);
+		Dmg = std::max(1, Dmg / 2);
 	}
 
 	pCharacter->m_DamageTaken++;

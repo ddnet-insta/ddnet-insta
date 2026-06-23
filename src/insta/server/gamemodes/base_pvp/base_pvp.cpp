@@ -347,7 +347,7 @@ bool CGameControllerBasePvp::ForceNetworkClippingLine(const CEntity *pEntity, in
 		// No line section was passed but two equal points
 		DistanceToLine = ViewPos - StartPos;
 	}
-	float ClippDistance = maximum(ShowDistance.x, ShowDistance.y);
+	float ClippDistance = std::max(ShowDistance.x, ShowDistance.y);
 	return (absolute(DistanceToLine.x) > ClippDistance || absolute(DistanceToLine.y) > ClippDistance);
 }
 
@@ -856,7 +856,7 @@ void CGameControllerBasePvp::OnAnyDamage(vec2 &Force, int &Dmg, int &From, int &
 		// Only if not infinite ammo and activated
 		if(Weapon == WEAPON_GRENADE && g_Config.m_SvGrenadeAmmoRegen && g_Config.m_SvGrenadeAmmoRegenSpeedNade)
 		{
-			pCharacter->SetWeaponAmmo(WEAPON_GRENADE, minimum(pCharacter->GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + 1, g_Config.m_SvGrenadeAmmoRegenNum));
+			pCharacter->SetWeaponAmmo(WEAPON_GRENADE, std::min(pCharacter->GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + 1, g_Config.m_SvGrenadeAmmoRegenNum));
 		}
 	}
 
@@ -923,7 +923,7 @@ void CGameControllerBasePvp::RefillGrenadesOnHit(CPlayer *pPlayer)
 		RefillNades = g_Config.m_SvGrenadeAmmoRegenNum;
 	if(RefillNades && g_Config.m_SvGrenadeAmmoRegen)
 	{
-		pChr->SetWeaponAmmo(WEAPON_GRENADE, minimum(pChr->GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + RefillNades, g_Config.m_SvGrenadeAmmoRegenNum));
+		pChr->SetWeaponAmmo(WEAPON_GRENADE, std::min(pChr->GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + RefillNades, g_Config.m_SvGrenadeAmmoRegenNum));
 	}
 }
 
