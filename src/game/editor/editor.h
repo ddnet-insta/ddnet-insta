@@ -725,7 +725,7 @@ public:
 	};
 	void DoEditorDragBar(CUIRect View, CUIRect *pDragBar, EDragSide Side, float *pValue, float MinValue = 100.0f, float MaxValue = 400.0f);
 
-	void UpdateHotEnvelopePoint(const CUIRect &View, const CEnvelope *pEnvelope, int ActiveChannels);
+	void UpdateHotEnvelopeObject(const CUIRect &View, const CEnvelope *pEnvelope, int ActiveChannels);
 
 	void RenderMenubar(CUIRect Menubar);
 	void ShowHelp();
@@ -771,8 +771,8 @@ public:
 	unsigned char m_SwitchDelay;
 	unsigned char m_ViewSwitch;
 
-	// Adjust must be -1, 0 or 1
-	void AdjustBrushSpecialTiles(bool UseNextFree, int Adjust = 0);
+	// AdjustValue must be -1, 0 or 1
+	void AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int AdjustValue);
 
 private:
 	CEditorMap m_Map;

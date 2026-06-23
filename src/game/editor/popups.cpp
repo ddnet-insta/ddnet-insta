@@ -497,7 +497,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		{
 			pEditor->Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionGroup>(pEditor->Map(), pEditor->Map()->m_SelectedGroup, true));
 			pEditor->Map()->DeleteGroup(pEditor->Map()->m_SelectedGroup);
-			pEditor->Map()->m_SelectedGroup = maximum(0, pEditor->Map()->m_SelectedGroup - 1);
+			pEditor->Map()->m_SelectedGroup = std::max(0, pEditor->Map()->m_SelectedGroup - 1);
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -1997,7 +1997,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectImage(void *pContext, CUIRect 
 			ImageView.w = ImageView.h;
 		else
 			ImageView.h = ImageView.w;
-		float Max = (float)(maximum(pEditor->Map()->m_vpImages[ShowImage]->m_Width, pEditor->Map()->m_vpImages[ShowImage]->m_Height));
+		float Max = std::max(pEditor->Map()->m_vpImages[ShowImage]->m_Width, pEditor->Map()->m_vpImages[ShowImage]->m_Height);
 		ImageView.w *= pEditor->Map()->m_vpImages[ShowImage]->m_Width / Max;
 		ImageView.h *= pEditor->Map()->m_vpImages[ShowImage]->m_Height / Max;
 		pEditor->Graphics()->TextureSet(pEditor->Map()->m_vpImages[ShowImage]->m_Texture);
@@ -2184,7 +2184,7 @@ void CEditor::PopupSelectConfigAutoMapInvoke(int Current, float x, float y)
 	s_AutoMapConfigSelected = -100;
 	s_AutoMapConfigCurrent = Current;
 	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayer(0));
-	const int ItemCount = minimum(Map()->m_vpImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum() + 1, 10); // +1 for None-entry
+	const int ItemCount = std::min(Map()->m_vpImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum() + 1, 10); // +1 for None-entry
 	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
 	Ui()->DoPopupMenu(&s_PopupSelectConfigAutoMapId, x, y, 120.0f + 15.0f + 2.0f, 10.0f + 12.0f * ItemCount + 2.0f * (ItemCount - 1), this, PopupSelectConfigAutoMap);
 }
@@ -2321,7 +2321,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 			if(TeleNumber != -1)
 			{
 				pEditor->m_TeleNumber = TeleNumber;
-				pEditor->AdjustBrushSpecialTiles(false);
+				pEditor->AdjustBrushSpecialTiles(false, 0, 0);
 			}
 		}
 
@@ -2333,7 +2333,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 			if(CheckpointNumber != -1)
 			{
 				pEditor->m_TeleCheckpointNumber = CheckpointNumber;
-				pEditor->AdjustBrushSpecialTiles(false);
+				pEditor->AdjustBrushSpecialTiles(false, 0, 0);
 			}
 		}
 
@@ -2361,12 +2361,12 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 		if(Prop == PROP_TELE)
 		{
 			pEditor->m_TeleNumber = (NewVal - 1 + 255) % 255 + 1;
-			pEditor->AdjustBrushSpecialTiles(false);
+			pEditor->AdjustBrushSpecialTiles(false, 0, 0);
 		}
 		else if(Prop == PROP_TELE_CP)
 		{
 			pEditor->m_TeleCheckpointNumber = (NewVal - 1 + 255) % 255 + 1;
-			pEditor->AdjustBrushSpecialTiles(false);
+			pEditor->AdjustBrushSpecialTiles(false, 0, 0);
 		}
 		else if(Prop == PROP_TELE_VIEW)
 			pEditor->m_ViewTeleNumber = (NewVal - 1 + 255) % 255 + 1;
@@ -2422,7 +2422,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSpeedup(void *pContext, CUIRect View
 	else if(Prop == PROP_ANGLE)
 	{
 		pEditor->m_SpeedupAngle = std::clamp(NewVal, 0, 359);
-		pEditor->AdjustBrushSpecialTiles(false);
+		pEditor->AdjustBrushSpecialTiles(false, 0, 0);
 	}
 
 	return CUi::POPUP_KEEP_OPEN;
@@ -2755,7 +2755,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 	if(pEditor->DoButton_FontIcon(&s_DecreaseButton, FontIcon::MINUS, 0, &ButtonDecrease, BUTTONFLAG_LEFT, "Decrease animation speed.", IGraphics::CORNER_L, 7.0f))
 	{
 		pEditor->m_AnimateSpeed -= pEditor->m_AnimateSpeed <= 1.0f ? 0.1f : 0.5f;
-		pEditor->m_AnimateSpeed = maximum(pEditor->m_AnimateSpeed, MIN_ANIM_SPEED);
+		pEditor->m_AnimateSpeed = std::max(pEditor->m_AnimateSpeed, MIN_ANIM_SPEED);
 		pEditor->m_AnimateUpdatePopup = true;
 	}
 
@@ -2766,7 +2766,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 			pEditor->m_AnimateSpeed = 0.1f;
 		else
 			pEditor->m_AnimateSpeed += pEditor->m_AnimateSpeed < 1.0f ? 0.1f : 0.5f;
-		pEditor->m_AnimateSpeed = minimum(pEditor->m_AnimateSpeed, MAX_ANIM_SPEED);
+		pEditor->m_AnimateSpeed = std::min(pEditor->m_AnimateSpeed, MAX_ANIM_SPEED);
 		pEditor->m_AnimateUpdatePopup = true;
 	}
 
@@ -2793,6 +2793,10 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 	float AnimateSpeedRatio = OldAnimateSpeed / pEditor->m_AnimateSpeed;
 	float Time = pEditor->Client()->GlobalTime();
 	pEditor->m_AnimateStart = Time + (pEditor->m_AnimateStart - Time) * AnimateSpeedRatio;
+	if(!pEditor->m_Animate)
+	{
+		pEditor->m_AnimateTime *= AnimateSpeedRatio;
+	}
 
 	return CUi::POPUP_KEEP_OPEN;
 }

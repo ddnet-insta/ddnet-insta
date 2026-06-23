@@ -116,7 +116,9 @@ public:
 					Result = SendPackMsgOne(pMsg, Flags, i);
 		}
 		else if(IsSixup(ClientId))
+		{
 			Result = SendPackMsgOne(pMsg, Flags, ClientId);
+		}
 
 		return Result;
 	}

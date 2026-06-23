@@ -576,7 +576,6 @@ if(TARGET_OS AND TARGET_OS STREQUAL "mac")
 endif()
 
 set(VULKAN_SHADER_FILE_LIST "" CACHE STRING "Vulkan shader file list")
-set(VULKAN_SHADER_FILE_SHA256 "" CACHE STRING "Vulkan shader file hash")
 if(CLIENT AND VULKAN)
   find_package(Vulkan)
   include(cmake/BuildVulkanShaders.cmake)
@@ -2841,6 +2840,9 @@ if(CLIENT)
     )
   endif()
   add_dependencies(game-client generate_content_types)
+  if(VULKAN)
+    add_dependencies(game-client build_vulkan_shaders)
+  endif()
   set_property(TARGET game-client
       PROPERTY OUTPUT_NAME ${CLIENT_EXECUTABLE}
   )
@@ -3269,6 +3271,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     os_test.cpp
     packer_test.cpp
     prng_test.cpp
+    replace_words_test.cpp
     score_test.cpp
     secure_random_test.cpp
     server_test.cpp
@@ -3300,6 +3303,8 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     src/engine/client/serverbrowser_ping_cache.cpp
     src/engine/client/serverbrowser_ping_cache.h
     src/engine/client/sqlite.cpp
+    src/game/client/components/censor.cpp
+    src/game/client/components/censor.h
     # tidy-alphabetical-end
   )
 
@@ -3605,18 +3610,20 @@ if(NOT DEV)
     endif()
   endforeach()
   foreach(file ${VULKAN_SHADER_FILE_LIST})
-    install(FILES ${PROJECT_BINARY_DIR}/${file} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/ddnet/data/shader/vulkan COMPONENT client)
+    install(FILES ${file} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/ddnet/data/shader/vulkan COMPONENT client)
   endforeach()
 endif()
 
 if(DEV)
   # Don't generate CPack targets.
 else()
-  set(EXTRA_ARGS DESTINATION ${CPACK_PACKAGE_FILE_NAME} COMPONENT portable EXCLUDE_FROM_ALL)
-  install(TARGETS ${CPACK_TARGETS} ${EXTRA_ARGS})
-  install(DIRECTORY ${CPACK_DIRS} ${EXTRA_ARGS})
-  set(CPACK_FILES_TMP ${CPACK_FILES} ${CPACK_GEN_FILES})
-  install(FILES ${CPACK_FILES_TMP} ${EXTRA_ARGS})
+  install(TARGETS ${CPACK_TARGETS} DESTINATION ${CPACK_PACKAGE_FILE_NAME} COMPONENT portable EXCLUDE_FROM_ALL)
+  install(DIRECTORY ${CPACK_DIRS} DESTINATION ${CPACK_PACKAGE_FILE_NAME} COMPONENT portable EXCLUDE_FROM_ALL)
+  install(FILES ${CPACK_FILES} DESTINATION ${CPACK_PACKAGE_FILE_NAME} COMPONENT portable EXCLUDE_FROM_ALL)
+  foreach(file ${CPACK_GEN_FILES})
+    get_filename_component(parent_path ${file} PATH)
+    install(FILES "${PROJECT_BINARY_DIR}/${file}" DESTINATION "${CPACK_PACKAGE_FILE_NAME}/${parent_path}" COMPONENT portable EXCLUDE_FROM_ALL)
+  endforeach()
 endif()
 
 set(PACKAGE_TARGETS)
