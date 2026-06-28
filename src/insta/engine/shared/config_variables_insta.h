@@ -167,3 +167,7 @@ MACRO_CONFIG_INT(SvShuffleOnRoundStart, sv_shuffle_on_round_start, 0, 0, 1, CFGF
 MACRO_CONFIG_INT(SvKillIndicator, sv_kill_indicator, 0, 0, 1, CFGFLAG_SERVER, "Shows the killer that he froze the player(only fng for now)")
 MACRO_CONFIG_INT(SvDeathrateThreshold, sv_deathrate_threshold, 5, 0, 30, CFGFLAG_SERVER, "Death frequency threshold per second. If the player dies more often, their saved training checkpoint is removed (0 = disabled)")
 MACRO_CONFIG_INT(SvLogCoordsOnDeath, sv_log_coords_on_death, 0, 0, 1, CFGFLAG_SERVER, "Log player coordinates on death to the server console")
+
+MACRO_CONFIG_INT(SvSsh, sv_ssh, 0, 0, 1, CFGFLAG_SERVER, "Enable the ssh server for the remote console")
+MACRO_CONFIG_INT(SvSshPort, sv_ssh_port, 2222, 0, 65535, CFGFLAG_SERVER, "The port the ssh server for the remote console will listen on")
+MACRO_CONFIG_INT(SvSshPasswordAuthentication, sv_ssh_password_authentication, 1, 0, 1, CFGFLAG_SERVER, "Use 0 to disable clear text passwords and allow only ssh keys to login")

@@ -1,3 +1,39 @@
+option(SSH "Build the server with ssh remote console" OFF)
+
+message(STATUS "******** ddnet-insta ********")
+
+if(SSH)
+  find_package(libssh)
+endif()
+
+message(STATUS "Dependencies:")
+if(SSH)
+  show_dependency_status("libssh" libssh)
+endif()
+
+if(NOT(libssh_FOUND) AND SSH)
+  message(SEND_ERROR "You must install libssh to compile ${CMAKE_PROJECT_NAME}")
+endif()
+
+########################################################################
+# DEPENDENCY COMPILATION
+########################################################################
+
+function(insta_patch_deps)
+  set_src(DEP_UNICODE_WIDTH_SRC GLOB src/engine/external/unicode-width unicode_width.c unicode_width.h)
+  add_library(unicode_width EXCLUDE_FROM_ALL OBJECT ${DEP_UNICODE_WIDTH_SRC})
+
+  set(DEP_UNICODE_WIDTH $<TARGET_OBJECTS:unicode_width>)
+
+  set(DEPS ${DEPS} PARENT_SCOPE)
+  list(APPEND DEPS ${DEP_UNICODE_WIDTH})
+  set(DEPS ${DEPS} PARENT_SCOPE)
+endfunction()
+
+########################################################################
+# SERVER & SHARED
+########################################################################
+
 function(insta_patch_engine)
     set_src(INSTA_ENGINE_INTERFACE GLOB src/insta/engine
       # tidy-alphabetical-start
@@ -10,6 +46,8 @@ function(insta_patch_engine)
       # tidy-alphabetical-start
       _network.cpp
       config_variables_insta.h
+      ssh_server.cpp
+      ssh_server.h
       # tidy-alphabetical-end
     )
 

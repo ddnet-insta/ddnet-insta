@@ -21,6 +21,8 @@
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
+#include <insta/engine/shared/ssh_server.h>
+
 #include <memory>
 #include <optional>
 #include <vector>
@@ -232,6 +234,10 @@ public:
 	CNetServer m_NetServer;
 	CEcon m_Econ;
 	CFifo m_Fifo;
+#if defined(CONF_SSH)
+	// ddnet-insta
+	CSshServer m_SshServer;
+#endif
 	CServerBan m_ServerBan;
 
 	int64_t m_GameStartTime;
