@@ -157,6 +157,9 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_kill_indicator` Shows the killer that he froze the player(only fng for now)
 + `sv_deathrate_threshold` Death frequency threshold per second. If the player dies more often, their saved training checkpoint is removed (0 = disabled)
 + `sv_log_coords_on_death` Log player coordinates on death to the server console
++ `sv_ssh` Enable the ssh server for the remote console
++ `sv_ssh_port` The port the ssh server for the remote console will listen on
++ `sv_ssh_password_authentication` Use 0 to disable clear text passwords and allow only ssh keys to login
 + `sv_spawn_weapons` possible values: grenade, laser
 + `sv_zcatch_colors` Color scheme for zCatch options: teetime, savander
 + `sv_display_score` values: points, round_points, spree, current_spree, win_points, wins, kills, round_kills
