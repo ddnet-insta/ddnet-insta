@@ -6,8 +6,8 @@ class CInstaPersistentData
 public:
 	// make sure to read and write the variables you add here in these methods:
 	//
-	// virtual void OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPersistentClientData *pData) {};
-	// virtual void OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData) {};
+	// virtual void OnDataPersist(CGameContext::CPersistentData *pData) {}
+	// virtual void OnDataRestore(const CGameContext::CPersistentData *pData) {}
 
 	// This has dual use:
 	// - It is used to persist the CGameContext::m_aGameType variable across gametype changes
