@@ -80,7 +80,7 @@ void CIpStorageController::OnTick(int ServerTick)
 					 Deleted = true;
 					 char aAddr[512];
 					 net_addr_str(Entry.Addr(), aAddr, sizeof(aAddr), false);
-					 log_info("ddnet-insta", "ip storage entry expired. ip=%s entryid=%d", aAddr, Entry.EntryId());
+					 log_info("ddnet-insta", "ip storage entry expired. ip=<{%s}> entryid=%d", aAddr, Entry.EntryId());
 					 return true;
 				 }),
 		m_vEntries.end());
