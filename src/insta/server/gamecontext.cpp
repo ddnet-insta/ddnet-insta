@@ -582,7 +582,7 @@ void CGameContext::UndeepJail(CIpStorage *pEntry)
 	{
 		char aAddr[512];
 		net_addr_str(pEntry->Addr(), aAddr, sizeof(aAddr), false);
-		log_info("deep_jail", "removed deep jail entry %s", aAddr);
+		log_info("deep_jail", "removed deep jail entry #%d name='%s' ip=<{%s}>", pEntry->EntryId(), pEntry->Name(), aAddr);
 	}
 }
 
