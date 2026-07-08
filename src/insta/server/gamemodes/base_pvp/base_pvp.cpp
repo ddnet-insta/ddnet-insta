@@ -93,6 +93,10 @@ void CGameControllerBasePvp::OnRoundStart()
 		SendChat(-1, TEAM_ALL, "Starting warmup phase. Call a restart vote to start a new game.");
 		SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
 	}
+	else if(g_Config.m_SvWarmup > 0 && StartGameState == IGS_END_ROUND)
+	{
+		SetGameState(IGS_WARMUP_USER, g_Config.m_SvWarmup);
+	}
 	else
 	{
 		SetGameState(IGS_START_COUNTDOWN_ROUND_START);
