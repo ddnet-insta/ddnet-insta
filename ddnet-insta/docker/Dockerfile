@@ -1,4 +1,4 @@
-FROM alpine:3.18 AS build
+FROM alpine:3.24 AS build
 
 RUN apk add --no-cache \
     cargo \
@@ -40,7 +40,7 @@ RUN cmake -S /tw/sources -B /tw/build \
 
 RUN cmake --build /tw/build --target install -- -j"$(nproc)"
 
-FROM alpine:3.18 AS ddnet
+FROM alpine:3.24 AS ddnet
 
 RUN apk add --no-cache \
     libcurl \
