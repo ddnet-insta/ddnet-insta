@@ -1077,24 +1077,6 @@ void CGameContext::AbortVoteKickOnDisconnect(int ClientId)
 		m_VoteEnforce = VOTE_ENFORCE_ABORT;
 }
 
-void CGameContext::CheckPureTuning()
-{
-	// might not be created yet during start up
-	if(!m_pController)
-		return;
-
-	if(str_comp(m_pController->m_pGameType, "DM") == 0 ||
-		str_comp(m_pController->m_pGameType, "TDM") == 0 ||
-		str_comp(m_pController->m_pGameType, "CTF") == 0)
-	{
-		if(mem_comp(&CTuningParams::DEFAULT, &m_aTuningList[0], sizeof(CTuningParams)) != 0)
-		{
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "resetting tuning due to pure server");
-			m_aTuningList[0] = CTuningParams::DEFAULT;
-		}
-	}
-}
-
 void CGameContext::SendTuningParams(int ClientId, int Zone)
 {
 	if(ClientId == -1)
@@ -1116,8 +1098,6 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 		}
 		return;
 	}
-
-	CheckPureTuning();
 
 	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
 	dbg_assert(m_apPlayers[ClientId], "client %d without player", ClientId);
@@ -1192,9 +1172,6 @@ void CGameContext::OnPreTickTeehistorian()
 
 void CGameContext::OnTick()
 {
-	// check tuning
-	CheckPureTuning();
-
 	if(m_TeeHistorianActive)
 	{
 		int Error = aio_error(m_pTeeHistorianFile);
@@ -4424,6 +4401,11 @@ void CGameContext::OnInit(const void *pPersistentData)
 	str_copy(m_aGameType, m_pController->m_pGameType);
 	// ddnet-insta end
 
+	for(const char *pReservedGameType : {"DM", "TDM", "CTF", "LMS", "LTS"})
+	{
+		dbg_assert(str_comp(m_pController->m_pGameType, pReservedGameType) != 0, "Using reserved gametype '%s' is not allowed", m_pController->m_pGameType);
+	}
+
 	ReadCensorList();
 
 	m_TeeHistorianActive = g_Config.m_SvTeeHistorian;
@@ -4909,7 +4891,7 @@ void CGameContext::UpdatePlayerMaps()
 			if(!pChr->CanSnapCharacter(i))
 				Dist[j].first = 1e8;
 			else
-				Dist[j].first = length_squared(m_apPlayers[i]->m_ViewPos - pChr->GetPos());
+				Dist[j].first = distance_squared(m_apPlayers[i]->m_ViewPos, pChr->GetPos());
 		}
 
 		// always send the player themselves, even if all in same position
