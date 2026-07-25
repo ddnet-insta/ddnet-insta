@@ -217,10 +217,10 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `!1v1` `!2v2` `!v1` `!v2` `!1on1` ... call vote to change in game slots
 + `!restart ?(seconds)` call vote to restart game with optional parameter of warmup seconds (default: 10)
 + `/drop flag` if it is a CTF gametype the flagger can drop the flag without dying if either `sv_drop_flag_on_selfkill` or `sv_drop_flag_on_vote` is set
-+ `/info` Shows info about this server"
-+ `/credits` Shows the credits of the current ddnet-insta mode"
-+ `/credits_insta` Shows the credits of the entire ddnet-insta project"
-+ `/credits_ddnet` Shows the credits of the DDNet mod"
++ `/info` Shows info about this server
++ `/credits` Shows the credits of the current ddnet-insta mode
++ `/credits_insta` Shows the credits of the entire ddnet-insta project
++ `/credits_ddnet` Shows the credits of the DDNet mod
 + `/rank` Lists available rank commands
 + `/top5` Lists available top commands
 + `/top` Lists available top commands

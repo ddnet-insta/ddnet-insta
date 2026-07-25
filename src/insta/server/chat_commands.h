@@ -17,20 +17,20 @@
 // if sv_gametype is "ddnet"
 
 // "info" shadows a ddnet command
-CHAT_COMMAND("info", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaInfo, this, "Shows info about this server");
+CHAT_COMMAND("info", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaInfo, this, "Shows info about this server")
 
 // "credits" shadows a ddnet command
-CHAT_COMMAND("credits", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaModeCredits, this, "Shows the credits of the current ddnet-insta mode");
-CHAT_COMMAND("credits_insta", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaCredits, this, "Shows the credits of the entire ddnet-insta project");
-CHAT_COMMAND("credits_ddnet", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConCredits, this, "Shows the credits of the DDNet mod");
+CHAT_COMMAND("credits", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaModeCredits, this, "Shows the credits of the current ddnet-insta mode")
+CHAT_COMMAND("credits_insta", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaCredits, this, "Shows the credits of the entire ddnet-insta project")
+CHAT_COMMAND("credits_ddnet", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConCredits, this, "Shows the credits of the DDNet mod")
 
 // all these team related commands shadow ddnet commands
-CHAT_COMMAND("team", "?i[id]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaTeam, this, "Lets you join team i (shows your team if left blank)");
-CHAT_COMMAND("lock", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaLock, this, "Toggle team lock so no one else can join and so the team restarts when a player dies. /lock 0 to unlock, /lock 1 to lock");
-CHAT_COMMAND("unlock", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaUnlock, this, "Unlock a team");
-CHAT_COMMAND("invite", "r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaInvite, this, "Invite a person to a locked team");
-CHAT_COMMAND("join", "r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaJoin, this, "Join the team of the specified player");
-CHAT_COMMAND("team0mode", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaTeam0Mode, this, "Toggle team between team 0 and team mode. This mode will make your team behave like team 0.");
+CHAT_COMMAND("team", "?i[id]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaTeam, this, "Lets you join team i (shows your team if left blank)")
+CHAT_COMMAND("lock", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaLock, this, "Toggle team lock so no one else can join and so the team restarts when a player dies. /lock 0 to unlock, /lock 1 to lock")
+CHAT_COMMAND("unlock", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaUnlock, this, "Unlock a team")
+CHAT_COMMAND("invite", "r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaInvite, this, "Invite a person to a locked team")
+CHAT_COMMAND("join", "r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaJoin, this, "Join the team of the specified player")
+CHAT_COMMAND("team0mode", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaTeam0Mode, this, "Toggle team between team 0 and team mode. This mode will make your team behave like team 0.")
 
 // "rank" shadows a ddnet command
 CHAT_COMMAND("rank", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRankCmdlist, this, "Lists available rank commands")
@@ -41,13 +41,13 @@ CHAT_COMMAND("top", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTopCmdlist, this, "Lis
 // "pause" shadows a ddnet command, alias for "ready" in pvp modes, Has pvp description. This is wrong in ddrace gametypes.
 CHAT_COMMAND("pause", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaTogglePause, this, "Pause or resume the game")
 // "spec" shadows a ddnet command
-CHAT_COMMAND("spec", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaToggleSpec, this, "Toggles spec (if not available behaves as /pause)");
+CHAT_COMMAND("spec", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaToggleSpec, this, "Toggles spec (if not available behaves as /pause)")
 // "pausevoted" shadows a ddnet command
-CHAT_COMMAND("pausevoted", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaTogglePauseVoted, this, "Toggles pause on the currently voted player");
+CHAT_COMMAND("pausevoted", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaTogglePauseVoted, this, "Toggles pause on the currently voted player")
 // "specvoted" shadows a ddnet command
-CHAT_COMMAND("specvoted", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaToggleSpecVoted, this, "Toggles spec on the currently voted player");
+CHAT_COMMAND("specvoted", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaToggleSpecVoted, this, "Toggles spec on the currently voted player")
 // "kill" shadows a ddnet command
-CHAT_COMMAND("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");
+CHAT_COMMAND("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)")
 
 // alias for "pause" in pvp modes
 CHAT_COMMAND("ready", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConReadyChange, this, "Pause or resume the game")
