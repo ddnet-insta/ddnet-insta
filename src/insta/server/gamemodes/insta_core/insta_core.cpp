@@ -123,6 +123,17 @@ void CGameControllerInstaCore::SendChatSpectators(const char *pMessage, int Flag
 	}
 }
 
+void CGameControllerInstaCore::OnInfoChatCmd(IConsole::IResult *pResult, void *pUserData)
+{
+	log_info("chatresp", "DDNet-insta " DDNET_INSTA_VERSIONSTR " by ChillerDragon");
+	log_info("chatresp", "https://github.com/ddnet-insta/ddnet-insta/");
+	log_info("chatresp", "built on: " DDNET_INSTA_BUILD_DATE);
+	log_info("chatresp", "based on:");
+
+	// print default ddnet info output below
+	IGameController::OnInfoChatCmd(pResult, pUserData);
+}
+
 void CGameControllerInstaCore::OnCreditsChatCmd(IConsole::IResult *pResult, void *pUserData)
 {
 	// fallback to project wide credits

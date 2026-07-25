@@ -16,6 +16,9 @@
 // ideally the ddnet-insta commands call the original command
 // if sv_gametype is "ddnet"
 
+// "info" shadows a ddnet command
+CHAT_COMMAND("info", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaInfo, this, "Shows info about this server");
+
 // "credits" shadows a ddnet command
 CHAT_COMMAND("credits", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaModeCredits, this, "Shows the credits of the current ddnet-insta mode");
 CHAT_COMMAND("credits_insta", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaCredits, this, "Shows the credits of the entire ddnet-insta project");

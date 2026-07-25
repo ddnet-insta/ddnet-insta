@@ -38,6 +38,7 @@ public:
 	void SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1, int Flags = CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP);
 	void SendChatSpectators(const char *pMessage, int Flags);
 
+	void OnInfoChatCmd(IConsole::IResult *pResult, void *pUserData) override;
 	void OnCreditsChatCmd(IConsole::IResult *pResult, void *pUserData) override;
 	bool OnTeamChatCmd(IConsole::IResult *pResult) override;
 	void OnKillChatCmd(IConsole::IResult *pResult, void *pUserData) override;

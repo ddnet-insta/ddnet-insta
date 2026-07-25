@@ -145,6 +145,7 @@ public:
 	static void ConInstaRestart(IConsole::IResult *pResult, void *pUserData);
 
 	// chat_commands.cpp
+	static void ConInstaInfo(IConsole::IResult *pResult, void *pUserData);
 	static void ConInstaModeCredits(IConsole::IResult *pResult, void *pUserData);
 	static void ConInstaCredits(IConsole::IResult *pResult, void *pUserData);
 	static void ConInstaTeam(IConsole::IResult *pResult, void *pUserData);

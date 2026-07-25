@@ -51,12 +51,6 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 
 void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
 {
-	// ddnet-insta start
-	log_info("chatresp", "DDNet-insta " DDNET_INSTA_VERSIONSTR " by ChillerDragon");
-	log_info("chatresp", "https://github.com/ddnet-insta/ddnet-insta/");
-	log_info("chatresp", "built on: " DDNET_INSTA_BUILD_DATE);
-	log_info("chatresp", "based on:");
-	// ddnet-insta end
 	log_info("chatresp", "DDraceNetwork Mod. Version: " GAME_VERSION);
 	if(GIT_SHORTREV_HASH)
 	{

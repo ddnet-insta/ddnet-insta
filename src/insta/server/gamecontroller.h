@@ -702,6 +702,13 @@ public:
 	virtual void OnKillChatCmd(IConsole::IResult *pResult, void *pUserData);
 
 	/*
+		Function: OnInfoChatCmd
+			Called when a player runs the /info ddnet chat command
+			Contains the full implementation
+	*/
+	virtual void OnInfoChatCmd(IConsole::IResult *pResult, void *pUserData);
+
+	/*
 		Function: OnCreditsChatCmd
 			Called when a player runs the /credits ddnet chat command
 			Contains the full implementation

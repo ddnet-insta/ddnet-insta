@@ -954,6 +954,11 @@ void IGameController::OnKillChatCmd(IConsole::IResult *pResult, void *pUserData)
 	CGameContext::ConProtectedKill(pResult, pUserData);
 }
 
+void IGameController::OnInfoChatCmd(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext::ConInfo(pResult, pUserData);
+}
+
 void IGameController::OnCreditsChatCmd(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext::ConCredits(pResult, pUserData);

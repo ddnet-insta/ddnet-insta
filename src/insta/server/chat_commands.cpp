@@ -11,6 +11,14 @@
 
 #include <insta/server/enums.h>
 
+// "/info"
+void CGameContext::ConInstaInfo(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->m_pController)
+		pSelf->m_pController->OnInfoChatCmd(pResult, pUserData);
+}
+
 // "/credits"
 void CGameContext::ConInstaModeCredits(IConsole::IResult *pResult, void *pUserData)
 {
