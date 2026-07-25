@@ -1501,6 +1501,8 @@ void CGameContext::PreInputClients(int ClientId, bool *pClients)
 	if(!pInputChr || m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS || m_apPlayers[ClientId]->IsAfk())
 		return;
 
+	const int Team = GetDDRaceTeam(ClientId);
+
 	for(int Id = 0; Id < MAX_CLIENTS; Id++)
 	{
 		if(ClientId == Id)
@@ -1510,10 +1512,10 @@ void CGameContext::PreInputClients(int ClientId, bool *pClients)
 		if(!pPlayer)
 			continue;
 
-		if(Server()->GetClientVersion(Id) < VERSION_DDNET_PREINPUT)
+		if(pPlayer->GetTeam() == TEAM_SPECTATORS || Team != GetDDRaceTeam(Id) || pPlayer->IsAfk())
 			continue;
 
-		if(pPlayer->GetTeam() == TEAM_SPECTATORS || GetDDRaceTeam(ClientId) != GetDDRaceTeam(Id) || pPlayer->IsAfk())
+		if(Server()->GetClientVersion(Id) < VERSION_DDNET_PREINPUT)
 			continue;
 
 		if(!pInputChr->CanSnapCharacter(Id) || pInputChr->NetworkClipped(Id))

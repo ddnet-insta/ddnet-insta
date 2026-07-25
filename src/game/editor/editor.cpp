@@ -3845,7 +3845,7 @@ void CEditor::Render()
 			static bool s_ShowServerSettingsEditorLast = false;
 			if(m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES)
 			{
-				RenderEnvelopeEditor(ExtraEditor);
+				m_EnvelopeEditor.Render(ExtraEditor);
 			}
 			else if(m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS)
 			{
@@ -4398,7 +4398,6 @@ void CEditor::Reset(bool CreateDefault)
 	m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
 	m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::NONE;
 
-	m_ResetZoomEnvelope = true;
 	m_SettingsCommandInput.Clear();
 	m_MapSettingsCommandContext.Reset();
 	m_RenderLayersState.Reset();
@@ -4465,10 +4464,9 @@ void CEditor::Init()
 		OnInput(Event);
 	});
 	m_RenderMap.Init(m_pGraphics, m_pTextRender);
-	m_ZoomEnvelopeX.OnInit(this);
-	m_ZoomEnvelopeY.OnInit(this);
 
 	m_vComponents.emplace_back(m_MapView);
+	m_vComponents.emplace_back(m_EnvelopeEditor);
 	m_vComponents.emplace_back(m_MapSettingsBackend);
 	m_vComponents.emplace_back(m_LayerSelector);
 	m_vComponents.emplace_back(m_FileBrowser);
@@ -4592,9 +4590,7 @@ void CEditor::HandleWriterFinishJobs()
 	// send rcon.. if we can
 	if(Client()->RconAuthed() && g_Config.m_EdAutoMapReload)
 	{
-		CServerInfo CurrentServerInfo;
-		Client()->GetServerInfo(&CurrentServerInfo);
-
+		const CServerInfo &CurrentServerInfo = Client()->ServerInfo();
 		if(net_addr_is_local(&Client()->ServerAddress()))
 		{
 			char aMapName[MAX_MAP_LENGTH];
