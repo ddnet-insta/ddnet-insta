@@ -128,10 +128,14 @@ void CGameControllerInstaCore::OnInfoChatCmd(IConsole::IResult *pResult, void *p
 	log_info("chatresp", "DDNet-insta " DDNET_INSTA_VERSIONSTR " by ChillerDragon");
 	log_info("chatresp", "https://github.com/ddnet-insta/ddnet-insta/");
 	log_info("chatresp", "built on: " DDNET_INSTA_BUILD_DATE);
-	log_info("chatresp", "based on:");
-
-	// print default ddnet info output below
-	IGameController::OnInfoChatCmd(pResult, pUserData);
+	if(GIT_SHORTREV_HASH)
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "Git revision hash: %s", GIT_SHORTREV_HASH);
+		log_info("chatresp", "%s", aBuf);
+	}
+	log_info("chatresp", "based on: DDraceNetwork " GAME_VERSION);
+	log_info("chatresp", "For more info: /cmdlist");
 }
 
 void CGameControllerInstaCore::OnCreditsChatCmd(IConsole::IResult *pResult, void *pUserData)
