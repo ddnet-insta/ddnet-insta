@@ -29,6 +29,7 @@ CGameControllerBomb::CGameControllerBomb(class CGameContext *pGameServer) :
 	m_WinType = WIN_BY_SURVIVAL;
 	m_GameFlags = 0;
 	m_DefaultWeapon = WEAPON_HAMMER;
+	m_IsVanillaGameType = true;
 	m_pDeadSpecController = new CDeadSpecController(this, pGameServer);
 	m_pStatsTable = "bomb";
 	m_pExtraColumns = new CBombColumns();
