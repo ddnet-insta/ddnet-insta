@@ -1629,7 +1629,7 @@ bool CGameControllerInstaCore::OnRaceFinish(CPlayer *pPlayer, int TimeTicks, con
 
 		while((pUrls = str_next_token(pUrls, ",", aUrl, sizeof(aUrl))))
 		{
-			std::shared_ptr<CHttpRequest> pHttp = HttpPost(aUrl, (const unsigned char *)aStats, PayloadSize);
+			std::shared_ptr<IHttpRequest> pHttp = HttpPost(aUrl, (const unsigned char *)aStats, PayloadSize);
 			pHttp->LogProgress(HTTPLOG::FAILURE);
 			pHttp->IpResolve(IPRESOLVE::V4);
 			pHttp->Timeout(CTimeout{4000, 15000, 500, 5});

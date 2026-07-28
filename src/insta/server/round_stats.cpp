@@ -1,8 +1,8 @@
 #include <base/io.h>
 #include <base/log.h>
 
+#include <engine/http.h>
 #include <engine/shared/config.h>
-#include <engine/shared/http.h>
 #include <engine/shared/json.h>
 #include <engine/shared/jsonwriter.h>
 #include <engine/shared/protocol.h>
@@ -346,7 +346,7 @@ void IGameController::PublishRoundEndStatsStrDiscord(const char *pStr)
 	while((pUrls = str_next_token(pUrls, ",", aUrl, sizeof(aUrl))))
 	{
 		// TODO: use HttpPostJson()
-		std::shared_ptr<CHttpRequest> pDiscord = HttpPost(aUrl, (const unsigned char *)aPayload, PayloadSize);
+		std::shared_ptr<IHttpRequest> pDiscord = HttpPost(aUrl, (const unsigned char *)aPayload, PayloadSize);
 		pDiscord->LogProgress(HTTPLOG::FAILURE);
 		pDiscord->IpResolve(IPRESOLVE::V4);
 		pDiscord->Timeout(CTimeout{4000, 15000, 500, 5});
@@ -363,7 +363,7 @@ void IGameController::PublishRoundEndStatsStrHttp(const char *pStr)
 
 	while((pUrls = str_next_token(pUrls, ",", aUrl, sizeof(aUrl))))
 	{
-		std::shared_ptr<CHttpRequest> pHttp = HttpPost(aUrl, (const unsigned char *)pStr, PayloadSize);
+		std::shared_ptr<IHttpRequest> pHttp = HttpPost(aUrl, (const unsigned char *)pStr, PayloadSize);
 		pHttp->LogProgress(HTTPLOG::FAILURE);
 		pHttp->IpResolve(IPRESOLVE::V4);
 		pHttp->Timeout(CTimeout{4000, 15000, 500, 5});

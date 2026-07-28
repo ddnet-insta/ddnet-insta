@@ -6,8 +6,8 @@
 #include <base/dbg.h>
 #include <base/vmath.h>
 
+#include <engine/http.h> // ddnet-insta
 #include <engine/map.h>
-#include <engine/shared/http.h> // ddnet-insta
 #include <engine/shared/protocol.h>
 
 #include <generated/protocol.h>
