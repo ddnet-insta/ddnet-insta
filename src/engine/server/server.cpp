@@ -2864,6 +2864,11 @@ void CServer::PumpNetwork(bool PacketWaiting)
 
 	m_NetServer.Update();
 
+	// Coalesce the flushes triggered while handling this burst of incoming
+	// packets (preinput broadcasts, timing/ping replies, ...) into one packet
+	// per recipient, flushed once all packets have been handled below.
+	m_NetServer.BeginFlushBatch();
+
 	if(PacketWaiting)
 	{
 		// process packets
@@ -2955,6 +2960,8 @@ void CServer::PumpNetwork(bool PacketWaiting)
 			ProcessClientPacket(&Packet);
 		}
 	}
+
+	m_NetServer.EndFlushBatch();
 
 	m_ServerBan.Update();
 	m_Econ.Update();
