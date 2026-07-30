@@ -296,7 +296,7 @@ int IGameController::WinPointsForWin(const CPlayer *pPlayer)
 	// The best player will usually win.
 	// And reaching the scorelimit should require the same
 	// time and difficulty with one enemy or with 100 enemies.
-	// The chance of winning is stastically lower with
+	// The chance of winning is statistically lower with
 	// more competitors but I don't think thats relevant here (the more balanced the skill is the more relevant it is).
 	// In team modes getting carried in a 8v8 and barely contributing
 	// to the game should not reward you more for the 8 enemies
