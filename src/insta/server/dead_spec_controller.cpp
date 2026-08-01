@@ -201,6 +201,7 @@ void CDeadSpecController::KillPlayer(CPlayer *pPlayer, int KillerId)
 {
 	pPlayer->m_IsDead = true;
 	pPlayer->m_KillerId = KillerId;
+	pPlayer->m_TeamBeforeDeath = pPlayer->GetTeam();
 
 	// we also support marking spectators as dead
 	// this is useful for zCatch where players get caught
@@ -292,8 +293,7 @@ void CDeadSpecController::RespawnPlayer(CPlayer *pPlayer)
 	{
 		// log_info("deadspec", "  cid=%d name='%s' moved to game actually", pPlayer->GetCid(), Server()->ClientName(pPlayer->GetCid()));
 
-		// TODO: support multiple teams
-		GameServer()->m_pController->DoTeamChange(pPlayer, TEAM_GAME, false);
+		GameServer()->m_pController->DoTeamChange(pPlayer, pPlayer->m_TeamBeforeDeath, false);
 	}
 }
 
