@@ -120,6 +120,10 @@ public:
 	bool m_IsDead = false;
 	bool m_GotRespawnInfo = false;
 
+	// team the player was on when CDeadSpecController::KillPlayer() killed them
+	// used to respawn them back on their team on round end (e.g. ltsblock)
+	int m_TeamBeforeDeath = TEAM_GAME;
+
 	std::vector<int> m_vVictimIds;
 
 	// kills made in zCatch that give reward points
