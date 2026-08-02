@@ -2505,7 +2505,7 @@ void CCharacter::DDRaceInit()
 	}
 }
 
-void CCharacter::Rescue()
+bool CCharacter::Rescue()
 {
 	if(m_SetSavePos[GetPlayer()->m_RescueMode] && !m_Core.m_Super && !m_Core.m_Invincible)
 	{
@@ -2514,7 +2514,7 @@ void CCharacter::Rescue()
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "You have to wait %d seconds until you can rescue yourself", (int)((m_LastRescue + (int64_t)g_Config.m_SvRescueDelay * Server()->TickSpeed() - Server()->Tick()) / Server()->TickSpeed()));
 			GameServer()->SendChatTarget(GetPlayer()->GetCid(), aBuf);
-			return;
+			return false;
 		}
 
 		m_LastRescue = Server()->Tick();
@@ -2534,7 +2534,9 @@ void CCharacter::Rescue()
 		m_SavedInput.m_Fire &= INPUT_STATE_MASK;
 		m_SavedInput.m_Hook = 0;
 		m_pPlayer->Pause(CPlayer::PAUSE_NONE, true);
+		return true;
 	}
+	return false;
 }
 
 CClientMask CCharacter::TeamMask()
