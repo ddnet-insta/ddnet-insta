@@ -8,6 +8,7 @@
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
+#include <insta/server/db/accounts_worker/accounts_worker.h>
 
 CDbAccounts::CDbAccounts(CGameContext *pGameServer, CDbConnectionPool *pPool, CDbInsta *pInstaDatabase) :
 	m_pPool(pPool),
@@ -75,7 +76,7 @@ void CDbAccounts::ExecPlayerThreadRatelimited(
 	m_pPool->ExecuteWrite(pFuncPtr, std::move(Tmp), pThreadName);
 }
 
-void CDbAccounts::ChatCmd(int ClientId, const char *pUsername, const char *pDisplayName, const char *pOldPassword, const char *pNewPassword, EAccountChatCmd RequestType)
+bool CDbAccounts::IsRatelimitError(int ClientId)
 {
 	if(Db()->RateLimitPlayer(ClientId))
 	{
@@ -84,7 +85,7 @@ void CDbAccounts::ChatCmd(int ClientId, const char *pUsername, const char *pDisp
 		// and shown a useful error message to the user
 		// if this gets printed there is a flaw in the code that called it!
 		log_error("sql", "FATAL ERROR: cid=%d got ratelimited trying to perform an account action", ClientId);
-		return;
+		return true;
 	}
 
 	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientId];
@@ -99,10 +100,73 @@ void CDbAccounts::ChatCmd(int ClientId, const char *pUsername, const char *pDisp
 		// can we even do that from a thread?
 		// if this gets hit it is really bad!
 		log_error("sql", "FATAL ERROR: player already had an account operation pending. Ignoring this new one!");
-		return;
+		return true;
 	}
+	return false;
+}
+
+void CDbAccounts::ChatCmd(int ClientId, const char *pUsername, const char *pDisplayName, const char *pOldPassword, const char *pNewPassword, EAccountChatCmd RequestType)
+{
+	if(IsRatelimitError(ClientId))
+		return;
 
 	ExecPlayerThreadRatelimited(CAccountsWorker::ChatCmdWorker, "account", ClientId, pUsername, pDisplayName, pOldPassword, pNewPassword, RequestType);
+}
+
+// FIXME: provide one generic method available for mods that takes a lamdba as argument
+//        where mods can pass their own struct
+//        it might get a bit long and messy but then they can do that without having to edit
+//        any ddnet-insta code which is amazing
+//
+//        i wonder how the sync on the main thread will be handled again
+//        can we pass a second lambda that will run on the main thread?
+//
+//        where did i do this already? in ddnet++?
+
+void CDbAccounts::ChatCmdSlowOperation(int ClientId)
+{
+	if(IsRatelimitError(ClientId))
+		return;
+
+	auto pResult = NewPlayerResult(ClientId);
+	if(pResult == nullptr)
+		return;
+
+	struct CSlowReq : CSqlAccData
+	{
+		CSlowReq(std::shared_ptr<CAccountPlayerResult> pResult) :
+			CSqlAccData(std::move(pResult))
+		{
+		}
+		char m_aUsername[MAX_NAME_LENGTH];
+	};
+	auto Tmp = std::make_unique<CSlowReq>(pResult);
+	str_copy(Tmp->m_aUsername, "yolo", sizeof(Tmp->m_aUsername));
+
+	m_pPool->ExecuteWrite(
+		+[](IDbConnection *pConn, const ISqlData *pGameData, Write w, char *pError, int ErrorSize) -> bool
+		{
+			if(w != Write::NORMAL)
+			{
+				// could write to backup database here
+				return true;
+			}
+
+			const auto *pData = dynamic_cast<const CSlowReq*>(pGameData);
+			auto *pResult = dynamic_cast<CAccountPlayerResult *>(pGameData->m_pResult.get());
+
+			log_info("sql-thread", "starting slooooooooooooooooooooooooooooooooow debug operation ...");
+			log_info("sql-thread", "yo we are in a lambda pog");
+			log_info("sql-thread", "username passed in: %s", pData->m_aUsername);
+			using namespace std::chrono_literals;
+			std::this_thread::sleep_for(10000ms);
+			log_info("sql-thread", "finished slow debug operation");
+			pResult->m_MessageKind = EAccountChatCmd::CHAT_CMD_SLOW_ACCOUNT_OPERATION;
+			str_copy(pResult->m_Data.m_aaMessages[0], "slow debug operation reached main thread");
+			return true;
+		},
+		std::move(Tmp),
+		"acc_slow_op");
 }
 
 void CDbAccounts::RconCmd(int ClientId, const char *pUsername, const char *pPassword, EAccountRconCmd RequestType)

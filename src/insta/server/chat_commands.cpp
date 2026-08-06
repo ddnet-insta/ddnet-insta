@@ -852,13 +852,7 @@ void CGameContext::ConSlowAccountOperation(IConsole::IResult *pResult, void *pUs
 		return;
 	}
 
-	pSelf->m_pController->Db()->Accounts()->ChatCmd(
-		pResult->m_ClientId,
-		"test_user",
-		"test_name",
-		"test_pass",
-		"test_pass",
-		EAccountChatCmd::CHAT_CMD_SLOW_ACCOUNT_OPERATION);
+	pSelf->m_pController->Db()->Accounts()->ChatCmdSlowOperation(pResult->m_ClientId);
 }
 
 void CGameContext::ConScore(IConsole::IResult *pResult, void *pUserData)

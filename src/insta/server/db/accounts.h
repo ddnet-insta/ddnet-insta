@@ -41,6 +41,8 @@ class CDbAccounts
 		const char *pNewPassword,
 		EAccountChatCmd RequestType);
 
+	bool IsRatelimitError(int ClientId);
+
 public:
 	CDbAccounts(CGameContext *pGameServer, CDbConnectionPool *pPool, CDbInsta *pInstaDatabase);
 	~CDbAccounts() = default;
@@ -52,6 +54,9 @@ public:
 	//
 	// ratelimited per player account requests
 	void ChatCmd(int ClientId, const char *pUsername, const char *pDisplayName, const char *pOldPassword, const char *pNewPassword, EAccountChatCmd RequestType);
+
+	// ratelimited per player account requests
+	void ChatCmdSlowOperation(int ClientId);
 
 	// for now only used for resetting passwords
 	// can in the future also be used to
