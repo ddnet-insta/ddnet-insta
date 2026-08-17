@@ -6,6 +6,7 @@
 #include <insta/server/ddnet_db_utils/ddnet_db_utils.h>
 #include <insta/server/display_name.h>
 #include <insta/server/password_hash.h>
+#include <insta/server/strhelpers.h>
 
 #include <cstdint>
 
@@ -412,7 +413,8 @@ CAccountsWorker::EResult CAccountsWorker::LoadAccount(IDbConnection *pSqlServer,
 		" id, username, password,"
 		" logged_in, locked,"
 		" server_ip, server_port,"
-		" display_name, name_protected, contact, pin,"
+		" display_name, display_name_skel, name_protected,"
+		" contact, pin,"
 		" register_ip, "
 		" %s, %s " // last_login, register_date
 		"FROM accounts "
@@ -450,6 +452,7 @@ CAccountsWorker::EResult CAccountsWorker::LoadAccount(IDbConnection *pSqlServer,
 		pSqlServer->GetString(Offset++, pAccount->m_aServerIp, sizeof(pAccount->m_aServerIp));
 		pAccount->m_ServerPort = pSqlServer->GetInt(Offset++);
 		pSqlServer->GetString(Offset++, pAccount->m_aDisplayName, sizeof(pAccount->m_aDisplayName));
+		pSqlServer->GetString(Offset++, pAccount->m_aDisplayNameSkel, sizeof(pAccount->m_aDisplayNameSkel));
 		pAccount->m_IsNameProtected = pSqlServer->GetInt(Offset++) == 1;
 		pSqlServer->GetString(Offset++, pAccount->m_aContact, sizeof(pAccount->m_aContact));
 		pAccount->m_Pin = pSqlServer->GetOptionalInt(Offset++);
@@ -472,19 +475,26 @@ bool CAccountsWorker::GetDisplayNameOwner(IDbConnection *pSqlServer, const char 
 	pOwner->Reset();
 	str_copy(pOwner->m_aDisplayName, pDisplayName);
 
+	char aDisplayNameSkeleton[MAX_NAME_LENGTH * 2] = "";
+	if(!str_utf8_to_skeleton_str(pDisplayName, aDisplayNameSkeleton, sizeof(aDisplayNameSkeleton)))
+	{
+		str_format(pError, ErrorSize, "utf-8 confusable skeleton failed: %s", aDisplayNameSkeleton);
+		return false;
+	}
+
 	char aBuf[1024];
 	str_copy(
 		aBuf,
 		"SELECT"
 		" username, name_protected "
 		"FROM accounts "
-		"WHERE display_name = ?;");
+		"WHERE display_name_skel = ?;");
 	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		log_error("sql-thread", "prepare failed query: %s", aBuf);
 		return false;
 	}
-	pSqlServer->BindString(1, pDisplayName);
+	pSqlServer->BindString(1, aDisplayNameSkeleton);
 	pSqlServer->Print();
 
 	bool End;

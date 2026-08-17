@@ -32,6 +32,9 @@ public:
 	char m_aServerIp[64];
 	int m_ServerPort = 0;
 	char m_aDisplayName[MAX_NAME_LENGTH];
+	// utf-8 confusable skeleton
+	// to make sure visually too similar names can not be claimed
+	char m_aDisplayNameSkel[MAX_NAME_LENGTH * 2];
 	bool m_IsNameProtected = false;
 	char m_aContact[MAX_CONTACT_LENGTH];
 	std::optional<int> m_Pin = std::nullopt;

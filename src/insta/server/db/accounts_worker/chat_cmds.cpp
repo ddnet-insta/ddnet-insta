@@ -1,11 +1,15 @@
 #include "accounts_worker.h"
 
 #include <base/log.h>
+#include <base/str.h>
 #include <base/time.h>
+
+#include <engine/shared/protocol.h>
 
 #include <insta/server/ddnet_db_utils/ddnet_db_utils.h>
 #include <insta/server/display_name.h>
 #include <insta/server/password_hash.h>
+#include <insta/server/strhelpers.h>
 
 #include <thread>
 
@@ -369,7 +373,12 @@ bool CAccountsWorker::ChatCmdDisplayName(IDbConnection *pSqlServer, const ISqlDa
 		return true;
 	}
 
+	char aSkel[MAX_NAME_LENGTH * 2];
+	str_utf8_to_skeleton_str(pData->m_aDisplayName, aSkel, sizeof(aSkel));
+	log_info("sql-thread", "claiming name '%s' with skeleton '%s'", pData->m_aDisplayName, aSkel);
+
 	SetAccountString(pSqlServer, pData->m_aUsername, "display_name", pData->m_aDisplayName, pError, ErrorSize);
+	SetAccountString(pSqlServer, pData->m_aUsername, "display_name_skel", aSkel, pError, ErrorSize);
 	if(Owner.m_IsProtected == false)
 	{
 		if(!SetAccountInt(pSqlServer, pData->m_aUsername, "name_protected", 1, pError, ErrorSize))

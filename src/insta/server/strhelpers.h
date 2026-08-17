@@ -81,4 +81,17 @@ bool str_isalphanumeric(char c);
  */
 bool str_contains_only_allowed_chars(const char *pAllowedCharacters, const char *pTestedString);
 
+/**
+ * Converts a string to a confusable skeleton string.
+ *
+ * @ingroup Strings
+ *
+ * @param pStr Input string.
+ * @param pBuf Output string buffer.
+ * @param BufLen Output buffer size in bytes.
+ *
+ * @return `true` on success and `false` on error
+ */
+bool str_utf8_to_skeleton_str(const char *pStr, char *pBuf, int BufLen);
+
 #endif
