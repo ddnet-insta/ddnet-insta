@@ -397,12 +397,28 @@ void CPlayer::UpdateLastToucher(int ClientId, int Weapon)
 	// 	return;
 	// }
 
+	// we check if the kill would count when the touch happens
+	// this is needed because we use the toucher to find the killer
+	// when this player dies but by then the kill might no longer count
+	// so we want to know if it would have been a valid kill on touch
+	// https://github.com/ddnet-insta/ddnet-insta/issues/690
+	bool DoesKillCount = false;
+	if(GameServer()->m_pController && GetCharacter())
+	{
+		DoesKillCount = GameServer()->m_pController->DoesKillCount(
+			GetCharacter(),
+			ClientId,
+			Weapon,
+			false);
+	}
+
 	m_LastToucher = CLastToucher(
 		ClientId,
 		pPlayer->GetUniqueCid(),
 		pPlayer->GetTeam(),
 		Weapon,
-		Server()->Tick());
+		Server()->Tick(),
+		DoesKillCount);
 }
 
 void CPlayer::ResetLastToucherAfterSeconds(int Seconds)

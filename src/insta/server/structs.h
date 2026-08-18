@@ -112,8 +112,36 @@ public:
 	// only used in block mode for now
 	int m_TouchTick;
 
-	CLastToucher(int ClientId, uint32_t UniqueClientId, int Team, int Weapon, int ServerTick) :
-		m_ClientId(ClientId), m_UniqueClientId(UniqueClientId), m_Team(Team), m_Weapon(Weapon), m_TouchTick(ServerTick)
+	// True if the kill would count at the time of the touch.
+	// False if the kill would be ignored by some anti farm protection at the
+	// time of the touch.
+	//
+	// The last toucher is used for tracking kills in for example
+	// the block gametype. Here the actual kill happens when someone does
+	// die in freeze but the killer is determined by the last toucher.
+	//
+	// There are some anti farm protections that can ignore kills.
+	// Because there is a time and potential state difference between
+	// the touch and the kill we check if the kill would count at the time
+	// of the touch. Otherwise the kill might be wrongfully not counted
+	// because the killer already died him self and is now in the spawn area.
+	//
+	// https://github.com/ddnet-insta/ddnet-insta/issues/690
+	bool m_DoesKillCount;
+
+	CLastToucher(
+		int ClientId,
+		uint32_t UniqueClientId,
+		int Team,
+		int Weapon,
+		int ServerTick,
+		bool DoesKillCount) :
+		m_ClientId(ClientId),
+		m_UniqueClientId(UniqueClientId),
+		m_Team(Team),
+		m_Weapon(Weapon),
+		m_TouchTick(ServerTick),
+		m_DoesKillCount(DoesKillCount)
 	{
 	}
 };

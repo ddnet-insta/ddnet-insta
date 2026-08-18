@@ -127,8 +127,9 @@ public:
 			Killer - The client id of the killer. Can be negative!
 			Weapon - What weapon that killed it. Can be -1 for undefined
 				weapon when switching team or player suicides.
+			SendWarningInChat - Side effect of tracking amount of ignored kills and warn users about it
 	*/
-	virtual bool DoesKillCount(class CCharacter *pVictim, int Killer, int Weapon);
+	virtual bool DoesKillCount(class CCharacter *pVictim, int Killer, int Weapon, bool SendWarningInChat);
 
 	/*
 		Function: OnCharacterDeathImpl

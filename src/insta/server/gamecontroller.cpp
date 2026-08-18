@@ -27,7 +27,7 @@ bool IGameController::IsPickupEntity(int Index) const
 	       Index == ENTITY_POWERUP_NINJA;
 }
 
-bool IGameController::DoesKillCount(CCharacter *pVictim, int Killer, int Weapon)
+bool IGameController::DoesKillCount(CCharacter *pVictim, int Killer, int Weapon, bool SendWarningInChat)
 {
 	if(g_Config.m_SvIgnoreKillsBeforeRaceStart)
 	{
@@ -60,6 +60,7 @@ bool IGameController::DoesKillCount(CCharacter *pVictim, int Killer, int Weapon)
 		}
 
 		if(
+			SendWarningInChat &&
 			IgnoreKill &&
 			pKiller &&
 			Killer != pVictim->GetPlayer()->GetCid())
@@ -80,8 +81,18 @@ bool IGameController::DoesKillCount(CCharacter *pVictim, int Killer, int Weapon)
 
 void IGameController::OnCharacterDeathImpl(CCharacter *pVictim, int Killer, int Weapon, bool SendKillMsg)
 {
-	if(!DoesKillCount(pVictim, Killer, Weapon))
+	if(!DoesKillCount(pVictim, Killer, Weapon, false))
+	{
+		// https://github.com/ddnet-insta/ddnet-insta/issues/690
+		// would probably be nice to clear out the weapon here too
+		// otherwise the kill feed can contain a weapon without a killer
+		// and it looks odd and is also conceptually confusing if the kill did not count
+		// but we have to be careful to only clear out weapons in that exact case
+		// so only if it was an ignored kill by someone else
+		// and a weapon that shows with texture
+		// to avoid adding some bugs with WEAPON_WORLD edge cases or something like that
 		Killer = pVictim->GetPlayer()->GetCid();
+	}
 
 	if(Killer != WEAPON_GAME && pVictim->m_SetSavePos[RESCUEMODE_AUTO])
 		pVictim->GetPlayer()->m_LastDeath = pVictim->m_RescueTee[RESCUEMODE_AUTO];
