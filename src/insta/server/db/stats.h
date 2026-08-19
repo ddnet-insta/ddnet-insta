@@ -38,9 +38,51 @@ enum class EInstaSqlRequestType
 
 	// /steals chat command
 	CHAT_CMD_STEALS,
+};
 
-	// initial stats load on connect
-	PLAYER_DATA,
+struct CSqlInstaData : ISqlData
+{
+	CSqlInstaData(std::shared_ptr<ISqlResult> pResult) :
+		ISqlData(std::move(pResult))
+	{
+	}
+
+	~CSqlInstaData() override;
+
+	int m_DebugStats = 0;
+	CExtraColumns *m_pExtraColumns = nullptr;
+};
+
+// Result of loading all time stats for a player
+// this is a management operation done for every player
+// on join and rename
+struct CLoadStatsSqlResult : ISqlResult
+{
+	// The display name the stats were looked up for
+	// will also be included in m_Stats but only if the name was found
+	// this value is here to know which name was not found
+	char m_aName[MAX_NAME_LENGTH];
+
+	// Can be nullopt when the player did not collect stats in the past yet
+	std::optional<CSqlStatsPlayer> m_Stats = std::nullopt;
+};
+
+// Request of loading all time stats for a player
+// this is a management operation done for every player
+// on join and rename
+struct CSqlLoadStatsRequest : CSqlInstaData
+{
+	CSqlLoadStatsRequest(std::shared_ptr<CLoadStatsSqlResult> pResult, int DebugStats) :
+		CSqlInstaData(std::move(pResult))
+	{
+		m_DebugStats = DebugStats;
+	}
+
+	// In game display name of the player that joined or renamed
+	char m_aName[MAX_NAME_LENGTH];
+
+	// table name depends on gametype
+	char m_aTable[128];
 };
 
 struct CInstaSqlResult : ISqlResult
@@ -77,19 +119,6 @@ struct CInstaSqlResult : ISqlResult
 	char m_aRankColumnSql[128];
 
 	void SetVariant(EInstaSqlRequestType RequestType);
-};
-
-struct CSqlInstaData : ISqlData
-{
-	CSqlInstaData(std::shared_ptr<ISqlResult> pResult) :
-		ISqlData(std::move(pResult))
-	{
-	}
-
-	~CSqlInstaData() override;
-
-	int m_DebugStats = 0;
-	CExtraColumns *m_pExtraColumns = nullptr;
 };
 
 // read request
@@ -202,25 +231,64 @@ class CSqlStats
 
 	CExtraColumns *m_pExtraColumns = nullptr;
 
+	// This type should be used instead of bool for helpers
+	// that can result in an unhappy path without a critical database error
+	enum class EResult
+	{
+		// the sql operation finished successfully
+		// and the user input was valid
+		SUCCESS,
+
+		// this means "not found" or "not updated"
+		// there was no serious error but the user input
+		// was probably invalid
+		//
+		// this is the general expected unhappy path
+		INVALID,
+
+		// there was an unexpected fatal database error
+		// even funny user input should never trigger this
+		// this means the database schema is corrupted
+		// or the database connection died
+		// or some other serious issue which needs developer or admin attention
+		FATAL_ERROR,
+	};
+
+	// TODO: all these static methods take the same arguments move them into one struct
+
 	// non ratelimited server side queries
 	static bool CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 	static bool CreateFastcapTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 	static bool SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 
 	// ratelimited user queries
-
 	static bool ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowRankWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowTopWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowFastcapRankWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowFastcapTopWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 
+	// non ratelimited overriding management queries
 	static bool SaveFastcapWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
+	static bool LoadStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+
+	// generic helpers
+
+	static EResult LoadStats(
+		IDbConnection *pSqlServer,
+		const ISqlData *pGameData,
+		const char *pName,
+		const char *pTable,
+		CExtraColumns *pExtraColumns,
+		CSqlStatsPlayer *pStats,
+		char *pError,
+		int ErrorSize);
 
 	std::shared_ptr<CInstaSqlResult> NewInstaSqlResult(int ClientId);
 
-	// Creates for player database requests
-	void ExecPlayerStatsThread(
+	// Per player database requests
+	// returns false if it got ratelimited
+	bool ExecPlayerStatsThreadRatelimited(
 		bool (*pFuncPtr)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize),
 		const char *pThreadName,
 		int ClientId,

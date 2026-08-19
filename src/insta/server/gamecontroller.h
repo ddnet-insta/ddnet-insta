@@ -1089,11 +1089,19 @@ public:
 			This can be used for save servers to display the players
 			all time stats in the scoreboard
 
+			It is called when the sql worker finished no matter if previous stats
+			were found or not. If no stats were found for this name yet the stats
+			will be a nullptr.
+
 		Arguments:
-			pStats - stats struct that was loaded
+			pStatsOrNullptr - stats struct that was loaded or nullptr if the player did not collect
+					  any stats on this name yet
+			pName - the name that was looked up. This should in most cases match the pPlayer's current
+				in game name but is not guaranteed to be the same. The names can differe if the
+				user performed a rename while the worker thread was running.
 			pPlayer - player the stats are from
 	*/
-	virtual void OnLoadedNameStats(const CSqlStatsPlayer *pStats, class CPlayer *pPlayer) {}
+	virtual void OnLoadedNameStats(const CSqlStatsPlayer *pStatsOrNullptr, const char *pName, class CPlayer *pPlayer) {}
 
 	/*
 		Function: OnShowRank

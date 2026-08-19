@@ -35,6 +35,7 @@ public:
 	std::optional<CIpStorage> m_IpStorage;
 
 	void ProcessStatsResult(CInstaSqlResult &Result);
+	void ProcessLoadStatsResult(CLoadStatsSqlResult &Result);
 
 	int m_SentWarmupAlerts = 0;
 	void WarmupAlert();
@@ -295,7 +296,19 @@ public:
 	// resets round stats and sql stats
 	void ResetStats();
 
+	// This result is for user requests such as showing stats
+	// with chat commands like /statsall if a previous query is still
+	// running any new chat command will be ignored silently
 	std::shared_ptr<CInstaSqlResult> m_StatsQueryResult;
+
+	// This result is only used for loading *this* players stats based on the current name.
+	// This is triggered on join and rename. And should never fail because these stats
+	// power essential core logic.
+	//
+	// It will override the old request if it is still pending when a new name change happens.
+	// This way we never get ratelimited and always a stats result for the most recent name.
+	std::shared_ptr<CLoadStatsSqlResult> m_LoadStatsQueryResult;
+
 	std::shared_ptr<CInstaSqlResult> m_FastcapQueryResult;
 
 	// If sv_ignore_kills_before_race_start is set to 1

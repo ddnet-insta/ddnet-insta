@@ -175,7 +175,7 @@ public:
 	void SaveStatsOnRoundEnd(CPlayer *pPlayer) override;
 	void SaveStatsOnDisconnect(CPlayer *pPlayer) override;
 	void LoadNewPlayerNameData(class CPlayer *pPlayer) override;
-	void OnLoadedNameStats(const CSqlStatsPlayer *pStats, class CPlayer *pPlayer) override;
+	void OnLoadedNameStats(const CSqlStatsPlayer *pStatsOrNullptr, const char *pName, class CPlayer *pPlayer) override;
 
 	/*
 		m_pExtraColumns

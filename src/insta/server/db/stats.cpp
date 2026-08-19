@@ -17,7 +17,7 @@
 #include <insta/server/extra_columns.h>
 #include <insta/server/sql_stats_player.h>
 
-#include <cstdlib>
+#include <optional>
 
 class IDbConnection;
 
@@ -37,7 +37,6 @@ void CInstaSqlResult::SetVariant(EInstaSqlRequestType RequestType)
 	case EInstaSqlRequestType::CHAT_CMD_STATSALL:
 	case EInstaSqlRequestType::CHAT_CMD_MULTIS:
 	case EInstaSqlRequestType::CHAT_CMD_STEALS:
-	case EInstaSqlRequestType::PLAYER_DATA:
 	case EInstaSqlRequestType::DIRECT:
 	case EInstaSqlRequestType::ALL:
 		for(auto &aMessage : m_aaMessages)
@@ -53,13 +52,13 @@ void CInstaSqlResult::SetVariant(EInstaSqlRequestType RequestType)
 std::shared_ptr<CInstaSqlResult> CSqlStats::NewInstaSqlResult(int ClientId)
 {
 	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientId];
-	if(pCurPlayer->m_StatsQueryResult != nullptr) // TODO: send player a message: "too many requests"
+	if(pCurPlayer->m_StatsQueryResult != nullptr)
 		return nullptr;
 	pCurPlayer->m_StatsQueryResult = std::make_shared<CInstaSqlResult>();
 	return pCurPlayer->m_StatsQueryResult;
 }
 
-void CSqlStats::ExecPlayerStatsThread(
+bool CSqlStats::ExecPlayerStatsThreadRatelimited(
 	bool (*pFuncPtr)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize),
 	const char *pThreadName,
 	int ClientId,
@@ -69,7 +68,7 @@ void CSqlStats::ExecPlayerStatsThread(
 {
 	auto pResult = NewInstaSqlResult(ClientId);
 	if(pResult == nullptr)
-		return;
+		return false;
 	auto Tmp = std::make_unique<CSqlPlayerStatsRequest>(pResult, g_Config.m_SvDebugStats);
 	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
 	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
@@ -84,6 +83,7 @@ void CSqlStats::ExecPlayerStatsThread(
 	}
 
 	m_pPool->Execute(pFuncPtr, std::move(Tmp), pThreadName);
+	return true;
 }
 
 void CSqlStats::ExecPlayerRankOrTopThread(
@@ -175,15 +175,36 @@ CSqlInstaData::~CSqlInstaData()
 
 void CSqlStats::LoadInstaPlayerData(int ClientId, const char *pTable)
 {
-	const char *pName = Server()->ClientName(ClientId);
-	ExecPlayerStatsThread(ShowStatsWorker, "load insta player data", ClientId, pName, pTable, EInstaSqlRequestType::PLAYER_DATA);
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(pPlayer->m_LoadStatsQueryResult != nullptr)
+	{
+		// TODO: is this how these shared ptrs really work?
+		//       do we cleanup enough here? what about the pending worker?
+		pPlayer->m_LoadStatsQueryResult = nullptr;
+		log_warn("stats", "dropped old stats lookup for cid=%d because the name changed before it finished", ClientId);
+	}
+	pPlayer->m_LoadStatsQueryResult = std::make_shared<CLoadStatsSqlResult>();
+	auto pResult = pPlayer->m_LoadStatsQueryResult;
+
+	auto Tmp = std::make_unique<CSqlLoadStatsRequest>(pResult, g_Config.m_SvDebugStats);
+	str_copy(Tmp->m_aName, Server()->ClientName(ClientId), sizeof(Tmp->m_aName));
+	str_copy(Tmp->m_aTable, pTable, sizeof(Tmp->m_aTable));
+
+	if(m_pExtraColumns)
+	{
+		Tmp->m_pExtraColumns = m_pExtraColumns->Clone();
+		if(g_Config.m_SvDebugStats > 1)
+			dbg_msg("sql", "allocated memory at %p", Tmp->m_pExtraColumns);
+	}
+
+	m_pPool->Execute(LoadStatsWorker, std::move(Tmp), "load insta player data");
 }
 
 void CSqlStats::ShowStats(int ClientId, const char *pName, const char *pTable, EInstaSqlRequestType RequestType)
 {
 	if(Db()->RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerStatsThread(ShowStatsWorker, "show stats", ClientId, pName, pTable, RequestType);
+	ExecPlayerStatsThreadRatelimited(ShowStatsWorker, "show stats", ClientId, pName, pTable, RequestType);
 }
 
 void CSqlStats::ShowRank(
@@ -319,88 +340,32 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 	const auto *pData = dynamic_cast<const CSqlPlayerStatsRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CInstaSqlResult *>(pGameData->m_pResult.get());
 
-	// do not print "is unranked" in chat for new players
-	// https://github.com/ddnet-insta/ddnet-insta/issues/245
-	if(pData->m_RequestType == EInstaSqlRequestType::PLAYER_DATA)
+	EResult Result = LoadStats(
+		pSqlServer,
+		pGameData,
+		pData->m_aName,
+		pData->m_aTable,
+		pData->m_pExtraColumns,
+		&pResult->m_Stats,
+		pError,
+		ErrorSize);
+	switch(Result)
+	{
+	case EResult::SUCCESS:
 		pResult->m_MessageKind = pData->m_RequestType;
-
-	char aBuf[4096];
-	str_format(
-		aBuf,
-		sizeof(aBuf),
-		"SELECT"
-		" points, kills, deaths, spree,"
-		" win_points, wins, losses, shots_fired, shots_hit %s "
-		"FROM %s "
-		"WHERE name = ?;",
-		!pData->m_pExtraColumns ? "" : pData->m_pExtraColumns->SelectColumns(),
-		pData->m_aTable);
-	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
-	{
-		dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
-		return false;
-	}
-	pSqlServer->BindString(1, pData->m_aName);
-	pSqlServer->Print();
-
-	bool End;
-	if(!pSqlServer->Step(&End, pError, ErrorSize))
-	{
-		dbg_msg("sql-thread", "step failed query: %s", aBuf);
-		return false;
-	}
-
-	if(End)
-	{
+		str_copy(pResult->m_Info.m_aRequestedPlayer, pData->m_aName, sizeof(pResult->m_Info.m_aRequestedPlayer));
+		return true;
+	case EResult::INVALID:
+		pResult->m_MessageKind = EInstaSqlRequestType::DIRECT;
 		str_format(pResult->m_aaMessages[0], sizeof(pResult->m_aaMessages[0]),
 			"'%s' is unranked",
 			pData->m_aName);
+		return true;
+	case EResult::FATAL_ERROR:
+		return false;
 	}
-	else
-	{
-		// success
-		pResult->m_MessageKind = pData->m_RequestType;
 
-		str_copy(pResult->m_Info.m_aRequestedPlayer, pData->m_aName, sizeof(pResult->m_Info.m_aRequestedPlayer));
-
-		int Offset = 1;
-		pResult->m_Stats.m_Points = pSqlServer->GetInt(Offset++);
-		pResult->m_Stats.m_Kills = pSqlServer->GetInt(Offset++);
-		pResult->m_Stats.m_Deaths = pSqlServer->GetInt(Offset++);
-		pResult->m_Stats.m_BestSpree = pSqlServer->GetInt(Offset++);
-		pResult->m_Stats.m_WinPoints = pSqlServer->GetInt(Offset++);
-		pResult->m_Stats.m_Wins = pSqlServer->GetInt(Offset++);
-		pResult->m_Stats.m_Losses = pSqlServer->GetInt(Offset++);
-		pResult->m_Stats.m_ShotsFired = pSqlServer->GetInt(Offset++);
-		pResult->m_Stats.m_ShotsHit = pSqlServer->GetInt(Offset++);
-
-		if(pData->m_DebugStats > 1)
-		{
-			dbg_msg("sql-thread", "loaded base stats:");
-			pResult->m_Stats.Dump(pData->m_pExtraColumns, "sql-thread");
-		}
-
-		CSqlStatsPlayer EmptyStats;
-		EmptyStats.Reset();
-
-		// merge into empty stats instead of having a ReadStats() and a ReadAndMergeStats() method
-		if(pData->m_pExtraColumns)
-			pData->m_pExtraColumns->ReadAndMergeStats(&Offset, pSqlServer, &pResult->m_Stats, &EmptyStats);
-
-		if(pData->m_DebugStats > 1)
-		{
-			if(pData->m_pExtraColumns)
-			{
-				dbg_msg("sql-thread", "loaded gametype specific stats:");
-				pResult->m_Stats.Dump(pData->m_pExtraColumns, "sql-thread");
-			}
-			else
-			{
-				dbg_msg("sql-thread", "warning no extra columns set!");
-			}
-		}
-	}
-	return true;
+	return false;
 }
 
 bool CSqlStats::ShowRankWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
@@ -756,6 +721,126 @@ bool CSqlStats::SaveFastcapWorker(IDbConnection *pSqlServer, const ISqlData *pGa
 	pSqlServer->Print();
 	int NumInserted;
 	return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
+}
+
+bool CSqlStats::LoadStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlLoadStatsRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CLoadStatsSqlResult *>(pGameData->m_pResult.get());
+
+	str_copy(pResult->m_aName, pData->m_aName);
+
+	pResult->m_Stats.emplace();
+	EResult Result = LoadStats(
+		pSqlServer,
+		pGameData,
+		pData->m_aName,
+		pData->m_aTable,
+		pData->m_pExtraColumns,
+		&pResult->m_Stats.value(),
+		pError,
+		ErrorSize);
+	switch(Result)
+	{
+	case EResult::SUCCESS:
+		return true;
+	case EResult::INVALID:
+		pResult->m_Stats = std::nullopt;
+		return true;
+	case EResult::FATAL_ERROR:
+		return false;
+	}
+
+	return false;
+}
+
+CSqlStats::EResult CSqlStats::LoadStats(
+	IDbConnection *pSqlServer,
+	const ISqlData *pGameData,
+	const char *pName,
+	const char *pTable,
+	CExtraColumns *pExtraColumns,
+	CSqlStatsPlayer *pStats,
+	char *pError,
+	int ErrorSize)
+{
+	char aBuf[4096];
+	str_format(
+		aBuf,
+		sizeof(aBuf),
+		"SELECT"
+		" points, kills, deaths, spree,"
+		" win_points, wins, losses, shots_fired, shots_hit %s "
+		"FROM %s "
+		"WHERE name = ?;",
+		!pExtraColumns ? "" : pExtraColumns->SelectColumns(),
+		pTable);
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
+		return EResult::FATAL_ERROR;
+	}
+	pSqlServer->BindString(1, pName);
+	pSqlServer->Print();
+
+	bool End;
+	if(!pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		dbg_msg("sql-thread", "step failed query: %s", aBuf);
+		return EResult::FATAL_ERROR;
+	}
+
+	if(End)
+	{
+		// name not found
+		return EResult::INVALID;
+	}
+
+	if(!pStats)
+	{
+		return EResult::SUCCESS;
+	}
+
+	// success
+
+	int Offset = 1;
+	pStats->m_Points = pSqlServer->GetInt(Offset++);
+	pStats->m_Kills = pSqlServer->GetInt(Offset++);
+	pStats->m_Deaths = pSqlServer->GetInt(Offset++);
+	pStats->m_BestSpree = pSqlServer->GetInt(Offset++);
+	pStats->m_WinPoints = pSqlServer->GetInt(Offset++);
+	pStats->m_Wins = pSqlServer->GetInt(Offset++);
+	pStats->m_Losses = pSqlServer->GetInt(Offset++);
+	pStats->m_ShotsFired = pSqlServer->GetInt(Offset++);
+	pStats->m_ShotsHit = pSqlServer->GetInt(Offset++);
+
+	if(g_Config.m_SvDebugStats > 1)
+	{
+		dbg_msg("sql-thread", "loaded base stats:");
+		pStats->Dump(pExtraColumns, "sql-thread");
+	}
+
+	CSqlStatsPlayer EmptyStats;
+	EmptyStats.Reset();
+
+	// merge into empty stats instead of having a ReadStats() and a ReadAndMergeStats() method
+	if(pExtraColumns)
+		pExtraColumns->ReadAndMergeStats(&Offset, pSqlServer, pStats, &EmptyStats);
+
+	if(g_Config.m_SvDebugStats > 1)
+	{
+		if(pExtraColumns)
+		{
+			dbg_msg("sql-thread", "loaded gametype specific stats:");
+			pStats->Dump(pExtraColumns, "sql-thread");
+		}
+		else
+		{
+			dbg_msg("sql-thread", "warning no extra columns set!");
+		}
+	}
+
+	return EResult::SUCCESS;
 }
 
 bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)

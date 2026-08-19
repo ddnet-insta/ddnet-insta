@@ -2219,12 +2219,33 @@ void CGameControllerInstaCore::LoadNewPlayerNameData(CPlayer *pPlayer)
 	Db()->Stats()->LoadInstaPlayerData(pPlayer->GetCid(), m_pStatsTable);
 }
 
-void CGameControllerInstaCore::OnLoadedNameStats(const CSqlStatsPlayer *pStats, class CPlayer *pPlayer)
+void CGameControllerInstaCore::OnLoadedNameStats(const CSqlStatsPlayer *pStatsOrNullptr, const char *pName, class CPlayer *pPlayer)
 {
 	if(!pPlayer)
 		return;
+	if(!pStatsOrNullptr)
+	{
+		if(g_Config.m_SvDebugStats)
+		{
+			log_info(
+				"stats",
+				"lookup for cid=%d finished, the name='%s' did not collect any stats yet",
+				pPlayer->GetCid(),
+				pName);
+			if(str_comp(Server()->ClientName(pPlayer->GetCid()), pName))
+			{
+				// we do not really expect this to be hit because the rename
+				// should have cleared out the old pending worker job
+				log_warn(
+					"stats",
+					" warning the current player name '%s' differs from the looked up name",
+					Server()->ClientName(pPlayer->GetCid()));
+			}
+		}
+		return;
+	}
 
-	pPlayer->m_SavedStats = *pStats;
+	pPlayer->m_SavedStats = *pStatsOrNullptr;
 
 	if(g_Config.m_SvDebugStats > 1)
 	{
