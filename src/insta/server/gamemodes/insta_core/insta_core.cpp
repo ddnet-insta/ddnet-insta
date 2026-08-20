@@ -1461,21 +1461,21 @@ void CGameControllerInstaCore::SnapDDNetPlayer(int SnappingClient, CPlayer *pPla
 		pDDNetPlayer->m_AuthLevel = AUTHED_NO;
 }
 
-bool CGameControllerInstaCore::SendClientInfo7(const protocol7::CNetMsg_Sv_ClientInfo *pClientInfo, int ClientId)
+bool CGameControllerInstaCore::SendClientInfo7(const protocol7::CNetMsg_Sv_ClientInfo *pClientInfo, int InfoOwnerClientId, int ClientId)
 {
 	protocol7::CNetMsg_Sv_ClientInfo Info = *pClientInfo;
-	CPlayer *pPlayer = GetPlayerOrNullptr(Info.m_ClientId);
+	CPlayer *pPlayer = GetPlayerOrNullptr(InfoOwnerClientId);
 	if(pPlayer)
 		Info.m_Team = GetPlayerTeam(pPlayer, true);
-	Server()->SendPackMsg(&Info, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+	Server()->SendPackMsg(&Info, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, ClientId);
 	return true;
 }
 
-bool CGameControllerInstaCore::SendClientDrop7(const protocol7::CNetMsg_Sv_ClientDrop *pMsg, int ClientId)
+bool CGameControllerInstaCore::SendClientDrop7(const protocol7::CNetMsg_Sv_ClientDrop *pMsg, int InfoOwnerClientId, int ClientId)
 {
 	protocol7::CNetMsg_Sv_ClientDrop Msg = *pMsg;
-	// CPlayer *pPlayer = GetPlayerOrNullptr(Msg.m_ClientId);
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+	// CPlayer *pPlayer = GetPlayerOrNullptr(InfoOwnerClientId);
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, ClientId);
 	return true;
 }
 

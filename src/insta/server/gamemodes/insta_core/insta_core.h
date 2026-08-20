@@ -109,8 +109,8 @@ public:
 	int SnapPlayerFlags7(int SnappingClient, CPlayer *pPlayer, int PlayerFlags7) override;
 	void SnapClientInfo(int SnappingClient, CPlayer *pPlayer, CNetObj_ClientInfo *pClientInfo) override;
 	void SnapDDNetPlayer(int SnappingClient, CPlayer *pPlayer, CNetObj_DDNetPlayer *pDDNetPlayer) override;
-	bool SendClientInfo7(const protocol7::CNetMsg_Sv_ClientInfo *pClientInfo, int ClientId) override;
-	bool SendClientDrop7(const protocol7::CNetMsg_Sv_ClientDrop *pMsg, int ClientId) override;
+	bool SendClientInfo7(const protocol7::CNetMsg_Sv_ClientInfo *pClientInfo, int InfoOwnerClientId, int ClientId) override;
+	bool SendClientDrop7(const protocol7::CNetMsg_Sv_ClientDrop *pMsg, int InfoOwnerClientId, int ClientId) override;
 	bool OnClientPacket(int ClientId, bool Sys, int MsgId, struct CNetChunk *pPacket, class CUnpacker *pUnpacker) override;
 	bool UnfreezeOnHammerHit() const override;
 	void OnFireHook(class CCharacter *pCharacter) override;

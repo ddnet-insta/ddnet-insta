@@ -233,17 +233,19 @@ bool IGameController::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int Cl
 
 bool IGameController::SendClientInfo7(
 	const protocol7::CNetMsg_Sv_ClientInfo *pClientInfo,
+	int InfoOwnerClientId,
 	int ClientId)
 {
-	Server()->SendPackMsg(pClientInfo, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+	Server()->SendPackMsg(pClientInfo, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, ClientId);
 	return true;
 }
 
 bool IGameController::SendClientDrop7(
 	const protocol7::CNetMsg_Sv_ClientDrop *pMsg,
+	int InfoOwnerClientId,
 	int ClientId)
 {
-	Server()->SendPackMsg(pMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+	Server()->SendPackMsg(pMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, ClientId);
 	return true;
 }
 

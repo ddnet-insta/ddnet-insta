@@ -617,6 +617,8 @@ void CPlayer::SendConnect(int FakeId, int ClientId)
 	NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientId);
 	NewClientInfoMsg.m_Silent = 1;
 
+	pPlayer->SetTeeInfos(pPlayer->m_SkinInfoManager.TeeInfo()); // ddnet-insta
+
 	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 	{
 		NewClientInfoMsg.m_apSkinPartNames[p] = pPlayer->TeeInfos().m_aaSkinPartNames[p];
@@ -624,7 +626,8 @@ void CPlayer::SendConnect(int FakeId, int ClientId)
 		NewClientInfoMsg.m_aSkinPartColors[p] = pPlayer->TeeInfos().m_aSkinPartColors[p];
 	}
 
-	Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
+	// ddnet-insta uses SendClientInfo7 instead of SendPackMsg
+	GameServer()->m_pController->SendClientInfo7(&NewClientInfoMsg, ClientId, m_ClientId);
 }
 
 void CPlayer::SendDisconnect(int FakeId)
@@ -637,7 +640,8 @@ void CPlayer::SendDisconnect(int FakeId)
 	ClientDropMsg.m_pReason = "";
 	ClientDropMsg.m_Silent = 1;
 
-	Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
+	// ddnet-insta uses SendClientDrop7 instead of SendPackMsg
+	GameServer()->m_pController->SendClientDrop7(&ClientDropMsg, m_ClientId);
 }
 
 void CPlayer::OnDisconnect()
