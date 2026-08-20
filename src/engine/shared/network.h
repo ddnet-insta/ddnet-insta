@@ -66,7 +66,7 @@ enum
 enum
 {
 	NET_MAX_PACKETSIZE = 1400,
-	NET_MAX_PAYLOAD = NET_MAX_PACKETSIZE - 6,
+	NET_MAX_CONNLESS_PAYLOAD = NET_MAX_PACKETSIZE - 6,
 	/**
 	 * The maximum size of a chunk within a connection-oriented packet.
 	 *
@@ -101,7 +101,9 @@ enum
 
 	NET_CONN_BUFFERSIZE = 1024 * 32,
 
-	NET_CONNLIMIT_IPS = 16,
+	// Addresses tracked for `sv_connlimit`, evicted least recently used. The limit stops
+	// applying once addresses are evicted before they reach `sv_connlimit`.
+	NET_CONNLIMIT_IPS = 256,
 
 	NET_TOKENCACHE_ADDRESSEXPIRY = 64,
 	NET_TOKENCACHE_PACKETEXPIRY = 5,
@@ -146,6 +148,8 @@ struct CNetChunk
 	const void *m_pData;
 	// only used if the flags contain NETSENDFLAG_EXTENDED and NETSENDFLAG_CONNLESS
 	unsigned char m_aExtraData[NET_CONNLESS_EXTRA_SIZE];
+
+	void AssertSizeSanity() const;
 };
 
 class CNetChunkHeader
@@ -178,7 +182,7 @@ public:
 	int m_Ack;
 	int m_NumChunks;
 	int m_DataSize;
-	unsigned char m_aChunkData[NET_MAX_PAYLOAD];
+	unsigned char m_aChunkData[NET_MAX_PACKETSIZE - NET_PACKETHEADERSIZE];
 	unsigned char m_aExtraData[NET_CONNLESS_EXTRA_SIZE];
 };
 
@@ -410,6 +414,7 @@ class CPacketChunkUnpacker
 public:
 	void FeedPacket(const NETADDR &Addr, const CNetPacketConstruct &Packet, CNetConnection *pConnection, int ClientId);
 	bool UnpackNextChunk(CNetChunk *pChunk);
+	void Reset();
 
 private:
 	bool m_Valid = false;
@@ -438,7 +443,10 @@ private:
 	struct CSpamConn
 	{
 		NETADDR m_Addr;
+		// start of the timespan the connections are counted in
 		int64_t m_Time;
+		// last connection, only used to pick the entry to evict
+		int64_t m_LastSeen;
 		int m_Conns;
 	};
 
@@ -464,7 +472,14 @@ private:
 	int64_t m_VConnFirst;
 	int m_VConnNum;
 
-	CSpamConn m_aSpamConns[NET_CONNLIMIT_IPS];
+	// budgets for work unauthenticated peers can request, reset in Update():
+	// `m_NumRecvPackets` per Recv() batch, the others per second
+	int m_NumRecvPackets = 0;
+	int64_t m_BudgetStart = 0;
+	int m_NumPreConnDecompress = 0;
+	int m_NumBanReplies = 0;
+
+	CSpamConn m_aSpamConns[NET_CONNLIMIT_IPS] = {};
 
 	CPacketChunkUnpacker m_PacketChunkUnpacker;
 	CNetPacketConstruct m_RecvBuffer;
@@ -586,7 +601,7 @@ private:
 	public:
 		NETADDR m_Addr;
 		int m_DataSize;
-		unsigned char m_aData[NET_MAX_PAYLOAD];
+		unsigned char m_aData[NET_MAX_CONNLESS_PAYLOAD];
 		int64_t m_Expiry;
 	};
 
@@ -671,7 +686,10 @@ public:
 	static void SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup = false);
 
 	static std::optional<int> UnpackPacketFlags(unsigned char *pBuffer, int Size);
-	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken = nullptr, SECURITY_TOKEN *pResponseToken = nullptr);
+	// `AllowDecompression` false rejects compressed packets instead of decompressing them,
+	// decompression being the most expensive part of receiving a packet. `pDecompressed` is
+	// set when decompression was attempted, successfully or not.
+	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, bool AllowDecompression, SECURITY_TOKEN *pSecurityToken = nullptr, SECURITY_TOKEN *pResponseToken = nullptr, bool *pDecompressed = nullptr);
 
 	// The backroom is ack-NET_MAX_SEQUENCE/2. Used for knowing if we acked a packet or not
 	static bool IsSeqInBackroom(int Seq, int Ack);

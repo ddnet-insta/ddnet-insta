@@ -42,6 +42,7 @@ std::array<vec2, CMenuBackground::NUM_POS> GenerateMenuBackgroundPositions()
 	Positions[CMenuBackground::POS_SETTINGS_SOUND] = vec2(1000.0f, 1000.0f);
 	Positions[CMenuBackground::POS_SETTINGS_DDNET] = vec2(1200.0f, 200.0f);
 	Positions[CMenuBackground::POS_SETTINGS_ASSETS] = vec2(500.0f, 500.0f);
+	Positions[CMenuBackground::POS_SETTINGS_CREDITS] = vec2(1100.0f, 1000.0f);
 	for(int i = 0; i < CMenuBackground::POS_BROWSER_CUSTOM_NUM; ++i)
 		Positions[CMenuBackground::POS_BROWSER_CUSTOM0 + i] = vec2(500.0f + (75.0f * (float)i), 650.0f - (75.0f * (float)i));
 	for(int i = 0; i < CMenuBackground::POS_SETTINGS_RESERVED_NUM; ++i)
@@ -265,30 +266,20 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 			CMapLayers::OnMapLoad();
 
 			// look for custom positions
-			CMapItemLayerTilemap *pTLayer = m_pLayers->GameLayer();
-			if(pTLayer)
+			CMapItemLayerTilemap *pGameLayer = m_pLayers->GameLayer();
+			const CTile *pTiles = static_cast<const CTile *>(m_pLayers->Map()->GetData(pGameLayer->m_Data));
+			for(int y = 0; y < pGameLayer->m_Height; ++y)
 			{
-				int DataIndex = pTLayer->m_Data;
-				unsigned int Size = m_pLayers->Map()->GetDataSize(DataIndex);
-				void *pTiles = m_pLayers->Map()->GetData(DataIndex);
-				unsigned int TileSize = sizeof(CTile);
-
-				if(Size >= pTLayer->m_Width * pTLayer->m_Height * TileSize)
+				for(int x = 0; x < pGameLayer->m_Width; ++x)
 				{
-					for(int y = 0; y < pTLayer->m_Height; ++y)
+					unsigned char Index = pTiles[y * pGameLayer->m_Width + x].m_Index;
+					if(Index >= TILE_TIME_CHECKPOINT_FIRST && Index <= TILE_TIME_CHECKPOINT_LAST)
 					{
-						for(int x = 0; x < pTLayer->m_Width; ++x)
-						{
-							unsigned char Index = ((CTile *)pTiles)[y * pTLayer->m_Width + x].m_Index;
-							if(Index >= TILE_TIME_CHECKPOINT_FIRST && Index <= TILE_TIME_CHECKPOINT_LAST)
-							{
-								int ArrayIndex = std::clamp<int>((Index - TILE_TIME_CHECKPOINT_FIRST), 0, NUM_POS);
-								m_aPositions[ArrayIndex] = vec2(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
-							}
-
-							x += ((CTile *)pTiles)[y * pTLayer->m_Width + x].m_Skip;
-						}
+						int ArrayIndex = std::clamp<int>((Index - TILE_TIME_CHECKPOINT_FIRST), 0, NUM_POS);
+						m_aPositions[ArrayIndex] = vec2(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 					}
+
+					x += pTiles[y * pGameLayer->m_Width + x].m_Skip;
 				}
 			}
 		}

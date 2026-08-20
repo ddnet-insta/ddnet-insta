@@ -19,10 +19,10 @@
 // "info" shadows a ddnet command
 CHAT_COMMAND("info", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaInfo, this, "Shows info about this server")
 
-// "credits" shadows a ddnet command
+// "credits" used to shadow a ddnet command but it now got removed in ddnet we kept it
 CHAT_COMMAND("credits", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaModeCredits, this, "Shows the credits of the current ddnet-insta mode")
 CHAT_COMMAND("credits_insta", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaCredits, this, "Shows the credits of the entire ddnet-insta project")
-CHAT_COMMAND("credits_ddnet", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConCredits, this, "Shows the credits of the DDNet mod")
+CHAT_COMMAND("credits_ddnet", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConDDNetCredits, this, "Shows the credits of the DDNet mod")
 
 // all these team related commands shadow ddnet commands
 CHAT_COMMAND("team", "?i[id]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInstaTeam, this, "Lets you join team i (shows your team if left blank)")

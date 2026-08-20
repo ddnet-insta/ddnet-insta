@@ -961,7 +961,10 @@ void IGameController::OnInfoChatCmd(IConsole::IResult *pResult, void *pUserData)
 
 void IGameController::OnCreditsChatCmd(IConsole::IResult *pResult, void *pUserData)
 {
-	CGameContext::ConCredits(pResult, pUserData);
+	// Technically in real pure modern ddnet this command was removed
+	// so instead we should say in the "ddnet" gametype "no such command"
+	// and only show this one in the "ddrace" gametype but whatever
+	CGameContext::ConDDNetCredits(pResult, pUserData);
 }
 
 bool IGameController::OnRaceStart(int ClientId)

@@ -148,6 +148,7 @@ public:
 	static void ConInstaInfo(IConsole::IResult *pResult, void *pUserData);
 	static void ConInstaModeCredits(IConsole::IResult *pResult, void *pUserData);
 	static void ConInstaCredits(IConsole::IResult *pResult, void *pUserData);
+	static void ConDDNetCredits(IConsole::IResult *pResult, void *pUserData);
 	static void ConInstaTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConInstaLock(IConsole::IResult *pResult, void *pUserData);
 	static void ConInstaUnlock(IConsole::IResult *pResult, void *pUserData);

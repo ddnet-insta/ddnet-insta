@@ -28,6 +28,18 @@ void WriteSecurityToken(unsigned char *pData, SECURITY_TOKEN Token)
 	uint_to_bytes_be(pData, Token);
 }
 
+void CNetChunk::AssertSizeSanity() const
+{
+	if(m_Flags & NETSENDFLAG_CONNLESS)
+	{
+		dbg_assert(m_DataSize <= NET_MAX_CONNLESS_PAYLOAD, "connless packet too large, size=%d", m_DataSize);
+	}
+	else
+	{
+		dbg_assert(m_DataSize <= NET_MAX_CHUNK_SIZE, "chunk too large, size=%d", m_DataSize);
+	}
+}
+
 void CPacketChunkUnpacker::FeedPacket(const NETADDR &Addr, const CNetPacketConstruct &Packet, CNetConnection *pConnection, int ClientId)
 {
 	dbg_assert(!m_Valid, "Chunk unpacker is already unpacking");
@@ -113,6 +125,11 @@ bool CPacketChunkUnpacker::UnpackNextChunk(CNetChunk *pChunk)
 		pChunk->m_pData = pData;
 		return true;
 	}
+}
+
+void CPacketChunkUnpacker::Reset()
+{
+	m_Valid = false;
 }
 
 bool CNetBase::IsValidConnectionOrientedPacket(const CNetPacketConstruct *pPacket)
@@ -263,8 +280,13 @@ std::optional<int> CNetBase::UnpackPacketFlags(unsigned char *pBuffer, int Size)
 }
 
 // TODO: rename this function
-int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken, SECURITY_TOKEN *pResponseToken)
+int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, bool AllowDecompression, SECURITY_TOKEN *pSecurityToken, SECURITY_TOKEN *pResponseToken, bool *pDecompressed)
 {
+	if(pDecompressed != nullptr)
+	{
+		*pDecompressed = false;
+	}
+
 	if(pResponseToken != nullptr)
 	{
 		*pResponseToken = NET_SECURITY_TOKEN_UNKNOWN;
@@ -308,6 +330,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		pPacket->m_Ack = 0;
 		pPacket->m_NumChunks = 0;
 		pPacket->m_DataSize = Size - Offset;
+		dbg_assert((size_t)pPacket->m_DataSize <= sizeof(pPacket->m_aChunkData), "invalid packet size reached mem_copy, size=%d", pPacket->m_DataSize);
 		mem_copy(pPacket->m_aChunkData, pBuffer + Offset, pPacket->m_DataSize);
 
 		if(!Sixup && mem_comp(pBuffer, NET_HEADER_EXTENDED, sizeof(NET_HEADER_EXTENDED)) == 0)
@@ -343,6 +366,14 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 
 		if((pPacket->m_Flags & NET_PACKETFLAG_COMPRESSION) != 0)
 		{
+			if(!AllowDecompression)
+			{
+				return -1;
+			}
+			if(pDecompressed != nullptr)
+			{
+				*pDecompressed = true;
+			}
 			pPacket->m_DataSize = ms_Huffman.Decompress(&pBuffer[DataStart], pPacket->m_DataSize, pPacket->m_aChunkData, sizeof(pPacket->m_aChunkData));
 			if(pPacket->m_DataSize < 0)
 			{
@@ -351,10 +382,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		}
 		else
 		{
-			if(pPacket->m_DataSize > (int)sizeof(pPacket->m_aChunkData))
-			{
-				return -1;
-			}
+			dbg_assert((size_t)pPacket->m_DataSize <= sizeof(pPacket->m_aChunkData), "invalid packet size reached mem_copy, size=%d", pPacket->m_DataSize);
 			mem_copy(pPacket->m_aChunkData, &pBuffer[DataStart], pPacket->m_DataSize);
 		}
 	}

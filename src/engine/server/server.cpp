@@ -410,6 +410,7 @@ bool CServer::SetClientNameImpl(int ClientId, const char *pNameRequest, bool Set
 		// set the client name
 		str_copy(m_aClients[ClientId].m_aName, aNameTry);
 		GameServer()->TeehistorianRecordPlayerName(ClientId, m_aClients[ClientId].m_aName);
+		GameServer()->OnClientInfoChange(ClientId);
 	}
 
 	return Changed;
@@ -447,10 +448,11 @@ bool CServer::SetClientClanImpl(int ClientId, const char *pClanRequest, bool Set
 
 	bool Changed = str_comp(m_aClients[ClientId].m_aClan, aTrimmedClan) != 0;
 
-	if(Set)
+	if(Set && Changed)
 	{
 		// set the client clan
 		str_copy(m_aClients[ClientId].m_aClan, aTrimmedClan);
+		GameServer()->OnClientInfoChange(ClientId);
 	}
 
 	return Changed;
@@ -481,7 +483,11 @@ void CServer::SetClientCountry(int ClientId, int Country)
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS || m_aClients[ClientId].m_State < CClient::STATE_READY)
 		return;
 
+	if(m_aClients[ClientId].m_Country == Country)
+		return;
+
 	m_aClients[ClientId].m_Country = Country;
+	GameServer()->OnClientInfoChange(ClientId);
 }
 
 void CServer::SetClientScore(int ClientId, std::optional<int> Score)
@@ -1032,6 +1038,10 @@ void CServer::DoSnapshot()
 	{
 		// client must be ingame to receive snapshots
 		if(m_aClients[i].m_State != CClient::STATE_INGAME)
+			continue;
+
+		// don't send snapshots to clients that haven't identified as DDNet-based yet, can crash them.
+		if(!m_aClients[i].m_Sixup && m_aClients[i].m_DDNetVersion < VERSION_DDNET_OLD)
 			continue;
 
 		// this client is trying to recover, don't spam snapshots
@@ -2478,7 +2488,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 
 			if(Type == SERVERINFO_EXTENDED)
 			{
-				if(q.Size() >= NET_MAX_PAYLOAD - 18) // 8 bytes for type, 10 bytes for the largest token
+				if(q.Size() >= NET_MAX_CONNLESS_PAYLOAD - 18) // 8 bytes for type, 10 bytes for the largest token
 				{
 					// Retry current player.
 					i--;
@@ -2569,7 +2579,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxCons
 				Packer.AddInt(m_aClients[i].m_Score.value_or(-1)); // client score
 				Packer.AddInt(GameServer()->IsClientPlayer(i) ? 0 : 1); // flag spectator=1, bot=2 (player=0)
 
-				const int MaxPacketSize = NET_MAX_PAYLOAD - 128;
+				const int MaxPacketSize = NET_MAX_CONNLESS_PAYLOAD - 128;
 				if(MaxConsideredClients == MAX_CLIENTS)
 				{
 					if(Packer.Size() > MaxPacketSize - 32) // -32 because repacking will increase the length of the name
@@ -2865,7 +2875,7 @@ void CServer::UpdateServerInfo(bool Resend)
 	m_ServerInfoNeedsUpdate = false;
 }
 
-void CServer::PumpNetwork(bool PacketWaiting)
+void CServer::PumpNetwork()
 {
 	CNetChunk Packet;
 	SECURITY_TOKEN ResponseToken;
@@ -2877,7 +2887,8 @@ void CServer::PumpNetwork(bool PacketWaiting)
 	// per recipient, flushed once all packets have been handled below.
 	m_NetServer.BeginFlushBatch();
 
-	if(PacketWaiting)
+	// Receive unconditionally, `net_udp_recv()` can hold packets that
+	// `net_socket_read_wait()` does not see.
 	{
 		// process packets
 		ResponseToken = NET_SECURITY_TOKEN_UNKNOWN;
@@ -2954,7 +2965,7 @@ void CServer::PumpNetwork(bool PacketWaiting)
 		}
 	}
 	{
-		unsigned char aBuffer[NET_MAX_PAYLOAD];
+		unsigned char aBuffer[NET_MAX_CHUNK_SIZE];
 		int Flags;
 		mem_zero(&Packet, sizeof(Packet));
 		Packet.m_pData = aBuffer;
@@ -3118,7 +3129,9 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 			Client.m_DDNetVersion = DDNET_VERSION_NUMBER;
 			Client.m_GotDDNetVersionPacket = true;
 			Client.m_DDNetVersionSettled = true;
-			str_format(Client.m_aName, sizeof(Client.m_aName), "Debug dummy %d", DummyIndex + 1);
+			char aDummyName[MAX_NAME_LENGTH];
+			str_format(aDummyName, sizeof(aDummyName), "Debug dummy %d", DummyIndex + 1);
+			SetClientName(ClientId, aDummyName);
 			GameServer()->OnClientEnter(ClientId);
 		}
 		else if(!AddDummy && Client.m_DebugDummy)
@@ -3269,7 +3282,6 @@ int CServer::Run()
 	// start game
 	{
 		bool NonActive = false;
-		bool PacketWaiting = false;
 
 		m_GameStartTime = time_get();
 
@@ -3277,7 +3289,7 @@ int CServer::Run()
 		while(m_RunServer < STOPPING)
 		{
 			if(NonActive)
-				PumpNetwork(PacketWaiting);
+				PumpNetwork();
 
 			set_new_tick();
 
@@ -3495,7 +3507,7 @@ int CServer::Run()
 			}
 
 			if(!NonActive)
-				PumpNetwork(PacketWaiting);
+				PumpNetwork();
 
 			NonActive = true;
 			for(const auto &Client : m_aClients)
@@ -3534,14 +3546,15 @@ int CServer::Run()
 				!m_aDemoRecorder[RECORDER_MANUAL].IsRecording() &&
 				!m_aDemoRecorder[RECORDER_AUTO].IsRecording())
 			{
-				PacketWaiting = net_socket_read_wait(m_NetServer.Socket(), 1s);
+				net_socket_read_wait(m_NetServer.Socket(), 1s);
 			}
 			else
 			{
 				set_new_tick();
 				LastTime = time_get();
 				const auto MicrosecondsToWait = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::nanoseconds(TickStartTime(m_CurrentGameTick + 1) - LastTime)) + 1us;
-				PacketWaiting = MicrosecondsToWait > 0us ? net_socket_read_wait(m_NetServer.Socket(), MicrosecondsToWait) : true;
+				if(MicrosecondsToWait > 0us)
+					net_socket_read_wait(m_NetServer.Socket(), MicrosecondsToWait);
 			}
 			if(IsInterrupted())
 			{
@@ -3590,11 +3603,11 @@ void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "Kicked (%s)", pResult->GetString(1));
-		((CServer *)pUser)->Kick(pResult->GetInteger(0), aBuf);
+		((CServer *)pUser)->Kick(pResult->GetVictim(), aBuf);
 	}
 	else
 	{
-		((CServer *)pUser)->Kick(pResult->GetInteger(0), "Kicked by console");
+		((CServer *)pUser)->Kick(pResult->GetVictim(), "Kicked by console");
 	}
 }
 
@@ -4490,7 +4503,7 @@ void CServer::RegisterCommands()
 	m_pAntibot = Kernel()->RequestInterface<IEngineAntibot>();
 
 	// register console commands
-	Console()->Register("kick", "i[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
+	Console()->Register("kick", "v[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
 	Console()->Register("status", "?r[name]", CFGFLAG_SERVER, ConStatus, this, "List players containing name or all players");
 	Console()->Register("shutdown", "?r[reason]", CFGFLAG_SERVER, ConShutdown, this, "Shut down");
 	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon");
@@ -4730,6 +4743,10 @@ bool CServer::SetTimedOut(int ClientId, int OrigId)
 	m_NetServer.ResumeOldConnection(ClientId, OrigId);
 
 	m_aClients[ClientId].m_Sixup = m_aClients[OrigId].m_Sixup;
+	// This slot keeps playing with the resumed connection, which can use the other
+	// protocol version, so its snapshots must not be used as delta base anymore.
+	m_aClients[ClientId].m_Snapshots.PurgeAll();
+	m_aClients[ClientId].m_LastAckedSnapshot = -1;
 	m_aClients[ClientId].m_AuthKey = -1;
 	m_aClients[ClientId].m_Flags = m_aClients[OrigId].m_Flags;
 	m_aClients[ClientId].m_DDNetVersion = m_aClients[OrigId].m_DDNetVersion;
