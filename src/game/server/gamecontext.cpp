@@ -961,7 +961,7 @@ void CGameContext::SendRename7(int ClientId)
 	Info.m_pClan = Server()->ClientClan(ClientId);
 	Info.m_Local = 0;
 	Info.m_Silent = true;
-	Info.m_Team = m_pController->GetPlayerTeam(pPlayer, true); // ddnet-insta
+	Info.m_Team = pPlayer->GetTeam();
 
 	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 	{
