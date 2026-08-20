@@ -260,17 +260,17 @@ void CVanillaProjectile::Snap(int SnappingClient)
 
 	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
-		Server()->SnapNewItem(GetId().value(), NetInfo());
+		Server()->SnapNewItem(GetId().value(), NetInfo(SnappingClient));
 	}
 	else if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && NetIsInfoLegacyCompatible())
 	{
 		if(SnappingClientVersion >= VERSION_DDNET_MSG_LEGACY)
 		{
-			Server()->SnapNewItem(GetId().value(), NetInfoLegacy());
+			Server()->SnapNewItem(GetId().value(), NetInfoLegacy(SnappingClient));
 		}
 		else
 		{
-			CNetObj_DDRaceProjectile DDRaceProjectile = NetInfoLegacy();
+			CNetObj_DDRaceProjectile DDRaceProjectile = NetInfoLegacy(SnappingClient);
 			CNetObj_Projectile Projectile = {};
 			static_assert(sizeof(DDRaceProjectile) == sizeof(Projectile));
 			mem_copy(&Projectile, &DDRaceProjectile, sizeof(Projectile));

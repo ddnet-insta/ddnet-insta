@@ -876,6 +876,9 @@ public:
 			and also alter them.
 			And also abort the send by not calling Server()->SendPackMsg()
 
+			WARNING: since 128 support this method is not called reliably anymore
+			FIXME: CHECK THIS WARNING
+
 		Arguments:
 			pClientInfo - the client info that was filled by the ddnet-server that it would like to send
 			ClientId - Client that receives this net message
@@ -894,6 +897,9 @@ public:
 			You can overwrite this to read the values being sent
 			and also alter them.
 			And also abort the send by not calling Server()->SendPackMsg()
+
+			WARNING: since 128 support this method is not called reliably anymore
+			FIXME: CHECK THIS WARNING
 
 		Arguments:
 			pMsg - the info that was filled by the ddnet-server that it would like to send
