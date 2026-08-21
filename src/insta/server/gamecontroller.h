@@ -879,8 +879,9 @@ public:
 		Arguments:
 			pClientInfo - the client info that was filled by the ddnet-server that it would like to send
 			InfoOwnerClientId - The real client id of the player who's info we send
-			                    inside of pClientInfo there might be a fake translation id
+					    inside of pClientInfo there might be a fake translation id
 			ClientId - Client that receives this net message
+			Flags - the msg send flags like MSGFLAG_VITAL
 
 		Returns:
 			return true when the message was actually sent
@@ -888,7 +889,8 @@ public:
 	virtual bool SendClientInfo7(
 		const protocol7::CNetMsg_Sv_ClientInfo *pClientInfo,
 		int InfoOwnerClientId,
-		int ClientId);
+		int ClientId,
+		int Flags);
 
 	/*
 		Function: SendClientDrop7
@@ -901,8 +903,9 @@ public:
 		Arguments:
 			pMsg - the info that was filled by the ddnet-server that it would like to send
 			InfoOwnerClientId - The real client id of the player who's info we send
-			                    inside of pClientInfo there might be a fake translation id
+					    inside of pClientInfo there might be a fake translation id
 			ClientId - Client that receives this net message
+			Flags - the msg send flags like MSGFLAG_VITAL
 
 		Returns:
 			return true when the message was actually sent
@@ -910,7 +913,8 @@ public:
 	virtual bool SendClientDrop7(
 		const protocol7::CNetMsg_Sv_ClientDrop *pMsg,
 		int InfoOwnerClientId,
-		int ClientId);
+		int ClientId,
+		int Flags);
 
 	/*
 		Function: GetPlayerTeam
