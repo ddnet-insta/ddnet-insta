@@ -641,7 +641,7 @@ void CPlayer::SendDisconnect(int FakeId)
 	ClientDropMsg.m_Silent = 1;
 
 	// ddnet-insta uses SendClientDrop7 instead of SendPackMsg
-	GameServer()->m_pController->SendClientDrop7(&ClientDropMsg, m_ClientId, m_ClientId, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE);
+	GameServer()->m_pController->SendClientDrop7(&ClientDropMsg, std::nullopt, m_ClientId, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE);
 }
 
 void CPlayer::OnDisconnect()

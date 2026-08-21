@@ -878,7 +878,7 @@ public:
 
 		Arguments:
 			pClientInfo - the client info that was filled by the ddnet-server that it would like to send
-			InfoOwnerClientId - The real client id of the player who's info we send
+			RealClientId - The real client id of the player who's info we send
 					    inside of pClientInfo there might be a fake translation id
 			ClientId - Client that receives this net message
 			Flags - the msg send flags like MSGFLAG_VITAL
@@ -888,7 +888,7 @@ public:
 	*/
 	virtual bool SendClientInfo7(
 		const protocol7::CNetMsg_Sv_ClientInfo *pClientInfo,
-		int InfoOwnerClientId,
+		int RealClientId,
 		int ClientId,
 		int Flags);
 
@@ -902,8 +902,8 @@ public:
 
 		Arguments:
 			pMsg - the info that was filled by the ddnet-server that it would like to send
-			InfoOwnerClientId - The real client id of the player who's info we send
-					    inside of pClientInfo there might be a fake translation id
+			RealClientId - The real client id of the player who's disconnect we send
+				       inside of pMsg there might be a fake translation id
 			ClientId - Client that receives this net message
 			Flags - the msg send flags like MSGFLAG_VITAL
 
@@ -912,7 +912,7 @@ public:
 	*/
 	virtual bool SendClientDrop7(
 		const protocol7::CNetMsg_Sv_ClientDrop *pMsg,
-		int InfoOwnerClientId,
+		std::optional<int> RealClientId,
 		int ClientId,
 		int Flags);
 

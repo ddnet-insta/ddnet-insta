@@ -233,7 +233,7 @@ bool IGameController::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int Cl
 
 bool IGameController::SendClientInfo7(
 	const protocol7::CNetMsg_Sv_ClientInfo *pClientInfo,
-	int InfoOwnerClientId,
+	int RealClientId,
 	int ClientId,
 	int Flags)
 {
@@ -243,7 +243,7 @@ bool IGameController::SendClientInfo7(
 
 bool IGameController::SendClientDrop7(
 	const protocol7::CNetMsg_Sv_ClientDrop *pMsg,
-	int InfoOwnerClientId,
+	std::optional<int> RealClientId,
 	int ClientId,
 	int Flags)
 {

@@ -1461,10 +1461,10 @@ void CGameControllerInstaCore::SnapDDNetPlayer(int SnappingClient, CPlayer *pPla
 		pDDNetPlayer->m_AuthLevel = AUTHED_NO;
 }
 
-bool CGameControllerInstaCore::SendClientInfo7(const protocol7::CNetMsg_Sv_ClientInfo *pClientInfo, int InfoOwnerClientId, int ClientId, int Flags)
+bool CGameControllerInstaCore::SendClientInfo7(const protocol7::CNetMsg_Sv_ClientInfo *pClientInfo, int RealClientId, int ClientId, int Flags)
 {
 	protocol7::CNetMsg_Sv_ClientInfo Info = *pClientInfo;
-	CPlayer *pPlayer = GetPlayerOrNullptr(InfoOwnerClientId);
+	CPlayer *pPlayer = GetPlayerOrNullptr(RealClientId);
 	if(pPlayer)
 		Info.m_Team = GetPlayerTeam(pPlayer, true);
 	// ddnet silences the native 0.7 join and leave messages and sends a chat
@@ -1476,15 +1476,18 @@ bool CGameControllerInstaCore::SendClientInfo7(const protocol7::CNetMsg_Sv_Clien
 	return true;
 }
 
-bool CGameControllerInstaCore::SendClientDrop7(const protocol7::CNetMsg_Sv_ClientDrop *pMsg, int InfoOwnerClientId, int ClientId, int Flags)
+bool CGameControllerInstaCore::SendClientDrop7(const protocol7::CNetMsg_Sv_ClientDrop *pMsg, std::optional<int> RealClientId, int ClientId, int Flags)
 {
 	protocol7::CNetMsg_Sv_ClientDrop Msg = *pMsg;
+
+	// CPlayer *pPlayer = GetPlayerOrNullptr(RealClientId.value_or(-1));
+
 	// ddnet silences the native 0.7 join and leave messages and sends a chat
 	// message for both 0.6 and 0.7
 	// in ddnet-insta we use the new native join/leave message which 0.7 clients
 	// can localize
 	Msg.m_Silent = false;
-	// CPlayer *pPlayer = GetPlayerOrNullptr(InfoOwnerClientId);
+
 	Server()->SendPackMsg(&Msg, Flags, ClientId);
 	return true;
 }
