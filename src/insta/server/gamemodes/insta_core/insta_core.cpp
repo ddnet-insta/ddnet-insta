@@ -1467,6 +1467,11 @@ bool CGameControllerInstaCore::SendClientInfo7(const protocol7::CNetMsg_Sv_Clien
 	CPlayer *pPlayer = GetPlayerOrNullptr(InfoOwnerClientId);
 	if(pPlayer)
 		Info.m_Team = GetPlayerTeam(pPlayer, true);
+	// ddnet silences the native 0.7 join and leave messages and sends a chat
+	// message for both 0.6 and 0.7
+	// in ddnet-insta we use the new native join/leave message which 0.7 clients
+	// can localize
+	Info.m_Silent = false;
 	Server()->SendPackMsg(&Info, Flags, ClientId);
 	return true;
 }
@@ -1474,6 +1479,11 @@ bool CGameControllerInstaCore::SendClientInfo7(const protocol7::CNetMsg_Sv_Clien
 bool CGameControllerInstaCore::SendClientDrop7(const protocol7::CNetMsg_Sv_ClientDrop *pMsg, int InfoOwnerClientId, int ClientId, int Flags)
 {
 	protocol7::CNetMsg_Sv_ClientDrop Msg = *pMsg;
+	// ddnet silences the native 0.7 join and leave messages and sends a chat
+	// message for both 0.6 and 0.7
+	// in ddnet-insta we use the new native join/leave message which 0.7 clients
+	// can localize
+	Msg.m_Silent = false;
 	// CPlayer *pPlayer = GetPlayerOrNullptr(InfoOwnerClientId);
 	Server()->SendPackMsg(&Msg, Flags, ClientId);
 	return true;
