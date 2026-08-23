@@ -129,6 +129,10 @@ On regular ddnet servers it is impossible for teeworlds clients to login using t
 In ddnet-insta it is possible for 0.7 players to send ``username:password`` as the password.
 And it will log them in if those are valid credentials.
 
+But be careful the teeworlds client can only send passwords with a length of up to 32 characters!
+And we use the password field for username, the separator and the password so all of them together
+have to be shorter than 32 characters or the login will not work.
+
 ## Lots of little fun opt in features
 
 By default ddnet-insta tries to be ready to be used in competitive games. Being as close to prior implementations
