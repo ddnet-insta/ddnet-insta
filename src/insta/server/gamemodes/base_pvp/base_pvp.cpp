@@ -201,7 +201,14 @@ int CGameControllerBasePvp::SnapGameInfoExFlags(int SnappingClient, int DDRaceFl
 
 int CGameControllerBasePvp::SnapGameInfoExFlags2(int SnappingClient, int DDRaceFlags)
 {
-	return GAMEINFOFLAG2_HUD_AMMO | GAMEINFOFLAG2_HUD_HEALTH_ARMOR;
+	int Flags = DDRaceFlags;
+
+	// hud
+	Flags &= ~(GAMEINFOFLAG2_HUD_DDRACE);
+	Flags |= GAMEINFOFLAG2_HUD_AMMO;
+	Flags |= GAMEINFOFLAG2_HUD_HEALTH_ARMOR;
+
+	return Flags;
 }
 
 int CGameControllerBasePvp::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer)
