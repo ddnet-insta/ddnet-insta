@@ -196,11 +196,6 @@ int CGameControllerBasePvp::SnapGameInfoExFlags(int SnappingClient, int DDRaceFl
 	if(!g_Config.m_SvAllowZoom) //ddnet-insta
 		Flags &= ~(GAMEINFOFLAG_ALLOW_ZOOM);
 
-	// ddnet clients do not predict sv_old_laser correctly
-	// https://github.com/ddnet/ddnet/issues/7589
-	if(g_Config.m_SvOldLaser)
-		Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE);
-
 	return Flags;
 }
 
