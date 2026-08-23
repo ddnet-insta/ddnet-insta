@@ -2825,7 +2825,6 @@ if(CLIENT)
     ${OGG_LIBRARIES}
 
     ${TARGET_STEAMAPI}
-    rust_engine_shared
 
     ${PLATFORM_CLIENT_LIBS}
     ${LIBS}
@@ -3100,7 +3099,6 @@ if(SERVER)
     ${MINIUPNPC_LIBRARIES}
     ${MYSQL_LIBRARIES}
     ${TARGET_ANTIBOT}
-    rust_engine_shared
 
     ${LIBS}
   )

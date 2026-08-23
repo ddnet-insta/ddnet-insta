@@ -366,7 +366,6 @@ class CGameContext : public IGameServer
 
 	void SendTuningParams(int ClientId, int Zone = 0);
 
-	const CVoteOptionServer *GetVoteOption(int Index) const;
 	void ProgressVoteOptions(int ClientId);
 
 	//
