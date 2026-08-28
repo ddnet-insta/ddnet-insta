@@ -471,19 +471,12 @@ void CGameClient::OnUpdate()
 	}
 
 	// handle touch events
-	const std::vector<IInput::CTouchFingerState> &vTouchFingerStates = Input()->TouchFingerStates();
-	bool TouchHandled = false;
+	std::vector<IInput::CTouchFingerState> vTouchFingerStates = Input()->TouchFingerStates();
 	for(auto &pComponent : m_vpInput)
 	{
-		if(TouchHandled)
-		{
-			// Also update inactive components so they can handle touch fingers being released.
-			pComponent->OnTouchState({});
-		}
-		else if(pComponent->OnTouchState(vTouchFingerStates))
+		if(pComponent->OnTouchState(vTouchFingerStates))
 		{
 			Input()->ClearTouchDeltas();
-			TouchHandled = true;
 		}
 	}
 
@@ -1128,7 +1121,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 
 	if(Dummy)
 	{
-		if(MsgId == NETMSGTYPE_SV_CHAT && m_aLocalIds[0] >= 0 && m_aLocalIds[1] >= 0)
+		if(MsgId == NETMSGTYPE_SV_READYTOENTER)
+		{
+			Client()->EnterGame(Conn);
+		}
+		else if(MsgId == NETMSGTYPE_SV_CHAT && m_aLocalIds[0] >= 0 && m_aLocalIds[1] >= 0)
 		{
 			CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 
@@ -1267,9 +1264,6 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 	else if(MsgId == NETMSGTYPE_SV_MAPSOUNDGLOBAL)
 	{
 		if(m_SuppressEvents)
-			return;
-
-		if(!g_Config.m_SndGame)
 			return;
 
 		CNetMsg_Sv_MapSoundGlobal *pMsg = (CNetMsg_Sv_MapSoundGlobal *)pRawMsg;
@@ -1526,9 +1520,6 @@ void CGameClient::ProcessEvents()
 		else if(Item.m_Type == NETEVENTTYPE_MAPSOUNDWORLD)
 		{
 			CNetEvent_MapSoundWorld *pEvent = (CNetEvent_MapSoundWorld *)Item.m_pData;
-			if(!Config()->m_SndGame)
-				continue;
-
 			m_MapSounds.PlayAt(CSounds::CHN_WORLD, pEvent->m_SoundId, vec2(pEvent->m_X, pEvent->m_Y));
 		}
 	}
