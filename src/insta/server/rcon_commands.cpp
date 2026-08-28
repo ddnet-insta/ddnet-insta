@@ -42,7 +42,7 @@ void CGameContext::ConUnGun(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConGodmode(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetVictim();
+	int Victim = pResult->GetVictim(0);
 
 	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
 
@@ -61,7 +61,7 @@ void CGameContext::ConGodmode(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConRainbow(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetVictim();
+	int Victim = pResult->GetVictim(0);
 
 	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
 
@@ -74,7 +74,7 @@ void CGameContext::ConRainbow(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConForceReady(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetVictim();
+	int Victim = pResult->GetVictim(0);
 	if(Victim < 0 || Victim >= MAX_CLIENTS)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "victim has to be in 0-64 range");
@@ -316,7 +316,7 @@ void CGameContext::ConKickEventsAntibot(IConsole::IResult *pResult, void *pUserD
 void CGameContext::ConDeepJailId(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->DeepJailId(pResult->m_ClientId, pResult->GetVictim(), pResult->GetInteger(1));
+	pSelf->DeepJailId(pResult->m_ClientId, pResult->GetVictim(0), pResult->GetInteger(1));
 }
 
 void CGameContext::ConDeepJailIp(IConsole::IResult *pResult, void *pUserData)
@@ -409,7 +409,7 @@ void CGameContext::ConInstaRestart(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConDumpCoords(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetVictim();
+	int Victim = pResult->GetVictim(0);
 
 	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
 	if(!pChr)

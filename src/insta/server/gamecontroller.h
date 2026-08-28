@@ -1789,7 +1789,6 @@ public:
 	// depends on the base pvp controller to tick
 	int m_TicksUntilShutdown = 0;
 
-	int GameFlags() const { return m_GameFlags; }
 	void CheckGameInfo();
 	bool IsFriendlyFire(int ClientId1, int ClientId2) const;
 
