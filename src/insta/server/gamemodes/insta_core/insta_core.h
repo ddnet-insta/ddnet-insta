@@ -102,6 +102,7 @@ public:
 	void RoundInitPlayer(class CPlayer *pPlayer) override;
 	void InitPlayer(class CPlayer *pPlayer) override;
 	void Snap(int SnappingClient) override;
+	void SnapGameInfoEx(int SnappingClient, CNetObj_GameInfoEx *pGameInfoEx) override;
 	int SnapFlagCarrierRed(int SnappingClient) override;
 	int SnapFlagCarrierBlue(int SnappingClient) override;
 	int SnapTeamscoreRed(int SnappingClient) override;

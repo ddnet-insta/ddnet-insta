@@ -1364,6 +1364,12 @@ void CGameControllerInstaCore::Snap(int SnappingClient)
 	}
 }
 
+void CGameControllerInstaCore::SnapGameInfoEx(int SnappingClient, CNetObj_GameInfoEx *pGameInfoEx)
+{
+	pGameInfoEx->m_Flags = SnapGameInfoExFlags(SnappingClient, pGameInfoEx->m_Flags);
+	pGameInfoEx->m_Flags2 = SnapGameInfoExFlags2(SnappingClient, pGameInfoEx->m_Flags2);
+}
+
 int CGameControllerInstaCore::SnapFlagCarrierRed(int SnappingClient)
 {
 	int FlagCarrierRed = FLAG_MISSING;

@@ -1301,6 +1301,7 @@ public:
 	virtual void SnapDDNetPlayer(int SnappingClient, CPlayer *pPlayer, CNetObj_DDNetPlayer *pDDNetPlayer) {}
 	virtual int SnapRoundStartTick(int SnappingClient);
 	virtual int SnapTimeLimit(int SnappingClient);
+	virtual void SnapGameInfoEx(int SnappingClient, CNetObj_GameInfoEx *pGameInfoEx) {}
 
 	/*
 		Function: GetCarriedFlag
