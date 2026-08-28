@@ -8,8 +8,8 @@ function(insta_patch_engine)
 
     set_src(INSTA_ENGINE_SHARED GLOB_RECURSE src/insta/engine/shared
       # tidy-alphabetical-start
+      _network.cpp
       config_variables_insta.h
-      network.cpp
       # tidy-alphabetical-end
     )
 
