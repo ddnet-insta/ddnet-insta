@@ -53,13 +53,13 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_teamdamage` Team damage
 + `sv_team_score_normal` Points a team receives for grabbing into normal spikes
 + `sv_team_score_gold` Points a team receives for grabbing into golden spikes
-+ `sv_team_score_green` Points a team receives for grabbing into green spikes(non 4-teams fng only)
-+ `sv_team_score_purple` Points a team receives for grabbing into purple spikes(non 4-teams fng only)
++ `sv_team_score_green` Points a team receives for grabbing into green spikes
++ `sv_team_score_purple` Points a team receives for grabbing into purple spikes
 + `sv_team_score_team` Points a team receives for grabbing into team spikes
 + `sv_player_score_normal` Points a player receives for grabbing into normal spikes
 + `sv_player_score_gold` Points a player receives for grabbing into golden spikes
-+ `sv_player_score_green` Points a player receives for grabbing into green spikes(non 4-teams fng only)
-+ `sv_player_score_purple` Points a player receives for grabbing into purple spikes(non 4-teams fng only)
++ `sv_player_score_green` Points a player receives for grabbing into green spikes
++ `sv_player_score_purple` Points a player receives for grabbing into purple spikes
 + `sv_player_score_team` Points a player receives for grabbing into team spikes
 + `sv_wrong_spike_freeze` The time, in seconds, a player gets frozen, if he grabbed a frozen opponent into the opponents spikes (0=off, fng only)
 + `sv_hammer_scale_x` linearly scale up hammer x power, percentage, for hammering enemies and unfrozen teammates (needs sv_fng_hammer)

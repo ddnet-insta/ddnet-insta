@@ -26,14 +26,14 @@ MACRO_CONFIG_INT(SvTeamdamage, sv_teamdamage, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SE
 
 MACRO_CONFIG_INT(SvTeamScoreSpikeNormal, sv_team_score_normal, 5, 0, 100, CFGFLAG_SERVER, "Points a team receives for grabbing into normal spikes")
 MACRO_CONFIG_INT(SvTeamScoreSpikeGold, sv_team_score_gold, 12, 0, 100, CFGFLAG_SERVER, "Points a team receives for grabbing into golden spikes")
-MACRO_CONFIG_INT(SvTeamScoreSpikeGreen, sv_team_score_green, 15, 0, 100, CFGFLAG_SERVER, "Points a team receives for grabbing into green spikes(non 4-teams fng only)")
-MACRO_CONFIG_INT(SvTeamScoreSpikePurple, sv_team_score_purple, 18, 0, 100, CFGFLAG_SERVER, "Points a team receives for grabbing into purple spikes(non 4-teams fng only)")
+MACRO_CONFIG_INT(SvTeamScoreSpikeGreen, sv_team_score_green, 15, 0, 100, CFGFLAG_SERVER, "Points a team receives for grabbing into green spikes")
+MACRO_CONFIG_INT(SvTeamScoreSpikePurple, sv_team_score_purple, 18, 0, 100, CFGFLAG_SERVER, "Points a team receives for grabbing into purple spikes")
 MACRO_CONFIG_INT(SvTeamScoreSpikeTeam, sv_team_score_team, 10, 0, 100, CFGFLAG_SERVER, "Points a team receives for grabbing into team spikes")
 
 MACRO_CONFIG_INT(SvPlayerScoreSpikeNormal, sv_player_score_normal, 3, 0, 100, CFGFLAG_SERVER, "Points a player receives for grabbing into normal spikes")
 MACRO_CONFIG_INT(SvPlayerScoreSpikeGold, sv_player_score_gold, 6, 0, 100, CFGFLAG_SERVER, "Points a player receives for grabbing into golden spikes")
-MACRO_CONFIG_INT(SvPlayerScoreSpikeGreen, sv_player_score_green, 8, 0, 100, CFGFLAG_SERVER, "Points a player receives for grabbing into green spikes(non 4-teams fng only)")
-MACRO_CONFIG_INT(SvPlayerScoreSpikePurple, sv_player_score_purple, 10, 0, 100, CFGFLAG_SERVER, "Points a player receives for grabbing into purple spikes(non 4-teams fng only)")
+MACRO_CONFIG_INT(SvPlayerScoreSpikeGreen, sv_player_score_green, 8, 0, 100, CFGFLAG_SERVER, "Points a player receives for grabbing into green spikes")
+MACRO_CONFIG_INT(SvPlayerScoreSpikePurple, sv_player_score_purple, 10, 0, 100, CFGFLAG_SERVER, "Points a player receives for grabbing into purple spikes")
 MACRO_CONFIG_INT(SvPlayerScoreSpikeTeam, sv_player_score_team, 5, 0, 100, CFGFLAG_SERVER, "Points a player receives for grabbing into team spikes")
 
 MACRO_CONFIG_INT(SvWrongSpikeFreeze, sv_wrong_spike_freeze, 10, 0, 30, CFGFLAG_SERVER, "The time, in seconds, a player gets frozen, if he grabbed a frozen opponent into the opponents spikes (0=off, fng only)")
