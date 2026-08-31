@@ -10,6 +10,7 @@
 #include <engine/http.h>
 #include <engine/server.h>
 
+#include <insta/server/config_enums.h>
 #include <insta/server/enums.h>
 #include <insta/server/ip_storage.h>
 #include <insta/server/strhelpers.h>
@@ -22,9 +23,19 @@ class CGameContext : public IGameServer
 	friend class IGameController;
 	friend class CGameControllerTrainFng;
 
-	std::unordered_map<const char *, int *, CStrHash, CStrEq> m_IntConfigs;
+	CConfigEnums m_ConfigEnums;
+
+	friend class CConfigEnums;
+
+protected:
+	friend class CGameControllerInstaCore;
+	void LoadConfigEnums(const CConfigEnums *pConfigEnums) { m_ConfigEnums = *pConfigEnums; }
 
 public:
+	const CConfigEnums *ConfigEnums() const { return &m_ConfigEnums; }
+
+	std::unordered_map<const char *, int *, CStrHash, CStrEq> m_IntConfigs;
+
 	// instagib/gamecontext.cpp
 	void OnInitInstagib();
 	void PrintInstaCredits();

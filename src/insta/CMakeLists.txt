@@ -47,6 +47,8 @@ function(insta_patch_server)
       chat_commands.cpp
       chat_commands.h
       column_template.h
+      config_enums.cpp
+      config_enums.h
       db/insta.cpp
       db/insta.h
       db/stats.cpp
@@ -73,6 +75,7 @@ function(insta_patch_server)
       entities/text/projectile.h
       entities/text/text.cpp
       entities/text/text.h
+      enum_variables.h
       enums.cpp
       enums.h
       extra_columns.h
