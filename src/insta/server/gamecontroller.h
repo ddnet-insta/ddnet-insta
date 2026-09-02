@@ -342,8 +342,34 @@ public:
 			and can be used in addition to the controllers constructor
 
 			Its main use case is running code in a base controller after its child constructor
+
+		Arguments:
+			ServerStart - is only true once in the very beginning when the server starts
+				      will be false for all the other calls that happen on
+				      reload, round end and map change
 	*/
-	virtual void OnInit() {}
+	virtual void OnInit(bool ServerStart) {}
+
+	/*
+		Function: OnShutdown
+			Will be called once in the very end when the server is fully shutting down.
+			This is the counter part to ``OnInit(ServerStart = true)`` but not to ``OnInit(ServerStart = false)``
+
+			If you need something that is called on reloads, map changes and so on have a look at
+			``OnRoundEnd()``, ``OnRoundStart()`` or use your controllers destructor.
+			Or if you need something that is called before every controller destruction but not
+			the final one checkout `OnBeforeReload()`
+	*/
+	virtual void OnShutdown() {}
+
+	/*
+		Function: OnBeforeReload
+			Will be called before the controller gets destructed.
+			You can do cleanup here that has to be done when switching modes or doing a rcon "reload".
+			It will not be called on the final shutdown when the server goes fully offline.
+			If you need that checkout `OnShutdown()`
+	*/
+	virtual void OnBeforeReload() {}
 
 	/*
 		Function: ForceNetworkClipping
@@ -1043,6 +1069,302 @@ public:
 			pPlayer - the player to check
 	*/
 	virtual bool IsPlaying(const CPlayer *pPlayer);
+
+	/*
+		Function: CreateAccountsTable
+			This is implemented in accounts.cpp you should not have to override it.
+			It will be called on server start or when accounts are turned on during
+			runtime of the server.
+			It does create the main accounts table and also additional tables
+			that were activated by the current game mode.
+	*/
+	virtual void CreateAccountsTable() {}
+
+	/*
+		Function: OnLogin
+			Called when the login thread finished successfully
+			and a player entered a correct username password combination
+			using the /login chat command
+
+		Arguments:
+			pAccount - the account data that was loaded
+			pPlayer - player that logged in
+	*/
+	virtual void OnLogin(const CAccount *pAccount, class CPlayer *pPlayer) {}
+
+	/*
+		Function: OnRegister
+			Called when the register thread finished successfully
+			this is triggered by a player using the /register chat command
+
+		Arguments:
+			pPlayer - player that logged in
+	*/
+	virtual void OnRegister(class CPlayer *pPlayer) {}
+
+	/*
+		Function: LogoutAccount
+			Called when a player uses the logout chat command
+			or leaves the game.
+			Makes sure the account is correctly logged out.
+
+			You can override this method to run additional code on logout
+			but make sure to call the parents method otherwise the accounts
+			get locked on disconnect.
+
+		Arguments:
+			pPlayer - player that logged out or disconnected
+			pSuccessMessage - string that will be printed to the logged in player in chat after successful logout
+			IsDisconnect - if the logout was triggered by disconnect
+	*/
+	virtual void LogoutAccount(class CPlayer *pPlayer, const char *pSuccessMessage, bool IsDisconnect) {}
+
+	/*
+		Function: LogoutAllAccounts
+			Logs out all players on this server.
+			This is implemented in the insta core controller.
+
+		Arguments:
+			pSuccessMessage - string that will be printed to the logged out player in chat after successful logout
+	*/
+	virtual void LogoutAllAccounts(const char *pSuccessMessage = "Logged out of account") {}
+
+	/*
+		Function: OnLogout
+			Called on successful logout.
+			This is not guaranteed to be called!
+			If a player disconnects this will not be called.
+			It is only used for the logout chat command.
+
+			If you need to run code on every logout.
+			Hook into the login start which is `LogoutAccount()`
+
+		Arguments:
+			pPlayer - player that logged out
+	*/
+	virtual void OnLogout(class CPlayer *pPlayer, const char *pMessage) {}
+
+	/*
+		Function: IsAccountRatelimited
+			If the user is ratelimited and can not run any account database actions.
+			This block chat commands such as /login, /logout, /register, /changepassword
+			if it returns true.
+
+			Can later also be extended to implement anti bruteforce protection.
+
+		Arguments:
+			ClientId - id of the player to check, can be -1 for econ
+			pReason - buffer the reason for ratelimit will be written to (can be null) will be an empty string if not ratelimited
+			ReasonSize - size of the pReason in bytes
+
+		Returns:
+			true - if all account operations (except saving on disconnect) should be blocked
+			false - if all account operations are allowed
+	*/
+	virtual bool IsAccountRatelimited(int ClientId, char *pReason, int ReasonSize) { return false; }
+
+	/*
+		Function: IsAccountRconCmdRatelimited
+			If the user is ratelimited and can not run any account related rcon
+			commands that operate on the database.
+
+			This blocks rcon commands such as "acc_set_password"
+			if it returns true.
+
+		Arguments:
+			ClientId - id of the player to check
+			pReason - buffer the reason for ratelimit will be written to (can be null) will be an empty string if not ratelimited
+			ReasonSize - size of the pReason in bytes
+
+		Returns:
+			true - if all rcon account operations (not affecting own account only rcon commands)
+			false - if all rcon account operations are allowed
+	*/
+	virtual bool IsAccountRconCmdRatelimited(int ClientId, char *pReason, int ReasonSize) { return false; }
+
+	/*
+		Function: RconAccountList
+			Called when an admin uses the "acc_list" rcon command.
+
+		Arguments:
+			pSearch - string to search for and filter the list (should show all entries when empty)
+	*/
+	virtual void RconAccountList(const char *pSearch) {}
+
+	/*
+		Function: RconForceSetPassword
+			Called when an admin uses the "acc_set_password" rcon command.
+			This method initiates the process.
+
+		Arguments:
+			ClientId - Client Id of the admin that initiated the request
+				   can be -1 for econ and fifo
+			pUsername - account that should be updated
+			pPassword - new password that will overwrite the old one
+	*/
+	virtual void RconForceSetPassword(int ClientId, const char *pUsername, const char *pPassword) {}
+
+	/*
+		Function: RconForceLogout
+			Called when an admin uses the "acc_logout" rcon command.
+			This method initiates the process.
+
+		Arguments:
+			ClientId - Client Id of the admin that initiated the request
+				   can be -1 for econ and fifo
+			pUsername - account that should be logged out
+	*/
+	virtual void RconForceLogout(int ClientId, const char *pUsername) {}
+
+	/*
+		Function: RconLockAccount
+			Called when an admin uses the "acc_lock" rcon command.
+			This method initiates the process.
+
+		Arguments:
+			ClientId - Client Id of the admin that initiated the request
+				   can be -1 for econ and fifo
+			pUsername - account that should be locked
+	*/
+	virtual void RconLockAccount(int ClientId, const char *pUsername) {}
+
+	/*
+		Function: RconUnlockAccount
+			Called when an admin uses the "acc_unlock" rcon command.
+			This method initiates the process.
+
+		Arguments:
+			ClientId - Client Id of the admin that initiated the request
+				   can be -1 for econ and fifo
+			pUsername - account that should be unlocked
+	*/
+	virtual void RconUnlockAccount(int ClientId, const char *pUsername) {}
+
+	/*
+		Function: RconAccountInfo
+			Called when an admin uses the "acc_info" rcon command.
+			This method initiates the process.
+
+		Arguments:
+			ClientId - Client Id of the admin that initiated the request
+				   can be -1 for econ and fifo
+			pUsername - account that should be displayed
+	*/
+	virtual void RconAccountInfo(int ClientId, const char *pUsername) {}
+
+	/*
+		Function: RconAccountStatus
+			Called when an admin uses the "acc_status" rcon command.
+			This method initiates the process.
+
+		Arguments:
+			ClientId - Client Id of the admin that initiated the request
+				   can be -1 for econ and fifo
+	*/
+	virtual void RconAccountStatus(int ClientId) {}
+
+	/*
+		Function: RconAccountRatelimits
+			Called when an admin uses the "acc_ratelimits" rcon command.
+			This method initiates the process.
+
+		Arguments:
+			AdminClientId - Client Id of the admin that initiated the request
+					can be -1 for econ and fifo
+			VictimClientId - Client Id of the player whose ratelimits are being checked or reset
+			pCommand - this is the argument passed by the admin. We expect this to be "reset" or empty.
+	*/
+	virtual void RconAccountRatelimits(int AdminClientId, int VictimClientId, const char *pCommand) {}
+
+	/*
+		Function: RequestChangePassword
+			Called when a player uses the changepassword chat command.
+			See also `OnChangePassword()` which is called when the password change
+			was applied successfully.
+
+			You can override this method to run additional code on password change
+			but make sure to call the parents method.
+
+		Arguments:
+			pPlayer - player that requested a password change
+	*/
+	virtual void RequestChangePassword(class CPlayer *pPlayer, const char *pOldPassword, const char *pNewPassword) {}
+
+	/*
+		Function: OnChangedPassword
+			Called on successful password change.
+			This is not guaranteed to be called!
+			If a player disconnects this will not be called.
+			It is only used for the changepassword chat command.
+
+			If you need to run code on every password change attempt.
+			Hook into the request start which is `RequestChangePassword()`
+
+		Arguments:
+			pPlayer - player that changed the password
+	*/
+	virtual void OnChangePassword(class CPlayer *pPlayer) {}
+
+	/*
+		Function: OnFailedAccountLogin
+			Called if a /login chat command failed
+
+		Arguments:
+			pPlayer - player that requested the login
+			pErrorMsg - the error message that will be sent to the user in the chat
+			pUsername - the username of the account that the player tried to log in to
+	*/
+	virtual void OnFailedAccountLogin(class CPlayer *pPlayer, const char *pErrorMsg, const char *pUsername) {}
+
+	/*
+		Function: ChatCmdDisplayName
+			Called when a player uses the /displayname chat command.
+
+			You can override this method to run additional code on name claim attempt
+			but make sure to call the parents method.
+
+		Arguments:
+			pPlayer - player that requested a name claim
+	*/
+	virtual void ChatCmdDisplayName(class CPlayer *pPlayer) {}
+
+	/*
+		Function: ChatCmdLockName
+			Called when a player uses the /lockname chat command.
+
+			You can override this method to run additional code on name protect attempt
+			but make sure to call the parents method.
+
+		Arguments:
+			pPlayer - player that requested a name claim
+	*/
+	virtual void ChatCmdLockName(class CPlayer *pPlayer) {}
+
+	/*
+		Function: OnDisplayNameSet
+			Called when the display name was successfully set
+			and the pPlayers account is now the name owner.
+			This happens when someone uses the /displayname chat command
+
+		Arguments:
+			pPlayer - player that requested a name claim
+			pDisplayName - the display name that was claimed
+			pUsername - username of the account that now owns the name
+	*/
+	virtual void OnDisplayNameSet(class CPlayer *pPlayer, const char *pDisplayName, const char *pUsername) {}
+
+	/*
+		Function: OnNameLocked
+			Called when the /lockname worker thread finished
+			prints the success message to the user
+
+		Arguments:
+			pPlayer - player that requested a name claim
+			pDisplayName - the display name that was claimed
+			pUsername - username of the account that now owns the name
+			IsProtected - the new locked state because the command toggles the lock on and off
+	*/
+	virtual void OnNameLocked(class CPlayer *pPlayer, const char *pDisplayName, const char *pUsername, bool IsProtected) {}
 
 	/*
 		Function: OnShowStatsAll
@@ -1809,6 +2131,7 @@ public:
 	// for ranks and points
 	CDbInsta *Db() { return m_pInstaDatabase; }
 
+	class CExtraAccountTableController *m_pExtraAccountTableController = nullptr;
 	const char *m_pStatsTable = "";
 	const char *StatsTable() const { return m_pStatsTable; }
 

@@ -4,6 +4,8 @@
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/protocol.h>
 
+#include <generated/insta/mode_account.h>
+
 #include <game/server/scoreworker.h>
 
 #include <insta/server/ddnet_db_utils/ddnet_db_utils.h>
@@ -326,6 +328,7 @@ public:
 
 	void CreateTable(const char *pName);
 	void CreateFastcapTable();
+	void CreateExtraAccountsTables(const std::vector<EExtraAccTable> &vTables);
 	void SaveRoundStats(const char *pName, const char *pTable, CSqlStatsPlayer *pStats);
 	void SaveFastcap(int ClientId, int TimeTicks, const char *pTimestamp, bool Grenade, bool StatTrack);
 

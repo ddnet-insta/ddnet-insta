@@ -115,8 +115,13 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_require_chat_flag_to_chat` clients have to send playerflag chat to use public chat (commands are unrelated)
 + `sv_always_track_stats` Track stats no matter how many players are online
 + `sv_ignore_kills_before_race_start` Hide kills from feed and reward no points if the involved players did not touch the start line yet
++ `sv_accounts` See /register and /login chat commands
++ `sv_claimable_names` 0=off 1=lock claimed names but no /claimname cmd 2=fully on
++ `sv_points_needed_to_register` Amount of round points needed to be able to /register an account (anti spam)
++ `sv_join_register_delay` Delay in seconds after join before one can /register an account (anti spam)
 + `sv_debug_catch` Debug zCatch ticks caught and in game
 + `sv_debug_stats` Verbose logging for the SQL player stats
++ `sv_debug_accounts` Verbose logging for the account system
 + `sv_vote_checkboxes` Fill [ ] checkbox in vote name if the config is already set
 + `sv_hide_admins` Only send admin status to other authed players
 + `sv_show_settings_motd` Show insta game settings in motd on join
@@ -201,6 +206,17 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `deep_jailip` deep freeze (undeep tile works) will be restored on respawn and reconnect
 + `deep_jails` list all perma deeped players deeped by deep_jailid and deep_jailip commands
 + `undeep_jail` list all perma deeped players deeped by deep_jailid and deep_jailip commands
++ `acc_list` List account info of online players
++ `acc_set_password` Set new password for given account. Useful if players forget theirs. Keeps player logged in.
++ `acc_logout` Force logout player on current server
++ `acc_lock` Lock account and logout players logged in to it
++ `acc_unlock` Unlock account
++ `acc_info` Get information about an account
++ `acc_status` Get general account system status information
++ `acc_ratelimits` Show ratelimits for given victim, or reset them by passing 'reset'
++ `acc_displayname` Check which account claimed the given displayname and also unclaim it when passing 'delete'
++ `add_unclaimable_name` Exclude given name from /claimname chat command
++ `remove_unclaimable_name` Make given name available to /claimname chat command
 
 # Chat commands
 
@@ -231,6 +247,13 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `/multis` Shows the all time fng multi kill stats
 + `/steals` Shows all time and round fng kill steal stats
 + `/round_top` Shows the top players of the current round
++ `/register` register account
++ `/login` login to account
++ `/logout` logout account
++ `/changepassword` change the password of your account
++ `/displayname` set your current nick name as your primary name and store it in your account
++ `/lockname` toggle the lock on your /displayname so nobody else can use it
++ `/slow_account_operation` used to simulate high load for debugging account system stability
 + `/score` change which type of score is displayed in scoreboard
 + `/points` Shows the all time points rank of player name (your stats by default)
 + `/rank_points` Shows the all time points rank of player name (your stats by default)

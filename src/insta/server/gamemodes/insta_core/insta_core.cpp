@@ -45,6 +45,7 @@ CGameControllerInstaCore::CGameControllerInstaCore(class CGameContext *pGameServ
 
 	UpdateSpawnWeapons(true, true);
 	m_vFrozenQuitters.clear();
+	m_vIpRatelimits.clear();
 	g_AntibobContext.m_pConsole = Console();
 
 	m_vMysteryRounds.clear();
@@ -93,6 +94,12 @@ CGameControllerInstaCore::~CGameControllerInstaCore()
 	{
 		delete m_pExtraColumns;
 		m_pExtraColumns = nullptr;
+	}
+
+	if(m_pExtraAccountTableController)
+	{
+		delete m_pExtraAccountTableController;
+		m_pExtraAccountTableController = nullptr;
 	}
 }
 
@@ -187,8 +194,37 @@ void CGameControllerInstaCore::OnReset()
 	}
 }
 
-void CGameControllerInstaCore::OnInit()
+void CGameControllerInstaCore::OnInit(bool ServerStart)
 {
+	if(ServerStart)
+	{
+		GameServer()->m_ServerPortOnLaunch = g_Config.m_SvPort;
+	}
+
+	CheckAccountsConfig(); // can activate sv_accounts
+
+	if(g_Config.m_SvAccounts)
+	{
+		CreateAccountsTable();
+
+		dbg_assert(g_Config.m_SvPort != 0, "sv_port can not be 0 when sv_accounts is on! Otherwise wrong accounts get logged out");
+		dbg_assert(GameServer()->GetHostname(nullptr, 0), "sv_hostname can not be empty when sv_accounts is on! Otherwise wrong accounts get logged out");
+
+		if(ServerStart)
+		{
+			// cleanup stale accounts
+			Db()->Accounts()->LogoutAllOnCurrentServer();
+
+			// this should do nothing because it only affects in game
+			// accounts which there should be none on server start
+			// this is just here to make sure that
+			// we never have in game accounts logged in
+			// while logged_in is 0 in the db
+			// if this branch gets executed somehow later in the
+			// lifetime of the server because of some bug
+			LogoutAllAccounts();
+		}
+	}
 }
 
 void CGameControllerInstaCore::OnPlayerConnect(CPlayer *pPlayer)
@@ -219,8 +255,21 @@ void CGameControllerInstaCore::OnPlayerConnect(CPlayer *pPlayer)
 		pPlayer->m_VerifiedForChat = true;
 	}
 
+	pPlayer->m_DisplayName.SetWantedName(Server()->ClientName(ClientId));
+	const char *pWantedName = pPlayer->m_DisplayName.WantedName();
+	pPlayer->m_DisplayName.SetLastBroadcastedName(pWantedName);
+
+	if(g_Config.m_SvClaimableNames)
+	{
+		if(!Db()->Accounts()->CheckNameClaimed(ClientId, pWantedName))
+			log_error("ddnet-insta", "failed to lookup name");
+
+		// sets (..) prefix for now
+		Server()->SetClientName(ClientId, pPlayer->m_DisplayName.DisplayName());
+	}
+
 	RestoreFreezeStateOnRejoin(pPlayer);
-	PrintConnect(pPlayer, Server()->ClientName(pPlayer->GetCid()));
+	PrintConnect(pPlayer, pWantedName);
 	if(!Server()->ClientPrevIngame(ClientId))
 	{
 		PrintModWelcome(pPlayer);
@@ -318,6 +367,11 @@ void CGameControllerInstaCore::InstaCoreDisconnect(CPlayer *pPlayer, const char 
 
 	if(GameState() != IGS_END_ROUND)
 		SaveStatsOnDisconnect(pPlayer);
+
+	char aBuf[512] = "Logged out of account (disconnect)";
+	if(pReason && pReason[0])
+		str_format(aBuf, sizeof(aBuf), "Logged out of account (disconnect (%s))", pReason);
+	LogoutAccount(pPlayer, aBuf, true);
 }
 
 void CGameControllerInstaCore::PrintDisconnect(CPlayer *pPlayer, const char *pReason)
@@ -733,6 +787,32 @@ void CGameControllerInstaCore::Tick()
 		log_info("ddnet-insta", "all freeze quitter punishments expired. cleaning up ...");
 		m_vFrozenQuitters.clear();
 	}
+
+	// holy fuck c++
+	// iterates all pending rcon cmd sql worker thread results
+	// should be max one per player and all completed ones get processed
+	// here and then deleted from the vector
+	GameServer()->m_vAccountRconCmdQueryResults.erase(
+		std::remove_if(
+			GameServer()->m_vAccountRconCmdQueryResults.begin(),
+			GameServer()->m_vAccountRconCmdQueryResults.end(),
+			[this](std::shared_ptr<CAccountRconCmdResult> pResult) {
+				// this should not be null ever anyways?
+				if(!pResult)
+					return true;
+				if(!pResult->m_Completed)
+					return false;
+
+				ProcessAccountRconCmdResult(*pResult);
+				pResult = nullptr;
+				return true;
+			}),
+		GameServer()->m_vAccountRconCmdQueryResults.end());
+
+	// only check expires every second not every tick
+	// to avoid wasting clock cycles
+	if(Server()->Tick() % Server()->TickSpeed() == 0)
+		CIpRatelimit::CheckExpireTick(m_vIpRatelimits, Server()->Tick());
 }
 
 bool CGameControllerInstaCore::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
@@ -1205,6 +1285,9 @@ void CGameControllerInstaCore::OnClientDataPersist(CPlayer *pPlayer, CGameContex
 	pData->m_Insta.m_Addr = *Server()->ClientAddr(pPlayer->GetCid());
 	pData->m_Insta.m_SessionStats = pPlayer->m_SessionStats;
 	pData->m_Insta.m_SessionStats.Merge(&pPlayer->m_Stats);
+	pData->m_Insta.m_Account = pPlayer->m_Account;
+	pData->m_Insta.m_FirstJoinTime = pPlayer->m_FirstJoinTime;
+	pData->m_Insta.m_DisplayName = pPlayer->m_DisplayName;
 }
 
 void CGameControllerInstaCore::OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData)
@@ -1258,6 +1341,9 @@ void CGameControllerInstaCore::OnClientDataRestore(CPlayer *pPlayer, const CGame
 	}
 
 	pPlayer->m_SessionStats = pData->m_Insta.m_SessionStats;
+	pPlayer->m_Account = pData->m_Insta.m_Account;
+	pPlayer->m_FirstJoinTime = pData->m_Insta.m_FirstJoinTime;
+	pPlayer->m_DisplayName = pData->m_Insta.m_DisplayName;
 }
 
 void CGameControllerInstaCore::OnDataPersist(CGameContext::CPersistentData *pData)
@@ -1320,6 +1406,11 @@ void CGameControllerInstaCore::InitPlayer(CPlayer *pPlayer)
 
 	pPlayer->m_DeathsPerSeconds = 0;
 	pPlayer->m_pTrainSave = nullptr;
+
+	// might be loaded from persistent data on map change
+	if(!pPlayer->m_FirstJoinTime)
+		pPlayer->m_FirstJoinTime = time_get();
+
 	RoundInitPlayer(pPlayer);
 }
 
@@ -1672,6 +1763,46 @@ bool CGameControllerInstaCore::IsPlaying(const CPlayer *pPlayer)
 	//
 	// all other modes never set m_IsDead to true
 	return CGameControllerDDNet::IsPlaying(pPlayer) || pPlayer->m_IsDead;
+}
+
+bool CGameControllerInstaCore::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+
+	// ratelimit info changes
+	// if we are still looking up a name
+	if(pPlayer->m_CheckClaimNameQueryResult != nullptr)
+	{
+		log_warn("names", "name change claim lookup ratelimit");
+		return true;
+	}
+
+	if(g_Config.m_SvClaimableNames)
+	{
+		CNetMsg_Cl_ChangeInfo *pEditMsg = const_cast<CNetMsg_Cl_ChangeInfo *>(pMsg);
+
+		// ddnet-insta added claimable names
+		// if a user uses a claimed name without being logged in
+		// to the correct account the server forces a rename
+		// as soon as the user edits skin/clan/name in the menu
+		// the client will attempt resending the name change until it matches
+		// in that case we do want to whitelist this request
+		// to avoid players getting muted without actually spamming the chat
+		if(str_comp(pMsg->m_pName, pPlayer->m_DisplayName.WantedName()) == 0)
+		{
+			// the client requested to the name we already knows he wants
+			// so lets skip the spam protection
+			//
+			// to avoid editing the ddnet code and cause git conflicts
+			// we use a hack and edit the user sent request
+			// so it no longer contains a rename
+			pEditMsg->m_pName = Server()->ClientName(ClientId);
+		}
+	}
+
+	return false;
 }
 
 void CGameControllerInstaCore::OnPlayerTick(class CPlayer *pPlayer)
