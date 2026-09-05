@@ -263,7 +263,15 @@ void CGameControllerLTSBlock::CountAlivePlayersByTeam(int &AliveRed, int &AliveB
 
 bool CGameControllerLTSBlock::HandleFrozenTeamTimeout(int AliveRed, int AliveBlue)
 {
-	if(!m_RoundActive || m_Warmup > 0)
+	if(!m_RoundActive || m_Warmup > 0 || !IsGameRunning() || IsGamePaused())
+	{
+		m_RedTeamFrozenTicks = m_BlueTeamFrozenTicks = 0;
+		return false;
+	}
+
+	// ignore the round start freeze phase (sv_freeze_on_spawn):
+	// a team frozen on purpose is not a stuck team
+	if(Server()->Tick() - m_RoundStartTick < g_Config.m_SvFreezeOnSpawn * Server()->TickSpeed())
 	{
 		m_RedTeamFrozenTicks = m_BlueTeamFrozenTicks = 0;
 		return false;
