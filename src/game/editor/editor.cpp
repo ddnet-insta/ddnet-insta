@@ -126,6 +126,8 @@ bool CEditor::CallbackSaveMap(const char *pFilename, int StorageType, void *pUse
 	dbg_assert(StorageType == IStorage::TYPE_SAVE, "Saving only allowed for IStorage::TYPE_SAVE");
 
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
+	const bool CloseAfterSave = pEditor->m_CloseMapAfterSave;
+	pEditor->m_CloseMapAfterSave = false;
 
 	// Save map to specified file
 	if(pEditor->Save(pFilename))
@@ -137,6 +139,7 @@ bool CEditor::CallbackSaveMap(const char *pFilename, int StorageType, void *pUse
 		pEditor->Map()->m_ValidSaveFilename = true;
 		pEditor->Map()->m_Modified = false;
 		pEditor->UpdateMapDisplayNames();
+		pEditor->Map()->m_CloseOnSave = CloseAfterSave;
 	}
 	else
 	{
@@ -4349,8 +4352,16 @@ void CEditor::RenderIngameEntities(const CLayerGroup &Group, const CLayerTiles &
 				}
 				else if(Index == ENTITY_HEALTH_1)
 				{
-					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupHealth);
-					Graphics()->GetSpriteScale(SPRITE_PICKUP_HEALTH, Scale.x, Scale.y);
+					if(DDNetOrCustomEntities)
+					{
+						Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupFreeze);
+						Graphics()->GetSpriteScale(SPRITE_PICKUP_FREEZE, Scale.x, Scale.y);
+					}
+					else
+					{
+						Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupHealth);
+						Graphics()->GetSpriteScale(SPRITE_PICKUP_HEALTH, Scale.x, Scale.y);
+					}
 					VisualSize = 64;
 				}
 				else if(Index == ENTITY_WEAPON_SHOTGUN)
@@ -4505,6 +4516,7 @@ void CEditor::CloseMap(size_t Index, bool Confirm)
 		Reset();
 	}
 
+	Ui()->ClosePopupMenu(&m_PopupMapTab);
 	m_vpMaps.erase(m_vpMaps.begin() + Index);
 	if(m_vpMaps.empty())
 	{
@@ -4935,6 +4947,7 @@ void CEditor::OnClose()
 void CEditor::OnDialogClose()
 {
 	m_Dialog = DIALOG_NONE;
+	m_CloseMapAfterSave = false;
 	m_FileBrowser.OnDialogClose();
 }
 
