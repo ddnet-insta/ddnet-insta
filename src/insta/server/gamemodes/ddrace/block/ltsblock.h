@@ -21,6 +21,7 @@ public:
 	void OnCreditsChatCmd(IConsole::IResult *pResult, void *pUserData) override;
 
 	void Tick() override;
+	void OnCharacterSpawn(class CCharacter *pChr) override;
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId) override;
 	bool DoWincheckRound() override;
 	void OnRoundStart() override;
@@ -37,6 +38,16 @@ protected:
 
 	// true while a round is in progress (players have spawned and the fight is on)
 	bool m_RoundActive = false;
+
+	// starts the round start freeze phase: everyone stays frozen until this
+	// global tick fires, no matter when they spawned. 0 disables the phase.
+	int m_TickToUnFreeze = 0;
+
+	// arms the freeze phase anchored to Server()->Tick() using sv_freeze_on_spawn
+	void StartRoundFreezePhase();
+	// freezes pChr exactly until m_TickToUnFreeze (or undoes the per respawn
+	// freeze when it spawns after the phase already ended)
+	void ApplyRoundStartFreeze(CCharacter *pChr);
 
 	void CountAlivePlayersByTeam(int &AliveRed, int &AliveBlue) const;
 	bool HandleFrozenTeamTimeout(int AliveRed, int AliveBlue);

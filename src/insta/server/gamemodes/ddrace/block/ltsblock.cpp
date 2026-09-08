@@ -110,6 +110,7 @@ void CGameControllerLTSBlock::Tick()
 		m_RoundActive = false;
 		m_RedTeamFrozenTicks = m_BlueTeamFrozenTicks = 0;
 		m_pDeadSpecController->RespawnAllPlayers();
+		StartRoundFreezePhase();
 		AliveRed = 0;
 		AliveBlue = 0;
 		CountAlivePlayersByTeam(AliveRed, AliveBlue);
@@ -150,6 +151,7 @@ void CGameControllerLTSBlock::StartNewRound()
 	m_RoundActive = false;
 	m_RedTeamFrozenTicks = m_BlueTeamFrozenTicks = 0;
 	m_RoundStartTick = Server()->Tick();
+	StartRoundFreezePhase();
 
 	// bring killed players back to their teams
 	m_pDeadSpecController->RespawnAllPlayers();
@@ -175,6 +177,41 @@ void CGameControllerLTSBlock::StartNewRound()
 	}
 }
 
+void CGameControllerLTSBlock::OnCharacterSpawn(class CCharacter *pChr)
+{
+	CGameControllerBlock::OnCharacterSpawn(pChr);
+
+	// all players of both teams share one freeze timer: they stay frozen
+	// until m_TickToUnFreeze fires no matter when they spawned
+	ApplyRoundStartFreeze(pChr);
+}
+
+void CGameControllerLTSBlock::StartRoundFreezePhase()
+{
+	m_TickToUnFreeze = g_Config.m_SvFreezeOnSpawn > 0 ? Server()->Tick() + g_Config.m_SvFreezeOnSpawn * Server()->TickSpeed() : 0;
+}
+
+void CGameControllerLTSBlock::ApplyRoundStartFreeze(CCharacter *pChr)
+{
+	if(m_TickToUnFreeze == 0)
+		return;
+
+	const int Now = Server()->Tick();
+	if(Now >= m_TickToUnFreeze)
+	{
+		// the freeze phase is over: undo the per respawn freeze so a late
+		// spawner does not desync the shared unfreeze timing
+		if(pChr->m_FreezeTime > 0)
+			pChr->Unfreeze();
+		return;
+	}
+
+	// freeze exactly until the shared deadline (also overrides the per
+	// respawn freeze if it would end after the deadline)
+	pChr->m_FreezeTime = m_TickToUnFreeze - Now;
+	GameServer()->m_pController->SetArmorProgressEmpty(pChr);
+}
+
 void CGameControllerLTSBlock::OnRoundStart()
 {
 	CGameControllerBlock::OnRoundStart();
@@ -182,12 +219,20 @@ void CGameControllerLTSBlock::OnRoundStart()
 	// bring killed players back to their teams
 	m_pDeadSpecController->RespawnAllPlayers();
 
+	// the round start freeze phase is anchored to this round start
+	StartRoundFreezePhase();
+
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer || pPlayer->GetTeam() == TEAM_SPECTATORS)
 			continue;
-		if(pPlayer->GetCharacter())
+		if(CCharacter *pChr = pPlayer->GetCharacter())
+		{
+			// characters that survived the previous round do not spawn again,
+			// so freeze them here to the shared deadline
+			ApplyRoundStartFreeze(pChr);
 			continue;
+		}
 
 		pPlayer->m_RespawnTick = Server()->Tick();
 		pPlayer->Respawn();
@@ -200,6 +245,7 @@ void CGameControllerLTSBlock::OnRoundEnd()
 	CGameControllerBlock::OnRoundEnd();
 	m_RoundActive = false;
 	m_RedTeamFrozenTicks = m_BlueTeamFrozenTicks = 0;
+	m_TickToUnFreeze = 0;
 }
 
 void CGameControllerLTSBlock::OnPlayerConnect(CPlayer *pPlayer)
@@ -231,6 +277,7 @@ void CGameControllerLTSBlock::OnPlayerDisconnect(CPlayer *pPlayer, const char *p
 			m_RoundActive = false;
 			m_RedTeamFrozenTicks = m_BlueTeamFrozenTicks = 0;
 			m_pDeadSpecController->RespawnAllPlayers();
+			StartRoundFreezePhase();
 		}
 	}
 }
@@ -271,7 +318,7 @@ bool CGameControllerLTSBlock::HandleFrozenTeamTimeout(int AliveRed, int AliveBlu
 
 	// ignore the round start freeze phase (sv_freeze_on_spawn):
 	// a team frozen on purpose is not a stuck team
-	if(Server()->Tick() - m_RoundStartTick < g_Config.m_SvFreezeOnSpawn * Server()->TickSpeed())
+	if(Server()->Tick() < m_TickToUnFreeze)
 	{
 		m_RedTeamFrozenTicks = m_BlueTeamFrozenTicks = 0;
 		return false;
