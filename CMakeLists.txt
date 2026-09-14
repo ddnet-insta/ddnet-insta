@@ -145,6 +145,13 @@ if(EXTERNAL_STEAM_API_DYLIB AND NOT EXISTS "${EXTERNAL_STEAM_API_DYLIB}")
   message(FATAL_ERROR "EXTERNAL_STEAM_API_DYLIB does not exist: ${EXTERNAL_STEAM_API_DYLIB}")
 endif()
 
+list(LENGTH CMAKE_OSX_ARCHITECTURES NUM_OSX_ARCHITECTURES)
+if(PRECOMPILE_HEADERS AND NUM_OSX_ARCHITECTURES GREATER 1)
+  # Fat macOS builds with PCH break -mbranch-protection, since it's x86-64 only.
+  message(STATUS "Disabling precompiled headers for fat macOS build")
+  set(PRECOMPILE_HEADERS OFF)
+endif()
+
 if(TARGET_OS STREQUAL "mac" AND MACOS_CODESIGN)
   if(DEFINED ENV{MACOS_APP_IDENTITY})
     message(STATUS "Using MACOS_APP_IDENTITY as codesign signature")
@@ -2606,6 +2613,8 @@ if(CLIENT)
     graphics_threaded_sprites.cpp
     input.cpp
     input.h
+    keyboard.cpp
+    keyboard.h
     keynames.cpp
     keynames.h
     notifications.cpp
@@ -3535,13 +3544,22 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
   list(APPEND TARGETS_LINK ${TARGET_TESTRUNNER})
 
   add_custom_target(run_cxx_tests
-    COMMAND $<TARGET_FILE:${TARGET_TESTRUNNER}> ${TESTRUNNER_ARGS}
+    COMMAND $<TARGET_FILE:${TARGET_TESTRUNNER}> --gtest_brief=1 ${TESTRUNNER_ARGS}
     COMMENT Running unit tests
     DEPENDS ${TARGET_TESTRUNNER}
     USES_TERMINAL
   )
   add_custom_target(run_tests
     DEPENDS run_cxx_tests
+  )
+  add_custom_target(run_cxx_tests_verbose
+    COMMAND $<TARGET_FILE:${TARGET_TESTRUNNER}> --no-capture ${TESTRUNNER_ARGS}
+    COMMENT Running unit tests
+    DEPENDS ${TARGET_TESTRUNNER}
+    USES_TERMINAL
+  )
+  add_custom_target(run_tests_verbose
+    DEPENDS run_cxx_tests_verbose
   )
   if(NOT MSVC OR CMAKE_BUILD_TYPE STREQUAL Release OR CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo OR CMAKE_BUILD_TYPE STREQUAL MinSizeRel)
     # On MSVC, Rust tests only work in the release mode because we link our C++
@@ -3550,6 +3568,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     #
     # See also https://github.com/rust-lang/rust/issues/39016.
     add_dependencies(run_tests run_rust_tests)
+    add_dependencies(run_tests_verbose run_rust_tests)
   endif()
 endif()
 

@@ -83,10 +83,10 @@ void IGameController::OnCharacterDeathImpl(CCharacter *pVictim, int Killer, int 
 	if(!DoesKillCount(pVictim, Killer, Weapon))
 		Killer = pVictim->GetPlayer()->GetCid();
 
-	if(Killer != WEAPON_GAME && pVictim->m_SetSavePos[RESCUEMODE_AUTO])
-		pVictim->GetPlayer()->m_LastDeath = pVictim->m_RescueTee[RESCUEMODE_AUTO];
+	if(Killer != WEAPON_GAME && pVictim->m_aSetSavePos[RESCUEMODE_AUTO])
+		pVictim->GetPlayer()->m_LastDeath = pVictim->m_aRescueTee[RESCUEMODE_AUTO];
 	pVictim->StopRecording();
-	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(pVictim, (Killer < 0) ? nullptr : GameServer()->m_apPlayers[Killer], Weapon);
+	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(pVictim, GameServer()->m_apPlayers[Killer], Weapon);
 
 	LogKillMessage(pVictim, Killer, Weapon, ModeSpecial);
 

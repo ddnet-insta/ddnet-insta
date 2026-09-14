@@ -2220,8 +2220,8 @@ bool CCharacter::TrySetRescue(int RescueMode)
 
 void CCharacter::ForceSetRescue(int RescueMode)
 {
-	m_RescueTee[RescueMode].Save(this);
-	m_SetSavePos[RescueMode] = true;
+	m_aRescueTee[RescueMode].Save(this);
+	m_aSetSavePos[RescueMode] = true;
 }
 
 void CCharacter::DDRaceTick()
@@ -2493,8 +2493,7 @@ void CCharacter::DDRaceInit()
 	m_Paused = false;
 	m_DDRaceState = ERaceState::NONE;
 	m_PrevPos = m_Pos;
-	for(bool &Set : m_SetSavePos)
-		Set = false;
+	std::fill(std::begin(m_aSetSavePos), std::end(m_aSetSavePos), false);
 	m_LastBroadcast = 0;
 	m_TeamBeforeSuper = 0;
 	m_Core.m_Id = GetPlayer()->GetCid();
@@ -2543,7 +2542,7 @@ void CCharacter::DDRaceInit()
 
 bool CCharacter::Rescue()
 {
-	if(m_SetSavePos[GetPlayer()->m_RescueMode] && !m_Core.m_Super && !m_Core.m_Invincible)
+	if(m_aSetSavePos[GetPlayer()->m_RescueMode] && !m_Core.m_Super && !m_Core.m_Invincible)
 	{
 		if(m_LastRescue + (int64_t)g_Config.m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick() && !Teams()->IsPractice(Team()))
 		{
@@ -2556,7 +2555,7 @@ bool CCharacter::Rescue()
 		m_LastRescue = Server()->Tick();
 		int StartTime = m_StartTime;
 		ERaceState DDRaceState = m_DDRaceState;
-		m_RescueTee[GetPlayer()->m_RescueMode].Load(this);
+		m_aRescueTee[GetPlayer()->m_RescueMode].Load(this);
 		// Don't load these from saved tee:
 		m_Core.m_Vel = vec2(0, 0);
 		m_Core.m_HookState = HOOK_IDLE;
