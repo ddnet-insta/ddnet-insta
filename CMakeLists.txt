@@ -994,6 +994,12 @@ if(NOT CRYPTO_FOUND)
 endif()
 
 ########################################################################
+# ddnet-insta
+########################################################################
+
+include("${CMAKE_CURRENT_SOURCE_DIR}/src/insta/CMakeLists.txt")
+
+########################################################################
 # RUST
 ########################################################################
 
@@ -2514,8 +2520,8 @@ set(LIBS
 )
 
 # ddnet-insta START
-include("${CMAKE_CURRENT_SOURCE_DIR}/src/insta/CMakeLists.txt")
 insta_patch_engine()
+insta_patch_deps()
 # ddnet-insta END
 
 # Targets
@@ -3464,6 +3470,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     csv_test.cpp
     datafile_test.cpp
     dbg_test.cpp
+    ddnet_insta_ssh_test.cpp
     editor_test.cpp
     fs_test.cpp
     gameworld_test.cpp
@@ -4152,6 +4159,10 @@ foreach(target ${TARGETS})
     endif()
   endif()
   if(OUR_FLAGS_LINK)
+    # ddnet-insta
+    if(SSH)
+      set(OUR_FLAGS_LINK ${OUR_FLAGS_LINK} ssh)
+    endif()
     target_link_libraries(${target} ${OUR_FLAGS_LINK})
   endif()
   if(OUR_FLAGS)
@@ -4279,6 +4290,10 @@ foreach(target ${TARGETS_OWN})
   endif()
   if(HEADLESS_CLIENT)
     target_compile_definitions(${target} PRIVATE CONF_HEADLESS_CLIENT)
+  endif()
+  # ddnet-insta
+  if(SSH)
+    target_compile_definitions(${target} PRIVATE CONF_SSH)
   endif()
   if(MYSQL)
     target_compile_definitions(${target} PRIVATE CONF_MYSQL)
