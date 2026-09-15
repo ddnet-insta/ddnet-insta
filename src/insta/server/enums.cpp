@@ -64,3 +64,54 @@ const char *display_score_to_str(EDisplayScore Score)
 
 	return "(invalid)";
 }
+
+bool str_to_weapon(const char *pInput, int *pWeapon)
+{
+	if(!pInput || pInput[0] == '\0')
+		return false;
+
+	// Also support weapon ids
+	int Weapon = 0;
+	if(str_toint(pInput, &Weapon))
+	{
+		switch(Weapon)
+		{
+		case WEAPON_HAMMER: return Weapon;
+		case WEAPON_GUN: return Weapon;
+		case WEAPON_SHOTGUN: return Weapon;
+		case WEAPON_GRENADE: return Weapon;
+		case WEAPON_LASER: return Weapon;
+		case WEAPON_NINJA: return Weapon;
+		}
+	}
+
+	if(!str_comp_nocase(pInput, "hammer"))
+		*pWeapon = WEAPON_HAMMER;
+	else if(!str_comp_nocase(pInput, "gun"))
+		*pWeapon = WEAPON_GUN;
+	else if(!str_comp_nocase(pInput, "shotgun"))
+		*pWeapon = WEAPON_SHOTGUN;
+	else if(!str_comp_nocase(pInput, "grenade"))
+		*pWeapon = WEAPON_GRENADE;
+	else if(!str_comp_nocase(pInput, "laser") || !str_comp_nocase(pInput, "rifle"))
+		*pWeapon = WEAPON_LASER;
+	else if(!str_comp_nocase(pInput, "ninja"))
+		*pWeapon = WEAPON_NINJA;
+	else
+		return false;
+
+	// intentionally not supporting these
+	// WEAPON_GAME = -3, // team switching etc
+	// WEAPON_SELF = -2, // console kill command
+	// WEAPON_WORLD = -1, // death tiles etc
+
+	return true;
+}
+
+#define LINK_CONFIG(ConfigName, ConfigScriptName, EnumName) \
+	bool str_to_##EnumName(const char *pInput, EnumName *pValue) \
+	{ \
+		*pValue = EnumName::
+}
+#include <insta/server/config_enums.h>
+#undef LINK_CONFIG

@@ -21,6 +21,7 @@
 #include <game/mapbugs.h>
 #include <game/voting.h>
 
+#include <insta/server/config_enums.h> // ddnet-insta
 #include <insta/server/db/insta.h> // ddnet-insta
 #include <insta/server/enums.h> // ddnet-insta
 #include <insta/server/ip_storage.h> // ddnet-insta

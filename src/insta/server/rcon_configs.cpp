@@ -36,6 +36,8 @@ void CGameContext::RegisterInstagibCommands()
 	Console()->Chain("sv_grenade_ammo_regen_on_kill", ConchainGrenadeAmmoRegenSetting, this);
 	Console()->Chain("sv_grenade_ammo_regen_reset_on_fire", ConchainGrenadeAmmoRegenSetting, this);
 
+	m_ConfigEnums.RegisterChains(this);
+
 // https://github.com/ddnet-insta/ddnet-insta/issues/649
 #define IgnoreDocReg Console()->Register
 
