@@ -65,4 +65,33 @@ char *str_escape_csv(char *pBuffer, int BufferSize, const char *pString);
 bool str_isalpha(char c);
 bool str_isalphanumeric(char c);
 
+#define STR_ALLOW_LOWERALPHA "abcdefghijklmnopqrstuvwxyz"
+#define STR_ALLOW_ALPHA "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#define STR_ALLOW_NUMERIC "0123456789"
+#define STR_ALLOW_ALPHANUMERIC STR_ALLOW_ALPHA STR_ALLOW_NUMERIC
+#define STR_ALLOW_LOWERALPHANUMERIC STR_ALLOW_LOWERALPHA STR_ALLOW_NUMERIC
+
+/**
+ * Check if a given string only contains characters from a given list
+ *
+ * @param pAllowedCharacters string with all the allowed characters for example the constant STR_ALLOW_LOWERALPHANUMERIC
+ * @param pTestedString string to be checked if it contains only allowed characters
+ *
+ * @return `true` if the string is valid and only contains allowed characters
+ */
+bool str_contains_only_allowed_chars(const char *pAllowedCharacters, const char *pTestedString);
+
+/**
+ * Converts a string to a confusable skeleton string.
+ *
+ * @ingroup Strings
+ *
+ * @param pStr Input string.
+ * @param pBuf Output string buffer.
+ * @param BufLen Output buffer size in bytes.
+ *
+ * @return `true` on success and `false` on error
+ */
+bool str_utf8_to_skeleton_str(const char *pStr, char *pBuf, int BufLen);
+
 #endif
