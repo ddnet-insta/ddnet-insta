@@ -2644,6 +2644,7 @@ if(CLIENT)
     # tidy-alphabetical-start
     animstate.cpp
     animstate.h
+    assets.cpp
     component.cpp
     component.h
     components/background.cpp
