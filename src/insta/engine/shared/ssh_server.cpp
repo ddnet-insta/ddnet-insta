@@ -2164,7 +2164,7 @@ bool CSshServer::GenerateHostKeyIfMissing()
 	log_info("ssh", "generating host key ...");
 
 	ssh_key Key = nullptr;
-#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0, 11, 0)
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0, 12, 0)
 	if(ssh_pki_generate_key(SSH_KEYTYPE_RSA, nullptr, &Key) != SSH_OK)
 #else
 	if(ssh_pki_generate(SSH_KEYTYPE_RSA, 0, &Key) != SSH_OK)
