@@ -2170,7 +2170,7 @@ bool CSshServer::GenerateHostKeyIfMissing()
 	if(ssh_pki_generate(SSH_KEYTYPE_RSA, 0, &Key) != SSH_OK)
 #endif
 	{
-		log_error("ssh", "failed to generate host key");
+		log_error("ssh", "failed to generate host key: %s", ssh_get_error(m_Bind));
 		str_copy(m_aError, "failed to generate host key");
 		ssh_key_free(Key);
 		return false;
