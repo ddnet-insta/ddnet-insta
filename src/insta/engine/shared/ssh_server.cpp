@@ -23,6 +23,7 @@
 #include <libssh/callbacks.h>
 #include <libssh/libssh.h>
 #include <libssh/server.h>
+#include <openssl/err.h>
 
 #include <algorithm>
 #include <array>
@@ -2167,10 +2168,18 @@ bool CSshServer::GenerateHostKeyIfMissing()
 #if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0, 12, 0)
 	if(ssh_pki_generate_key(SSH_KEYTYPE_RSA, nullptr, &Key) != SSH_OK)
 #else
-	if(ssh_pki_generate(SSH_KEYTYPE_RSA, 0, &Key) != SSH_OK)
+	if(ssh_pki_generate(SSH_KEYTYPE_RSA, 2048, &Key) != SSH_OK)
 #endif
 	{
-		log_error("ssh", "failed to generate host key: %s", ssh_get_error(m_Bind));
+		unsigned long ErrCode;
+		while((ErrCode = ERR_get_error()) != 0)
+		{
+			char aError[256];
+			ERR_error_string_n(ErrCode, aError, sizeof(aError));
+			log_error("ssh/openssl", "OpenSSL error: %s", aError);
+		}
+
+		log_error("ssh", "failed to generate host key");
 		str_copy(m_aError, "failed to generate host key");
 		ssh_key_free(Key);
 		return false;
