@@ -1138,16 +1138,22 @@ void CSshClient::CompletionPreviewCallback(int Index, const char *pCmd, void *pU
 
 void CSshClient::AddToInputHistory(const char *pInput)
 {
-	// check duplicates
-	// for now only filter out consecutive duplicates
-	if(!m_InputHistory.empty())
-	{
-		auto &Prev = m_InputHistory.back();
-		if(!str_comp(Prev.data(), pInput))
-		{
-			return;
-		}
-	}
+	// TODO: checking for duplicates is a good idea to reduce the history size
+	//       but silently dropping consecutive duplicates does break arrow key
+	//       up history entry lookups because it keeps going further back
+	//       in the history but we only have one entry when
+	//       resending the same commands
+
+	// // check duplicates
+	// // for now only filter out consecutive duplicates
+	// if(!m_InputHistory.empty())
+	// {
+	// 	auto &Prev = m_InputHistory.back();
+	// 	if(!str_comp(Prev.data(), pInput))
+	// 	{
+	// 		return;
+	// 	}
+	// }
 
 	auto &Entry = m_InputHistory.emplace_back();
 	str_copy(Entry.data(), pInput, Entry.size());
@@ -1165,6 +1171,32 @@ const char *CSshClient::PrevInputFromHistory()
 	if(m_InputHistory.empty())
 		return "";
 
+	// jump over multiple consecutive duplicates at once
+	// if the user ran the same command a bunch of times
+	// we do not require them to press arrow key up
+	// as many times to get to the previous different command
+
+	// we already have to be scrolled back in time at least
+	// once for this skip to make sure we get the previous command correctly
+	// and so that we can check if prev is same as current without OOB
+	if(m_HistoryIdx < m_InputHistory.size())
+	{
+		while(m_HistoryIdx > 0)
+		{
+			const char *pCurrentCmd = m_InputHistory.at(m_HistoryIdx).data();
+			const char *pPrevCmd = m_InputHistory.at(m_HistoryIdx - 1).data();
+			if(str_comp(pCurrentCmd, pPrevCmd) != 0)
+			{
+				// if the previous command differs we stop scrolling
+				break;
+			}
+
+			// if the previous command was the same
+			// we keep scrolling
+			m_HistoryIdx--;
+		}
+	}
+
 	if(m_HistoryIdx > 0)
 		m_HistoryIdx--;
 	auto &Entry = m_InputHistory.at(m_HistoryIdx);
@@ -1175,6 +1207,29 @@ const char *CSshClient::NextInputFromHistory()
 {
 	if(m_InputHistory.empty())
 		return "";
+
+	// jump over multiple consecutive duplicates at once
+	// if the user ran the same command a bunch of times
+	// we do not require them to press arrow key up
+	// as many times to get to the previous different command
+	if(m_InputHistory.size() > 1)
+	{
+		while(m_HistoryIdx < m_InputHistory.size() - 1)
+		{
+			const char *pCurrentCmd = m_InputHistory.at(m_HistoryIdx).data();
+			const char *pNextCmd = m_InputHistory.at(m_HistoryIdx + 1).data();
+			if(str_comp(pCurrentCmd, pNextCmd) != 0)
+			{
+				// if the next command differs we stop scrolling
+				break;
+			}
+
+			// if the next command was the same
+			// we keep scrolling
+			m_HistoryIdx++;
+		}
+	}
+
 	// WARNING: here we go intentionally out of bounds by one
 	if(m_HistoryIdx < m_InputHistory.size())
 		m_HistoryIdx++;

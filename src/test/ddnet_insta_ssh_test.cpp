@@ -87,6 +87,115 @@ TEST(Ssh, History)
 	EXPECT_STREQ(Client.PrevInputFromHistory(), "bar");
 }
 
+TEST(Ssh, HistoryPrevSpam)
+{
+	// here we simulate a common real world
+	// use case of me personally
+	//
+	// join ssh server then run "status" command
+	// then run "dump_antibot" then press arrow key
+	// up to get "dump_antibot" again and then press enter
+	// to send it again. And then keep spamming "dump_antibot"
+	//
+	// Currently there is a bug where one arrow key up would
+	// sometimes fetch "status"
+
+	CSshClient Client(0, nullptr);
+	Client.AddToInputHistory("status");
+	Client.AddToInputHistory("dump_antibot");
+
+	// arrow key up
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "dump_antibot");
+	// enter to send fetched command
+	Client.AddToInputHistory("dump_antibot");
+
+	// arrow key up
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "dump_antibot");
+	// enter to send fetched command
+	Client.AddToInputHistory("dump_antibot");
+
+	// arrow key up
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "dump_antibot");
+	// enter to send fetched command
+	Client.AddToInputHistory("dump_antibot");
+
+	// arrow key up
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "dump_antibot");
+	// enter to send fetched command
+	Client.AddToInputHistory("dump_antibot");
+
+	// arrow key up
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "dump_antibot");
+	// enter to send fetched command
+	Client.AddToInputHistory("dump_antibot");
+
+	// now that we ran "dump_antibot" a bunch of times we would like to
+	// run "status" again
+	// and it should work with two arrow key up presses
+	// having to scroll through all duplicated "dump_antibot"s would be annoying asf
+
+	// arrow key up
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "dump_antibot");
+	// arrow key up
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "status");
+}
+
+TEST(Ssh, HistoryPrevSpamReverse)
+{
+	CSshClient Client(0, nullptr);
+	Client.AddToInputHistory("status");
+	Client.AddToInputHistory("dump_antibot");
+
+	// arrow key up
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "dump_antibot");
+	// enter to send fetched command
+	Client.AddToInputHistory("dump_antibot");
+
+	// arrow key up
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "dump_antibot");
+	// enter to send fetched command
+	Client.AddToInputHistory("dump_antibot");
+
+	// arrow key up
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "dump_antibot");
+	// enter to send fetched command
+	Client.AddToInputHistory("dump_antibot");
+
+	// arrow key up
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "dump_antibot");
+	// enter to send fetched command
+	Client.AddToInputHistory("dump_antibot");
+
+	// arrow key up
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "dump_antibot");
+	// enter to send fetched command
+	Client.AddToInputHistory("dump_antibot");
+
+	// run new different command
+	Client.AddToInputHistory("kick");
+
+	// arrow key up
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "kick");
+
+	// arrow key up
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "dump_antibot");
+
+	// arrow key up
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "status");
+
+	// now that we are the beginning of the history go back
+	// in the other direction
+
+	// arrow key down
+	EXPECT_STREQ(Client.NextInputFromHistory(), "dump_antibot");
+
+	// arrow key down (expect to skip all the duplicated dump_antibot entries)
+	EXPECT_STREQ(Client.NextInputFromHistory(), "kick");
+
+	// arrow key down (end of history)
+	EXPECT_STREQ(Client.NextInputFromHistory(), "");
+}
+
 TEST(Ssh, HistoryDuplicates)
 {
 	CSshClient Client(0, nullptr);
