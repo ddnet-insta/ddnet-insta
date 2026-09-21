@@ -57,6 +57,10 @@ function(insta_patch_engine)
       # tidy-alphabetical-start
       _network.cpp
       config_variables_insta.h
+      ssh_programs/logs.cpp
+      ssh_programs/logs.h
+      ssh_programs/program.cpp
+      ssh_programs/program.h
       ssh_server.cpp
       ssh_server.h
       # tidy-alphabetical-end

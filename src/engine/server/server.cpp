@@ -663,6 +663,10 @@ void CServer::SendLogLine(const CLogMessage *pMessage)
 	{
 		m_Econ.Send(-1, pMessage->m_aLine);
 	}
+#if defined(CONF_SSH)
+	// ddnet-insta
+	m_SshServer.OnLogMessage(pMessage);
+#endif
 }
 
 void CServer::SetRconCid(int ClientId)
