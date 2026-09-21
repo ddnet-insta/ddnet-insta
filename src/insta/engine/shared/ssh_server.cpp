@@ -2,6 +2,8 @@
 
 #include "ssh_server.h"
 
+#include "ssh_programs/logs.h"
+
 #include <base/dbg.h>
 #include <base/io.h>
 #include <base/log.h>
@@ -247,44 +249,7 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 		return;
 	}
 
-	// We intentionally only print the Message() here not the m_aLine
-	// the timestamp is quite long and usually not interesting for a prompt
-	// the system is often "chatresp" which just looks ugly and also makes
-	// the output harder to read.
-	// Just showing the message might in some rare cases cause confusion where
-	// this log line comes from but in the majority of cases makes the console
-	// way more clean which is the main selling point of this entire thing.
-	// For now I don't have a use case for it but in the future there could be an option
-	// to enable printing more than just the message.
-
-	if(pClient->m_Channel)
-	{
-		bool NeedColorReset = true;
-		// I tested it and coloring does work
-		// but had to patch the server code for it
-		// because as far as I can tell no server side log uses colors for now
-		if(pMessage->m_HaveColor)
-		{
-			pClient->SendColor(pMessage->m_Color);
-		}
-		else if(pMessage->m_Level == LEVEL_ERROR)
-		{
-			pClient->SendColor({.r = 220, .g = 53, .b = 69});
-		}
-		else if(pMessage->m_Level == LEVEL_WARN)
-		{
-			pClient->SendColor({.r = 225, .g = 193, .b = 7});
-		}
-		else
-		{
-			NeedColorReset = false;
-		}
-		pClient->SendChannel("%s", pMessage->Message());
-		if(NeedColorReset)
-		{
-			pClient->ResetColor();
-		}
-	}
+	pClient->SendLogLine(pMessage);
 
 	// just mirror everything to regular log because the hiding is stupid
 	// https://github.com/ddnet/ddnet/issues/11095
@@ -653,6 +618,8 @@ void CSshClient::ResendPrompt()
 {
 	if(!m_Channel)
 		return;
+	if(m_pProgram)
+		return;
 
 	SendPromptBarBottom();
 
@@ -678,7 +645,7 @@ void CSshClient::SendPromptBarBottom()
 
 const char *CSshClient::PromptStr()
 {
-	if(m_Mode == EClientMode::HISTORY_SEARCH)
+	if(m_Mode == EShellMode::HISTORY_SEARCH)
 	{
 		return "search: ";
 	}
@@ -960,6 +927,48 @@ void CSshClient::RequestCursorPos()
 	m_WaitingForCursorPos = true;
 }
 
+void CSshClient::SendLogLine(const CLogMessage *pMessage)
+{
+	if(!m_Channel)
+		return;
+
+	// We intentionally only print the Message() here not the m_aLine
+	// the timestamp is quite long and usually not interesting for a prompt
+	// the system is often "chatresp" which just looks ugly and also makes
+	// the output harder to read.
+	// Just showing the message might in some rare cases cause confusion where
+	// this log line comes from but in the majority of cases makes the console
+	// way more clean which is the main selling point of this entire thing.
+	// For now I don't have a use case for it but in the future there could be an option
+	// to enable printing more than just the message.
+
+	bool NeedColorReset = true;
+	// I tested it and coloring does work
+	// but had to patch the server code for it
+	// because as far as I can tell no server side log uses colors for now
+	if(pMessage->m_HaveColor)
+	{
+		SendColor(pMessage->m_Color);
+	}
+	else if(pMessage->m_Level == LEVEL_ERROR)
+	{
+		SendColor({.r = 220, .g = 53, .b = 69});
+	}
+	else if(pMessage->m_Level == LEVEL_WARN)
+	{
+		SendColor({.r = 225, .g = 193, .b = 7});
+	}
+	else
+	{
+		NeedColorReset = false;
+	}
+	SendChannel("%s", pMessage->Message());
+	if(NeedColorReset)
+	{
+		ResetColor();
+	}
+}
+
 void CSshClient::ResetCompletion()
 {
 	ClearCompletionPreview();
@@ -970,11 +979,11 @@ void CSshClient::ResetCompletion()
 
 void CSshClient::AbortHistorySearch()
 {
-	if(m_Mode != EClientMode::HISTORY_SEARCH)
+	if(m_Mode != EShellMode::HISTORY_SEARCH)
 		return;
 
 	DisableAltBuf();
-	m_Mode = EClientMode::PROMPT;
+	m_Mode = EShellMode::PROMPT;
 	SetInput(m_aPromptInput);
 }
 
@@ -1266,7 +1275,7 @@ void CSshClient::SendChannel(const char *pFormat, ...)
 
 void CSshClient::OnTerminalResize(int OldWidth, int OldHeight)
 {
-	if(m_Mode == EClientMode::PROMPT && m_Config.m_PromptBarBottom)
+	if(m_Mode == EShellMode::PROMPT && m_Config.m_PromptBarBottom)
 	{
 		// the bottom bar can get bugged without this
 		ResendPrompt();
@@ -1475,7 +1484,7 @@ int CSshServer::TryProcessEscapeSequence(CSshClient *pClient, const char *pBuf, 
 		//       we need some kind of popup and screen system
 		//       but lets hack together some kind of view first so we can think about
 		//       how to structure the code
-		if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+		if(pClient->m_Mode == EShellMode::HISTORY_SEARCH)
 		{
 			pClient->AbortHistorySearch();
 		}
@@ -1557,12 +1566,12 @@ int CSshServer::TryProcessEscapeSequence(CSshClient *pClient, const char *pBuf, 
 	{
 		if(pBuf[2] == 65) // arrow key up
 		{
-			if(pClient->m_Mode == EClientMode::PROMPT)
+			if(pClient->m_Mode == EShellMode::PROMPT)
 			{
 				pClient->ResetCompletion();
 				pClient->SetInput(pClient->PrevInputFromHistory());
 			}
-			else if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+			else if(pClient->m_Mode == EShellMode::HISTORY_SEARCH)
 			{
 				pClient->m_HistorySearchScroll++;
 			}
@@ -1572,12 +1581,12 @@ int CSshServer::TryProcessEscapeSequence(CSshClient *pClient, const char *pBuf, 
 		}
 		else if(pBuf[2] == 66) // arrow key down
 		{
-			if(pClient->m_Mode == EClientMode::PROMPT)
+			if(pClient->m_Mode == EShellMode::PROMPT)
 			{
 				pClient->ResetCompletion();
 				pClient->SetInput(pClient->NextInputFromHistory());
 			}
-			else if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+			else if(pClient->m_Mode == EShellMode::HISTORY_SEARCH)
 			{
 				pClient->m_HistorySearchScroll--;
 			}
@@ -1684,6 +1693,30 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		}
 	}
 
+	if(pClient->m_pProgram)
+	{
+		for(size_t i = 0; i < BufSize; i++)
+		{
+			char Byte = pBuf[i];
+			if(Byte == KEY_CTRL_C)
+			{
+				if(pClient->m_pProgram->OnSigint())
+				{
+					pClient->m_pProgram->OnShutdown();
+					delete pClient->m_pProgram;
+					pClient->m_pProgram = nullptr;
+					pClient->m_Buffer.Clear();
+					pClient->m_Mode = EShellMode::PROMPT;
+					ssh_channel_write(Channel, "\n\r^C", 5);
+					pClient->NewPrompt();
+					return;
+				}
+			}
+		}
+		pClient->m_pProgram->TryProcessCurrentInput(&pClient->m_Buffer);
+		return;
+	}
+
 	// TODO: for waiting on more data this loop is not ideal
 	//       because when we do not call m_Buffer.Clear() we did potentially
 	//       already handle previous bytes in the loop
@@ -1694,10 +1727,10 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		if(Byte == KEY_ENTER)
 		{
 			// this if statement is a bit ugly move the mode somewhere else
-			if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+			if(pClient->m_Mode == EShellMode::HISTORY_SEARCH)
 			{
 				pClient->DisableAltBuf();
-				pClient->m_Mode = EClientMode::PROMPT;
+				pClient->m_Mode = EShellMode::PROMPT;
 				pClient->SendCursorPos(pClient->m_CursorPos);
 				if(pClient->m_pHistorySearchMatch)
 				{
@@ -1768,6 +1801,28 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 					CLogScope Scope(&Logger);
 					LogRatelimitStatus();
 				}
+				else if(!str_comp(pCmd, "logs"))
+				{
+					if(pClient->m_pProgram)
+					{
+						CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
+						CLogScope Scope(&Logger);
+						log_error("ssh", "error a program is already running");
+					}
+					else
+					{
+						for(const CLogMessage &Line : m_LogBuffer.m_Lines)
+						{
+							pClient->SendLogLine(&Line);
+						}
+
+						pClient->m_pProgram = new CSshProgramLogs(pClient);
+						pClient->m_pProgram->OnInit();
+						pClient->m_aInput[0] = '\0';
+						pClient->m_Buffer.Clear();
+						return;
+					}
+				}
 				// else if(!str_comp(pCmd, "x")) // FIXME: remove debug
 				// {
 				// 	CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
@@ -1807,9 +1862,9 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		}
 		else if(Byte == KEY_CTRL_R)
 		{
-			if(pClient->m_Mode == EClientMode::PROMPT)
+			if(pClient->m_Mode == EShellMode::PROMPT)
 			{
-				pClient->m_Mode = EClientMode::HISTORY_SEARCH;
+				pClient->m_Mode = EShellMode::HISTORY_SEARCH;
 				pClient->EnableAltBuf();
 				str_copy(pClient->m_aPromptInput, pClient->m_aInput);
 				pClient->m_aInput[0] = '\0';
@@ -1873,7 +1928,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		}
 		else if(Byte == KEY_CTRL_C)
 		{
-			if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+			if(pClient->m_Mode == EShellMode::HISTORY_SEARCH)
 			{
 				pClient->AbortHistorySearch();
 			}
@@ -1901,7 +1956,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			if(pClient->m_aInput[0])
 				continue;
 
-			if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+			if(pClient->m_Mode == EShellMode::HISTORY_SEARCH)
 			{
 				pClient->AbortHistorySearch();
 			}
@@ -2007,7 +2062,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			if(!pClient->AddSingleAsciiLetterToInput(Byte))
 				pClient->SendBell();
 
-			if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+			if(pClient->m_Mode == EShellMode::HISTORY_SEARCH)
 			{
 				pClient->m_HistorySearchScroll = 0;
 			}
@@ -2087,7 +2142,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 	// TODO: this should not be here
 	//       we also need to blacklist some commands during special modes
 
-	if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+	if(pClient->m_Mode == EShellMode::HISTORY_SEARCH)
 		pClient->RenderHistorySearch();
 
 	// TODO: only clear if we actually read the data
@@ -2973,8 +3028,35 @@ void CSshServer::Update()
 	}
 }
 
+void CSshServer::OnLogMessage(const CLogMessage *pMessage)
+{
+	m_LogBuffer.Add(pMessage);
+
+	for(CSshClient *pClient : m_apClients)
+	{
+		if(!pClient)
+			continue;
+
+		if(pClient->m_pProgram)
+			pClient->m_pProgram->OnLogMessage(pMessage);
+	}
+}
+
 void CSshServer::Shutdown()
 {
+	for(CSshClient *pClient : m_apClients)
+	{
+		if(!pClient)
+			continue;
+
+		if(pClient->m_pProgram)
+		{
+			pClient->m_pProgram->OnShutdown();
+			delete pClient->m_pProgram;
+			pClient->m_pProgram = nullptr;
+		}
+	}
+
 	if(m_Bind != nullptr && m_aError[0] == '\0')
 	{
 		ssh_bind_free(m_Bind);

@@ -16,6 +16,7 @@
 #include <engine/shared/ringbuffer.h>
 #include <engine/storage.h>
 
+#include <insta/engine/shared/ssh_programs/program.h>
 #include <libssh/callbacks.h>
 #include <libssh/libssh.h>
 #include <libssh/server.h>
@@ -74,7 +75,7 @@ public:
 	const unsigned char *Data() const { return m_aBuf; }
 };
 
-enum class EClientMode
+enum class EShellMode
 {
 	PROMPT,
 	HISTORY_SEARCH,
@@ -166,7 +167,9 @@ public:
 
 	int64_t m_JoinTime = 0;
 
-	EClientMode m_Mode = EClientMode::PROMPT;
+	EShellMode m_Mode = EShellMode::PROMPT;
+	// Currently running process that replaced the prompt
+	CSshProgram *m_pProgram = nullptr;
 
 	// The current ssh channel read buffer.
 	// These are all the bytes the ssh client sent to use
@@ -328,6 +331,11 @@ public:
 	void SendCursorPos(ivec2 Pos) const;
 	void RequestCursorPos();
 
+	// sends a ddnet log line entry to the ssh client
+	// it also applies coloring
+	// and handles line wrapping and cursor offsets
+	void SendLogLine(const CLogMessage *pMessage);
+
 	void AbortHistorySearch();
 	void RenderHistorySearch();
 	const char *m_pHistorySearchMatch = nullptr;
@@ -420,6 +428,23 @@ public:
 	CCallbackCtx m_CallbackCtx;
 };
 
+class CLogBuffer
+{
+	static constexpr size_t MAX_LINES = 6;
+
+public:
+	std::deque<CLogMessage> m_Lines;
+
+	void Add(const CLogMessage *pMessage)
+	{
+		m_Lines.push_back(*pMessage);
+		if(m_Lines.size() > MAX_LINES)
+		{
+			m_Lines.pop_front();
+		}
+	}
+};
+
 class CSshServer
 {
 	CConfig *m_pConfig = nullptr;
@@ -436,6 +461,7 @@ class CSshServer
 	// and newly connected clients base their session history
 	// on this central history
 	std::deque<std::array<char, sizeof(CSshClient::m_aInput)>> m_InputHistory;
+	CLogBuffer m_LogBuffer;
 
 	char m_aError[512] = "";
 
@@ -490,6 +516,7 @@ public:
 
 	void Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage);
 	void Update();
+	void OnLogMessage(const CLogMessage *pMessage);
 	void Shutdown();
 	bool GotActiveConnections();
 
