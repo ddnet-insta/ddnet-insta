@@ -489,6 +489,11 @@ class CSshServer
 	void AcceptNewConnections();
 	void ListConnections();
 	void MergeInputHistory(CSshClient *pClient);
+
+	// similar to ddnet's CServer::m_RconClientId
+	// it is the ssh client id of the ssh connection
+	// that is currently executing a rcon command
+	std::optional<int> m_RconClientId = std::nullopt;
 	void ExecuteRconLine(CSshClient *pClient, const char *pLine);
 
 	// pBuf should be pointing into the clients input buffer
@@ -504,6 +509,9 @@ class CSshServer
 	void TryProcessCurrentInput(CSshClient *pClient);
 
 	void ReadNewInput(CSshClient *pClient);
+
+	static void ConClear(IConsole::IResult *pResult, void *pUserData);
+	void OnConsoleInit();
 
 public:
 	std::unordered_map<NETADDR, CRatelimitSshCon> m_Ratelimits;
