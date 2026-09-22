@@ -2819,7 +2819,12 @@ void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 	socklen_t SockAddrLen = sizeof(SockAddr);
 	if(getpeername(Socket, (struct sockaddr *)&SockAddr, &SockAddrLen))
 	{
-		dbg_assert_failed("failed to get ssh connection address");
+		// I managed to trigger this using
+		// while true; do ssh root@localhost -p 2222 "clear;dump_antibot"; done
+		// and then pressing ctrl+c on the client side
+		log_error("ssh", "cid=%d failed to get ssh connection address", ClientId);
+		ssh_free(Session);
+		return;
 	}
 
 	CSshClient *pClient = new CSshClient(ClientId, Session);
