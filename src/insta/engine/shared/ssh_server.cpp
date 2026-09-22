@@ -1469,7 +1469,9 @@ void CSshServer::MergeInputHistory(CSshClient *pClient)
 
 void CSshServer::ExecuteRconLine(CSshClient *pClient, const char *pLine)
 {
+	m_RconClientId = pClient->m_ClientId;
 	Console()->ExecuteLine(pLine, IConsole::CLIENT_ID_UNSPECIFIED, true);
+	m_RconClientId = std::nullopt;
 }
 
 int CSshServer::TryProcessEscapeSequence(CSshClient *pClient, const char *pBuf, size_t BufSize)
@@ -2195,6 +2197,29 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 	// }
 }
 
+void CSshServer::ConClear(IConsole::IResult *pResult, void *pUserData)
+{
+	CSshServer *pSelf = (CSshServer *)pUserData;
+	if(!pSelf->m_RconClientId.has_value())
+	{
+		log_error("ssh", "only ssh connections can use this command");
+		return;
+	}
+
+	CSshClient *pClient = pSelf->m_apClients[pSelf->m_RconClientId.value()];
+	if(!pClient)
+		return;
+
+	// TODO: this is off by one
+	//       but the fix is a hack
+	//       so instead solve this issue first and refactor the newline design
+	//       https://github.com/ddnet-insta/ddnet-insta/issues/718
+
+	pClient->SendClearScreen();
+	pClient->m_CursorPos.y = 1;
+	pClient->SendCursorPos(pClient->m_CursorPos);
+}
+
 void CSshServer::GetHostKeyFilePath(char *pBuf, size_t BufSize)
 {
 	Storage()->GetCompletePath(IStorage::TYPE_SAVE, "ssh/ssh_host_rsa_key", pBuf, BufSize);
@@ -2416,6 +2441,13 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage)
 	// 	auto &Entry = m_InputHistory.emplace_back();
 	// 	str_copy(Entry.data(), pLine, Entry.size());
 	// }
+
+	OnConsoleInit();
+}
+
+void CSshServer::OnConsoleInit()
+{
+	Console()->Register("clear", "", CFGFLAG_SERVER, ConClear, this, "clears the terminal screen for ssh connections");
 }
 
 std::optional<int> CSshServer::FindFreeSlot()
