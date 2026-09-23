@@ -140,6 +140,7 @@ public:
 class CSshClient
 {
 	char m_aPromptBarBottom[2048] = "(bottom bar)";
+	char m_aLastSentPromptBarBottom[2048] = "(bottom bar)";
 
 public:
 	const IConsole *Console() const;
@@ -292,9 +293,10 @@ public:
 	// Render the prompt bar below the input cursor
 	void SendPromptBarBottom();
 
-	// Refresh and regenerate the bottom bar text
-	// and also send it to the client
-	void UpdatePromptBarBottom();
+	// This is called on tick and checks if we need to resend
+	// the bottom bar because its content changed even without user input
+	// this is used to show some live stats there
+	void CheckPromptBarBottomResendNeeded();
 
 	const char *PromptStr();
 	const char *PromptBarBottomStr();
@@ -461,6 +463,7 @@ class CSshServer
 	CLogBuffer m_LogBuffer;
 
 	char m_aError[512] = "";
+	int64_t m_Tick = 0;
 
 	void GetHostKeyFilePath(char *pBuf, size_t BufSize);
 	bool GenerateHostKeyIfMissing();
@@ -524,6 +527,8 @@ public:
 	void OnLogMessage(const CLogMessage *pMessage);
 	void Shutdown();
 	bool GotActiveConnections();
+
+	int64_t Tick() const { return m_Tick; }
 
 	// making this static in the class is just for namespacing purposes
 	// the same name already exists as a static single compilation unit function

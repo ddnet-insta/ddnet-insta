@@ -621,10 +621,36 @@ void CSshClient::SendPromptBarBottom()
 	ssh_channel_write(m_Channel, "\r\n\033[2K", 7);
 
 	// send bottom bar
-	ssh_channel_write(m_Channel, PromptBarBottomStr(), str_length(PromptBarBottomStr()));
+	const char *pBarStr = PromptBarBottomStr();
+	ssh_channel_write(m_Channel, pBarStr, str_length(pBarStr));
+	str_copy(m_aLastSentPromptBarBottom, pBarStr);
 
 	// move back up
 	ssh_channel_write(m_Channel, "\x1B[A", 4);
+}
+
+void CSshClient::CheckPromptBarBottomResendNeeded()
+{
+	if(!m_Config.m_PromptBarBottom)
+		return;
+	if(m_Mode != EShellMode::PROMPT)
+		return;
+	if(m_pProgram)
+		return;
+
+	// only rebuild and strcomp prompt string every
+	// few ticks to be nice on the cpu
+	if(m_CallbackCtx.m_pServer->Tick() % 50)
+		return;
+
+	const char *pBarStr = PromptBarBottomStr();
+	if(!str_comp(m_aLastSentPromptBarBottom, pBarStr))
+		return;
+
+	SendPromptBarBottom();
+
+	// resending the bar messes up the cursor x offset
+	SendCursorPos(m_CursorPos);
 }
 
 const char *CSshClient::PromptStr()
@@ -2940,6 +2966,7 @@ void CSshServer::Update()
 	if(g_Config.m_SvSsh == 0)
 		return;
 
+	m_Tick++;
 	if(time_get() > m_NextRatelimitCleanup)
 	{
 		m_NextRatelimitCleanup = time_get() + time_freq() * 3;
@@ -3052,6 +3079,11 @@ void CSshServer::Update()
 		if(!pClient->m_Authenticated)
 			continue;
 
+		pClient->CheckPromptBarBottomResendNeeded();
+
+		// WARNING: place no code below ReadNewInput()
+		//          because new input can cause a disconnect
+		//          which invalidates the pClient pointer
 		ReadNewInput(pClient);
 	}
 }
