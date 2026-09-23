@@ -11,6 +11,8 @@
 
 #include <engine/console.h>
 #include <engine/external/unicode-width/unicode_width.h>
+#include <engine/kernel.h>
+#include <engine/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
 #include <engine/shared/ringbuffer.h>
@@ -446,13 +448,25 @@ public:
 
 class CSshServer
 {
+	IKernel *m_pKernel = nullptr;
 	CConfig *m_pConfig = nullptr;
 	IConsole *m_pConsole = nullptr;
 	IStorage *m_pStorage = nullptr;
+	IGameServer *m_pGameServer = nullptr;
+	IServer *m_pServer = nullptr;
 
-	const IStorage *Storage() const { return m_pStorage; }
+	IKernel *Kernel() { return m_pKernel; }
+	const IKernel *Kernel() const { return m_pKernel; }
 	IStorage *Storage() { return m_pStorage; }
+	const IStorage *Storage() const { return m_pStorage; }
 
+public:
+	IGameServer *GameServer() { return m_pGameServer; }
+	const IGameServer *GameServer() const { return m_pGameServer; }
+	IServer *Server() { return m_pServer; }
+	const IServer *Server() const { return m_pServer; }
+
+private:
 	ssh_bind m_Bind = nullptr;
 
 	// global shared stored history
@@ -522,7 +536,7 @@ public:
 
 	IConsole *Console() { return m_pConsole; }
 
-	void Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage);
+	void Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, IKernel *pKernel);
 	void Update();
 	void OnLogMessage(const CLogMessage *pMessage);
 	void Shutdown();

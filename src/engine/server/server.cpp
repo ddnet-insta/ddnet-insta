@@ -3432,7 +3432,7 @@ int CServer::Run()
 	m_Fifo.Init(Console(), Config()->m_SvInputFifo, CFGFLAG_SERVER);
 #if defined(CONF_SSH)
 	// ddnet-insta
-	m_SshServer.Init(Config(), Console(), Storage());
+	m_SshServer.Init(Config(), Console(), Storage(), Kernel());
 #endif
 
 	char aBuf[256];

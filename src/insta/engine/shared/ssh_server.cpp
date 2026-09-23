@@ -16,8 +16,11 @@
 
 #include <engine/console.h>
 #include <engine/external/unicode-width/unicode_width.h>
+#include <engine/kernel.h>
+#include <engine/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
+#include <engine/shared/protocol.h>
 #include <engine/storage.h>
 
 #include <arpa/inet.h>
@@ -694,6 +697,22 @@ const char *CSshClient::PromptBarBottomStr()
 		// 	"%s placeholder %s",
 		// 	aYellow,
 		// 	aResetColor);
+	}
+
+	// if there is no command completion preview
+	// fallback to some live dashboard
+	if(m_aPromptBarBottom[0] == '\0')
+	{
+		int NumPlayers = 0;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+			if(m_CallbackCtx.m_pServer->Server()->ClientIngame(i))
+				NumPlayers++;
+
+		str_format(
+			m_aPromptBarBottom,
+			sizeof(m_aPromptBarBottom),
+			"players=%d",
+			NumPlayers);
 	}
 
 	// the prompt bar should never line wrap it messes with
@@ -2372,16 +2391,20 @@ bool CSshServer::GenerateHostKeyIfMissing()
 	return true;
 }
 
-void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage)
+void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, IKernel *pKernel)
 {
 	m_pConfig = pConfig;
 	m_pConsole = pConsole;
 	m_pStorage = pStorage;
+	m_pKernel = pKernel;
 
 	if(!g_Config.m_SvSsh)
 		return;
 
 	log_info("ssh", "libssh %s", ssh_version(0));
+
+	m_pGameServer = Kernel()->RequestInterface<IGameServer>();
+	m_pServer = Kernel()->RequestInterface<IServer>();
 
 	unicode_width_init(&m_UnicodeWidthState);
 
