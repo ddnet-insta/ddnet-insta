@@ -13,8 +13,13 @@
 
 #include <game/alloc.h>
 #include <game/server/save.h>
+#include <game/server/teeinfo.h> // ddnet-insta
 
+#include <insta/server/db/accounts_worker/accounts_worker.h> // ddnet-insta
+#include <insta/server/db/accounts_worker/chat_cmds.h> // ddnet-insta
+#include <insta/server/db/accounts_worker/rcon_cmds.h> // ddnet-insta
 #include <insta/server/db/stats.h> // ddnet-insta
+#include <insta/server/display_name.h> // ddnet-insta
 #include <insta/server/enums.h> // ddnet-insta
 #include <insta/server/ip_storage.h> // ddnet-insta
 #include <insta/server/round_stats_player.h> // ddnet-insta
