@@ -43,3 +43,27 @@ The password will be your `sv_rcon_password`
 
 Alternatively you can also add your ssh key to the authorized_keys file which is located
 in your ddnet storage location under ssh/authorized_keys. So for example `~/.teeworlds/ssh/authorized_keys` or wherever that is on your system.
+
+## scripting example
+
+The openssh command line client allows to pass one command to the server. It will wait until the command finished and then close the connection.
+You can use this to run a set of rcon commands and then examine their output.
+
+For example to read the config value sv_map like this:
+
+```
+$ ssh root@localhost -p 2222 "sv_map"
+Value: ctf1
+
+Connection to localhost closed by remote host.
+$
+```
+
+So a bash script could look like this
+
+```bash
+#!/bin/bash
+
+map_name="$(ssh root@localhost -p 2222 "sv_map" 2>/dev/null | cut -d' ' -f2-)"
+echo "The server currently is using the map: $map_name"
+```
