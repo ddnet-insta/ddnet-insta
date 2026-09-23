@@ -149,6 +149,11 @@ so they know what is going on:
 
 ![settings motd](https://raw.githubusercontent.com/ddnet-insta/images/master/settings_motd.png)
 
+## Remote admin console over ssh
+
+The rcon console can be exposed with an ssh server.
+Checkout the [rcon ssh section](./ddnet-insta/docs/ssh_rcon.md) for more details.
+
 ## Gametype support
 
 Make sure to also `reload` or switch the map when changing the gametype.
