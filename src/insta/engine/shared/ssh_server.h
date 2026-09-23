@@ -281,10 +281,7 @@ public:
 	// returns false if the input was not changed and a size limit was reached.
 	bool InsertToInputAtCursor(const char *pText);
 
-	// clears the current line and places an empty prompt
-	void ClearPrompt();
-
-	// sends new line and prompt
+	// draw a new empty prompt at the current cursor
 	void NewPrompt();
 
 	// resend the prompt line together with input

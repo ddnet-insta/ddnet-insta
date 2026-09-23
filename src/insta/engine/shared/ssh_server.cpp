@@ -439,7 +439,7 @@ void CSshClient::SetInput(const char *pInput)
 
 	if(m_Channel)
 	{
-		ClearPrompt();
+		NewPrompt();
 		ssh_channel_write(m_Channel, pInput, str_length(pInput));
 	}
 	m_CursorPos.x = PromptLength() + StringTerminalWidth(pInput, &m_CallbackCtx.m_pServer->m_UnicodeWidthState);
@@ -584,31 +584,15 @@ bool CSshClient::InsertToInputAtCursor(const char *pText)
 	return true;
 }
 
-void CSshClient::ClearPrompt()
-{
-	if(!m_Channel)
-		return;
-
-	SendPromptBarBottom();
-
-	ssh_channel_write(m_Channel, "\r\033[2K", 6);
-	ssh_channel_write(m_Channel, PromptStr(), str_length(PromptStr()));
-	SetCursorPosToPromptStart();
-
-	UpdateStatusLine();
-}
-
 void CSshClient::NewPrompt()
 {
 	if(!m_Channel)
 		return;
 
-	ssh_channel_write(m_Channel, "\r\n", 2);
 	SendPromptBarBottom();
 
 	ssh_channel_write(m_Channel, "\r\033[2K", 6);
 	ssh_channel_write(m_Channel, PromptStr(), str_length(PromptStr()));
-	m_CursorPos.y++;
 	SetCursorPosToPromptStart();
 
 	UpdateStatusLine();
@@ -1269,8 +1253,8 @@ void CSshClient::SendChannel(const char *pFormat, ...)
 		&m_CallbackCtx.m_pServer->m_UnicodeWidthState);
 
 	m_CursorPos.y += NumLines;
-	ssh_channel_write(m_Channel, "\r\n", 2);
 	ssh_channel_write(m_Channel, aSshLine, str_length(aSshLine));
+	ssh_channel_write(m_Channel, "\r\n", 2);
 }
 
 void CSshClient::OnTerminalResize(int OldWidth, int OldHeight)
@@ -1709,7 +1693,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 					pClient->m_pProgram = nullptr;
 					pClient->m_Buffer.Clear();
 					pClient->m_Mode = EShellMode::PROMPT;
-					ssh_channel_write(Channel, "\n\r^C", 5);
+					ssh_channel_write(Channel, "^C\n\r", 5);
 					pClient->NewPrompt();
 					return;
 				}
@@ -1764,6 +1748,12 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				// cursor down, clear line, cursor up
 				ssh_channel_write(pClient->m_Channel, "\n\r\033[2K\x1B[A", 10);
 			}
+
+			// when pressing enter we move the cursor to the next line
+			// so the next prompt or command output
+			// is in the new line
+			ssh_channel_write(pClient->m_Channel, "\r\n", 2);
+			pClient->m_CursorPos.y++;
 
 			const char *pCmd = pClient->m_aInput;
 			if(pCmd[0])
@@ -1870,7 +1860,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				pClient->EnableAltBuf();
 				str_copy(pClient->m_aPromptInput, pClient->m_aInput);
 				pClient->m_aInput[0] = '\0';
-				pClient->ClearPrompt();
+				pClient->NewPrompt();
 				pClient->m_CursorPos.y = pClient->m_Term.m_Height - pClient->StatusLineHeight();
 				pClient->m_HistorySearchScroll = 0;
 				pClient->RenderHistorySearch();
@@ -1889,7 +1879,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			{
 				str_copy(pClient->m_aYankBuffer, pClient->m_aInput);
 				pClient->m_aInput[0] = '\0';
-				pClient->ClearPrompt();
+				pClient->NewPrompt();
 			}
 			else
 			{
@@ -1907,14 +1897,14 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			{
 				str_copy(pClient->m_aYankBuffer, pClient->m_aInput);
 				pClient->m_aInput[0] = '\0';
-				pClient->ClearPrompt();
+				pClient->NewPrompt();
 			}
 			else
 			{
 				char aRight[sizeof(CSshClient::m_aInput)];
 				str_copy(aRight, pClient->m_aInput + pClient->m_InputIdx);
 				str_copy(pClient->m_aYankBuffer, pClient->m_aInput, pClient->m_InputIdx + 1);
-				pClient->ClearPrompt();
+				pClient->NewPrompt();
 				ssh_channel_write(Channel, aRight, str_length(aRight));
 				str_copy(pClient->m_aInput, aRight);
 				pClient->SendCursorPos(pClient->m_CursorPos);
@@ -1978,7 +1968,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			pClient->SendClearScreen();
 			pClient->m_CursorPos.y = 1;
 			pClient->SendCursorPos(pClient->m_CursorPos);
-			pClient->ClearPrompt();
+			pClient->NewPrompt();
 			continue;
 		}
 		else if(Byte == KEY_BACKSPACE || Byte == KEY_DEL)
@@ -2217,6 +2207,7 @@ void CSshServer::ConClear(IConsole::IResult *pResult, void *pUserData)
 
 	pClient->SendClearScreen();
 	pClient->m_CursorPos.y = 1;
+	pClient->m_CursorPos.x = 1;
 	pClient->SendCursorPos(pClient->m_CursorPos);
 }
 
