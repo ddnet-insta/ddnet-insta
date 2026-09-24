@@ -679,14 +679,31 @@ const char *CSshClient::PromptBarBottomStr()
 
 	if(m_pCurrentCmd)
 	{
-		str_format(
-			m_aPromptBarBottom,
-			sizeof(m_aPromptBarBottom),
-			"%s%s %s - %s",
-			aYellow,
-			m_pCurrentCmd->Name(),
-			m_pCurrentCmd->Params(),
-			m_pCurrentCmd->Help());
+		if(m_aCompletionPreviewNextCommands[0])
+		{
+			str_format(
+				m_aPromptBarBottom,
+				sizeof(m_aPromptBarBottom),
+				"%s%s %s",
+				aYellow,
+				m_pCurrentCmd->Params(),
+				m_pCurrentCmd->Help());
+
+			m_aPromptBarBottom[64] = '\0';
+			str_append(m_aPromptBarBottom, "\x1b[0m - ");
+			str_append(m_aPromptBarBottom, m_aCompletionPreviewNextCommands);
+		}
+		else
+		{
+			str_format(
+				m_aPromptBarBottom,
+				sizeof(m_aPromptBarBottom),
+				"%s%s %s - %s",
+				aYellow,
+				m_pCurrentCmd->Name(),
+				m_pCurrentCmd->Params(),
+				m_pCurrentCmd->Help());
+		}
 	}
 	else
 	{
@@ -697,6 +714,11 @@ const char *CSshClient::PromptBarBottomStr()
 		// 	"%s placeholder %s",
 		// 	aYellow,
 		// 	aResetColor);
+	}
+
+	if(m_aCompletionPreviewNextCommands[0] && m_aPromptBarBottom[0] != '\0')
+	{
+		str_append(m_aPromptBarBottom, m_aCompletionPreviewNextCommands);
 	}
 
 	// if there is no command completion preview
@@ -1004,6 +1026,7 @@ void CSshClient::ResetCompletion()
 	m_aCompletionBuffer[0] = '\0';
 	m_CompletionIndex = -1;
 	m_CompletionEnumerationCount = -1;
+	m_aCompletionPreviewNextCommands[0] = '\0';
 }
 
 void CSshClient::AbortHistorySearch()
@@ -1120,6 +1143,7 @@ void CSshClient::CompleteCommands(bool IsReverse)
 	else
 		m_CompletionIndex++;
 
+	m_aCompletionPreviewNextCommands[0] = '\0';
 	Console()->PossibleCommands(m_aCompletionBuffer, CFGFLAG_SERVER, false, CompletionCallback, &m_CallbackCtx);
 
 	// handle wrapping
@@ -1136,9 +1160,23 @@ void CSshClient::CompletionCallback(int Index, const char *pCmd, void *pUser)
 	CCallbackCtx *pCtx = static_cast<CCallbackCtx *>(pUser);
 	CSshClient *pClient = pCtx->m_pClient;
 
+	if(pClient->m_CompletionIndex - 1 == pClient->m_CompletionEnumerationCount)
+	{
+		str_append(pClient->m_aCompletionPreviewNextCommands, pCmd, sizeof(pClient->m_aCompletionPreviewNextCommands));
+		str_append(pClient->m_aCompletionPreviewNextCommands, " ", sizeof(pClient->m_aCompletionPreviewNextCommands));
+	}
 	if(pClient->m_CompletionIndex == pClient->m_CompletionEnumerationCount)
 	{
 		pClient->SetInput(pCmd);
+
+		str_append(pClient->m_aCompletionPreviewNextCommands, "\x1b[1m", sizeof(pClient->m_aCompletionPreviewNextCommands));
+		str_append(pClient->m_aCompletionPreviewNextCommands, pCmd, sizeof(pClient->m_aCompletionPreviewNextCommands));
+		str_append(pClient->m_aCompletionPreviewNextCommands, "\x1b[0m ", sizeof(pClient->m_aCompletionPreviewNextCommands));
+	}
+	else if(pClient->m_CompletionIndex < pClient->m_CompletionEnumerationCount)
+	{
+		str_append(pClient->m_aCompletionPreviewNextCommands, pCmd, sizeof(pClient->m_aCompletionPreviewNextCommands));
+		str_append(pClient->m_aCompletionPreviewNextCommands, " ", sizeof(pClient->m_aCompletionPreviewNextCommands));
 	}
 
 	pClient->m_CompletionEnumerationCount++;

@@ -348,7 +348,10 @@ public:
 	char m_aCompletionBuffer[2048] = "";
 	int m_CompletionIndex = -1;
 	int m_CompletionEnumerationCount = -1;
+	// inline preview completion of the current command
 	const char *m_pCompletionPreview = nullptr;
+	// status bar preview of next tab complete command candidates
+	char m_aCompletionPreviewNextCommands[1024] = "";
 
 	// TODO: this might point to invalid memory
 	//       https://github.com/ddnet/ddnet/pull/12842
