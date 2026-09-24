@@ -273,15 +273,15 @@ void CGameControllerBomb::OnAppliedDamage(int &Dmg, int &From, int &Weapon, CCha
 
 		MakeBomb(pPlayer->GetCid(), pKiller->m_ToBombTick);
 
-		pChr->GiveWeapon(Config()->m_SvBombtagBombWeapon, true);
+		pChr->GiveWeapon(ConfigEnums()->SvBombtagBombWeapon(), true);
 		pChr->GiveWeapon(WEAPON_HAMMER);
 		pChr->SetWeapon(WEAPON_HAMMER);
 
 		if(pPlayer->m_ToBombTick < Config()->m_SvBombtagMinSecondsToExplosion * Server()->TickSpeed() && Config()->m_SvBombtagMinSecondsToExplosion)
 			pPlayer->m_ToBombTick = Config()->m_SvBombtagMinSecondsToExplosion * Server()->TickSpeed();
 
-		pCharacter->GiveWeapon(Config()->m_SvBombtagBombWeapon);
-		pCharacter->SetWeapon(Config()->m_SvBombtagBombWeapon);
+		pCharacter->GiveWeapon(ConfigEnums()->SvBombtagBombWeapon());
+		pCharacter->SetWeapon(ConfigEnums()->SvBombtagBombWeapon());
 		return;
 	}
 
@@ -582,11 +582,11 @@ void CGameControllerBomb::MakeBomb(int ClientId, int Ticks)
 
 	pPlayer->m_IsBomb = true;
 	pPlayer->m_ToBombTick = Ticks;
-	if(Config()->m_SvBombtagBombWeapon != WEAPON_HAMMER)
+	if(ConfigEnums()->SvBombtagBombWeapon() != WEAPON_HAMMER)
 		pChr->GiveWeapon(WEAPON_HAMMER, true);
 
-	pChr->GiveWeapon(Config()->m_SvBombtagBombWeapon);
-	pChr->SetWeapon(Config()->m_SvBombtagBombWeapon);
+	pChr->GiveWeapon(ConfigEnums()->SvBombtagBombWeapon());
+	pChr->SetWeapon(ConfigEnums()->SvBombtagBombWeapon());
 
 	GameServer()->SendBroadcast("You are the new bomb!\nHit another player before the time runs out!", ClientId);
 }

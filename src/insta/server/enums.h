@@ -90,4 +90,20 @@ bool str_to_display_score(const char *pInputText, EDisplayScore *pDisplayScore);
 
 const char *display_score_to_str(EDisplayScore Score);
 
+// writes based on the input pInput the output pWeapon
+// returns true on match
+// returns false on no match
+bool str_to_weapon(const char *pInput, int *pWeapon);
+
+#define LINK_CONFIG(ConfigName, ConfigScriptName, EnumName) bool str_to_##EnumName(const char *pInput, EnumName *pValue);
+#include <insta/server/config_enums.h>
+#undef LINK_CONFIG
+
+enum class EBombWeapon
+{
+#define X(val) val,
+	BOMB_WEAPON_ENUM
+#undef X
+};
+
 #endif

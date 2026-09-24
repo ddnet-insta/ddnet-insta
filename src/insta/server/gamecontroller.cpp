@@ -889,6 +889,11 @@ CPlayer *IGameController::GetPlayerOrNullptr(int ClientId) const
 	return GameServer()->m_apPlayers[ClientId];
 }
 
+const class CConfigEnums *IGameController::ConfigEnums() const
+{
+	return GameServer()->ConfigEnums();
+}
+
 void IGameController::SetArmorProgressFull(CCharacter *pCharacter)
 {
 	pCharacter->SetArmor(10);
