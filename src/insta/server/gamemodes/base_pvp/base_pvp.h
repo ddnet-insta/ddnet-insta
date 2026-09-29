@@ -1,6 +1,8 @@
 #ifndef INSTA_SERVER_GAMEMODES_BASE_PVP_BASE_PVP_H
 #define INSTA_SERVER_GAMEMODES_BASE_PVP_BASE_PVP_H
 
+#include <base/types.h>
+
 #include <insta/server/extra_columns.h>
 #include <insta/server/gamemodes/insta_core/insta_core.h>
 
@@ -29,7 +31,7 @@ public:
 
 	bool BlockFirstShotOnSpawn(class CCharacter *pChr, int Weapon) const;
 	bool BlockFullAutoUntilRepress(class CCharacter *pChr, int Weapon) const;
-	void OnInit() override;
+	void OnInit(bool ServerStart) override;
 	void OnPlayerConnect(CPlayer *pPlayer) override;
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;
 	void DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg) override;

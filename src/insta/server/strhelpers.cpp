@@ -131,6 +131,64 @@ bool str_isalphanumeric(char c)
 	return str_isalpha(c) || str_isnum(c);
 }
 
+bool str_contains_only_allowed_chars(const char *pAllowedCharacters, const char *pTestedString)
+{
+	const char *pTestChar = pTestedString;
+	while(*pTestChar)
+	{
+		const char *pAllowedChar = pAllowedCharacters;
+		bool CharOk = false;
+		while(*pAllowedChar)
+		{
+			if(*pAllowedChar == *pTestChar)
+			{
+				CharOk = true;
+				break;
+			}
+			pAllowedChar++;
+		}
+		if(!CharOk)
+			return false;
+		pTestChar++;
+	}
+	return true;
+}
+
+bool str_utf8_to_skeleton_str(const char *pStr, char *pBuf, int BufLen)
+{
+	int aPoints[2048];
+	if((sizeof(aPoints) / sizeof(aPoints[0])) - 1 < (size_t)str_length(pStr))
+	{
+		str_copy(pBuf, "(internal buffer too small)", BufLen);
+		return false;
+	}
+
+	int NumPoints = str_utf8_to_skeleton(pStr, aPoints, sizeof(aPoints));
+	int OutIdx = 0;
+	for(int i = 0; i < NumPoints; i++)
+	{
+		if(OutIdx + 8 > BufLen)
+		{
+			pBuf[OutIdx] = '\0';
+			return false;
+		}
+		int CodePoint = aPoints[i];
+		if(CodePoint == 0)
+		{
+			break;
+		}
+		int BytesWritten = str_utf8_encode(pBuf + OutIdx, CodePoint);
+		OutIdx += BytesWritten;
+		if(BytesWritten == 0)
+		{
+			pBuf[OutIdx] = '\0';
+			return false;
+		}
+	}
+	pBuf[OutIdx] = '\0';
+	return true;
+}
+
 // int test_thing()
 // {
 // 	char aMsg[512];
