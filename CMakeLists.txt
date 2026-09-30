@@ -2754,8 +2754,6 @@ if(CLIENT)
     components/spectator.h
     components/statboard.cpp
     components/statboard.h
-    components/tooltips.cpp
-    components/tooltips.h
     components/touch_controls.cpp
     components/touch_controls.h
     components/voting.cpp
@@ -2798,6 +2796,8 @@ if(CLIENT)
     sixup_translate_snapshot.cpp
     skin.cpp
     skin.h
+    tooltips.cpp
+    tooltips.h
     ui.cpp
     ui.h
     ui_listbox.cpp

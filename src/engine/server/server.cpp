@@ -42,6 +42,8 @@
 #include <engine/shared/snapshot.h>
 #include <engine/storage.h>
 
+#include <generated/protocol.h>
+
 #include <game/version.h>
 
 #include <zlib.h>
@@ -1341,7 +1343,7 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 #endif
 
 	// notify the mod about the drop
-	if(pThis->m_aClients[ClientId].m_State >= CClient::STATE_READY)
+	if(pThis->m_aClients[ClientId].m_State >= CClient::STATE_READY || pThis->m_aClients[ClientId].m_IngameBeforeRejoin)
 		pThis->GameServer()->OnClientDrop(ClientId, pReason);
 
 	pThis->m_aClients[ClientId].m_State = CClient::STATE_EMPTY;
@@ -1687,23 +1689,50 @@ bool CServer::CheckReservedSlotAuth(int ClientId, const char *pPassword)
 		return true;
 	}
 
-	// "^([^:]*):(.*)$"
-	if(Config()->m_SvReservedSlotsAuthLevel != 4)
+	if(!str_comp(Config()->m_SvReservedSlotsAuthLevel, "4"))
 	{
-		char aName[sizeof(Config()->m_Password)];
-		const char *pInnerPassword = str_next_token(pPassword, ":", aName, sizeof(aName));
-		if(!pInnerPassword)
-		{
-			return false;
-		}
-		int Slot = m_AuthManager.FindKey(aName);
-		if(m_AuthManager.CheckKey(Slot, pInnerPassword + 1) && m_AuthManager.KeyLevel(Slot) >= Config()->m_SvReservedSlotsAuthLevel)
-		{
-			log_info("server", "ClientId=%d joining reserved slot with key='%s'", ClientId, m_AuthManager.KeyIdent(Slot));
-			return true;
-		}
+		return false;
+	}
+	if(Config()->m_SvReservedSlotsAuthLevel[0] == '\0')
+	{
+		return false;
 	}
 
+	// "^([^:]*):(.*)$"
+	char aName[sizeof(Config()->m_Password)];
+	const char *pInnerPassword = str_next_token(pPassword, ":", aName, sizeof(aName));
+	if(!pInnerPassword)
+	{
+		return false;
+	}
+	int Slot = m_AuthManager.FindKey(aName);
+	const char *pMinAuthLevel = Config()->m_SvReservedSlotsAuthLevel;
+	std::optional<int> MinAuthLevel = CAuthManager::RoleNameToAuthLevel(pMinAuthLevel);
+	if(!MinAuthLevel.has_value())
+	{
+		if(str_comp(pMinAuthLevel, "1") == 0)
+		{
+			MinAuthLevel = AUTHED_HELPER;
+		}
+		else if(str_comp(pMinAuthLevel, "2") == 0)
+		{
+			MinAuthLevel = AUTHED_MOD;
+		}
+		else if(str_comp(pMinAuthLevel, "3") == 0)
+		{
+			MinAuthLevel = AUTHED_ADMIN;
+		}
+	}
+	if(!MinAuthLevel.has_value())
+	{
+		return false;
+	}
+
+	if(m_AuthManager.CheckKey(Slot, pInnerPassword + 1) && m_AuthManager.KeyLevel(Slot) >= MinAuthLevel.value())
+	{
+		log_info("server", "ClientId=%d joining reserved slot with key='%s'", ClientId, m_AuthManager.KeyIdent(Slot));
+		return true;
+	}
 	return false;
 }
 
@@ -4148,7 +4177,6 @@ void CServer::DemoRecorder_HandleAutoStart()
 		str_format(aFilename, sizeof(aFilename), "demos/auto/server/%s_%s.demo", GameServer()->Map()->BaseName(), aTimestamp);
 		m_aDemoRecorder[RECORDER_AUTO].Start(
 			Storage(),
-			m_pConsole,
 			aFilename,
 			GameServer()->NetVersion(),
 			GameServer()->Map()->BaseName(),
@@ -4191,7 +4219,6 @@ void CServer::StartRecord(int ClientId)
 		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", GameServer()->Map()->BaseName(), m_NetServer.Address().port, ClientId);
 		m_aDemoRecorder[ClientId].Start(
 			Storage(),
-			Console(),
 			aFilename,
 			GameServer()->NetVersion(),
 			GameServer()->Map()->BaseName(),
@@ -4253,7 +4280,6 @@ void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 	}
 	pServer->m_aDemoRecorder[RECORDER_MANUAL].Start(
 		pServer->Storage(),
-		pServer->Console(),
 		aFilename,
 		pServer->GameServer()->NetVersion(),
 		pServer->GameServer()->Map()->BaseName(),
@@ -4591,6 +4617,37 @@ void CServer::ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void 
 	pfnCallback(pResult, pCallbackUserData);
 }
 
+void CServer::ConchainReservedSlotsAuthLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	const char *pValue = pResult->GetString(0);
+	if(pResult->NumArguments() && pResult->GetString(0)[0] != '\0' && !CAuthManager::RoleNameToAuthLevel(pValue).has_value())
+	{
+		if(str_comp(pValue, "1") == 0)
+		{
+			log_warn("server", "got deprecated value %s for sv_reserved_slots_auth_level, please use \"helper\" instead", pValue);
+		}
+		else if(str_comp(pValue, "2") == 0)
+		{
+			log_warn("server", "got deprecated value %s for sv_reserved_slots_auth_level, please use \"moderator\" instead", pValue);
+		}
+		else if(str_comp(pValue, "3") == 0)
+		{
+			log_warn("server", "got deprecated value %s for sv_reserved_slots_auth_level, please use \"admin\" instead", pValue);
+		}
+		else if(str_comp(pValue, "4") == 0)
+		{
+			log_warn("server", "got deprecated value %s for sv_reserved_slots_auth_level, please use \"\" instead", pValue);
+		}
+		else
+		{
+			log_error("server", "Value can only be one of those: helper, moderator, admin or empty");
+			return;
+		}
+	}
+
+	pfnCallback(pResult, pCallbackUserData);
+}
+
 void CServer::ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CServer *pThis = static_cast<CServer *>(pUserData);
@@ -4746,6 +4803,7 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_rcon_password", ConchainRconPasswordChange, this);
 	Console()->Chain("sv_rcon_mod_password", ConchainRconModPasswordChange, this);
 	Console()->Chain("sv_rcon_helper_password", ConchainRconHelperPasswordChange, this);
+	Console()->Chain("sv_reserved_slots_auth_level", ConchainReservedSlotsAuthLevel, this);
 	Console()->Chain("sv_map", ConchainMapUpdate, this);
 	Console()->Chain("sv_sixup", ConchainSixupUpdate, this);
 	Console()->Chain("sv_register_community_token", ConchainRegisterCommunityTokenRedact, nullptr);
