@@ -236,11 +236,17 @@ Freeze next generation mode with grenade. One grenade hit freezes enemies.
 Frozen enemies can be sacrificed to the gods by killing them in special spikes.
 First player to reach the scorelimit wins.
 
+
+Make sure to checkout the [fng specific documentation](./ddnet-insta/docs/gamemodes/fng.md).
+
 ### solofng
 
 ``sv_gametype solofng``
 
 Like bolofng but with laser.
+
+
+Make sure to checkout the [fng specific documentation](./ddnet-insta/docs/gamemodes/fng.md).
 
 ### boomfng
 
@@ -248,11 +254,17 @@ Like bolofng but with laser.
 
 Like bolofng but with teams.
 
+
+Make sure to checkout the [fng specific documentation](./ddnet-insta/docs/gamemodes/fng.md).
+
 ### fng
 
 ``sv_gametype fng``
 
 Like boomfng but with laser.
+
+
+Make sure to checkout the [fng specific documentation](./ddnet-insta/docs/gamemodes/fng.md).
 
 ### TSmash
 

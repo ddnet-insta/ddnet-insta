@@ -99,7 +99,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_drop_flag_on_selfkill` drop flag on selfkill (activates chat cmd '/drop flag')
 + `sv_drop_flag_on_vote` drop flag on vote yes (activates chat cmd '/drop flag')
 + `sv_laser_reload_time_on_hit` 0=default/off ticks it takes to shoot again after a shot was hit (see also sv_fast_hit_full_auto)
-+ `sv_fast_hit_full_auto` require fire button repress when sv_reload_time_on_hit is set
++ `sv_fast_hit_full_auto` require fire button repress when sv_laser_reload_time_on_hit is set
 + `sv_punish_freeze_disconnect` freeze player for 20 seconds on rejoin when leaving server while being frozen
 + `sv_freeze_on_spawn` freeze all players for x seconds after every respawn
 + `sv_self_damage_respawn_delay_ms` time in milliseconds it takes to respawn after dying by self damage

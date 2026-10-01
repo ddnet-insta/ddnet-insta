@@ -1206,7 +1206,7 @@ bool CGameControllerBasePvp::OnFireWeapon(CCharacter &Character, int &Weapon, ve
 	if(BlockFirstShotOnSpawn(&Character, Weapon))
 		return true;
 	// https://github.com/ddnet-insta/ddnet-insta/issues/375
-	// sv_reload_time_on_hit can make weapons shoot faster on hit
+	// sv_laser_reload_time_on_hit can make weapons shoot faster on hit
 	// this was made for laser fng to be able to fight multiple enemies
 	// but because the laser is a auto weapon (meaning holding fire keeps shooting)
 	// it can cause accidental shots.
