@@ -181,6 +181,8 @@ function(insta_patch_server)
       gamemodes/base_pvp/chat.cpp
       gamemodes/city/city.cpp
       gamemodes/city/city.h
+      gamemodes/color_catch/color_catch.cpp
+      gamemodes/color_catch/color_catch.h
       gamemodes/ddrace/block/block.cpp
       gamemodes/ddrace/block/block.h
       gamemodes/ddrace/block/ltsblock.cpp
