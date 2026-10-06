@@ -4,4 +4,4 @@
 # its code is located here
 # https://github.com/ddnet-insta/cli
 
-require_relative 'ddnet-insta-cli/lib/cli'
+require_relative '../ddnet-insta/cli/lib/cli'

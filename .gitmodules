@@ -3,7 +3,7 @@
 	url = https://github.com/ddnet/ddnet-libs
 	shallow = true
 [submodule "scripts/ddnet-insta-cli"]
-	path = scripts/ddnet-insta-cli
+	path = ddnet-insta/cli
 	url = https://github.com/ddnet-insta/cli.git
 [submodule "src/insta/server/ddnet_db_utils"]
 	path = src/insta/server/ddnet_db_utils
