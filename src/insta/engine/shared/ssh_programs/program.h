@@ -24,6 +24,7 @@ public:
 	// return false to ignore sigint and keep running
 	virtual bool OnSigint() { return true; }
 
+	virtual void OnTick() {}
 	virtual void OnInit() {}
 	virtual void OnShutdown() {}
 };

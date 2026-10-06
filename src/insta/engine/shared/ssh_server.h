@@ -528,6 +528,8 @@ private:
 	void ReadNewInput(CSshClient *pClient);
 
 	static void ConClear(IConsole::IResult *pResult, void *pUserData);
+	static void ConScoreboard(IConsole::IResult *pResult, void *pUserData);
+
 	void OnConsoleInit();
 
 public:

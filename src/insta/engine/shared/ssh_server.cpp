@@ -25,6 +25,7 @@
 
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <insta/engine/shared/ssh_programs/scoreboard.h>
 #include <libssh/callbacks.h>
 #include <libssh/libssh.h>
 #include <libssh/server.h>
@@ -2294,6 +2295,35 @@ void CSshServer::ConClear(IConsole::IResult *pResult, void *pUserData)
 	pClient->SendCursorPos(pClient->m_CursorPos);
 }
 
+void CSshServer::ConScoreboard(IConsole::IResult *pResult, void *pUserData)
+{
+	CSshServer *pSelf = (CSshServer *)pUserData;
+	if(!pSelf->m_RconClientId.has_value())
+	{
+		log_error("ssh", "only ssh connections can use this command");
+		return;
+	}
+
+	CSshClient *pClient = pSelf->m_apClients[pSelf->m_RconClientId.value()];
+	if(!pClient)
+		return;
+
+	if(pClient->m_pProgram)
+	{
+		CSshLogger Logger(pSelf, pClient->m_ClientId, log_get_scope_logger());
+		CLogScope Scope(&Logger);
+		log_error("ssh", "error a program is already running");
+	}
+	else
+	{
+		pClient->m_pProgram = new CSshProgramScoreboard(pClient);
+		pClient->m_pProgram->OnInit();
+		pClient->m_aInput[0] = '\0';
+		pClient->m_Buffer.Clear();
+		return;
+	}
+}
+
 void CSshServer::GetHostKeyFilePath(char *pBuf, size_t BufSize)
 {
 	Storage()->GetCompletePath(IStorage::TYPE_SAVE, "ssh/ssh_host_rsa_key", pBuf, BufSize);
@@ -2526,6 +2556,7 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, 
 void CSshServer::OnConsoleInit()
 {
 	Console()->Register("clear", "", CFGFLAG_SERVER, ConClear, this, "clears the terminal screen for ssh connections");
+	Console()->Register("scoreboard", "", CFGFLAG_SERVER, ConScoreboard, this, "show currently connected players");
 }
 
 std::optional<int> CSshServer::FindFreeSlot()
@@ -3141,6 +3172,16 @@ void CSshServer::Update()
 			continue;
 
 		pClient->CheckPromptBarBottomResendNeeded();
+
+		if(pClient->m_pProgram)
+		{
+			int ClientId = pClient->m_ClientId;
+			pClient->m_pProgram->OnTick();
+
+			// skip tick if the program disconnected the client
+			if(m_apClients[ClientId] == nullptr)
+				continue;
+		}
 
 		// WARNING: place no code below ReadNewInput()
 		//          because new input can cause a disconnect

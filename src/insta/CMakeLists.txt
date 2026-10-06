@@ -83,6 +83,8 @@ function(insta_patch_engine)
       ssh_programs/logs.h
       ssh_programs/program.cpp
       ssh_programs/program.h
+      ssh_programs/scoreboard.cpp
+      ssh_programs/scoreboard.h
       ssh_server.cpp
       ssh_server.h
       # tidy-alphabetical-end
