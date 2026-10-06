@@ -12,7 +12,7 @@ class CPlayer;
 #define MIN_ZCATCH_PLAYERS 5
 #define MIN_ZCATCH_KILLS 4
 
-class CGameControllerZcatch : public CGameControllerInstagib
+class CGameControllerZcatch : public CGameControllerBaseInstagib
 {
 public:
 	CGameControllerZcatch(class CGameContext *pGameServer);

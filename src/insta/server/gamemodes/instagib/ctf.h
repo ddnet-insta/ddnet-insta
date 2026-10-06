@@ -3,7 +3,7 @@
 
 #include <insta/server/gamemodes/instagib/base_instagib.h>
 
-class CGameControllerInstaBaseCTF : public CGameControllerInstagib
+class CGameControllerInstaBaseCTF : public CGameControllerBaseInstagib
 {
 public:
 	CGameControllerInstaBaseCTF(class CGameContext *pGameServer);

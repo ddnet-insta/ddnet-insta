@@ -16,7 +16,7 @@
 #include <insta/server/sql_stats_player.h>
 
 CGameControllerBaseFng::CGameControllerBaseFng(class CGameContext *pGameServer) :
-	CGameControllerInstagib(pGameServer)
+	CGameControllerBaseInstagib(pGameServer)
 {
 }
 
@@ -60,7 +60,7 @@ int CGameControllerBaseFng::SnapGameInfoExFlags(int SnappingClient, int DDRaceFl
 
 void CGameControllerBaseFng::Tick()
 {
-	CGameControllerInstagib::Tick();
+	CGameControllerBaseInstagib::Tick();
 
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
@@ -103,7 +103,7 @@ void CGameControllerBaseFng::Tick()
 
 void CGameControllerBaseFng::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
 {
-	CGameControllerInstagib::OnShowStatsAll(pStats, pRequestingPlayer, pRequestedName);
+	CGameControllerBaseInstagib::OnShowStatsAll(pStats, pRequestingPlayer, pRequestedName);
 
 	char aBuf[512];
 	str_format(
@@ -217,30 +217,30 @@ void CGameControllerBaseFng::OnPlayerDisconnect(class CPlayer *pPlayer, const ch
 			pOther->m_OriginalFreezerId = -1;
 	}
 
-	CGameControllerInstagib::OnPlayerDisconnect(pPlayer, pReason);
+	CGameControllerBaseInstagib::OnPlayerDisconnect(pPlayer, pReason);
 }
 
 void CGameControllerBaseFng::OnPlayerConnect(CPlayer *pPlayer)
 {
-	CGameControllerInstagib::OnPlayerConnect(pPlayer);
+	CGameControllerBaseInstagib::OnPlayerConnect(pPlayer);
 }
 
 void CGameControllerBaseFng::OnCharacterSpawn(class CCharacter *pChr)
 {
-	CGameControllerInstagib::OnCharacterSpawn(pChr);
+	CGameControllerBaseInstagib::OnCharacterSpawn(pChr);
 
 	pChr->GiveWeapon(WEAPON_HAMMER, false, -1);
 }
 
 int CGameControllerBaseFng::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
-	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
+	CGameControllerBaseInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
 	return 0;
 }
 
 bool CGameControllerBaseFng::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
-	CGameControllerInstagib::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
+	CGameControllerBaseInstagib::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
 	return false;
 }
 
@@ -376,7 +376,7 @@ inline void CGameControllerBaseFng::UpdateScoresAndDisplayPoints(CPlayer *pKille
 
 void CGameControllerBaseFng::SnapDDNetCharacter(int SnappingClient, CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter)
 {
-	CGameControllerInstagib::SnapDDNetCharacter(SnappingClient, pChr, pDDNetCharacter);
+	CGameControllerBaseInstagib::SnapDDNetCharacter(SnappingClient, pChr, pDDNetCharacter);
 
 	if(SnappingClient < 0 || SnappingClient >= MAX_CLIENTS)
 		return;
@@ -417,7 +417,7 @@ bool CGameControllerBaseFng::OnLaserHit(int Bounces, int From, int Weapon, CChar
 	// do not track wallshots on frozen tees
 	if(pVictim->m_FreezeTime)
 		return true;
-	return CGameControllerInstagib::OnLaserHit(Bounces, From, Weapon, pVictim);
+	return CGameControllerBaseInstagib::OnLaserHit(Bounces, From, Weapon, pVictim);
 }
 
 bool CGameControllerBaseFng::SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce)
@@ -429,7 +429,7 @@ bool CGameControllerBaseFng::SkipDamage(int Dmg, int From, int Weapon, const CCh
 	if(Weapon == WEAPON_HAMMER)
 		return true;
 
-	return CGameControllerInstagib::SkipDamage(Dmg, From, Weapon, pCharacter, ApplyForce);
+	return CGameControllerBaseInstagib::SkipDamage(Dmg, From, Weapon, pCharacter, ApplyForce);
 }
 
 // WARNING: this does not call the base pvp take damage method
@@ -486,5 +486,5 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 
 void CGameControllerBaseFng::Snap(int SnappingClient)
 {
-	CGameControllerInstagib::Snap(SnappingClient);
+	CGameControllerBaseInstagib::Snap(SnappingClient);
 }

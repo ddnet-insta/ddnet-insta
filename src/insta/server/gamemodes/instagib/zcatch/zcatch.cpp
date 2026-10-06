@@ -19,7 +19,7 @@
 #include <insta/server/gamemodes/instagib/base_instagib.h>
 
 CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
-	CGameControllerInstagib(pGameServer)
+	CGameControllerBaseInstagib(pGameServer)
 {
 	m_GameFlags = 0;
 	m_pGameType = "zCatch";
@@ -41,7 +41,7 @@ CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
 
 void CGameControllerZcatch::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
 {
-	CGameControllerInstagib::OnShowStatsAll(pStats, pRequestingPlayer, pRequestedName);
+	CGameControllerBaseInstagib::OnShowStatsAll(pStats, pRequestingPlayer, pRequestedName);
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "~ Win points: %d", pStats->m_WinPoints);
@@ -56,7 +56,7 @@ void CGameControllerZcatch::OnShowStatsAll(const CSqlStatsPlayer *pStats, class 
 
 void CGameControllerZcatch::OnShowRoundStats(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
 {
-	CGameControllerInstagib::OnShowRoundStats(pStats, pRequestingPlayer, pRequestedName);
+	CGameControllerBaseInstagib::OnShowRoundStats(pStats, pRequestingPlayer, pRequestedName);
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "~ Seconds in game: %" PRId64, pStats->m_TicksAlive / Server()->TickSpeed());
@@ -227,7 +227,7 @@ void CGameControllerZcatch::StartZcatchRound()
 
 void CGameControllerZcatch::OnRoundStart()
 {
-	CGameControllerInstagib::OnRoundStart();
+	CGameControllerBaseInstagib::OnRoundStart();
 
 	int ActivePlayers = NumActivePlayers();
 	if(ActivePlayers < MIN_ZCATCH_PLAYERS && CatchGameState() != ECatchGameState::RELEASE_GAME)
@@ -256,19 +256,19 @@ void CGameControllerZcatch::OnRoundEnd()
 		UpdateCatchTicks(pPlayer, ECatchUpdate::ROUND_END);
 	}
 
-	CGameControllerInstagib::OnRoundEnd();
+	CGameControllerBaseInstagib::OnRoundEnd();
 }
 
 CGameControllerZcatch::~CGameControllerZcatch() = default;
 
 void CGameControllerZcatch::Tick()
 {
-	CGameControllerInstagib::Tick();
+	CGameControllerBaseInstagib::Tick();
 }
 
 void CGameControllerZcatch::OnCharacterSpawn(class CCharacter *pChr)
 {
-	CGameControllerInstagib::OnCharacterSpawn(pChr);
+	CGameControllerBaseInstagib::OnCharacterSpawn(pChr);
 
 	SetSpawnWeapons(pChr);
 
@@ -285,7 +285,7 @@ void CGameControllerZcatch::ReleasePlayer(class CPlayer *pPlayer, const char *pM
 
 bool CGameControllerZcatch::DoSomethingElseInsteadOfSelfkill(CPlayer *pPlayer)
 {
-	if(CGameControllerInstagib::DoSomethingElseInsteadOfSelfkill(pPlayer))
+	if(CGameControllerBaseInstagib::DoSomethingElseInsteadOfSelfkill(pPlayer))
 		return true;
 
 	int ClientId = pPlayer->GetCid();
@@ -425,7 +425,7 @@ int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPl
 			pKiller->AddScore(-2);
 	}
 
-	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
+	CGameControllerBaseInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
 	ResetKillsThatCount(pVictim->GetPlayer());
 
 	// TODO: revisit this edge case when zcatch is done
@@ -472,7 +472,7 @@ void CGameControllerZcatch::YouWillJoinGameMessage(CPlayer *pPlayer, char *pMsg,
 
 bool CGameControllerZcatch::CanStillJoinDeadSpecGame(const CPlayer *pPlayerOrNullptr, char *pMsg, size_t MsgLen)
 {
-	if(!CGameControllerInstagib::CanStillJoinDeadSpecGame(pPlayerOrNullptr, pMsg, MsgLen))
+	if(!CGameControllerBaseInstagib::CanStillJoinDeadSpecGame(pPlayerOrNullptr, pMsg, MsgLen))
 		return false;
 
 	if(!IsCatchGameRunning())
@@ -532,7 +532,7 @@ bool CGameControllerZcatch::CanStillJoinDeadSpecGame(const CPlayer *pPlayerOrNul
 
 void CGameControllerZcatch::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 {
-	CGameControllerInstagib::DoTeamChange(pPlayer, Team, DoChatMsg);
+	CGameControllerBaseInstagib::DoTeamChange(pPlayer, Team, DoChatMsg);
 
 	if(Team != pPlayer->GetTeam())
 	{
@@ -586,7 +586,7 @@ bool CGameControllerZcatch::CheckChangeGameState()
 
 void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 {
-	CGameControllerInstagib::OnPlayerConnect(pPlayer);
+	CGameControllerBaseInstagib::OnPlayerConnect(pPlayer);
 
 	UpdateCatchTicks(pPlayer, ECatchUpdate::CONNECT);
 
@@ -623,7 +623,7 @@ void CGameControllerZcatch::OnPlayerDisconnect(class CPlayer *pDisconnectingPlay
 {
 	UpdateCatchTicks(pDisconnectingPlayer, ECatchUpdate::DISCONNECT);
 
-	CGameControllerInstagib::OnPlayerDisconnect(pDisconnectingPlayer, pReason);
+	CGameControllerBaseInstagib::OnPlayerDisconnect(pDisconnectingPlayer, pReason);
 
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
@@ -638,7 +638,7 @@ void CGameControllerZcatch::OnPlayerDisconnect(class CPlayer *pDisconnectingPlay
 
 bool CGameControllerZcatch::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
-	CGameControllerInstagib::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
+	CGameControllerBaseInstagib::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
 	return false;
 }
 

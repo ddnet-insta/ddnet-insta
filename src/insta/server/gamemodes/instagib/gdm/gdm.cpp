@@ -4,8 +4,10 @@
 
 #include <game/server/entities/character.h>
 
+#include <insta/server/gamemodes/instagib/base_instagib.h>
+
 CGameControllerGDM::CGameControllerGDM(class CGameContext *pGameServer) :
-	CGameControllerInstaBaseDM(pGameServer)
+	CGameControllerBaseInstagib(pGameServer)
 {
 	m_pGameType = "gDM";
 	m_DefaultWeapon = WEAPON_GRENADE;
@@ -32,12 +34,12 @@ void CGameControllerGDM::OnCreditsChatCmd(IConsole::IResult *pResult, void *pUse
 
 void CGameControllerGDM::Tick()
 {
-	CGameControllerInstaBaseDM::Tick();
+	CGameControllerBaseInstagib::Tick();
 }
 
 void CGameControllerGDM::OnCharacterSpawn(class CCharacter *pChr)
 {
-	CGameControllerInstaBaseDM::OnCharacterSpawn(pChr);
+	CGameControllerBaseInstagib::OnCharacterSpawn(pChr);
 
 	// give default weapons
 	pChr->GiveWeapon(m_DefaultWeapon, false, g_Config.m_SvGrenadeAmmoRegen ? g_Config.m_SvGrenadeAmmoRegenNum : -1);

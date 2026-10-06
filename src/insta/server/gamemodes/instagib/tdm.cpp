@@ -4,7 +4,7 @@
 #include <game/server/player.h>
 
 CGameControllerInstaTDM::CGameControllerInstaTDM(class CGameContext *pGameServer) :
-	CGameControllerInstaBaseDM(pGameServer)
+	CGameControllerBaseInstagib(pGameServer)
 {
 	m_GameFlags = GAMEFLAG_TEAMS;
 }
@@ -13,7 +13,7 @@ CGameControllerInstaTDM::~CGameControllerInstaTDM() = default;
 
 void CGameControllerInstaTDM::Tick()
 {
-	CGameControllerInstaBaseDM::Tick();
+	CGameControllerBaseInstagib::Tick();
 }
 
 // Can not use OnKill() here because we need to cover team kills

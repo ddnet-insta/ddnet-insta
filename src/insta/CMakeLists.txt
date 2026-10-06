@@ -202,8 +202,6 @@ function(insta_patch_server)
       gamemodes/instagib/boomfng/sql_columns.h
       gamemodes/instagib/ctf.cpp
       gamemodes/instagib/ctf.h
-      gamemodes/instagib/dm.cpp
-      gamemodes/instagib/dm.h
       gamemodes/instagib/fng/fng.cpp
       gamemodes/instagib/fng/fng.h
       gamemodes/instagib/fng/sql_columns.h

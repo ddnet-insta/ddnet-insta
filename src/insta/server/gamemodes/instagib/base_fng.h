@@ -5,7 +5,7 @@
 
 #include <base/types.h>
 
-class CGameControllerBaseFng : public CGameControllerInstagib
+class CGameControllerBaseFng : public CGameControllerBaseInstagib
 {
 public:
 	CGameControllerBaseFng(class CGameContext *pGameServer);

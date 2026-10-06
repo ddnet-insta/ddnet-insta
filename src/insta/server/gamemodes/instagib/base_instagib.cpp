@@ -9,16 +9,16 @@
 
 #include <insta/server/gamemodes/base_pvp/base_pvp.h>
 
-CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer) :
+CGameControllerBaseInstagib::CGameControllerBaseInstagib(class CGameContext *pGameServer) :
 	CGameControllerBasePvp(pGameServer)
 {
-	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
+	m_GameFlags = 0;
 	m_SelfDamage = false;
 }
 
-CGameControllerInstagib::~CGameControllerInstagib() = default;
+CGameControllerBaseInstagib::~CGameControllerBaseInstagib() = default;
 
-bool CGameControllerInstagib::SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce)
+bool CGameControllerBaseInstagib::SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce)
 {
 	ApplyForce = true;
 
@@ -28,13 +28,13 @@ bool CGameControllerInstagib::SkipDamage(int Dmg, int From, int Weapon, const CC
 	return CGameControllerBasePvp::SkipDamage(Dmg, From, Weapon, pCharacter, ApplyForce);
 }
 
-void CGameControllerInstagib::OnAppliedDamage(int &Dmg, int &From, int &Weapon, CCharacter *pCharacter)
+void CGameControllerBaseInstagib::OnAppliedDamage(int &Dmg, int &From, int &Weapon, CCharacter *pCharacter)
 {
 	Dmg = 20;
 	CGameControllerBasePvp::OnAppliedDamage(Dmg, From, Weapon, pCharacter);
 }
 
-bool CGameControllerInstagib::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
+bool CGameControllerBaseInstagib::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
 	if(IsPickupEntity(Index))
 		return false;

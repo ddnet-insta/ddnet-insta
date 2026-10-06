@@ -11,7 +11,7 @@
 #include <insta/server/entities/flag.h>
 
 CGameControllerInstaBaseCTF::CGameControllerInstaBaseCTF(class CGameContext *pGameServer) :
-	CGameControllerInstagib(pGameServer)
+	CGameControllerBaseInstagib(pGameServer)
 {
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
 }
@@ -27,7 +27,7 @@ void CGameControllerInstaBaseCTF::Tick()
 
 void CGameControllerInstaBaseCTF::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
 {
-	CGameControllerInstagib::OnShowStatsAll(pStats, pRequestingPlayer, pRequestedName);
+	CGameControllerBaseInstagib::OnShowStatsAll(pStats, pRequestingPlayer, pRequestedName);
 
 	char aBuf[512];
 
@@ -96,7 +96,7 @@ int CGameControllerInstaBaseCTF::OnCharacterDeath(class CCharacter *pVictim, cla
 
 bool CGameControllerInstaBaseCTF::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
-	CGameControllerInstagib::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
+	CGameControllerBaseInstagib::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
 
 	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 	int Team = -1;

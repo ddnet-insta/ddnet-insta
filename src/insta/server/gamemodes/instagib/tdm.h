@@ -1,9 +1,9 @@
 #ifndef INSTA_SERVER_GAMEMODES_INSTAGIB_TDM_H
 #define INSTA_SERVER_GAMEMODES_INSTAGIB_TDM_H
 
-#include <insta/server/gamemodes/instagib/dm.h>
+#include <insta/server/gamemodes/instagib/base_instagib.h>
 
-class CGameControllerInstaTDM : public CGameControllerInstaBaseDM
+class CGameControllerInstaTDM : public CGameControllerBaseInstagib
 {
 public:
 	CGameControllerInstaTDM(class CGameContext *pGameServer);

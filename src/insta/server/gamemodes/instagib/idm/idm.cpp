@@ -2,8 +2,10 @@
 
 #include <game/server/entities/character.h>
 
+#include <insta/server/gamemodes/instagib/base_instagib.h>
+
 CGameControllerIDM::CGameControllerIDM(class CGameContext *pGameServer) :
-	CGameControllerInstaBaseDM(pGameServer)
+	CGameControllerBaseInstagib(pGameServer)
 {
 	m_pGameType = "iDM";
 	m_DefaultWeapon = WEAPON_LASER;
@@ -30,12 +32,12 @@ void CGameControllerIDM::OnCreditsChatCmd(IConsole::IResult *pResult, void *pUse
 
 void CGameControllerIDM::Tick()
 {
-	CGameControllerInstaBaseDM::Tick();
+	CGameControllerBaseInstagib::Tick();
 }
 
 void CGameControllerIDM::OnCharacterSpawn(class CCharacter *pChr)
 {
-	CGameControllerInstaBaseDM::OnCharacterSpawn(pChr);
+	CGameControllerBaseInstagib::OnCharacterSpawn(pChr);
 
 	// give default weapons
 	pChr->GiveWeapon(m_DefaultWeapon, false, -1);
