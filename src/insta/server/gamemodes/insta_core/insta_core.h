@@ -71,6 +71,9 @@ public:
 	// Call this in your tick method if you want ctf (capture the flag) flags
 	virtual void FlagTick();
 
+	virtual void OnPlayerTick(class CPlayer *pPlayer);
+	virtual void OnCharacterTick(class CCharacter *pChr);
+
 	bool DropFlag(class CCharacter *pChr) override;
 	void OnFlagReturn(CFlag *pFlag, CPlayer *pPlayer) override;
 	void OnFlagGrab(CFlag *pFlag) override;
@@ -129,9 +132,6 @@ public:
 	bool IsPureDDNetGameType() const override { return false; }
 	bool IsPlaying(const CPlayer *pPlayer) override;
 	bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) override;
-
-	void OnPlayerTick(class CPlayer *pPlayer);
-	void OnCharacterTick(class CCharacter *pChr);
 
 	CDeadSpecController *m_pDeadSpecController = nullptr;
 	void YouWillJoinSpecMessage(CPlayer *pPlayer, char *pMsg, size_t MsgLen) override;
