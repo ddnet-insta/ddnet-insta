@@ -625,6 +625,8 @@ int CServer::Init()
 
 	m_CurrentGameTick = MIN_TICK;
 
+	m_StartTime = time_get();
+
 	m_AnnouncementLastLine = -1;
 	std::fill(std::begin(m_aPrevStates), std::end(m_aPrevStates), 0);
 
@@ -1699,12 +1701,13 @@ bool CServer::CheckReservedSlotAuth(int ClientId, const char *pPassword)
 	}
 
 	// "^([^:]*):(.*)$"
-	char aName[sizeof(Config()->m_Password)];
-	const char *pInnerPassword = str_next_token(pPassword, ":", aName, sizeof(aName));
-	if(!pInnerPassword)
+	const char *pInnerPassword = str_find(pPassword, ":");
+	if(pInnerPassword == nullptr)
 	{
 		return false;
 	}
+	char aName[sizeof(Config()->m_Password)];
+	str_truncate(aName, sizeof(aName), pPassword, pInnerPassword - pPassword);
 	int Slot = m_AuthManager.FindKey(aName);
 	const char *pMinAuthLevel = Config()->m_SvReservedSlotsAuthLevel;
 	std::optional<int> MinAuthLevel = CAuthManager::RoleNameToAuthLevel(pMinAuthLevel);
@@ -4165,6 +4168,16 @@ void CServer::ConShutdown(IConsole::IResult *pResult, void *pUser)
 	}
 }
 
+void CServer::ConUptime(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = static_cast<CServer *>(pUser);
+	// str_time expects centiseconds, convert directly to avoid overflow
+	const int64_t UptimeCentisecs = (time_get() - pThis->m_StartTime) / (time_freq() / 100);
+	char aTime[64];
+	str_time(UptimeCentisecs, ETimeFormat::DAYS, aTime, sizeof(aTime));
+	log_info("server", "Uptime %s", aTime);
+}
+
 void CServer::DemoRecorder_HandleAutoStart()
 {
 	if(Config()->m_SvAutoDemoRecord)
@@ -4767,6 +4780,7 @@ void CServer::RegisterCommands()
 	Console()->Register("kick", "v[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
 	Console()->Register("status", "?r[name]", CFGFLAG_SERVER, ConStatus, this, "List players containing name or all players");
 	Console()->Register("shutdown", "?r[reason]", CFGFLAG_SERVER, ConShutdown, this, "Shut down");
+	Console()->Register("uptime", "", CFGFLAG_SERVER, ConUptime, this, "Show server uptime");
 	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon");
 	Console()->Register("show_ips", "?i[show]", CFGFLAG_SERVER, ConShowIps, this, "Show IP addresses in rcon commands (1 = on, 0 = off)");
 	Console()->Register("hide_auth_status", "?i[hide]", CFGFLAG_SERVER, ConHideAuthStatus, this, "Opt out of spectator count and hide auth status to non-authed players (1 = hidden, 0 = shown)");
