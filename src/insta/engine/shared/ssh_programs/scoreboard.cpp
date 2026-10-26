@@ -5,6 +5,7 @@
 #include <base/logger.h>
 #include <base/str.h>
 
+#include <engine/server/server.h>
 #include <engine/shared/protocol.h>
 
 #include <insta/engine/shared/ssh_server.h>
@@ -43,24 +44,49 @@ void CSshProgramScoreboard::BuildScoreboardStr(char *pBuf, int BufSize)
 	str_append(pBuf, "\n\r", BufSize);
 
 	int NumRows = 0;
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(bool OnlyIngame : {true, false})
 	{
-		if(!m_pClient->m_CallbackCtx.m_pServer->Server()->ClientIngame(i))
-			continue;
-		if(NumRows++ >= Height)
-			break;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(!m_pClient->m_CallbackCtx.m_pServer->Server()->ClientIngame(i))
+				continue;
 
-		const char *pName = m_pClient->m_CallbackCtx.m_pServer->Server()->ClientName(i);
+			const char *pName = m_pClient->m_CallbackCtx.m_pServer->Server()->ClientName(i);
+			CServer *pServer = static_cast<CServer *>(m_pClient->m_CallbackCtx.m_pServer->Server());
+			std::optional<int> Score = pServer->m_aClients[i].m_Score;
+			bool IsPlayer = pServer->GameServer()->IsClientPlayer(i);
 
-		int NameColWidth = Width - 4;
+			// skip spectators in first pass to place them last
+			if(OnlyIngame != IsPlayer)
+				continue;
 
-		str_format(
-			aRow,
-			sizeof(aRow),
-			"| %-*s |\n\r",
-			NameColWidth,
-			pName);
-		str_append(pBuf, aRow, BufSize);
+			if(NumRows++ >= Height)
+				break;
+
+			int ScoreColWidth = 5;
+			// take remaining space for name
+			int NameColWidth = Width - (7 + ScoreColWidth);
+
+			char aScore[8] = "";
+			if(Score.has_value())
+			{
+				str_format(aScore, sizeof(aScore), "%d", Score.value());
+			}
+			if(!IsPlayer)
+				str_copy(aScore, "SPEC");
+			// make sure scores like 9999999 get trimmed correctly
+			aScore[ScoreColWidth] = '\0';
+
+			str_format(
+				aRow,
+				sizeof(aRow),
+				"| %-*s | %-*s |\n\r",
+				ScoreColWidth,
+				aScore,
+				NameColWidth,
+				pName);
+			str_append(pBuf, aRow, BufSize);
+		}
 	}
 
 	memset(aRow, '-', Width);
