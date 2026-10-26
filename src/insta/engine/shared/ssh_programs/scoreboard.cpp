@@ -63,6 +63,10 @@ void CSshProgramScoreboard::BuildScoreboardStr(char *pBuf, int BufSize)
 			if(NumRows++ >= Height)
 				break;
 
+			int NameWidth = StringTerminalWidth(pName, &m_pClient->m_CallbackCtx.m_pServer->m_UnicodeWidthState);
+			int NameSize = str_length(pName);
+			int NameWidthDiff = NameSize - NameWidth;
+
 			int ScoreColWidth = 5;
 			// take remaining space for name
 			int NameColWidth = Width - (7 + ScoreColWidth);
@@ -83,7 +87,7 @@ void CSshProgramScoreboard::BuildScoreboardStr(char *pBuf, int BufSize)
 				"| %-*s | %-*s |\n\r",
 				ScoreColWidth,
 				aScore,
-				NameColWidth,
+				NameColWidth + NameWidthDiff,
 				pName);
 			str_append(pBuf, aRow, BufSize);
 		}

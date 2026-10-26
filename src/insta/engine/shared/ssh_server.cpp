@@ -148,9 +148,7 @@ void CSshServer::StrCopyUntilSpaceOrEol(char *pDest, size_t DestSize, const char
 		str_copy(pDest, pSrc, DestSize);
 }
 
-// Get the amount of terminal columns this string will take up.
-// It supports multi byte utf-8 characters and also wide characters
-static int StringTerminalWidth(const char *pStr, unicode_width_state_t *pUnicodeWidthState)
+int StringTerminalWidth(const char *pStr, unicode_width_state_t *pUnicodeWidthState)
 {
 	int Width = 0;
 	while(*pStr)

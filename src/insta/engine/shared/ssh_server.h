@@ -34,6 +34,10 @@ static constexpr size_t MAX_TERMINAL_HEIGHT = 1024;
 
 class CSshServer;
 
+// Get the amount of terminal columns this string will take up.
+// It supports multi byte utf-8 characters and also wide characters
+int StringTerminalWidth(const char *pStr, unicode_width_state_t *pUnicodeWidthState);
+
 // Not thread-safe!
 class CSshLogger : public ILogger
 {
