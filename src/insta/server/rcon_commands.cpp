@@ -288,13 +288,13 @@ void CGameContext::ConDeleteSessionStats(IConsole::IResult *pResult, void *pUser
 void CGameContext::ConGctfAntibot(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->Antibot()->ConsoleCommand("gctf");
+	pSelf->Antibot()->ConsoleCommand(pResult->m_ClientId, "gctf");
 }
 
 void CGameContext::ConKnownAntibot(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->Antibot()->ConsoleCommand("known");
+	pSelf->Antibot()->ConsoleCommand(pResult->m_ClientId, "known");
 }
 
 void CGameContext::ConKickEventsAntibot(IConsole::IResult *pResult, void *pUserData)
@@ -314,7 +314,7 @@ void CGameContext::ConKickEventsAntibot(IConsole::IResult *pResult, void *pUserD
 
 	char aCommand[512];
 	str_format(aCommand, sizeof(aCommand), "kick_events %s", pEventIds);
-	pSelf->Antibot()->ConsoleCommand(aCommand);
+	pSelf->Antibot()->ConsoleCommand(pResult->m_ClientId, aCommand);
 }
 
 void CGameContext::ConDeepJailId(IConsole::IResult *pResult, void *pUserData)
