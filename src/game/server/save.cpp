@@ -97,6 +97,8 @@ void CSaveTee::Save(CCharacter *pChr, bool AddPenalty)
 
 	if(pChr->m_TimeCpBroadcastEndTick)
 		m_TimeCpBroadcastEndTime = pChr->Server()->Tick() - pChr->m_TimeCpBroadcastEndTick;
+	else
+		m_TimeCpBroadcastEndTime = 0;
 
 	m_LastTimeCp = pChr->m_LastTimeCp;
 	m_LastTimeCpBroadcasted = pChr->m_LastTimeCpBroadcasted;
@@ -205,6 +207,8 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 
 	if(m_TimeCpBroadcastEndTime)
 		pChr->m_TimeCpBroadcastEndTick = pChr->Server()->Tick() - m_TimeCpBroadcastEndTime;
+	else
+		pChr->m_TimeCpBroadcastEndTick = 0;
 
 	pChr->m_LastTimeCp = m_LastTimeCp;
 	pChr->m_LastTimeCpBroadcasted = m_LastTimeCpBroadcasted;
@@ -694,7 +698,13 @@ bool CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakSt
 		{
 			pGameServer->Switchers()[i].m_aStatus[Team] = m_pSwitchers[i].m_Status;
 			if(m_pSwitchers[i].m_EndTime)
+			{
 				pGameServer->Switchers()[i].m_aEndTick[Team] = pController->Server()->Tick() - m_pSwitchers[i].m_EndTime;
+			}
+			else
+			{
+				pGameServer->Switchers()[i].m_aEndTick[Team] = 0;
+			}
 			pGameServer->Switchers()[i].m_aType[Team] = m_pSwitchers[i].m_Type;
 		}
 	}
