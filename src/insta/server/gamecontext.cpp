@@ -396,20 +396,23 @@ void CGameContext::InstagibUnstackChatMessage(char *pUnstacked, const char *pMes
 	}
 	if(Match)
 	{
+		// NOTE: escape the invisible characters as explicit UTF-8 bytes.
+		// Spelling them out literally (or as \uXXXX) makes gcc >= 12 warn with
+		// -Wbidi-chars, which fails the build because of -Werror.
 		char aaInvisibleUnicodes[][8] = {
 			"", // no unicode is also different than unicode :D
-			"‌", // U+200C ZERO WIDTH NON-JOINER
-			"‍", // U+200D ZERO WIDTH JOINER
-			"‌", // U+200E LEFT-TO-RIGHT MARK
-			"‎", // U+200F RIGHT-TO-LEFT MARK
-			"⁠", // U+2060 WORD JOINER
-			"⁡", // U+2061 FUNCTION APPLICATION
-			"⁢", // U+2062 INVISIBLE TIMES
-			"⁣", // U+2063 INVISIBLE SEPARATOR
-			"⁤" // U+2064 INVISIBLE PLUS
+			"\xE2\x80\x8C", // U+200C ZERO WIDTH NON-JOINER
+			"\xE2\x80\x8D", // U+200D ZERO WIDTH JOINER
+			"\xE2\x80\x8E", // U+200E LEFT-TO-RIGHT MARK
+			"\xE2\x80\x8F", // U+200F RIGHT-TO-LEFT MARK
+			"\xE2\x81\xA0", // U+2060 WORD JOINER
+			"\xE2\x81\xA1", // U+2061 FUNCTION APPLICATION
+			"\xE2\x81\xA2", // U+2062 INVISIBLE TIMES
+			"\xE2\x81\xA3", // U+2063 INVISIBLE SEPARATOR
+			"\xE2\x81\xA4" // U+2064 INVISIBLE PLUS
 		};
 		m_UnstackHackCharacterOffset++;
-		if(m_UnstackHackCharacterOffset >= (int)(sizeof(aaInvisibleUnicodes) / 8))
+		if(m_UnstackHackCharacterOffset >= (int)(sizeof(aaInvisibleUnicodes) / sizeof(aaInvisibleUnicodes[0])))
 			m_UnstackHackCharacterOffset = 0;
 
 		const char *pPingPrefix = "";
