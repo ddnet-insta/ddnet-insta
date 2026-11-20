@@ -168,6 +168,63 @@ int StringTerminalWidth(const char *pStr, unicode_width_state_t *pUnicodeWidthSt
 	return Width;
 }
 
+// Returns the byte length of an ANSI escape sequence at pStr, or 0 if none.
+static size_t AnsiEscapeLen(const char *pStr)
+{
+	if(pStr[0] != '\x1b')
+		return 0;
+
+	const unsigned char *pRaw = reinterpret_cast<const unsigned char *>(pStr);
+
+	// CSI sequence: ESC '[' <params/intermediate 0x20-0x3F>* <final 0x40-0x7E>
+	if(pRaw[1] == '[')
+	{
+		size_t i = 2;
+		while(pRaw[i] >= 0x20 && pRaw[i] <= 0x3F)
+			++i;
+		if(pRaw[i] >= 0x40 && pRaw[i] <= 0x7E)
+			return i + 1;
+		return i; // truncated sequence
+	}
+
+	// Simple 2-byte ESC sequence
+	if(pRaw[1] >= 0x40 && pRaw[1] <= 0x7E)
+		return 2;
+
+	return 1;
+}
+
+void StringTruncateToTerminalWidth(char *pStr, int MaxWidth, unicode_width_state_t *pUnicodeWidthState)
+{
+	int Width = 0;
+	while(*pStr)
+	{
+		size_t EscLen = AnsiEscapeLen(pStr);
+		if(EscLen > 0)
+		{
+			pStr += EscLen;
+			continue;
+		}
+
+		int CodePoint = str_utf8_decode((const char **)&pStr);
+		if(CodePoint == 0)
+		{
+			return;
+		}
+		if(CodePoint == -1)
+		{
+			// meh
+			return;
+		}
+		Width += unicode_width_process(pUnicodeWidthState, CodePoint);
+		if(Width >= MaxWidth)
+		{
+			pStr[0] = '\0';
+			return;
+		}
+	}
+}
+
 // We keep track of the client's ssh session cursor position on the server side.
 // For that we need to update the y position on every new log line.
 // This gets complicated as soon as the log line contains \n newline escape sequences
@@ -743,11 +800,7 @@ const char *CSshClient::PromptBarBottomStr()
 
 	// the prompt bar should never line wrap it messes with
 	// all offsets so we force cut it to fit into the current terminal
-	//
-	// FIXME: this offset is totally wrong
-	//        it has to exclude the non printable color escape codes in the beginning
-	//        and support wide unicode characters
-	m_aPromptBarBottom[std::clamp(m_Term.m_Width, 0, (int)sizeof(m_aPromptBarBottom) - 1)] = '\0';
+	StringTruncateToTerminalWidth(m_aPromptBarBottom, m_Term.m_Width, &m_CallbackCtx.m_pServer->m_UnicodeWidthState);
 
 	if(m_Config.m_PromptBarBottomColors)
 	{
