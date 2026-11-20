@@ -173,18 +173,6 @@ void CPlayer::InstagibTick()
 	RainbowTick();
 }
 
-void CPlayer::RainbowTick()
-{
-	if(!GetCharacter())
-		return;
-	if(!GetCharacter()->HasRainbow())
-		return;
-
-	m_RainbowColor = (m_RainbowColor + 1) % 256;
-	m_SkinInfoManager.SetColorBody(ESkinPrio::RAINBOW, m_RainbowColor * 0x010000 + 0xff00);
-	m_SkinInfoManager.SetColorFeet(ESkinPrio::RAINBOW, m_RainbowColor * 0x010000 + 0xff00);
-}
-
 void CPlayer::InitIpStorage()
 {
 	if(m_IpStorage.has_value())
@@ -195,6 +183,31 @@ void CPlayer::InitIpStorage()
 		GameServer()->m_IpStorageController.GetNextEntryId(),
 		GetUniqueCid(),
 		Server()->ClientName(GetCid()));
+}
+
+void CPlayer::RainbowTick()
+{
+	if(!GetCharacter())
+		return;
+	if(!HasRainbow())
+		return;
+
+	m_RainbowColor = (m_RainbowColor + 1) % 256;
+	m_SkinInfoManager.SetColorBody(ESkinPrio::RAINBOW, m_RainbowColor * 0x010000 + 0xff00);
+	m_SkinInfoManager.SetColorFeet(ESkinPrio::RAINBOW, m_RainbowColor * 0x010000 + 0xff00);
+}
+
+void CPlayer::Rainbow(bool Activate)
+{
+	if(Activate == m_Rainbow)
+		return;
+
+	m_Rainbow = Activate;
+
+	if(Activate)
+		m_SkinInfoManager.SetUseCustomColor(ESkinPrio::RAINBOW, true);
+	else
+		m_SkinInfoManager.UnsetAll(ESkinPrio::RAINBOW);
 }
 
 void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)

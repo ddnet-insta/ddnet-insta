@@ -75,9 +75,6 @@ public:
 	// and otherwise the distance to the tile.
 	float DistToTouchingTile(int Tile);
 
-	void Rainbow(bool Activate);
-	bool HasRainbow() const { return m_Rainbow; }
-
 	int HookedPlayer() const { return m_Core.HookedPlayer(); }
 	CNetObj_PlayerInput GetLatestInput() { return m_LatestInput; }
 	int m_LastHookState = HOOK_IDLE;
@@ -92,10 +89,6 @@ public:
 	// unlikely useful for you only used internally
 	// to call OnFreeze and OnUnfreeze
 	bool m_WasFrozenLastTick = false;
-
-private:
-	// players skin changes colors
-	bool m_Rainbow = false;
 
 #ifndef IN_CLASS_CHARACTER
 };

@@ -64,13 +64,14 @@ void CGameContext::ConRainbow(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim(0);
-
-	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
-
-	if(!pChr)
+	if(!pSelf->m_pController)
 		return;
 
-	pChr->Rainbow(!pChr->HasRainbow());
+	CPlayer *pPlayer = pSelf->m_pController->GetPlayerOrNullptr(Victim);
+	if(!pPlayer)
+		return;
+
+	pPlayer->Rainbow(!pPlayer->HasRainbow());
 }
 
 void CGameContext::ConForceReady(IConsole::IResult *pResult, void *pUserData)

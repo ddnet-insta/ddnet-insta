@@ -172,19 +172,6 @@ void CCharacter::ResetInstaSettings()
 	}
 }
 
-void CCharacter::Rainbow(bool Activate)
-{
-	if(Activate == m_Rainbow)
-		return;
-
-	m_Rainbow = Activate;
-
-	if(Activate)
-		GetPlayer()->m_SkinInfoManager.SetUseCustomColor(ESkinPrio::RAINBOW, true);
-	else
-		GetPlayer()->m_SkinInfoManager.UnsetAll(ESkinPrio::RAINBOW);
-}
-
 void CCharacter::PlayerGetBall()
 {
 	if(m_LoseBallTick)

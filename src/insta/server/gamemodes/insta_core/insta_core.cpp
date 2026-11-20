@@ -693,8 +693,8 @@ int CGameControllerInstaCore::OnCharacterDeath(class CCharacter *pVictim, class 
 		}
 	}
 
-	if(pVictim->HasRainbow())
-		pVictim->Rainbow(false);
+	if(pPlayer->HasRainbow())
+		pPlayer->Rainbow(false);
 
 	// this is the vanilla base default respawn delay
 	// it can not be configured
@@ -773,7 +773,7 @@ void CGameControllerInstaCore::Tick()
 					Msg.m_aSkinPartColors[p] = TeeInfo.m_aSkinPartColors[p];
 					Msg.m_aUseCustomColors[p] = TeeInfo.m_aUseCustomColors[p];
 				}
-				bool NetworkClip = pPlayer->GetCharacter()->HasRainbow();
+				bool NetworkClip = pPlayer->HasRainbow();
 				SendSkinChangeToAllSixup(&Msg, pPlayer, NetworkClip);
 			}
 		}

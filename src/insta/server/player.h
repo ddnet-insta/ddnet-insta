@@ -27,11 +27,22 @@ class CPlayer
 
 public:
 	void InstagibTick();
-	void RainbowTick();
 	void InitIpStorage();
+
+	void RainbowTick();
+	void Rainbow(bool Activate);
+	bool HasRainbow() const { return m_Rainbow; }
+
+private:
+	// players skin changes colors
+	//
+	// it is a player variable but rainbow
+	// will be removed on death
+	bool m_Rainbow = false;
 
 	int m_RainbowColor = 0;
 
+public:
 	std::optional<CIpStorage> m_IpStorage;
 
 	void ProcessStatsResult(CInstaSqlResult &Result);
