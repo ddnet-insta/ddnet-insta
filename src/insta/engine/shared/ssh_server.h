@@ -378,6 +378,17 @@ public:
 	static void CompletionCallback(int Index, const char *pCmd, void *pUser);
 	static void CompletionPreviewCallback(int Index, const char *pCmd, void *pUser);
 
+	// sends the greyed out inline preview text
+	// used to show next command completion candidate
+	//
+	// the parameter pPreview should be m_pCompletionPreview
+	// in most cases
+	//
+	// it does not fix the cursor position
+	// so unless you want the cursor to be at the end of the preview
+	// text you need to resend it
+	void SendInlinePreview(const char *pPreview);
+
 	class CTerminal
 	{
 	public:

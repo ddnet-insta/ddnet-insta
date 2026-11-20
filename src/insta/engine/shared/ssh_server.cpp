@@ -612,6 +612,11 @@ void CSshClient::ResendPrompt()
 	ssh_channel_write(m_Channel, "\r\033[2K", 6);
 	ssh_channel_write(m_Channel, PromptStr(), str_length(PromptStr()));
 	ssh_channel_write(m_Channel, m_aInput, str_length(m_aInput));
+	if(m_pCompletionPreview)
+	{
+		SendInlinePreview(m_pCompletionPreview);
+		SendCursorPos(m_CursorPos);
+	}
 }
 
 void CSshClient::SendPromptBarBottom()
@@ -1181,6 +1186,16 @@ void CSshClient::CompletionCallback(int Index, const char *pCmd, void *pUser)
 	pClient->m_CompletionEnumerationCount++;
 }
 
+void CSshClient::SendInlinePreview(const char *pPreview)
+{
+	// sends the greyed out inline preview text
+	// used to show next command completion candidate
+
+	ssh_channel_write(m_Channel, "\033[36m", str_length("\033[36m"));
+	ssh_channel_write(m_Channel, pPreview, str_length(pPreview));
+	ssh_channel_write(m_Channel, "\033[0m", str_length("\033[0m"));
+}
+
 void CSshClient::CompletionPreviewCallback(int Index, const char *pCmd, void *pUser)
 {
 	CCallbackCtx *pCtx = static_cast<CCallbackCtx *>(pUser);
@@ -1202,9 +1217,7 @@ void CSshClient::CompletionPreviewCallback(int Index, const char *pCmd, void *pU
 			// and only then clear but eh idk seems cheap enough to just always clear
 			ssh_channel_write(pClient->m_Channel, "\33[0K", str_length("\33[0K"));
 
-			ssh_channel_write(pClient->m_Channel, "\033[36m", str_length("\033[36m"));
-			ssh_channel_write(pClient->m_Channel, pPreview, str_length(pPreview));
-			ssh_channel_write(pClient->m_Channel, "\033[0m", str_length("\033[0m"));
+			pClient->SendInlinePreview(pPreview);
 			pClient->SendCursorPos(pClient->m_CursorPos);
 			pClient->m_pCompletionPreview = pPreview;
 		}
